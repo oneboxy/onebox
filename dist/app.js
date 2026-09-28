@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.354';
+const APP_VERSION = '2.18.356';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -70,8 +70,10 @@ const FEED_SOURCE_REGISTRY = [
   { id: 'v2ex', name: 'V站', badge: 'V', icon: 'https://www.v2ex.com/favicon.ico', className: 'v2ex', visibleByDefault: false, siteUrl: 'https://www.v2ex.com/?tab=all', fetchers: [{ kind: 'v2ex-latest', url: 'https://www.v2ex.com/api/topics/latest.json' }, { kind: 'rss', url: 'https://www.v2ex.com/index.xml' }] },
   { id: 'weibo', name: '微博', badge: '博', icon: 'icons/weibo.png?v=2.18.105', className: 'weibo', mobileHost: 'm.weibo.cn', visibleByDefault: false, siteUrl: 'https://s.weibo.com/top/summary?cate=realtimehot', fetchers: [{ kind: 'weibo-hot', url: 'https://baiapi.cn/api/weibo?type=json' }, { kind: 'weibo-hot-v2', url: 'https://weibo.com/ajax/side/hotSearch' }] },
   { id: 'bilibili', name: 'B站', badge: 'B', icon: 'icons/bilibili.ico?v=2.18.124', className: 'bilibili', mobileHost: 'm.bilibili.com', visibleByDefault: false, siteUrl: 'https://search.bilibili.com/all', fetchers: [{ kind: 'bilibili-hot', url: 'https://api.bilibili.com/x/web-interface/search/square?limit=30&platform=web' }, { kind: 'bilibili-hotword', url: 'https://s.search.bilibili.com/main/hotword' }] },
-  { id: 'guancha', name: '风闻', badge: '风', icon: 'icons/guancha.png?v=2.18.124', className: 'guancha', mobileHost: 'user.guancha.cn', visibleByDefault: true, siteUrl: 'https://user.guancha.cn/main/index?s=fwdhsy', fetchers: [{ kind: 'guancha-fengwen', url: 'https://user.guancha.cn/main/index-list.json?page=1&order=1' }, { kind: 'guancha-fengwen', url: 'https://rsshub.app/guancha/topic/0/1' }] },
-  { id: 'hupu', name: '虎扑', badge: '虎', icon: 'icons/hupu.ico?v=2.18.124', className: 'hupu', mobileHost: 'm.hupu.com', visibleByDefault: true, siteUrl: 'https://bbs.hupu.com/bxj', fetchers: [{ kind: 'hupu-bbs', url: 'https://bbs.hupu.com/bxj' }, { kind: 'hupu-bbs', url: 'https://bbs.hupu.com/topic-daily' }] },
+  // Guancha and Hupu currently need the reader proxy to bypass cross-origin and anti-bot responses.
+  // Keep their longer source-specific budget so a healthy fallback is not discarded at 4.5 seconds.
+  { id: 'guancha', name: '风闻', badge: '风', icon: 'icons/guancha.png?v=2.18.124', className: 'guancha', mobileHost: 'user.guancha.cn', visibleByDefault: true, siteUrl: 'https://user.guancha.cn/main/index?s=fwdhsy', fetchers: [{ kind: 'guancha-fengwen', url: 'https://user.guancha.cn/main/index-list.json?page=1&order=1', timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'guancha-fengwen', url: 'https://rsshub.app/guancha/topic/0/1', timeoutMs: 20000, deadlineMs: 24000 }] },
+  { id: 'hupu', name: '虎扑', badge: '虎', icon: 'icons/hupu.ico?v=2.18.124', className: 'hupu', mobileHost: 'm.hupu.com', visibleByDefault: true, siteUrl: 'https://bbs.hupu.com/bxj', fetchers: [{ kind: 'hupu-bbs', url: 'https://bbs.hupu.com/bxj', timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'hupu-bbs', url: 'https://bbs.hupu.com/topic-daily', timeoutMs: 20000, deadlineMs: 24000 }] },
   { id: 'xiaohongshu', name: '红书', badge: '红', icon: 'https://www.xiaohongshu.com/favicon.ico?v=2.18.264', className: 'xiaohongshu', visibleByDefault: true, siteUrl: 'https://www.xiaohongshu.com/explore', fetchers: [{ kind: 'xiaohongshu-explore', url: 'https://www.xiaohongshu.com/explore' }, { kind: 'xiaohongshu-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=xiaohongshu&limit=30', direct: true }] },
   { id: 'douyin', name: '抖音', badge: '音', icon: 'https://www.douyin.com/favicon.ico?v=2.18.264', className: 'douyin', visibleByDefault: true, siteUrl: 'https://www.douyin.com/jingxuan', fetchers: [{ kind: 'douyin-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=douyin&limit=30', direct: true }, { kind: 'douyin-jingxuan', url: 'https://www.douyin.com/jingxuan' }] },
   { id: 'thepaper', name: '澎湃', badge: '澎', icon: 'https://m.thepaper.cn/_next/static/media/logo.8d76cf45.png?v=2.18.334', className: 'thepaper', mobileHost: 'm.thepaper.cn', visibleByDefault: true, siteUrl: 'https://m.thepaper.cn/', fetchers: [{ kind: 'thepaper-channel', url: 'https://www.thepaper.cn/channel_25950', timeoutMs: 15000, deadlineMs: 18000 }] },
@@ -488,6 +490,54 @@ function navigationAssetBases(value) {
     return [...new Set([new URL(directory, parsed.origin).href, new URL('/', parsed.origin).href])];
   } catch { return []; }
 }
+const NAVIGATION_ICON_CACHE_KEY = 'onebox.navigation-icon-cache';
+const NAVIGATION_ICON_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const NAVIGATION_ICON_CACHE_LIMIT = 160;
+function navigationIconCacheKey(value) {
+  try { return new URL(value).origin; } catch { return ''; }
+}
+function readNavigationIconCache() {
+  try {
+    const cache = JSON.parse(localStorage.getItem(NAVIGATION_ICON_CACHE_KEY) || '{}');
+    return cache && typeof cache === 'object' ? cache : {};
+  } catch { return {}; }
+}
+function navigationCachedIcon(value) {
+  const key = navigationIconCacheKey(value);
+  if (!key) return '';
+  const record = readNavigationIconCache()[key];
+  if (!record || typeof record.icon !== 'string' || !record.savedAt || Date.now() - record.savedAt > NAVIGATION_ICON_CACHE_TTL_MS) return '';
+  return navigationSafeUrl(record.icon);
+}
+function navigationRememberCachedIcon(siteUrl, icon) {
+  const key = navigationIconCacheKey(siteUrl);
+  const source = navigationSafeUrl(icon);
+  if (!key || !source) return;
+  const cache = readNavigationIconCache();
+  cache[key] = { icon: source, savedAt: Date.now() };
+  const compact = Object.fromEntries(Object.entries(cache).sort(([, a], [, b]) => Number(a?.savedAt || 0) - Number(b?.savedAt || 0)).slice(-NAVIGATION_ICON_CACHE_LIMIT));
+  try { localStorage.setItem(NAVIGATION_ICON_CACHE_KEY, JSON.stringify(compact)); } catch {}
+}
+function navigationIconMatchesSite(icon, siteUrl) {
+  const source = navigationSafeUrl(icon);
+  const target = navigationSafeUrl(siteUrl);
+  if (!source || !target) return false;
+  try {
+    const iconUrl = new URL(source);
+    const targetUrl = new URL(target);
+    if (iconUrl.hostname === 'www.google.com' && iconUrl.pathname === '/s2/favicons') {
+      const domainUrl = iconUrl.searchParams.get('domain_url');
+      if (domainUrl) return new URL(domainUrl).hostname === targetUrl.hostname;
+      return iconUrl.searchParams.get('domain') === targetUrl.hostname;
+    }
+    if (iconUrl.hostname === 'icons.duckduckgo.com' && iconUrl.pathname.startsWith('/ip3/')) return iconUrl.pathname.slice(4).replace(/\.ico$/i, '') === targetUrl.hostname;
+    if (iconUrl.hostname === 'icon.horse' && iconUrl.pathname.startsWith('/icon/')) return iconUrl.pathname.slice(6) === targetUrl.hostname;
+  } catch { return false; }
+  return true;
+}
+function navigationIconForSite(icon, siteUrl) {
+  return navigationIconMatchesSite(icon, siteUrl) ? navigationSafeUrl(icon) : '';
+}
 function navigationIconSources(value) {
   const url = navigationSafeUrl(value);
   if (!url) return [];
@@ -513,11 +563,12 @@ function navigationIconSources(value) {
       new URL('icons/icon.svg', base).href,
     ]);
     return [...new Set([
+      navigationCachedIcon(url),
       ...direct,
-      'https://icon.horse/icon/' + hostname,
+      'https://www.google.com/s2/favicons?domain_url=' + encodeURIComponent(parsed.origin) + '&sz=256',
       'https://icons.duckduckgo.com/ip3/' + hostname + '.ico',
-      'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(hostname) + '&sz=256'
-    ])];
+      'https://icon.horse/icon/' + hostname
+    ].filter(Boolean))];
   } catch { return []; }
 }
 function navigationIconUrl(value) { return navigationIconSources(value)[0] || ''; }
@@ -541,7 +592,7 @@ function normalizeNavigation(value) {
     // Keep the last known-good icon across reloads. Replacing it with the
     // first probe URL here made every refresh start over at a commonly
     // missing apple-touch-icon path, even after a fallback had succeeded.
-    const icon = navigationSafeUrl(item?.icon) || navigationIconUrl(url);
+    const icon = navigationIconForSite(item?.icon, url) || navigationIconUrl(url);
     return { id: uniqueId(item?.id, 'site'), type: 'site', name: String(item?.name || navigationNameFromUrl(url)).trim() || navigationNameFromUrl(url), url, icon, createdAt: Number(item?.createdAt) || Date.now() };
   };
   const items = rawItems.map((item) => {
@@ -2453,7 +2504,7 @@ function navigationIconMarkup(site, extraClass = '') {
   const generatedSources = navigationIconSources(site?.url);
   // A service URL can be the only reliable source for a site. It is still a
   // valid cached result and must be preferred on the next render/reload.
-  const preferredIcon = navigationSafeUrl(site?.icon);
+  const preferredIcon = navigationIconForSite(site?.icon, site?.url);
   const preferGenerated = navigationUsesDesktopBrandIcon(site?.url) || navigationUsesOneBoxBrandIcon(site?.url);
   const sources = preferGenerated
     ? [...new Set([...generatedSources, preferredIcon].filter(Boolean))]
@@ -2482,6 +2533,7 @@ function rememberNavigationIcon(image, source = '') {
   const url = navigationSafeUrl(image?.dataset?.navigationUrl);
   const icon = navigationSafeUrl(source || image?.currentSrc || image?.src);
   if (!url || !icon) return;
+  navigationRememberCachedIcon(url, icon);
   const site = navigationEverySite().find((item) => item.url === url);
   if (!site || site.icon === icon) return;
   site.icon = icon;
@@ -2489,14 +2541,21 @@ function rememberNavigationIcon(image, source = '') {
 }
 function handleNavigationIconLoad(image) {
   if (!image) return;
-  if (Number(image.naturalWidth || 0) >= 64) {
+  const width = Number(image.naturalWidth || 0);
+  if (width >= 64) {
     rememberNavigationIcon(image);
     return;
   }
   if (advanceNavigationIcon(image, true)) return;
-  // Some providers only expose a small but usable favicon. Cache that final
-  // service result instead of probing every direct path after each reload.
-  if (Number(image.naturalWidth || 0) > 0 && isNavigationIconServiceUrl(image.currentSrc || image.src)) rememberNavigationIcon(image);
+  // A 16/32px favicon is still a valid result. The old code hid it after the
+  // high-resolution candidates were exhausted, which made successful QQ Mail
+  // and other subdomain-specific favicons look like a fetch failure.
+  if (width > 0) {
+    rememberNavigationIcon(image);
+    image.hidden = false;
+    image.nextElementSibling?.setAttribute('hidden', '');
+    return;
+  }
   showNavigationIconFallback(image);
 }
 function handleNavigationIconError(image) {
