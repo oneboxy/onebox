@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.357';
+const APP_VERSION = '2.18.358';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -5809,6 +5809,9 @@ async function mergeGithubUploadBundle(bundle, id) {
     if (Object.prototype.hasOwnProperty.call(payload, key) && Object.prototype.hasOwnProperty.call(remote, key)) payload[key] = mergeGithubValue(remote[key], payload[key]);
   };
   ['events', 'weatherCards', 'translationHistory', 'notifications', 'library', 'homeFeedRead', 'navigation'].forEach(mergeField);
+  if (selection.navigation && payload.navigation) {
+    payload.navigation = mergeGithubNavigation(remoteGithubNavigation(remote), payload.navigation);
+  }
   if (selection.calculator && remote.calculator && payload.calculator) payload.calculator = mergeGithubValue(remote.calculator, payload.calculator);
   if (remote.storage && payload.storage) {
     // An unchecked group is intentionally left untouched in the cloud. Keep
@@ -6045,6 +6048,79 @@ function mergeGithubValue(localValue, remoteValue) {
     return merged;
   }
   return remoteValue === undefined ? localValue : remoteValue;
+}
+function navigationMergeItemKey(item) {
+  if (!item || typeof item !== 'object') return '';
+  if (item.type === 'site') {
+    const url = navigationSafeUrl(item.url);
+    return url ? 'site:' + url : '';
+  }
+  if (item.type === 'folder') {
+    const id = String(item.id || '').trim();
+    if (id) return 'folder-id:' + id;
+    const name = String(item.name || '').trim().toLocaleLowerCase();
+    return name ? 'folder-name:' + name : '';
+  }
+  return '';
+}
+function mergeGithubNavigation(localValue, remoteValue) {
+  const local = normalizeNavigation(localValue);
+  const remote = normalizeNavigation(remoteValue);
+  const merged = { version: 1, items: local.items.map((item) => ({ ...item, ...(item.type === 'folder' ? { children: item.children.map((child) => ({ ...child })) } : {}) })) };
+  const rootByKey = new Map();
+  const childByFolder = new Map();
+  const rememberRoot = (item, index) => {
+    const key = navigationMergeItemKey(item);
+    if (key) rootByKey.set(key, index);
+    if (item.type === 'folder') {
+      const children = new Map();
+      item.children.forEach((child, childIndex) => {
+        const childKey = navigationMergeItemKey(child);
+        if (childKey) children.set(childKey, childIndex);
+      });
+      childByFolder.set(index, children);
+    }
+  };
+  merged.items.forEach(rememberRoot);
+  remote.items.forEach((remoteItem) => {
+    const key = navigationMergeItemKey(remoteItem);
+    const existingIndex = key ? rootByKey.get(key) : undefined;
+    if (existingIndex === undefined) {
+      const nextIndex = merged.items.push({ ...remoteItem, ...(remoteItem.type === 'folder' ? { children: remoteItem.children.map((child) => ({ ...child })) } : {}) }) - 1;
+      rememberRoot(merged.items[nextIndex], nextIndex);
+      return;
+    }
+    const existing = merged.items[existingIndex];
+    if (existing.type !== 'folder' || remoteItem.type !== 'folder') {
+      // A URL is the stable identity of a site across devices. Keep the local
+      // id so bookmarks and folder moves remain stable, but refresh its label
+      // and icon from the backup when the same URL already exists locally.
+      merged.items[existingIndex] = { ...existing, ...remoteItem, id: existing.id };
+      return;
+    }
+    const children = childByFolder.get(existingIndex) || new Map();
+    remoteItem.children.forEach((remoteChild) => {
+      const childKey = navigationMergeItemKey(remoteChild);
+      const childIndex = childKey ? children.get(childKey) : undefined;
+      if (childIndex === undefined) {
+        children.set(childKey || 'child:' + existing.children.length, existing.children.length);
+        existing.children.push({ ...remoteChild });
+      } else {
+        const localChild = existing.children[childIndex];
+        existing.children[childIndex] = { ...localChild, ...remoteChild, id: localChild.id };
+      }
+    });
+    if (remoteItem.name) existing.name = remoteItem.name;
+  });
+  return normalizeNavigation(merged);
+}
+function remoteGithubNavigation(remote) {
+  if (remote?.navigation && Array.isArray(remote.navigation.items)) return remote.navigation;
+  const stored = remote?.storage?.[STORAGE.navigation];
+  if (typeof stored === 'string') {
+    try { return JSON.parse(stored); } catch { return null; }
+  }
+  return stored && typeof stored === 'object' ? stored : null;
 }
 const GITHUB_MERGE_STORAGE_KEYS = new Set([STORAGE.events, STORAGE.weatherCards, STORAGE.translationHistory, STORAGE.notifications]);
 function mergeGithubStorageValue(key, localValue, remoteValue) {
@@ -6534,7 +6610,8 @@ async function githubDownload() {
     if (settingsEnabled && remote.topDisplay && typeof remote.topDisplay === 'object') { state.topDisplay = { theme: remote.topDisplay.theme !== false, language: remote.topDisplay.language !== false, messages: remote.topDisplay.messages !== false }; saveTopDisplay(); }
     if (navigationEnabled && Array.isArray(remote.homeFeedOrder)) { state.homeFeed.order = normalizeHomeFeedOrder(remote.homeFeedOrder); saveHomeFeedOrder(); }
     if (navigationEnabled && Array.isArray(remote.homeFeedVisibility)) { state.homeFeed.visible = normalizeHomeFeedVisibility(remote.homeFeedVisibility); saveHomeFeedVisibility(); }
-    if (navigationEnabled && remote.navigation && Array.isArray(remote.navigation.items)) { state.navigation = normalizeNavigation(mergeGithubValue(state.navigation, remote.navigation)); saveNavigation(); }
+    const remoteNavigation = remoteGithubNavigation(remote);
+    if (navigationEnabled && remoteNavigation && Array.isArray(remoteNavigation.items)) { state.navigation = mergeGithubNavigation(state.navigation, remoteNavigation); saveNavigation(); }
     if (navigationEnabled && remoteNavigationLocation) {
       state.navigationLocation = remoteNavigationLocation;
       state.toolOrder = normalizeToolOrder(state.toolOrder, state.navigationLocation === 'tools', state.navigationLocation === 'tools');

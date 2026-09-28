@@ -10575,7 +10575,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   line-height: 17px;
 }
 
-/* 2.18.357: keep GitHub sync switches visually identical to Settings > Top display. */
+/* 2.18.358: keep GitHub sync switches visually identical to Settings > Top display. */
 #githubDialog .github-sync-option {
   min-height: 30px;
   gap: 7px;
@@ -10611,7 +10611,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   outline-offset: 2px;
 }
 
-/* 2.18.357: show the active backup/restore stage inside the open dialog. */
+/* 2.18.358: show the active backup/restore stage inside the open dialog. */
 #githubDialog .github-sync-progress {
   display: grid;
   gap: 7px;
