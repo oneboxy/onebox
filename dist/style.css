@@ -10899,6 +10899,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
 .ticket-wallet-editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
 .ticket-wallet-journey-list { display: grid; gap: 14px; }
 .ticket-wallet-journey-card { padding: 20px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); }
+.ticket-wallet-journey-card img, .ticket-wallet-journey-card .ticket-wallet-original { display: none; }
 .ticket-wallet-journey-head { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
 .ticket-wallet-journey-head h2 { margin: 5px 0 0; font-size: 21px; letter-spacing: -.03em; }
 .ticket-wallet-journey-head h2 span { color: var(--primary); font-weight: 500; }
