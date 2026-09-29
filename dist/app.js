@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.372';
+const APP_VERSION = '2.18.373';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -887,16 +887,25 @@ function ticketWalletJourneyKey(record) {
   if (record.journey) return record.journey;
   return [String(record.departAt || record.createdAt || '').slice(0, 10), record.from, record.to].join('|');
 }
+function ticketWalletDepartureTimestamp(record) {
+  const value = String(record?.departAt || '').trim();
+  if (!value) return Number.NEGATIVE_INFINITY;
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) ? timestamp : Number.NEGATIVE_INFINITY;
+}
+function ticketWalletDepartureDesc(first, second) {
+  return ticketWalletDepartureTimestamp(second) - ticketWalletDepartureTimestamp(first) || Number(second?.createdAt || 0) - Number(first?.createdAt || 0);
+}
 function ticketWalletJourneys() {
   const groups = new Map();
-  [...state.ticketWallet].sort((a, b) => new Date(a.departAt || a.createdAt) - new Date(b.departAt || b.createdAt)).forEach((record) => {
+  [...state.ticketWallet].sort((a, b) => ticketWalletDepartureTimestamp(a) - ticketWalletDepartureTimestamp(b) || Number(a.createdAt || 0) - Number(b.createdAt || 0)).forEach((record) => {
     const key = ticketWalletJourneyKey(record);
     if (!groups.has(key)) groups.set(key, { key, records: [], from: record.from, to: record.to, start: record.departAt || record.createdAt, end: record.arriveAt || record.departAt || record.updatedAt });
     const group = groups.get(key); group.records.push(record); group.from ||= record.from; group.to ||= record.to;
     if (new Date(record.departAt || record.createdAt) < new Date(group.start)) group.start = record.departAt || record.createdAt;
     if (new Date(record.arriveAt || record.departAt || record.updatedAt) > new Date(group.end)) group.end = record.arriveAt || record.departAt || record.updatedAt;
   });
-  return [...groups.values()].map((group) => ({ ...group, memory: state.ticketWalletMemories[group.key] || null }));
+  return [...groups.values()].map((group) => ({ ...group, memory: state.ticketWalletMemories[group.key] || null })).sort((a, b) => ticketWalletDepartureDesc({ departAt: a.start }, { departAt: b.start }));
 }
 function saveTicketWallet() { saveStored(STORAGE.ticketWallet, state.ticketWallet); }
 function saveTicketWalletMemories() { saveStored(STORAGE.ticketWalletMemories, state.ticketWalletMemories); }
@@ -3374,7 +3383,7 @@ function renderTicketWalletJourneys() {
 }
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const upcoming = state.ticketWallet.filter((item) => item.departAt && new Date(item.departAt) >= new Date()).length;
-  const body = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section"><div class="ticket-wallet-section-head"><div><h2>' + escapeHtml(t('ticketWalletTickets')) + '</h2></div><div class="ticket-wallet-section-tools"><span>' + state.ticketWallet.length + '</span><button class="ticket-wallet-add-trigger" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><span aria-hidden="true">＋</span>' + escapeHtml(t('ticketWalletAddTicket')) + '</button></div></div><div class="ticket-wallet-stack">' + [...state.ticketWallet].sort((a, b) => new Date(b.departAt || b.createdAt) - new Date(a.departAt || a.createdAt)).map(ticketWalletCardMarkup).join('') + '</div></section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="secondary" data-ticket-wallet-add>' + escapeHtml(t('ticketWalletAdd')) + '</button></div></div>';
+  const body = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section"><div class="ticket-wallet-section-head"><div><h2>' + escapeHtml(t('ticketWalletTickets')) + '</h2></div><div class="ticket-wallet-section-tools"><span>' + state.ticketWallet.length + '</span><button class="ticket-wallet-add-trigger" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><span aria-hidden="true">＋</span>' + escapeHtml(t('ticketWalletAddTicket')) + '</button></div></div><div class="ticket-wallet-stack">' + [...state.ticketWallet].sort(ticketWalletDepartureDesc).map(ticketWalletCardMarkup).join('') + '</div></section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="secondary" data-ticket-wallet-add>' + escapeHtml(t('ticketWalletAdd')) + '</button></div></div>';
   return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button data-ticket-wallet-back>' + escapeHtml(t('mine')) + '</button><span aria-hidden="true">/</span><span aria-current="page">' + escapeHtml(t('ticketWallet')) + '</span></nav><div class="ticket-wallet-tabs" role="tablist"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab">' + escapeHtml(t('ticketWalletTickets')) + '</button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab">' + escapeHtml(t('ticketWalletJourneys')) + '</button></div></div><section class="ticket-wallet-overview"><div><strong>' + state.ticketWallet.length + '</strong><small>' + escapeHtml(t('ticketWalletCount')) + '</small></div><div><strong>' + upcoming + '</strong><small>' + escapeHtml(t('ticketWalletUpcoming')) + '</small></div><div><strong>' + journeys.length + '</strong><small>' + escapeHtml(t('ticketWalletJourneyCount')) + '</small></div></section>' + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : body) + (state.ticketWallet.length && state.ticketWalletView === 'tickets' ? '<div class="ticket-wallet-secondary-actions"><button class="ghost" data-ticket-wallet-import-json>' + escapeHtml(t('ticketWalletImportJson')) + '</button></div>' : '') + '</div>';
 }
 
