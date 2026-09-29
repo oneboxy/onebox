@@ -11180,6 +11180,25 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   gap: 0;
   padding: 22px 0 42px;
 }
+.ticket-wallet-focus { margin: 8px 0 26px; }
+.ticket-wallet-focus-head,
+.ticket-wallet-other-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.ticket-wallet-focus-head { margin: 0 2px 10px; }
+.ticket-wallet-focus-head .ghost { padding: 3px 0; color: var(--primary); font-size: 11px; }
+.ticket-wallet-focus-card .ticket-wallet-swipe-row { margin-top: 0; }
+.ticket-wallet-focus-card .ticket-wallet-swipe-row-train { margin-top: 0; }
+.ticket-wallet-focus-card .ticket-wallet-card { box-shadow: 0 20px 38px color-mix(in srgb, var(--ink) 14%, transparent), 0 0 0 2px color-mix(in srgb, var(--primary) 14%, transparent); }
+.ticket-wallet-focus-card .ticket-wallet-train-ticket { box-shadow: 0 20px 38px rgba(25, 22, 31, .14), 0 0 0 2px color-mix(in srgb, var(--primary) 14%, transparent); }
+.ticket-wallet-other-head { margin: 0 2px 4px; font-size: 11px; font-weight: 700; }
+.ticket-wallet-stack-secondary { padding-top: 10px; }
 .ticket-wallet-swipe-row-train {
   margin-top: calc(var(--ticket-stack-index) * -320px);
 }
