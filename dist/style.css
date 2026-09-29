@@ -11653,6 +11653,15 @@ body:has(.ticket-wallet-page) .ticket-wallet-train-card .ticket-wallet-card-acti
   border-radius: 999px;
 }
 
+@media (min-width: 761px) and (max-width: 1100px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-category-bar {
+    flex-wrap: wrap;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-category {
+    flex: 1 1 calc(20% - 6px);
+  }
+}
+
 @media (max-width: 760px) {
   body:has(.ticket-wallet-page) .ticket-wallet-page {
     padding-top: 10px;
