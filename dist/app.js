@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.389';
+const APP_VERSION = '2.18.390';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3517,7 +3517,8 @@ async function hydrateTicketWalletMap() {
   } catch { if (token === ticketWalletLeafletRenderToken && element.isConnected) ticketWalletMapError(element, geocoded); } finally { if (ticketWalletLeafletPendingElement === element) ticketWalletLeafletPendingElement = null; }
 }
 function ticketWalletJourneyMapMarkup(journeys) {
-  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div><h2>' + escapeHtml(state.language === 'en' ? 'Travel routes' : '旅迹地图') + '</h2></div><span>' + journeys.length + (state.language === 'en' ? ' routes' : ' 条路线') + '</span></div><div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map" data-ticket-wallet-real-map role="img" aria-label="' + escapeHtml(state.language === 'en' ? 'Journey routes on a real map' : '真实地图上的旅迹路线') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载真实地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(state.language === 'en' ? 'Locations are geocoded from the ticket cities. Use the controls at bottom right to zoom.' : '根据票据中的城市定位，路线会显示在真实地图上；可使用右下角控件缩放地图。') + '</div></section>';
+  const note = journeys.length ? (state.language === 'en' ? 'Locations are geocoded from the ticket cities. Use the controls at bottom right to zoom.' : '根据票据中的城市定位，路线会显示在真实地图上；可使用右下角控件缩放地图。') : (state.language === 'en' ? 'No routes match this filter. The map remains available for browsing.' : '当前筛选暂无路线，地图仍可拖动和缩放浏览。');
+  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div><h2>' + escapeHtml(state.language === 'en' ? 'Travel routes' : '旅迹地图') + '</h2></div><span>' + journeys.length + (state.language === 'en' ? ' routes' : ' 条路线') + '</span></div><div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map' + (journeys.length ? '' : ' is-empty') + '" data-ticket-wallet-real-map role="img" aria-label="' + escapeHtml(state.language === 'en' ? 'Journey routes on a real map' : '真实地图上的旅迹路线') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载真实地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(note) + '</div></section>';
 }
 function renderTicketWalletJourneysLegacy() {
   const journeys = ticketWalletJourneys();
@@ -3526,7 +3527,6 @@ function renderTicketWalletJourneysLegacy() {
 }
 function renderTicketWalletJourneys() {
   const journeys = ticketWalletJourneys(ticketWalletFilteredRecords(state.ticketWallet));
-  if (!journeys.length) return '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletNoJourney')) + '</h2><p>' + escapeHtml(t('ticketWalletEmpty')) + '</p></div>';
   return ticketWalletJourneyMapMarkup(journeys);
 }
 function renderTicketWallet() {
