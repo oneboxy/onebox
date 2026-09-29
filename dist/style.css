@@ -11165,4 +11165,11 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
     width: min(1360px, 100%);
     padding-inline: 24px;
   }
+  body:has(.ticket-wallet-page) .ticket-wallet-overview { margin-bottom: 12px; }
+  body:has(.ticket-wallet-page) .ticket-wallet-section-head { margin-bottom: 8px; }
+  body:has(.ticket-wallet-page) .ticket-wallet-train-card {
+    width: min(780px, calc((100dvh - 330px) * 1.5), 100%);
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
