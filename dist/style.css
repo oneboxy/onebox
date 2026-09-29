@@ -11185,7 +11185,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   height: auto;
   aspect-ratio: 1096 / 695;
 }
-.ticket-wallet-train-template .ticket-paper { fill: #efb4b4; }
+.ticket-wallet-train-template:not(.ticket-wallet-train-template-blue) .ticket-paper { fill: #efb4b4; }
 .ticket-wallet-train-template .ticket-paper-pattern { opacity: .19; }
 .ticket-wallet-train-template pattern path { fill: none; stroke: #bd7075; stroke-width: 2; }
 .ticket-wallet-train-template-blue .ticket-paper-blue { stroke: rgba(255, 255, 255, .45); stroke-width: 2; }
@@ -12353,4 +12353,38 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:firs
 body:has(.ticket-wallet-page) .ticket-wallet-train-template-blue .ticket-paper-blue {
   stroke: color-mix(in srgb, #159bb8 66%, transparent);
   stroke-width: 1;
+}
+
+/* Use a colored layer edge instead of a white frame to separate stacked cards. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket {
+  border: 2px solid color-mix(in srgb, var(--primary) 42%, transparent);
+  box-shadow: 0 18px 31px rgba(25, 22, 31, .18), 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-train-ticket {
+  border-color: color-mix(in srgb, var(--primary) 58%, transparent);
+  box-shadow: 0 21px 36px rgba(25, 22, 31, .22), 0 0 0 2px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  border-radius: 12px 12px 0 0;
+  background: color-mix(in srgb, var(--primary) 48%, transparent);
+  content: '';
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket {
+    border-width: 2px;
+    box-shadow: 0 16px 27px color-mix(in srgb, var(--ink) 18%, transparent), 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-train-ticket {
+    box-shadow: 0 19px 31px color-mix(in srgb, var(--ink) 22%, transparent), 0 0 0 2px color-mix(in srgb, var(--primary) 28%, transparent);
+  }
 }
