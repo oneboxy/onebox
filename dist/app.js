@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.377';
+const APP_VERSION = '2.18.370';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -641,7 +641,7 @@ function normalizeNavigation(value) {
 }
 const TICKET_TYPES = Object.freeze({
   train: { label: '火车票', labelEn: 'Train', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="3"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h8M8 20l-2 2M16 20l2 2"/></svg>' },
-  flight: { label: '飞机票', labelEn: 'Flight', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 12 18-6-6 18-3-8-9-4Z"/><path d="m12 16 3-3"/></svg>' },
+  flight: { label: '飞机票', labelEn: 'Flight', icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13.2 10.5 11l2.8-6.8 1.8.5-.4 6.8 6.3 1.4v1.6l-6.4-.2-.6 5-1.7.5-1.8-5.3L3 14.9Z"/></svg>' },
   ferry: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16h14l-2-7H7l-2 7Z"/><path d="M9 9V5h6v4M3 18c1.8 1.8 3.6 1.8 5.4 0 1.8 1.8 3.6 1.8 5.4 0 1.8 1.8 3.6 1.8 5.4 0 1.8 0 1.8-1.8 3.6"/></svg>' },
   coach: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="13" rx="3"/><path d="m7 5 1-2h8l1 2M7 11h10M7 15h.01M17 15h.01M7 18v2M17 18v2"/></svg>' },
   transit: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M7 8h10M7 12h3M14 12h3M8 19l-2 2M16 19l2 2"/></svg>' },

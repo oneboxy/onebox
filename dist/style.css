@@ -11201,11 +11201,10 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-stack-secondary { padding-top: 10px; }
 .ticket-wallet-category-bar {
   display: flex;
-  gap: 3px;
+  gap: 8px;
   margin: 10px 0 20px;
-  padding: 0 0 7px;
+  padding: 0 0 4px;
   overflow-x: auto;
-  border-bottom: 1px solid var(--line);
   scrollbar-width: none;
 }
 .ticket-wallet-category-bar::-webkit-scrollbar { display: none; }
@@ -11215,22 +11214,29 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-width: 86px;
-  min-height: 38px;
-  flex: 1 0 auto;
-  padding: 6px 9px 8px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
+  min-width: 98px;
+  min-height: 42px;
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--panel);
   color: var(--muted);
   font: inherit;
   font-size: 12px;
   font-weight: 750;
   white-space: nowrap;
   cursor: pointer;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ink) 5%, transparent);
+  transition: border-color .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
-.ticket-wallet-category.active { border-bottom-color: var(--primary); color: var(--primary); }
-.ticket-wallet-category:hover { color: var(--ink); }
+.ticket-wallet-category.active {
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--line));
+  background: color-mix(in srgb, var(--primary) 9%, var(--panel));
+  color: var(--primary);
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.ticket-wallet-category:hover { border-color: color-mix(in srgb, var(--primary) 36%, var(--line)); color: var(--ink); transform: translateY(-1px); }
 .ticket-wallet-category-icon { display: grid; width: 19px; height: 19px; place-items: center; flex: 0 0 19px; }
 .ticket-wallet-category-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
 .ticket-wallet-category b { min-width: 15px; color: color-mix(in srgb, currentColor 72%, var(--muted)); font-size: 10px; font-weight: 750; }
@@ -11342,7 +11348,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 
 @media (max-width: 760px) {
   .ticket-wallet-category-bar { margin: 5px -14px 15px; padding-inline: 14px; }
-  .ticket-wallet-category { min-width: 78px; padding-inline: 7px; font-size: 11px; }
+  .ticket-wallet-category { min-width: 88px; min-height: 40px; padding-inline: 9px; font-size: 11px; }
   .ticket-wallet-category-icon { width: 17px; height: 17px; flex-basis: 17px; }
   .ticket-wallet-category-icon svg { width: 16px; height: 16px; }
   .ticket-wallet-physical-ticket { min-height: 218px; padding: 17px 16px 13px; border-radius: 17px; }
