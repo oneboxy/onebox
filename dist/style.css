@@ -2090,6 +2090,42 @@ html.layout-simple #languageControl { display: none !important; }
   }
 }
 
+/* Ticket wallet breadcrumb back affordance ------------------------------ */
+.ticket-wallet-breadcrumb .ticket-wallet-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ink) 6%, transparent);
+  transition: border-color .18s ease, background .18s ease, color .18s ease, transform .18s ease;
+}
+
+.ticket-wallet-breadcrumb .ticket-wallet-back:hover {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
+  background: color-mix(in srgb, var(--primary) 7%, var(--panel));
+  color: var(--primary);
+  transform: translateX(-1px);
+}
+
+@media (max-width: 760px) {
+  .ticket-wallet-breadcrumb .ticket-wallet-back {
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    font-size: 20px;
+  }
+}
+
 /* Ticket wallet dark-mode contrast -------------------------------------- */
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category-bar,
 html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category-bar {

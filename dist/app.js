@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.404';
+const APP_VERSION = '2.18.405';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3585,9 +3585,7 @@ function renderTicketWalletJourneys() {
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = [...state.ticketWallet].sort(ticketWalletDepartureAsc); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
   const body = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section"><div class="ticket-wallet-section-head"><div><h2>' + escapeHtml(t('ticketWalletTickets')) + '</h2></div><div class="ticket-wallet-section-tools"><span>' + visibleTickets.length + '</span><button class="ticket-wallet-add-trigger" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><span aria-hidden="true">＋</span>' + escapeHtml(t('ticketWalletAddTicket')) + '</button></div></div>' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>') + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="secondary" data-ticket-wallet-add>' + escapeHtml(t('ticketWalletAdd')) + '</button></div></div>';
-  const tabs = '<div class="ticket-wallet-tabs" role="tablist"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab">' + escapeHtml(t('ticketWalletTickets')) + '</button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab">' + escapeHtml(t('ticketWalletJourneys')) + '</button></div>';
-  const pageBody = '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden>' + ticketWalletCategoryMarkup(state.ticketWallet) + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : body) + (state.ticketWallet.length && state.ticketWalletView === 'tickets' ? '<div class="ticket-wallet-secondary-actions"><button class="ghost" data-ticket-wallet-import-json>' + escapeHtml(t('ticketWalletImportJson')) + '</button></div>' : '') + '</div>';
-  return '<div class="ticket-wallet-dialog-shell" data-ticket-wallet-overlay role="dialog" aria-modal="true" aria-label="' + escapeHtml(t('ticketWallet')) + '"><div class="ticket-wallet-dialog-card"><div class="ticket-wallet-dialog-head"><div class="ticket-wallet-dialog-title"><span class="ticket-wallet-eyebrow">' + escapeHtml(t('mine')) + '</span><h2>' + escapeHtml(t('ticketWallet')) + '</h2><small>' + escapeHtml(t('ticketWalletDescription')) + '</small></div>' + tabs + '<button class="icon-btn small" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="ticket-wallet-dialog-scroll">' + pageBody + '</div></div></div>';
+  return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><span aria-hidden="true">‹</span></button><span aria-current="page">' + escapeHtml(t('ticketWallet')) + '</span></nav><div class="ticket-wallet-tabs" role="tablist"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab">' + escapeHtml(t('ticketWalletTickets')) + '</button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab">' + escapeHtml(t('ticketWalletJourneys')) + '</button></div></div>' + ticketWalletCategoryMarkup(state.ticketWallet) + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : body) + (state.ticketWallet.length && state.ticketWalletView === 'tickets' ? '<div class="ticket-wallet-secondary-actions"><button class="ghost" data-ticket-wallet-import-json>' + escapeHtml(t('ticketWalletImportJson')) + '</button></div>' : '') + '</div>';
 }
 
 function renderPetDialog() {
@@ -8890,8 +8888,6 @@ workspace.addEventListener('click', async (event) => {
   const section = event.target.closest('[data-section]');
   if (section) return selectSection(section.dataset.section);
   if (event.target.closest('[data-open-ticket-wallet]')) return openTicketWallet();
-  const ticketWalletOverlay = event.target.closest('[data-ticket-wallet-overlay]');
-  if (ticketWalletOverlay && event.target === ticketWalletOverlay) return closeTicketWallet();
   if (event.target.closest('[data-ticket-wallet-back]')) return closeTicketWallet();
   const ticketWalletView = event.target.closest('[data-ticket-wallet-view]');
   if (ticketWalletView) { state.ticketWalletView = ticketWalletView.dataset.ticketWalletView === 'journeys' ? 'journeys' : 'tickets'; state.ticketWalletMemoryDraft = null; return render(); }
@@ -9442,7 +9438,6 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && state.ticketWalletOpen) { closeTicketWallet(); return; }
   const ticketFieldTarget = event.target.closest?.('[data-ticket-wallet-edit-field]');
   if (ticketFieldTarget && (event.key === 'Enter' || event.key === ' ')) {
     event.preventDefault();
