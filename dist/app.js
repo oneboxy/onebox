@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.387';
+const APP_VERSION = '2.18.388';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3122,7 +3122,15 @@ function openTicketWalletEditor(id = '', focusField = '') {
   state.ticketWalletRecognition = { status: 'idle', progress: 0, message: '' };
   state.ticketWalletEditorOpen = true; state.ticketWalletMemoryDraft = null; render();
   const focusTargets = { from: '#ticketWalletFrom', to: '#ticketWalletTo', ticketSerial: '#ticketWalletSerial', ticketNo: '#ticketWalletTicketNo', price: '#ticketWalletPrice', passenger: '#ticketWalletPassengerName', passengerName: '#ticketWalletPassengerName', passengerId: '#ticketWalletPassengerId', departAt: '#ticketWalletDepart', seat: '#ticketWalletSeat', seatClass: '#ticketWalletSeatClass', ticketCode: '#ticketWalletCode' };
-  requestAnimationFrame(() => $(focusTargets[focusField] || '#ticketWalletFrom')?.focus());
+  requestAnimationFrame(() => {
+    const field = $(focusTargets[focusField] || '#ticketWalletFrom');
+    if (!field) return;
+    field.focus();
+    if (typeof field.setSelectionRange === 'function' && field.type !== 'datetime-local') {
+      const end = field.value.length;
+      try { field.setSelectionRange(end, end); } catch {}
+    }
+  });
 }
 function closeTicketWalletEditor() { state.ticketWalletEditorOpen = false; state.ticketWalletEditingId = ''; state.ticketWalletDraft = null; state.ticketWalletRecognition = { status: 'idle', progress: 0, message: '' }; render(); }
 function ticketWalletValue(selector) { return $(selector)?.value?.trim() || ''; }
