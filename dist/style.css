@@ -2090,6 +2090,33 @@ html.layout-simple #languageControl { display: none !important; }
   }
 }
 
+/* Ticket wallet dark-mode contrast -------------------------------------- */
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category-bar,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category-bar {
+  border-color: #3d3d3d;
+  background: #141414;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .34);
+}
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category {
+  color: #d2d2d2;
+}
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category b,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category b {
+  color: #a9a9a9;
+}
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category.active {
+  border-color: color-mix(in srgb, var(--primary) 62%, #555);
+  background: #292929;
+  color: var(--primary);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, .32), inset 0 0 0 1px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category.active b,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category.active b {
+  color: currentColor;
+}
+
 /* User-selectable accent palettes. The neutral palette is the default; the
    other presets only replace the accent tokens so every existing surface and
    icon follows the same color without creating parallel component themes. */
