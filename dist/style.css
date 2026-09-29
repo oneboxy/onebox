@@ -11030,12 +11030,15 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-real-map .leaflet-popup-content strong, .ticket-wallet-real-map .leaflet-popup-content small { display: inline-block; }
 .ticket-wallet-real-map .leaflet-popup-content strong { margin-bottom: 3px; font-size: 12px; }
 .ticket-wallet-real-map .leaflet-popup-content small { color: var(--muted); font-size: 10px; }
+.ticket-wallet-map-pin-wrap { width: 20px !important; height: 20px !important; margin: 0 !important; border: 0 !important; background: transparent !important; }
+.ticket-wallet-map-pin { display: block; width: 13px; height: 13px; margin: 3px; border: 3px solid #fff; border-radius: 50%; background: var(--ticket-wallet-route-color, var(--primary)); box-shadow: 0 2px 7px rgb(15 23 42 / 28%); }
 .ticket-wallet-map-loading, .ticket-wallet-map-error { display: grid; min-height: 340px; place-content: center; gap: 6px; padding: 24px; color: var(--muted); text-align: center; }
 .ticket-wallet-map-loading::before { width: 20px; height: 20px; margin: 0 auto 4px; border: 2px solid color-mix(in srgb, var(--primary) 18%, transparent); border-top-color: var(--primary); border-radius: 50%; animation: ticket-wallet-map-spin .8s linear infinite; content: ''; }
 .ticket-wallet-map-error strong { color: var(--ink); font-size: 14px; }
 .ticket-wallet-map-error small { font-size: 11px; }
 @keyframes ticket-wallet-map-spin { to { transform: rotate(360deg); } }
-.ticket-wallet-route-map-canvas svg { display: block; width: 100%; height: auto; min-height: 220px; }
+.ticket-wallet-route-map-canvas > svg { display: block; width: 100%; height: auto; min-height: 220px; }
+.ticket-wallet-real-map .leaflet-overlay-pane svg { display: block; width: auto; height: auto; min-height: 0; }
 .ticket-wallet-map-coast { fill: none; stroke: color-mix(in srgb, var(--primary) 12%, var(--muted)); stroke-width: 18; stroke-linecap: round; opacity: .22; }
 .ticket-wallet-map-grid path { fill: none; stroke: color-mix(in srgb, var(--primary) 13%, transparent); stroke-width: 1; stroke-dasharray: 2 8; }
 .ticket-wallet-map-route path { stroke: var(--route-color); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 7 6; animation: ticket-wallet-route-flow 3s linear infinite; }
