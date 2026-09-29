@@ -11235,7 +11235,12 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   padding: 22px 0 42px;
 }
 .ticket-wallet-stack .ticket-wallet-swipe-row { z-index: calc(100 - var(--ticket-stack-index)); }
-.ticket-wallet-stack .ticket-wallet-swipe-row:first-child { margin-top: 0; }
+.ticket-wallet-stack .ticket-wallet-swipe-row {
+  grid-area: 1 / 1;
+  margin-top: 0 !important;
+  transform: translateY(calc((var(--ticket-stack-count) - 1 - var(--ticket-stack-index)) * var(--ticket-stack-peek, 104px)));
+}
+.ticket-wallet-stack .ticket-wallet-swipe-row:first-child { margin-top: 0 !important; }
 .ticket-wallet-focus { margin: 8px 0 26px; }
 .ticket-wallet-focus-head,
 .ticket-wallet-other-head {
@@ -11390,6 +11395,16 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-swipe-actions button.danger { color: var(--danger); }
 .ticket-wallet-swipe-row .swipe-content { transform: translateX(0); transition: transform .2s ease; }
 .ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-168px); }
+
+/* The first record is the front card. Later records are placed upward into
+   the pack so their top edge remains visible behind it. */
+.ticket-wallet-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: calc(42px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 104px));
+}
+.ticket-wallet-stack .ticket-wallet-swipe-row { overflow: hidden; }
+.ticket-wallet-stack .ticket-wallet-swipe-row-train { --ticket-stack-peek: 116px; }
 .ticket-wallet-swipe-row .ticket-wallet-card-actions { position: relative; }
 
 @media (min-width: 761px) {
@@ -11429,6 +11444,8 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   .ticket-wallet-swipe-row .ticket-wallet-card-actions { display: none; }
   .ticket-wallet-swipe-actions { width: 168px; border-radius: 16px; }
   .ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-168px); }
+  .ticket-wallet-stack { padding-bottom: calc(42px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 74px)); }
+  .ticket-wallet-stack .ticket-wallet-swipe-row-train { --ticket-stack-peek: 78px; }
 }
 
 /* Ticket wallet desktop surface ------------------------------------------
