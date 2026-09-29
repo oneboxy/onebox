@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.411';
+const APP_VERSION = '2.18.412';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -50,6 +50,7 @@ const STORAGE = {
   mascotDisplayMode: 'onebox.mascot-display-mode',
   petProfile: 'onebox.pet-profile',
   ticketWallet: 'onebox.ticket-wallet',
+  ticketWalletTypeFilter: 'onebox.ticket-wallet-type-filter',
   ticketWalletMemories: 'onebox.ticket-wallet-memories',
   ticketWalletMapCache: 'onebox.ticket-wallet-map-cache',
 };
@@ -717,6 +718,7 @@ function normalizeTicketMemories(value) {
   }]));
 }
 const storedTicketWallet = normalizeTicketWallet(parseStored(STORAGE.ticketWallet, []));
+const storedTicketWalletTypeFilter = localStorage.getItem(STORAGE.ticketWalletTypeFilter);
 const storedTicketMemories = normalizeTicketMemories(parseStored(STORAGE.ticketWalletMemories, {}));
 function ticketTypeLabel(type) {
   const labels = TICKET_TYPE_LABELS[type] || TICKET_TYPE_LABELS.other;
@@ -923,6 +925,7 @@ function ticketWalletJourneys(records = state.ticketWallet) {
   return [...groups.values()].map((group) => ({ ...group, memory: state.ticketWalletMemories[group.key] || null })).sort((a, b) => ticketWalletDepartureAsc({ departAt: a.start }, { departAt: b.start }));
 }
 function saveTicketWallet() { saveStored(STORAGE.ticketWallet, state.ticketWallet); }
+function saveTicketWalletTypeFilter() { localStorage.setItem(STORAGE.ticketWalletTypeFilter, state.ticketWalletTypeFilter); }
 function saveTicketWalletMemories() { saveStored(STORAGE.ticketWalletMemories, state.ticketWalletMemories); }
 async function hydrateTicketWalletImages() {
   const ids = [...state.ticketWallet.map((item) => item.sourceImageId), ...Object.values(state.ticketWalletMemories).map((item) => item.imageId)].filter(Boolean);
@@ -995,7 +998,7 @@ const state = {
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
   homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
   navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationDialog: null, navigationFolderDraft: null, navigationSettingsOpen: false,
-  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: 'all', ticketWalletSelectedId: '', ticketWalletEditorOpen: false, ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
+  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: Object.prototype.hasOwnProperty.call(TICKET_TYPES, storedTicketWalletTypeFilter) ? storedTicketWalletTypeFilter : 'train', ticketWalletSelectedId: '', ticketWalletEditorOpen: false, ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
   notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, githubDialogOpen: false, recentReadingOpen: false,
@@ -3113,7 +3116,7 @@ function renderMine() {
 }
 
 function openTicketWallet() {
-  state.section = 'mine'; state.ticketWalletOpen = true; state.ticketWalletTypeFilter = 'all'; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
+  state.section = 'mine'; state.ticketWalletOpen = true; state.ticketWalletTypeFilter = Object.prototype.hasOwnProperty.call(TICKET_TYPES, state.ticketWalletTypeFilter) ? state.ticketWalletTypeFilter : 'train'; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
   history.replaceState(null, '', '#ticket-wallet'); window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); void hydrateTicketWalletImages();
 }
 function closeTicketWallet() {
@@ -3350,7 +3353,7 @@ function ticketWalletTrainBlueTemplateMarkup(data, sourceHint = '') {
     '<div class="ticket-wallet-train-ticket" data-train-ticket-template="crh-blue-v1"', sourceHint ? ' aria-label="' + escapeHtml(sourceHint) + '"' : '', '>',
     '<svg class="ticket-wallet-train-template ticket-wallet-train-template-blue" viewBox="0 0 1096 695" role="img" aria-label="', escapeHtml(data.from + '到' + data.to + '火车票'), '" preserveAspectRatio="xMidYMid meet">',
     '<title>', escapeHtml(data.from + '到' + data.to + ' ' + data.trainNo), '</title>',
-    '<defs><linearGradient id="', gradientId, '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9f5fb"/><stop offset=".62" stop-color="#d4f1f5"/><stop offset="1" stop-color="#9edfe9"/></linearGradient></defs>',
+    '<defs><linearGradient id="', gradientId, '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8eaf2"/><stop offset=".62" stop-color="#7dd4e1"/><stop offset="1" stop-color="#38b9d2"/></linearGradient></defs>',
     '<rect class="ticket-paper ticket-paper-blue" width="1096" height="695" rx="18" fill="url(#', gradientId, ')"/>',
     '<path class="ticket-blue-haze" d="M0 420c150-35 254 23 389-18s225-18 336 5 239-4 371 22v266H0Z"/>',
     '<g class="ticket-blue-train-art" aria-hidden="true"><path d="M42 523c124-4 210 18 324-7 92-20 134-53 224-48 113 6 167 48 263 53 73 4 129-7 201-27v64H42Z"/><path d="M173 541h720c-44 23-91 28-145 27H327c-61 0-111-9-154-27Zm168-26h75l33-45h106l27 45h94l28-39 93 4 28 35H341Z"/><path d="M477 470h104l13 45H463Zm-234 99h45m38 0h45m348 0h45m38 0h45"/></g>',
@@ -3589,7 +3592,7 @@ function renderTicketWallet() {
   const ticketWalletFilterRow = '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
   const ticketWalletAddAction = ticketWalletAddEntryMarkup();
   const body = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) + ticketWalletAddAction : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>' + ticketWalletAddAction) + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button></div></div>';
-  return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav><div class="ticket-wallet-tabs" role="tablist"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab">' + escapeHtml(t('ticketWalletTickets')) + '</button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab">' + escapeHtml(t('ticketWalletJourneys')) + '</button></div></div>' + ticketWalletFilterRow + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : body) + (state.ticketWallet.length && state.ticketWalletView === 'tickets' ? '<div class="ticket-wallet-secondary-actions"><button class="ghost" data-ticket-wallet-import-json>' + escapeHtml(t('ticketWalletImportJson')) + '</button></div>' : '') + '</div>';
+  return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav><div class="ticket-wallet-tabs" role="tablist"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab">' + escapeHtml(t('ticketWalletTickets')) + '</button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab">' + escapeHtml(t('ticketWalletJourneys')) + '</button></div></div>' + ticketWalletFilterRow + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : body) + '</div>';
 }
 
 function renderPetDialog() {
@@ -8898,7 +8901,7 @@ workspace.addEventListener('click', async (event) => {
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
   if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1'; document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => item.classList.toggle('active', item === ticketWalletTemplate)); return; }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');
-  if (ticketWalletFilter) { state.ticketWalletTypeFilter = ticketWalletFilter.dataset.ticketWalletFilter || 'all'; state.ticketWalletSelectedId = ''; return render(); }
+  if (ticketWalletFilter) { state.ticketWalletTypeFilter = ticketWalletFilter.dataset.ticketWalletFilter || 'train'; saveTicketWalletTypeFilter(); state.ticketWalletSelectedId = ''; return render(); }
   if (event.target.closest('[data-ticket-wallet-add]')) return openTicketWalletEditor();
   if (event.target.closest('[data-ticket-wallet-import-image]')) { $('#ticketWalletFileInput')?.click(); return; }
   if (event.target.closest('[data-ticket-wallet-import-json]')) { $('#ticketWalletJsonInput')?.click(); return; }

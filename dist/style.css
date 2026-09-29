@@ -12290,3 +12290,67 @@ body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb .ticket-wallet-back svg 
     gap: 12px;
   }
 }
+
+/* Make each layer of the physical ticket stack easier to distinguish. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack {
+  --ticket-stack-peek: 136px;
+  padding-bottom: calc(52px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row-train {
+  --ticket-stack-peek: 136px;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket {
+  border-width: 2px;
+  border-color: color-mix(in srgb, var(--primary) 20%, #e5e6ea);
+  box-shadow: 0 17px 30px rgba(25, 22, 31, .14), 0 0 0 3px var(--panel), 0 0 0 4px color-mix(in srgb, var(--primary) 13%, var(--line));
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-train-ticket {
+  box-shadow: 0 20px 34px rgba(25, 22, 31, .18), 0 0 0 3px var(--panel), 0 0 0 4px color-mix(in srgb, var(--primary) 23%, var(--line));
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket {
+  border-width: 2px;
+  box-shadow: 0 17px 30px color-mix(in srgb, var(--ink) 15%, transparent), 0 0 0 3px var(--panel), 0 0 0 4px color-mix(in srgb, var(--ticket-accent) 24%, var(--line));
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-stack {
+    --ticket-stack-peek: 96px;
+    padding-bottom: calc(44px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row-train {
+    --ticket-stack-peek: 96px;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket,
+  body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket {
+    box-shadow: 0 14px 25px color-mix(in srgb, var(--ink) 15%, transparent), 0 0 0 3px var(--panel), 0 0 0 4px color-mix(in srgb, var(--primary) 15%, var(--line));
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-train-ticket,
+  body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-physical-ticket {
+    box-shadow: 0 17px 28px color-mix(in srgb, var(--ink) 18%, transparent), 0 0 0 3px var(--panel), 0 0 0 4px color-mix(in srgb, var(--primary) 24%, var(--line));
+  }
+}
+
+/* Physical train tickets should touch the stack without a white frame. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket {
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: 0 17px 30px rgba(25, 22, 31, .16), 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-train-ticket {
+  box-shadow: 0 20px 34px rgba(25, 22, 31, .2), 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-train-template-blue .ticket-paper-blue {
+  stroke: color-mix(in srgb, #159bb8 66%, transparent);
+  stroke-width: 1;
+}
