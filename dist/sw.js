@@ -1,29 +1,29 @@
-const CACHE = 'onebox-v370';
+const CACHE = 'onebox-v371';
 const APP_SHELL = [
   './',
   'index.html',
-  'style.css?v=2.18.401',
-  'app.js?v=2.18.401',
-  'calendar-data.js?v=2.18.401',
+  'style.css?v=2.18.402',
+  'app.js?v=2.18.402',
+  'calendar-data.js?v=2.18.402',
   'manifest.webmanifest',
-  'manifest.webmanifest?v=2.18.401',
-  'favicon-v317.ico?v=2.18.401',
+  'manifest.webmanifest?v=2.18.402',
+  'favicon-v317.ico?v=2.18.402',
   'apple-touch-icon.png',
   'apple-touch-icon-precomposed.png',
-  'apple-touch-icon.png?v=2.18.401',
-  'icons/onebox-brand-v317-16.png?v=2.18.401',
-  'icons/onebox-brand-v317-32.png?v=2.18.401',
-  'icons/onebox-brand-v317-48.png?v=2.18.401',
-  'icons/onebox-brand-v317-64.png?v=2.18.401',
-  'icons/onebox-brand-v317-128.png?v=2.18.401',
-  'icons/onebox-brand-v317-120.png?v=2.18.401',
-  'icons/onebox-brand-v317-152.png?v=2.18.401',
-  'icons/onebox-brand-v317-167.png?v=2.18.401',
-  'icons/onebox-brand-v317-180.png?v=2.18.401',
-  'icons/onebox-brand-v317-192.png?v=2.18.401',
-  'icons/onebox-brand-v317-256.png?v=2.18.401',
-  'icons/onebox-brand-v317-512.png?v=2.18.401',
-  'icons/onebox-brand-v317-1024.png?v=2.18.401',
+  'apple-touch-icon.png?v=2.18.402',
+  'icons/onebox-brand-v317-16.png?v=2.18.402',
+  'icons/onebox-brand-v317-32.png?v=2.18.402',
+  'icons/onebox-brand-v317-48.png?v=2.18.402',
+  'icons/onebox-brand-v317-64.png?v=2.18.402',
+  'icons/onebox-brand-v317-128.png?v=2.18.402',
+  'icons/onebox-brand-v317-120.png?v=2.18.402',
+  'icons/onebox-brand-v317-152.png?v=2.18.402',
+  'icons/onebox-brand-v317-167.png?v=2.18.402',
+  'icons/onebox-brand-v317-180.png?v=2.18.402',
+  'icons/onebox-brand-v317-192.png?v=2.18.402',
+  'icons/onebox-brand-v317-256.png?v=2.18.402',
+  'icons/onebox-brand-v317-512.png?v=2.18.402',
+  'icons/onebox-brand-v317-1024.png?v=2.18.402',
   'icons/mascot-fox-full-reactions.png',
   'icons/mascot-fox-full-reactions.png?v=2.18.311',
   'icons/mascot-fox-full.png',
@@ -48,6 +48,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE)
     .then((cache) => cache.addAll(CORE_APP_SHELL)
       .then(() => Promise.all(OPTIONAL_APP_SHELL.map((asset) => cache.add(asset).catch(() => null)))))
+    .then(() => self.skipWaiting())
     .then(() => undefined));
 });
 self.addEventListener('activate', (event) => {
