@@ -11990,3 +11990,89 @@ body:has(.ticket-wallet-dialog-shell) #workspace {
     margin-left: 0;
   }
 }
+
+/* Ticket wallet filter row ---------------------------------------------- */
+body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0 0 24px;
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--primary) 9%, var(--line));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel) 78%, var(--panel-2));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  gap: 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category {
+  flex: 0 0 auto !important;
+  min-width: 98px;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 7px 13px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 5%, var(--panel));
+  box-shadow: -8px 0 14px color-mix(in srgb, var(--panel) 88%, transparent);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+    gap: 7px;
+    margin: 0 -14px 14px;
+    padding: 3px 10px 4px 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+    min-width: max-content;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category {
+    min-width: 88px;
+    min-height: 35px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
+    min-height: 35px;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
