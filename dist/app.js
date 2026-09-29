@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.384';
+const APP_VERSION = '2.18.385';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3507,7 +3507,7 @@ function renderTicketWalletJourneysLegacy() {
 function renderTicketWalletJourneys() {
   const journeys = ticketWalletJourneys();
   if (!journeys.length) return '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletNoJourney')) + '</h2><p>' + escapeHtml(t('ticketWalletEmpty')) + '</p></div>';
-  return ticketWalletJourneyMapMarkup(journeys) + '<div class="ticket-wallet-journey-list">' + journeys.map((group) => '<article class="ticket-wallet-journey-card"><div class="ticket-wallet-journey-head"><div><span class="ticket-wallet-eyebrow">' + escapeHtml(ticketWalletDateLabel(group.start, false)) + '</span><h2>' + escapeHtml(group.from || '—') + ' <span>→</span> ' + escapeHtml(group.to || '—') + '</h2></div></div>' + (group.memory ? '<div class="ticket-wallet-memory-preview"><strong>' + escapeHtml(group.memory.title || t('ticketWalletMemory')) + '</strong><p>' + escapeHtml(group.memory.description || '') + '</p></div>' : '') + '<div class="ticket-wallet-journey-actions"><button class="secondary" data-ticket-wallet-memory="' + escapeHtml(group.key) + '">' + escapeHtml(group.memory ? t('ticketWalletEditMemory') : t('ticketWalletAddMemory')) + '</button><button class="ghost" data-ticket-wallet-share="' + escapeHtml(group.key) + '">' + escapeHtml(t('ticketWalletShare')) + '</button></div></article>').join('') + '</div>';
+  return ticketWalletJourneyMapMarkup(journeys);
 }
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = [...state.ticketWallet].sort(ticketWalletDepartureAsc); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
