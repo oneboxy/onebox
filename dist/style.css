@@ -11059,12 +11059,14 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-train-template .ticket-edit-target:focus-visible text { fill: var(--primary); }
 .ticket-wallet-train-template .ticket-edit-target:hover path,
 .ticket-wallet-train-template .ticket-edit-target:focus-visible path { stroke: var(--primary); }
+.ticket-wallet-train-template .ticket-edit-target:hover .train-number-arrow,
+.ticket-wallet-train-template .ticket-edit-target:focus-visible .train-number-arrow { fill: var(--primary); }
 .ticket-wallet-train-template .ticket-serial {
   fill: #bd5865;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 55px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 56px;
   font-weight: 400;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 .ticket-wallet-train-template .station-main {
   font-family: 'Songti SC', 'STSong', SimSun, serif;
@@ -11077,6 +11079,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   font-family: 'Songti SC', 'STSong', SimSun, serif;
   font-size: 34px;
   font-weight: 900;
+  letter-spacing: 0;
 }
 .ticket-wallet-train-template .station-latin {
   font-family: Georgia, 'Times New Roman', serif;
@@ -11089,7 +11092,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   font-weight: 400;
   letter-spacing: 2px;
 }
-.ticket-wallet-train-template .train-number-line { fill: none; stroke: #050505; stroke-width: 3; }
+.ticket-wallet-train-template .train-number-arrow { fill: #050505; stroke: none; }
 .ticket-wallet-train-template .ticket-date,
 .ticket-wallet-train-template .ticket-seat,
 .ticket-wallet-train-template .ticket-price,
