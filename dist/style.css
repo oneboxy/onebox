@@ -12086,3 +12086,21 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
     font-size: 11px;
   }
 }
+
+/* Keep the fixed add action visually separate from the scrolling filters -- */
+body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll {
+  flex: 1 1 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
+  margin-left: 0;
+  background: var(--panel);
+  box-shadow: -14px 0 18px var(--panel), 0 0 0 1px color-mix(in srgb, var(--primary) 10%, transparent);
+}
