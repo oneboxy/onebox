@@ -11048,3 +11048,201 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   .ticket-wallet-route-map-canvas svg { min-height: 175px; }
   .ticket-wallet-map-route text { font-size: 10px; }
 }
+
+/* Traditional pink railway ticket: keep the physical-ticket proportions and
+   position every detail inside one flat paper surface. */
+.ticket-wallet-train-card {
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ticket-wallet-train-card::after { display: none; }
+.ticket-wallet-train-ticket {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 1.7142857 / 1;
+  min-height: 0;
+  padding: 4.1% 2.35% 2.55%;
+  border: 1px solid #d69294;
+  border-radius: 1px;
+  color: #080808;
+  background-color: #efb4b4;
+  background-image:
+    radial-gradient(ellipse at 18% 18%, rgba(198, 90, 98, .16) 0 1px, transparent 2px),
+    radial-gradient(ellipse at 74% 63%, rgba(198, 90, 98, .12) 0 1px, transparent 2px),
+    repeating-linear-gradient(132deg, transparent 0 23px, rgba(255, 255, 255, .08) 24px 25px, transparent 26px 45px),
+    repeating-linear-gradient(43deg, transparent 0 31px, rgba(155, 66, 73, .05) 32px 33px, transparent 34px 60px);
+  box-shadow: 0 13px 25px rgba(25, 22, 31, .08);
+}
+.ticket-wallet-train-ticket::before { display: none; }
+.ticket-wallet-train-serial-row,
+.ticket-wallet-train-route,
+.ticket-wallet-train-info,
+.ticket-wallet-train-passenger,
+.ticket-wallet-train-notice,
+.ticket-wallet-train-qr,
+.ticket-wallet-train-code { position: absolute; z-index: 1; }
+.ticket-wallet-train-serial-row { top: 1.4%; left: 1.7%; }
+.ticket-wallet-train-serial {
+  color: #bf5a67;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(18px, 3.15vw, 43px);
+  line-height: 1;
+  letter-spacing: .02em;
+}
+.ticket-wallet-train-route {
+  top: 10.3%;
+  right: 3.1%;
+  left: 3.1%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, .7fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 1.8%;
+}
+.ticket-wallet-train-station { min-width: 0; }
+.ticket-wallet-train-station strong,
+.ticket-wallet-train-number strong {
+  display: block;
+  overflow: hidden;
+  color: #050505;
+  font-family: 'Songti SC', 'STSong', SimSun, serif;
+  font-weight: 900;
+  line-height: .95;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ticket-wallet-train-station strong { font-size: clamp(25px, 5.2vw, 70px); letter-spacing: -.08em; }
+.ticket-wallet-train-station small {
+  display: block;
+  margin-top: 2.5%;
+  color: #0c0c0c;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(12px, 2.35vw, 32px);
+  line-height: 1;
+  white-space: nowrap;
+}
+.ticket-wallet-train-destination { text-align: right; }
+.ticket-wallet-train-number { align-self: center; text-align: center; }
+.ticket-wallet-train-number strong { font-family: Arial, Helvetica, sans-serif; font-size: clamp(27px, 5.1vw, 68px); font-weight: 500; letter-spacing: .01em; }
+.ticket-wallet-train-number i { display: block; width: 77%; height: clamp(1px, .18vw, 3px); margin: 2% auto 0; background: #090909; transform: rotate(-1deg); }
+.ticket-wallet-train-info {
+  top: 34.5%;
+  right: 3.1%;
+  left: 3.1%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(28px, .34fr) minmax(0, 1fr);
+  align-items: start;
+}
+.ticket-wallet-train-time,
+.ticket-wallet-train-seat { display: grid; align-content: start; gap: 6%; }
+.ticket-wallet-train-time strong,
+.ticket-wallet-train-seat strong {
+  color: #090909;
+  font-family: 'Songti SC', 'STSong', SimSun, serif;
+  font-size: clamp(12px, 2.75vw, 37px);
+  font-weight: 900;
+  line-height: 1.08;
+  white-space: nowrap;
+}
+.ticket-wallet-train-time strong:nth-child(2) { font-size: clamp(14px, 3.1vw, 42px); }
+.ticket-wallet-train-time strong:nth-child(3) { font-size: clamp(12px, 2.55vw, 35px); }
+.ticket-wallet-train-seat { justify-items: end; text-align: right; padding-top: 1.5%; }
+.ticket-wallet-train-seal {
+  align-self: center;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: clamp(24px, 4vw, 54px);
+  aspect-ratio: 1;
+  border: clamp(1px, .16vw, 3px) solid #090909;
+  border-radius: 50%;
+  color: #090909;
+  font-family: 'Songti SC', 'STSong', SimSun, serif;
+  font-size: clamp(15px, 2.8vw, 38px);
+  font-weight: 900;
+  line-height: 1;
+}
+.ticket-wallet-train-passenger {
+  top: 62.1%;
+  left: 2.4%;
+  max-width: 66%;
+  overflow: hidden;
+  color: #090909;
+  font-family: 'Songti SC', 'STSong', SimSun, serif;
+  font-size: clamp(12px, 2.85vw, 39px);
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ticket-wallet-train-notice {
+  right: 31.8%;
+  bottom: 10.4%;
+  left: 4.1%;
+  display: grid;
+  gap: 3%;
+  padding: 1.5% 2.4% 1.7%;
+  border: clamp(1px, .16vw, 3px) dashed #090909;
+  color: #090909;
+  text-align: center;
+}
+.ticket-wallet-train-notice strong {
+  display: block;
+  font-family: 'Songti SC', 'STSong', SimSun, serif;
+  font-size: clamp(10px, 2.35vw, 32px);
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.ticket-wallet-train-qr {
+  right: 7.7%;
+  bottom: 10.2%;
+  display: block;
+  width: clamp(54px, 14.5vw, 170px);
+  aspect-ratio: 1;
+  border: clamp(3px, .45vw, 7px) solid #080808;
+  background:
+    repeating-conic-gradient(#080808 0 25%, transparent 0 50%) 0 0 / 18% 18%,
+    linear-gradient(90deg, transparent 45%, #080808 46% 55%, transparent 56%) 0 0 / 33% 33%,
+    linear-gradient(0deg, transparent 45%, #080808 46% 55%, transparent 56%) 0 0 / 33% 33%;
+}
+.ticket-wallet-train-code {
+  bottom: 1.6%;
+  left: 1.7%;
+  color: #090909;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(7px, 1.25vw, 17px);
+  letter-spacing: .01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.ticket-wallet-train-card .ticket-wallet-card-actions {
+  justify-content: flex-end;
+  padding: 8px 0 0;
+  margin: 0;
+  background: transparent;
+}
+.ticket-wallet-train-card .ticket-wallet-card-actions .ghost { color: var(--muted); }
+
+@media (max-width: 760px) {
+  .ticket-wallet-train-serial { font-size: clamp(10px, 3.15vw, 22px); }
+  .ticket-wallet-train-route { top: 11.2%; grid-template-columns: minmax(0, 1fr) minmax(48px, .7fr) minmax(0, 1fr); gap: 1.2%; }
+  .ticket-wallet-train-station strong { font-size: clamp(16px, 5.2vw, 27px); letter-spacing: -.1em; }
+  .ticket-wallet-train-station small { font-size: clamp(7px, 2.1vw, 12px); }
+  .ticket-wallet-train-number strong { font-size: clamp(16px, 5.1vw, 25px); }
+  .ticket-wallet-train-info { top: 37.5%; }
+  .ticket-wallet-train-time, .ticket-wallet-train-seat { gap: 2%; }
+  .ticket-wallet-train-time strong, .ticket-wallet-train-seat strong { font-size: clamp(7px, 2.75vw, 14px); }
+  .ticket-wallet-train-time strong:nth-child(2) { font-size: clamp(8px, 3.1vw, 16px); }
+  .ticket-wallet-train-time strong:nth-child(3) { font-size: clamp(7px, 2.55vw, 13px); }
+  .ticket-wallet-train-seal { width: clamp(16px, 4vw, 23px); font-size: clamp(10px, 2.8vw, 16px); }
+  .ticket-wallet-train-passenger { top: 62.4%; font-size: clamp(8px, 2.85vw, 15px); }
+  .ticket-wallet-train-notice { right: 31%; bottom: 10.4%; padding: 1.2% 1.7%; }
+  .ticket-wallet-train-notice strong { font-size: clamp(6px, 2.2vw, 12px); }
+  .ticket-wallet-train-qr { right: 6.8%; bottom: 10.2%; width: clamp(34px, 14.5vw, 58px); border-width: 2px; }
+  .ticket-wallet-train-code { font-size: clamp(5px, 1.25vw, 9px); }
+}

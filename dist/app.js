@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.362';
+const APP_VERSION = '2.18.363';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -654,8 +654,9 @@ function normalizeTicketRecord(value) {
     title: String(source.title || '').trim(), carrier: String(source.carrier || '').trim(),
     from: String(source.from || '').trim(), to: String(source.to || '').trim(),
     departAt: String(source.departAt || ''), arriveAt: String(source.arriveAt || ''),
-    ticketNo: String(source.ticketNo || '').trim(), seat: String(source.seat || '').trim(),
-    passenger: String(source.passenger || '').trim(), journey: String(source.journey || '').trim(),
+    ticketNo: String(source.ticketNo || '').trim(), ticketSerial: String(source.ticketSerial || '').trim(),
+    ticketCode: String(source.ticketCode || '').trim(), price: String(source.price || '').trim(),
+    seat: String(source.seat || '').trim(), passenger: String(source.passenger || '').trim(), journey: String(source.journey || '').trim(),
     notes: String(source.notes || '').trim(), sourceImageId: String(source.sourceImageId || ''),
     sourceImageName: String(source.sourceImageName || '').trim(), sourceMime: String(source.sourceMime || '').trim(),
     createdAt: Number(source.createdAt) || now, updatedAt: Number(source.updatedAt) || now,
@@ -704,6 +705,9 @@ function ticketWalletRecognitionFromText(text, fileName = '') {
   const trainNo = source.match(/\b([GDCZTKYS]\s*\d{1,5})\b/i)?.[1]?.replace(/\s+/g, '').toUpperCase() || '';
   const flightNo = source.match(/\b([A-Z]{2}\s*\d{2,4})\b/)?.[1]?.replace(/\s+/g, '').toUpperCase() || '';
   const ticketNo = type === 'train' ? trainNo : type === 'flight' ? flightNo : '';
+  const ticketSerial = source.match(/\b([A-Z]\d{6})\b/i)?.[1]?.toUpperCase() || '';
+  const ticketCode = source.match(/\b(CRGT[A-Z0-9]+)\b/i)?.[1]?.toUpperCase() || '';
+  const price = source.match(/[￥¥]\s*\d+(?:\.\d{1,2})?\s*元?/i)?.[0]?.replace(/\s+/g, '') || '';
   const seat = source.match(/(\d{1,3})\s*车\s*(\d{1,3}\s*[A-Z])\s*(?:号)?/i)?.[0]?.replace(/\s+/g, '') || source.match(/\b\d{1,3}\s*[A-Z]\d?\s*(?:号|座)?\b/i)?.[0]?.replace(/\s+/g, '') || '';
   const dateText = source.match(/20\d{2}\s*[年\/-]\s*\d{1,2}\s*[月\/-]\s*\d{1,2}\s*(?:日)?/)?.[0] || '';
   const timeText = source.match(/\b\d{1,2}\s*[:：]\s*\d{2}\b/)?.[0] || '';
@@ -713,7 +717,7 @@ function ticketWalletRecognitionFromText(text, fileName = '') {
   const to = (route || fileRoute)?.[2]?.trim() || '';
   const journey = from && to ? from + '至' + to : '';
   const title = journey || (ticketNo ? ticketNo : '');
-  return { type, title, carrier: type === 'train' ? '中国铁路' : '', from, to, departAt: ticketWalletDateFromText(dateText, timeText), ticketNo, seat, journey };
+  return { type, title, carrier: type === 'train' ? '中国铁路' : '', from, to, departAt: ticketWalletDateFromText(dateText, timeText), ticketNo, ticketSerial, ticketCode, price, seat, journey };
 }
 let ticketWalletOcrPromise = null;
 function loadTicketWalletOcr() {
@@ -3053,12 +3057,33 @@ function ticketWalletTrainDateParts(value) {
   const date = new Date(value); if (Number.isNaN(date.getTime())) return { date: '—', time: '' };
   return { date: date.getFullYear() + '年' + pad(date.getMonth() + 1) + '月' + pad(date.getDate()) + '日', time: pad(date.getHours()) + ':' + pad(date.getMinutes()) };
 }
+function ticketWalletTrainStationName(value) {
+  return String(value || '').replace(/\s*(?:站|车站)\s*$/, '').trim();
+}
+function ticketWalletTrainStationDisplay(value) {
+  const station = String(value || '').trim();
+  return station ? (/(?:站|车站)$/.test(station) ? station : station + '站') : '—';
+}
+function ticketWalletTrainStationLatin(value) {
+  const station = ticketWalletTrainStationName(value);
+  const known = { 苏州: 'Suzhou', 上海: 'Shanghai', 上海虹桥: 'Shanghaihongqiao', 杭州东: 'Hangzhoudong', 南京南: 'Nanjingnan', 北京南: 'Beijingnan', 广州南: 'Guangzhounan', 深圳北: 'Shenzhenbei' };
+  return known[station] || station || '—';
+}
+function ticketWalletTrainTicketSerial(record) {
+  return String(record.ticketSerial || '').trim() || String(record.sourceImageName || '').match(/\b[A-Z]\d{6}\b/i)?.[0]?.toUpperCase() || '票号待识别';
+}
 function ticketWalletTrainCardMarkup(record, index) {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
   const date = ticketWalletTrainDateParts(record.departAt);
-  const seat = record.seat || '座位待确认';
-  const ticketNo = record.ticketNo || '车次待确认';
-  return '<article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card" data-ticket-wallet-card="' + escapeHtml(record.id) + '" style="--ticket-stack-index:' + index + '"><div class="ticket-wallet-train-ticket"><div class="ticket-wallet-train-top"><span>' + escapeHtml(record.sourceImageName || '电子车票') + '</span><strong>' + escapeHtml(record.carrier || '中国铁路') + '</strong><span>' + (source?.src ? escapeHtml(t('ticketWalletSourceReady')) : record.sourceImageId ? escapeHtml(t('ticketWalletSourceMissing')) : '') + '</span></div><div class="ticket-wallet-train-route"><div><strong>' + escapeHtml(record.from || '—') + '</strong><small>' + escapeHtml((record.from || '') + '站') + '</small></div><div class="ticket-wallet-train-number"><small>车次</small><strong>' + escapeHtml(ticketNo) + '</strong><i></i></div><div class="ticket-wallet-train-destination"><strong>' + escapeHtml(record.to || '—') + '</strong><small>' + escapeHtml((record.to || '') + '站') + '</small></div></div><div class="ticket-wallet-train-facts"><div><small>出发</small><strong>' + escapeHtml(date.date + ' ' + date.time) + '</strong></div><div><small>座位</small><strong>' + escapeHtml(seat) + '</strong></div></div><div class="ticket-wallet-train-bottom"><span>' + escapeHtml(record.passenger || '原始票据已保留') + '</span><span class="ticket-wallet-train-qr" aria-hidden="true"></span></div></div><div class="ticket-wallet-card-actions"><button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" data-ticket-wallet-apple="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button></div></article>';
+  const from = ticketWalletTrainStationDisplay(record.from);
+  const to = ticketWalletTrainStationDisplay(record.to);
+  const seat = record.seat || '—';
+  const ticketNo = record.ticketNo || '—';
+  const passenger = record.passenger || '旅客信息待识别';
+  const price = record.price || '￥—元';
+  const ticketCode = record.ticketCode || 'CRGT' + (date.date === '—' ? '' : date.date.replace(/\D/g, '')) + (ticketWalletTrainTicketSerial(record) === '票号待识别' ? '' : ticketWalletTrainTicketSerial(record));
+  const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
+  return '<article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card" data-ticket-wallet-card="' + escapeHtml(record.id) + '" style="--ticket-stack-index:' + index + '"><div class="ticket-wallet-train-ticket"' + (sourceHint ? ' aria-label="' + escapeHtml(sourceHint) + '"' : '') + '><div class="ticket-wallet-train-serial-row"><span class="ticket-wallet-train-serial">' + escapeHtml(ticketWalletTrainTicketSerial(record)) + '</span></div><div class="ticket-wallet-train-route"><div class="ticket-wallet-train-station"><strong>' + escapeHtml(from) + '</strong><small>' + escapeHtml(ticketWalletTrainStationLatin(record.from)) + '</small></div><div class="ticket-wallet-train-number"><strong>' + escapeHtml(ticketNo) + '</strong><i></i></div><div class="ticket-wallet-train-station ticket-wallet-train-destination"><strong>' + escapeHtml(to) + '</strong><small>' + escapeHtml(ticketWalletTrainStationLatin(record.to)) + '</small></div></div><div class="ticket-wallet-train-info"><div class="ticket-wallet-train-time"><strong>' + escapeHtml(date.date + ' ' + date.time) + ' 开</strong><strong>' + escapeHtml(price) + '</strong><strong>仅供纪念使用</strong></div><span class="ticket-wallet-train-seal" aria-hidden="true">纪</span><div class="ticket-wallet-train-seat"><strong>' + escapeHtml(seat) + '</strong><strong>二等座</strong></div></div><div class="ticket-wallet-train-passenger">' + escapeHtml(passenger) + '</div><div class="ticket-wallet-train-notice"><strong>买票请到12306 发货请到95306</strong><strong>中国铁路祝您旅途愉快</strong></div><span class="ticket-wallet-train-qr" aria-hidden="true"></span><span class="ticket-wallet-train-code">' + escapeHtml(ticketCode) + '</span></div><div class="ticket-wallet-card-actions"><button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" data-ticket-wallet-apple="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button></div></article>';
 }
 function ticketWalletCardMarkup(record, index) {
   if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index);
