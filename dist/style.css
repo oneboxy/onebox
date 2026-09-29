@@ -11793,3 +11793,164 @@ body:has(.ticket-wallet-page) .ticket-wallet-train-card .ticket-wallet-card-acti
     padding-bottom: calc(30px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
   }
 }
+
+/* Ticket wallet modal surface ------------------------------------------ */
+.ticket-wallet-dialog-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 82;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: calc(var(--app-header-height) + 12px) 14px 24px;
+  overflow: auto;
+  background: rgba(12, 16, 28, .58);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.ticket-wallet-dialog-card {
+  display: flex;
+  flex-direction: column;
+  width: min(1180px, 100%);
+  max-height: calc(100dvh - var(--app-header-height) - 36px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .32);
+}
+
+.ticket-wallet-dialog-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  flex: 0 0 auto;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.ticket-wallet-dialog-title {
+  min-width: 0;
+}
+
+.ticket-wallet-dialog-title h2 {
+  margin: 2px 0 0;
+  font-size: 21px;
+  letter-spacing: -.04em;
+}
+
+.ticket-wallet-dialog-title small {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-wallet-dialog-head > .ticket-wallet-tabs {
+  align-self: center;
+  justify-self: end;
+}
+
+.ticket-wallet-dialog-head > .ticket-wallet-tabs button {
+  padding-top: 6px;
+  padding-bottom: 7px;
+}
+
+.ticket-wallet-dialog-scroll {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ticket-wallet-dialog-card .ticket-wallet-page {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding: 14px 20px 28px;
+}
+
+.ticket-wallet-dialog-card .ticket-wallet-category-bar {
+  margin-top: 0;
+}
+
+.ticket-wallet-dialog-card .ticket-wallet-page-head {
+  display: none;
+}
+
+body:has(.ticket-wallet-dialog-shell) main {
+  padding-top: 0 !important;
+  overflow: hidden;
+}
+
+body:has(.ticket-wallet-dialog-shell) #workspace {
+  min-height: 0;
+}
+
+@media (max-width: 760px) {
+  .ticket-wallet-dialog-shell {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .ticket-wallet-dialog-card {
+    width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top) - 6px);
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .ticket-wallet-dialog-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'title close' 'tabs tabs';
+    gap: 5px 12px;
+    padding: 13px 14px 0;
+  }
+
+  .ticket-wallet-dialog-title {
+    grid-area: title;
+  }
+
+  .ticket-wallet-dialog-title h2 {
+    font-size: 19px;
+  }
+
+  .ticket-wallet-dialog-head > .ticket-wallet-tabs {
+    grid-area: tabs;
+    justify-self: start;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 18px;
+  }
+
+  .ticket-wallet-dialog-head > .ticket-wallet-tabs button {
+    padding: 6px 0 9px;
+  }
+
+  .ticket-wallet-dialog-head > .icon-btn {
+    grid-area: close;
+    align-self: start;
+  }
+
+  .ticket-wallet-dialog-card .ticket-wallet-page {
+    padding: 10px 14px 24px;
+  }
+
+  .ticket-wallet-dialog-card .ticket-wallet-category-bar {
+    margin-right: -14px;
+    margin-left: -14px;
+  }
+
+  .ticket-wallet-dialog-card .ticket-wallet-section-head {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
