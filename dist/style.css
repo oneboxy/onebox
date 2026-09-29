@@ -11162,6 +11162,80 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 }
 .ticket-wallet-train-card .ticket-wallet-card-actions .ghost { color: var(--muted); }
 
+/* Ticket cards behave like a physical wallet pack. The visible card is the
+   front layer; later records peek out behind it and expose actions on swipe. */
+.ticket-wallet-swipe-row {
+  position: relative;
+  z-index: calc(40 - var(--ticket-stack-index));
+  min-width: 0;
+  margin-top: calc(var(--ticket-stack-index) * -52px);
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  overflow: visible;
+}
+.ticket-wallet-swipe-row:first-child { margin-top: 0; }
+.ticket-wallet-swipe-row .ticket-wallet-card {
+  z-index: 1;
+  width: 100%;
+  margin-top: 0;
+}
+.ticket-wallet-swipe-row .ticket-wallet-train-card { margin: 0; }
+.ticket-wallet-swipe-row-train .swipe-content { background: transparent !important; }
+.ticket-wallet-swipe-actions {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 168px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel-2);
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.ticket-wallet-swipe-actions button {
+  min-width: 0;
+  padding: 8px 3px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.ticket-wallet-swipe-actions button:first-child { border-left: 0; color: var(--primary); }
+.ticket-wallet-swipe-actions button:hover { background: color-mix(in srgb, var(--primary) 7%, transparent); color: var(--ink); }
+.ticket-wallet-swipe-actions button.danger { color: var(--danger); }
+.ticket-wallet-swipe-row .swipe-content { transform: translateX(0); transition: transform .2s ease; }
+.ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-168px); }
+.ticket-wallet-swipe-row .ticket-wallet-card-actions { position: relative; }
+
+@media (min-width: 761px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-swipe-row-train {
+    width: min(780px, calc((100dvh - 330px) * 1.5), 100%);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-swipe-row-train .ticket-wallet-train-card { width: 100%; }
+  body:has(.ticket-wallet-page) .ticket-wallet-swipe-actions { display: none; }
+}
+
+@media (max-width: 760px) {
+  .ticket-wallet-swipe-row {
+    overflow: hidden;
+    border-radius: 19px;
+    margin-top: calc(var(--ticket-stack-index) * -42px);
+    touch-action: pan-y;
+  }
+  .ticket-wallet-swipe-row .ticket-wallet-card-actions { display: none; }
+  .ticket-wallet-swipe-actions { width: 168px; border-radius: 16px; }
+  .ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-168px); }
+}
+
 /* Ticket wallet desktop surface ------------------------------------------
    The wallet is a full page on desktop, so it should use the available
    canvas and keep the mobile floating navigation from covering the ticket. */
