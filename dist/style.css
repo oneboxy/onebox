@@ -10977,6 +10977,14 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-empty-actions .secondary { color: var(--ink); }
 .ticket-wallet-empty-actions .primary:hover,
 .ticket-wallet-empty-actions .secondary:hover { border-color: var(--primary); background: var(--panel-2); color: var(--ink); }
+.ticket-wallet-page .ticket-wallet-empty-actions button.primary,
+.ticket-wallet-page .ticket-wallet-empty-actions button.secondary {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: none;
+}
+.ticket-wallet-page .ticket-wallet-empty-actions button.primary { border-color: color-mix(in srgb, var(--primary) 46%, var(--line)); color: var(--primary); }
+.ticket-wallet-page .ticket-wallet-empty-actions button.secondary { color: var(--ink); }
 .ticket-wallet-editor-note { margin: 7px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .ticket-wallet-recognition { margin: -5px 0 18px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line)); border-radius: 13px; background: color-mix(in srgb, var(--primary) 6%, var(--panel)); }
 .ticket-wallet-recognition.warning { border-color: color-mix(in srgb, #d38333 44%, var(--line)); background: color-mix(in srgb, #d38333 7%, var(--panel)); }
