@@ -11199,6 +11199,94 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-focus-card .ticket-wallet-train-ticket { box-shadow: 0 20px 38px rgba(25, 22, 31, .14), 0 0 0 2px color-mix(in srgb, var(--primary) 14%, transparent); }
 .ticket-wallet-other-head { margin: 0 2px 4px; font-size: 11px; font-weight: 700; }
 .ticket-wallet-stack-secondary { padding-top: 10px; }
+.ticket-wallet-category-bar {
+  display: flex;
+  gap: 3px;
+  margin: 10px 0 20px;
+  padding: 0 0 7px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+.ticket-wallet-category-bar::-webkit-scrollbar { display: none; }
+.ticket-wallet-category {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 86px;
+  min-height: 38px;
+  flex: 1 0 auto;
+  padding: 6px 9px 8px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ticket-wallet-category.active { border-bottom-color: var(--primary); color: var(--primary); }
+.ticket-wallet-category:hover { color: var(--ink); }
+.ticket-wallet-category-icon { display: grid; width: 19px; height: 19px; place-items: center; flex: 0 0 19px; }
+.ticket-wallet-category-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.ticket-wallet-category b { min-width: 15px; color: color-mix(in srgb, currentColor 72%, var(--muted)); font-size: 10px; font-weight: 750; }
+.ticket-wallet-filter-empty { display: grid; justify-items: center; gap: 5px; margin: 8px auto 28px; padding: 42px 20px; border: 1px dashed color-mix(in srgb, var(--primary) 32%, var(--line)); border-radius: 18px; background: color-mix(in srgb, var(--primary) 3%, var(--panel)); text-align: center; }
+.ticket-wallet-filter-empty > span { color: var(--primary); font-size: 22px; }
+.ticket-wallet-filter-empty strong { font-size: 14px; }
+.ticket-wallet-filter-empty small { color: var(--muted); font-size: 11px; }
+.ticket-wallet-card-physical { min-height: 0; padding: 0; overflow: visible; border: 0; background: transparent; box-shadow: none; }
+.ticket-wallet-card-physical::after { display: none; }
+.ticket-wallet-physical-ticket {
+  --physical-bg: linear-gradient(135deg, #f4f6fb, #fff);
+  position: relative;
+  min-height: 248px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 22px 24px 16px;
+  border: 1px solid color-mix(in srgb, var(--ticket-accent) 34%, var(--line));
+  border-radius: 20px;
+  background: var(--physical-bg);
+  color: var(--physical-ink, var(--ink));
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--ink) 11%, transparent), inset 0 0 0 1px color-mix(in srgb, #fff 42%, transparent);
+}
+.ticket-wallet-physical-ticket::before { position: absolute; inset: 0; background: radial-gradient(circle at 12% 20%, color-mix(in srgb, var(--ticket-accent) 17%, transparent) 0 1px, transparent 1.5px) 0 0 / 20px 20px; content: ''; opacity: .25; pointer-events: none; }
+.ticket-wallet-physical-watermark { position: absolute; right: 20px; bottom: 10px; color: color-mix(in srgb, var(--ticket-accent) 32%, transparent); font-size: 33px; font-weight: 900; letter-spacing: .08em; transform: rotate(-8deg); user-select: none; }
+.ticket-wallet-physical-head, .ticket-wallet-physical-route, .ticket-wallet-physical-meta, .ticket-wallet-physical-footer { position: relative; z-index: 1; }
+.ticket-wallet-physical-head { display: flex; align-items: center; gap: 10px; }
+.ticket-wallet-physical-icon { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: color-mix(in srgb, var(--ticket-accent) 16%, #fff); color: var(--ticket-accent); }
+.ticket-wallet-physical-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.ticket-wallet-physical-head small, .ticket-wallet-physical-head strong { display: block; }
+.ticket-wallet-physical-head small { color: color-mix(in srgb, var(--physical-ink, var(--ink)) 64%, var(--muted)); font-size: 10px; }
+.ticket-wallet-physical-head strong { margin-top: 2px; font-size: 17px; }
+.ticket-wallet-physical-head .ticket-wallet-source { margin-left: auto; color: var(--ticket-accent); font-size: 10px; font-weight: 750; }
+.ticket-wallet-physical-route { display: grid; grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr); align-items: end; gap: 10px; margin: 34px 0 24px; }
+.ticket-wallet-physical-route small, .ticket-wallet-physical-route strong { display: block; }
+.ticket-wallet-physical-route small, .ticket-wallet-physical-meta small { margin-bottom: 5px; color: color-mix(in srgb, var(--physical-ink, var(--ink)) 58%, var(--muted)); font-size: 10px; }
+.ticket-wallet-physical-route strong { overflow: hidden; font-size: clamp(21px, 3.8vw, 34px); letter-spacing: -.04em; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-physical-route-end { text-align: right; }
+.ticket-wallet-physical-arrow { align-self: center; color: var(--ticket-accent); font-size: 26px; font-weight: 500; text-align: center; }
+.ticket-wallet-physical-meta { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.ticket-wallet-physical-meta span { display: block; min-width: 0; }
+.ticket-wallet-physical-meta strong { display: block; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-physical-footer { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-top: 24px; color: color-mix(in srgb, var(--physical-ink, var(--ink)) 65%, var(--muted)); font: 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ticket-wallet-physical-footer i { display: block; width: 112px; height: 25px; background: repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 5px, currentColor 5px 6px, transparent 6px 10px); opacity: .78; }
+.ticket-wallet-physical-ticket-flight { --ticket-accent: #3e83d5; --physical-bg: linear-gradient(135deg, #d8efff, #fff 72%); --physical-ink: #183650; }
+.ticket-wallet-physical-ticket-ferry { --ticket-accent: #098b9b; --physical-bg: linear-gradient(135deg, #cceff0, #fff 74%); --physical-ink: #123d4a; }
+.ticket-wallet-physical-ticket-coach { --ticket-accent: #d47732; --physical-bg: linear-gradient(135deg, #ffe1b9, #fff 74%); --physical-ink: #4c2c19; }
+.ticket-wallet-physical-ticket-transit { --ticket-accent: #2d78c9; --physical-bg: linear-gradient(135deg, #dceaff, #fff 74%); --physical-ink: #1b3555; }
+.ticket-wallet-physical-ticket-movie { --ticket-accent: #9258cc; --physical-bg: linear-gradient(135deg, #eadbff, #fff 74%); --physical-ink: #35224c; }
+.ticket-wallet-physical-ticket-concert { --ticket-accent: #d34e86; --physical-bg: linear-gradient(135deg, #ffd9e8, #fff 74%); --physical-ink: #4d1d34; }
+.ticket-wallet-physical-ticket-dining { --ticket-accent: #c78635; --physical-bg: linear-gradient(135deg, #fff0c9, #fffdf6 74%); --physical-ink: #49351a; }
+.ticket-wallet-physical-ticket-other { --ticket-accent: #7563c8; --physical-bg: linear-gradient(135deg, #e6e1ff, #fff 74%); --physical-ink: #2d2854; }
+.ticket-wallet-card-coach { --ticket-accent: #d47732; }
+.ticket-wallet-card-transit { --ticket-accent: #2d78c9; }
+.ticket-wallet-card-movie { --ticket-accent: #9258cc; }
+.ticket-wallet-card-concert { --ticket-accent: #d34e86; }
+.ticket-wallet-card-dining { --ticket-accent: #c78635; }
 .ticket-wallet-swipe-row-train {
   margin-top: calc(var(--ticket-stack-index) * -320px);
 }
@@ -11253,6 +11341,20 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 }
 
 @media (max-width: 760px) {
+  .ticket-wallet-category-bar { margin: 5px -14px 15px; padding-inline: 14px; }
+  .ticket-wallet-category { min-width: 78px; padding-inline: 7px; font-size: 11px; }
+  .ticket-wallet-category-icon { width: 17px; height: 17px; flex-basis: 17px; }
+  .ticket-wallet-category-icon svg { width: 16px; height: 16px; }
+  .ticket-wallet-physical-ticket { min-height: 218px; padding: 17px 16px 13px; border-radius: 17px; }
+  .ticket-wallet-physical-icon { width: 34px; height: 34px; border-radius: 10px; }
+  .ticket-wallet-physical-icon svg { width: 19px; height: 19px; }
+  .ticket-wallet-physical-head strong { font-size: 14px; }
+  .ticket-wallet-physical-route { margin-block: 24px 18px; }
+  .ticket-wallet-physical-route strong { font-size: 21px; }
+  .ticket-wallet-physical-meta strong { font-size: 12px; }
+  .ticket-wallet-physical-footer { margin-top: 18px; font-size: 9px; }
+  .ticket-wallet-physical-footer i { width: 82px; height: 19px; }
+  .ticket-wallet-physical-watermark { right: 13px; bottom: 8px; font-size: 23px; }
   .ticket-wallet-swipe-row {
     overflow: hidden;
     border-radius: 19px;
