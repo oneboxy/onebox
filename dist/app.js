@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.378';
+const APP_VERSION = '2.18.379';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -51,6 +51,7 @@ const STORAGE = {
   petProfile: 'onebox.pet-profile',
   ticketWallet: 'onebox.ticket-wallet',
   ticketWalletMemories: 'onebox.ticket-wallet-memories',
+  ticketWalletMapCache: 'onebox.ticket-wallet-map-cache',
 };
 const TOOL_DEFS = {
   calculator: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18h8"/></svg>', key: 'calculator' },
@@ -3388,7 +3389,7 @@ function ticketWalletFilteredRecords(records) {
 function renderTicketWalletMemoryEditor() {
   const draft = state.ticketWalletMemoryDraft; if (!draft) return '';
   const image = draft.imageId ? ticketWalletImageCache.get(draft.imageId) : null;
-  return '<section class="ticket-wallet-memory-editor"><div class="ticket-wallet-editor-head"><div><span class="ticket-wallet-eyebrow">ONEBOX JOURNEY</span><h2>' + escapeHtml(t(draft.title ? 'ticketWalletEditMemory' : 'ticketWalletAddMemory')) + '</h2></div><button class="icon-btn small" data-ticket-wallet-memory-cancel aria-label="' + escapeHtml(t('ticketWalletCancel')) + '">×</button></div>' + ticketWalletField(t('ticketWalletMemoryTitle'), 'ticketWalletMemoryTitle', draft.title) + '<label class="ticket-wallet-field ticket-wallet-field-wide"><span>' + escapeHtml(t('ticketWalletMemoryDescription')) + '</span><textarea id="ticketWalletMemoryDescription" rows="5">' + escapeHtml(draft.description || '') + '</textarea></label><div class="ticket-wallet-memory-image">' + (image?.src ? '<img src="' + escapeHtml(image.src) + '" alt="">' : '') + '<button class="secondary" data-ticket-wallet-memory-image>' + escapeHtml(t('ticketWalletImportImage')) + '</button></div><div class="ticket-wallet-editor-actions"><button class="secondary" data-ticket-wallet-memory-cancel>' + escapeHtml(t('ticketWalletCancel')) + '</button><button class="primary" data-ticket-wallet-memory-save>' + escapeHtml(t('ticketWalletMemorySave')) + '</button></div><input id="ticketWalletMemoryImageInput" type="file" accept="image/*" hidden></section>';
+  return '<section class="ticket-wallet-memory-editor"><div class="ticket-wallet-editor-head"><div><h2>' + escapeHtml(t(draft.title ? 'ticketWalletEditMemory' : 'ticketWalletAddMemory')) + '</h2></div><button class="icon-btn small" data-ticket-wallet-memory-cancel aria-label="' + escapeHtml(t('ticketWalletCancel')) + '">×</button></div>' + ticketWalletField(t('ticketWalletMemoryTitle'), 'ticketWalletMemoryTitle', draft.title) + '<label class="ticket-wallet-field ticket-wallet-field-wide"><span>' + escapeHtml(t('ticketWalletMemoryDescription')) + '</span><textarea id="ticketWalletMemoryDescription" rows="5">' + escapeHtml(draft.description || '') + '</textarea></label><div class="ticket-wallet-memory-image">' + (image?.src ? '<img src="' + escapeHtml(image.src) + '" alt="">' : '') + '<button class="secondary" data-ticket-wallet-memory-image>' + escapeHtml(t('ticketWalletImportImage')) + '</button></div><div class="ticket-wallet-editor-actions"><button class="secondary" data-ticket-wallet-memory-cancel>' + escapeHtml(t('ticketWalletCancel')) + '</button><button class="primary" data-ticket-wallet-memory-save>' + escapeHtml(t('ticketWalletMemorySave')) + '</button></div><input id="ticketWalletMemoryImageInput" type="file" accept="image/*" hidden></section>';
 }
 function ticketWalletMapPoint(name, index = 0) {
   const known = { 北京: [118, 48], 上海: [520, 174], 苏州: [478, 158], 南京: [385, 132], 杭州: [486, 218], 广州: [390, 236], 深圳: [425, 250], 西安: [238, 138], 成都: [164, 214], 武汉: [330, 182], 青岛: [526, 92], 厦门: [482, 258] };
@@ -3397,7 +3398,7 @@ function ticketWalletMapPoint(name, index = 0) {
   let hash = 0; for (const char of String(name || '') + index) hash = (hash * 31 + char.charCodeAt(0)) % 997;
   return { x: 80 + (hash % 520), y: 48 + ((hash * 7) % 175) };
 }
-function ticketWalletJourneyMapMarkup(journeys) {
+function ticketWalletLegacyMapMarkup(journeys) {
   const colors = ['#4863ee', '#0a9c91', '#d38333', '#8b6adf', '#d35f8a', '#4c8fbe'];
   const routes = journeys.map((group, index) => {
     const from = ticketWalletMapPoint(group.from, index); const to = ticketWalletMapPoint(group.to, index + 11);
@@ -3407,10 +3408,70 @@ function ticketWalletJourneyMapMarkup(journeys) {
   }).join('');
   return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div><span class="ticket-wallet-eyebrow">ONEBOX JOURNEY</span><h2>' + escapeHtml(state.language === 'en' ? 'Travel routes' : '旅迹地图') + '</h2></div><span>' + journeys.length + (state.language === 'en' ? ' routes' : ' 条路线') + '</span></div><div class="ticket-wallet-route-map-canvas"><svg viewBox="0 0 680 280" role="img" aria-label="' + escapeHtml(state.language === 'en' ? 'Journey routes' : '旅迹路线') + '"><path class="ticket-wallet-map-coast" d="M48 36c90-20 156 9 217-7s105 17 167 7 122 16 196 1M42 241c81 13 152-9 215 3s132-9 194 1 119-11 188 1M78 80c86 22 140 6 221 18s131-17 218 1 91 9 122 3M72 184c75-18 132 14 213 0s137-9 221 2 91-1 128-13"/><g class="ticket-wallet-map-grid"><path d="M80 25v230M180 25v230M280 25v230M380 25v230M480 25v230M580 25v230M30 75h620M30 135h620M30 195h620M30 255h620"/></g>' + routes + '</svg></div><div class="ticket-wallet-route-map-note">' + escapeHtml(state.language === 'en' ? 'Routes are grouped by trip and offset automatically when multiple lines overlap.' : '按旅程分组，多条路线重合时会自动错开显示。') + '</div></section>';
 }
-function renderTicketWalletJourneys() {
+const TICKET_WALLET_LEAFLET_VERSION = '1.9.4';
+const TICKET_WALLET_LEAFLET_CSS_URL = 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.css';
+const TICKET_WALLET_LEAFLET_JS_URL = 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.js';
+const TICKET_WALLET_CITY_COORDINATES = Object.freeze({ 北京: [39.9042, 116.4074], 上海: [31.2304, 121.4737], 苏州: [31.2989, 120.5853], 南京: [32.0603, 118.7969], 杭州: [30.2741, 120.1551], 广州: [23.1291, 113.2644], 深圳: [22.5431, 114.0579], 西安: [34.3416, 108.9398], 成都: [30.5728, 104.0668], 武汉: [30.5928, 114.3055], 青岛: [36.0671, 120.3826], 厦门: [24.4798, 118.0894], 天津: [39.3434, 117.3616], 重庆: [29.5630, 106.5516], 郑州: [34.7466, 113.6254], 济南: [36.6512, 117.1201], 合肥: [31.8206, 117.2272], 福州: [26.0745, 119.2965], 昆明: [25.0389, 102.7183], 长沙: [28.2282, 112.9388], 南昌: [28.6820, 115.8579], 沈阳: [41.8057, 123.4315], 大连: [38.9140, 121.6147], 哈尔滨: [45.8038, 126.5349], 石家庄: [38.0428, 114.5149], 太原: [37.8706, 112.5489], 兰州: [36.0611, 103.8343], 乌鲁木齐: [43.8256, 87.6168], 贵阳: [26.6470, 106.6302], 桂林: [25.2742, 110.2900], 宁波: [29.8683, 121.5440], 无锡: [31.4912, 120.3119], 常州: [31.8107, 119.9737], 嘉兴: [30.7461, 120.7555], 温州: [27.9949, 120.6994], 金华: [29.0895, 119.6495], 徐州: [34.2044, 117.2858], 洛阳: [34.6197, 112.4540], 珠海: [22.2710, 113.5767], 惠州: [23.1115, 114.4152], 海口: [20.0442, 110.1999], 三亚: [18.2528, 109.5119], 拉萨: [29.6500, 91.1000], 呼和浩特: [40.8426, 111.7492], 银川: [38.4872, 106.2309], 西宁: [36.6171, 101.7782] });
+let ticketWalletLeafletPromise = null; let ticketWalletLeafletMap = null; let ticketWalletLeafletMapElement = null; let ticketWalletLeafletPendingElement = null; let ticketWalletLeafletRenderToken = 0; let ticketWalletGeocodeNextAt = 0;
+const ticketWalletGeocodePromises = new Map();
+function ticketWalletMapPlaceKey(value) {
+  const text = String(value || '').trim().replace(/[（(].*?[）)]/g, '').replace(/\s+/g, '');
+  const aliases = [['上海虹桥', '上海'], ['杭州东', '杭州'], ['南京南', '南京'], ['北京南', '北京'], ['广州南', '广州'], ['深圳北', '深圳']];
+  const alias = aliases.find(([station]) => text.includes(station));
+  return alias ? alias[1] : text.replace(/(?:车站|火车站|站|机场|码头)$/g, '');
+}
+function ticketWalletMapCache() { return parseStored(STORAGE.ticketWalletMapCache, {}) || {}; }
+function saveTicketWalletMapCache(cache) { try { localStorage.setItem(STORAGE.ticketWalletMapCache, JSON.stringify(cache)); } catch { /* private mode can deny storage */ } }
+function ticketWalletMapPopupElement(group, label) {
+  const element = document.createElement('div'); const strong = document.createElement('strong'); strong.textContent = label; const small = document.createElement('small'); small.textContent = (group.records?.length || 1) + (state.language === 'en' ? ' ticket(s)' : ' 张票据'); element.append(strong, document.createElement('br'), small); return element;
+}
+async function ticketWalletGeocodePlace(value) {
+  const key = ticketWalletMapPlaceKey(value); if (!key) return null;
+  const cache = ticketWalletMapCache(); if (Array.isArray(cache[key])) return cache[key];
+  const local = Object.entries(TICKET_WALLET_CITY_COORDINATES).find(([city]) => key.includes(city) || city.includes(key));
+  if (local) { cache[key] = local[1]; saveTicketWalletMapCache(cache); return local[1]; }
+  if (ticketWalletGeocodePromises.has(key)) return ticketWalletGeocodePromises.get(key);
+  const promise = (async () => { const wait = Math.max(0, ticketWalletGeocodeNextAt - Date.now()); if (wait) await new Promise((resolve) => setTimeout(resolve, wait)); ticketWalletGeocodeNextAt = Date.now() + 1000; const response = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=zh-CN&countrycodes=cn&q=' + encodeURIComponent(String(value || key) + ', 中国'), { headers: { Accept: 'application/json' } }); const items = response.ok ? await response.json() : []; const item = items?.[0]; const coordinates = item && Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon)) ? [Number(item.lat), Number(item.lon)] : null; if (coordinates) { const nextCache = ticketWalletMapCache(); nextCache[key] = coordinates; saveTicketWalletMapCache(nextCache); } return coordinates; })().catch(() => null).finally(() => ticketWalletGeocodePromises.delete(key));
+  ticketWalletGeocodePromises.set(key, promise); return promise;
+}
+function ticketWalletLoadLeaflet() {
+  if (window.L) return Promise.resolve(window.L); if (ticketWalletLeafletPromise) return ticketWalletLeafletPromise;
+  ticketWalletLeafletPromise = new Promise((resolve, reject) => {
+    if (!document.getElementById('ticketWalletLeafletCss')) { const link = document.createElement('link'); link.id = 'ticketWalletLeafletCss'; link.rel = 'stylesheet'; link.href = TICKET_WALLET_LEAFLET_CSS_URL; document.head.appendChild(link); }
+    const script = document.createElement('script'); script.async = true; script.dataset.ticketWalletLeaflet = 'true'; script.src = TICKET_WALLET_LEAFLET_JS_URL; script.onload = () => window.L ? resolve(window.L) : reject(Error('Leaflet unavailable')); script.onerror = () => reject(Error('Leaflet unavailable')); document.head.appendChild(script);
+  });
+  return ticketWalletLeafletPromise;
+}
+function ticketWalletMapError(element) { element.innerHTML = '<div class="ticket-wallet-map-error"><strong>' + escapeHtml(state.language === 'en' ? 'The map could not be loaded' : '地图加载失败') + '</strong><small>' + escapeHtml(state.language === 'en' ? 'Check your network connection and try again.' : '请检查网络连接后重试。') + '</small></div>'; }
+async function hydrateTicketWalletMap() {
+  const element = $('[data-ticket-wallet-real-map]');
+  if (!element) { ticketWalletLeafletRenderToken += 1; if (ticketWalletLeafletMap) { try { ticketWalletLeafletMap.remove(); } catch {} } ticketWalletLeafletMap = null; ticketWalletLeafletMapElement = null; return; }
+  if (ticketWalletLeafletPendingElement === element) return;
+  if (ticketWalletLeafletMap && ticketWalletLeafletMapElement !== element) { try { ticketWalletLeafletMap.remove(); } catch {} ticketWalletLeafletMap = null; ticketWalletLeafletMapElement = null; }
+  if (ticketWalletLeafletMap && ticketWalletLeafletMapElement === element) { ticketWalletLeafletMap.invalidateSize(); return; }
+  const token = ++ticketWalletLeafletRenderToken; ticketWalletLeafletPendingElement = element;
+  try {
+    const L = await ticketWalletLoadLeaflet(); const journeys = ticketWalletJourneys(); const geocoded = [];
+    for (const group of journeys) geocoded.push({ group, from: await ticketWalletGeocodePlace(group.from), to: await ticketWalletGeocodePlace(group.to) });
+    if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
+    element.innerHTML = ''; const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, attributionControl: true }); L.control.zoom({ position: 'bottomright' }).addTo(map); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' }).addTo(map);
+    const bounds = []; const colors = ['#4863ee', '#0a9c91', '#d38333', '#8b6adf', '#d35f8a', '#4c8fbe']; const duplicateRoutes = new Map();
+    geocoded.forEach(({ group, from, to }, index) => { if (!from && !to) return; const color = colors[index % colors.length]; const addPoint = (coordinates, label) => { if (!coordinates) return; bounds.push(coordinates); L.circleMarker(coordinates, { radius: 7, color, weight: 3, fillColor: '#fff', fillOpacity: 1 }).addTo(map).bindTooltip(label, { direction: 'top', offset: [0, -6] }).bindPopup(ticketWalletMapPopupElement(group, label)); }; addPoint(from, group.from || '起点'); addPoint(to, group.to || '终点'); if (from && to) { const routeKey = from.join(',') + '|' + to.join(','); const duplicateIndex = duplicateRoutes.get(routeKey) || 0; duplicateRoutes.set(routeKey, duplicateIndex + 1); const routePoints = duplicateIndex ? [from, [(from[0] + to[0]) / 2 + duplicateIndex * .12, (from[1] + to[1]) / 2 - duplicateIndex * .12], to] : [from, to]; L.polyline(routePoints, { color, weight: 3, opacity: .88, dashArray: '8 8' }).addTo(map).bindPopup(ticketWalletMapPopupElement(group, (group.from || '起点') + ' → ' + (group.to || '终点'))); } });
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 8 }); else if (bounds.length === 1) map.setView(bounds[0], 9); else map.setView([35.8617, 104.1954], 4); ticketWalletLeafletMap = map; ticketWalletLeafletMapElement = element;
+  } catch { if (token === ticketWalletLeafletRenderToken && element.isConnected) ticketWalletMapError(element); } finally { if (ticketWalletLeafletPendingElement === element) ticketWalletLeafletPendingElement = null; }
+}
+function ticketWalletJourneyMapMarkup(journeys) {
+  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div><h2>' + escapeHtml(state.language === 'en' ? 'Travel routes' : '旅迹地图') + '</h2></div><span>' + journeys.length + (state.language === 'en' ? ' routes' : ' 条路线') + '</span></div><div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map" data-ticket-wallet-real-map role="img" aria-label="' + escapeHtml(state.language === 'en' ? 'Journey routes on a real map' : '真实地图上的旅迹路线') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载真实地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(state.language === 'en' ? 'Locations are geocoded from the ticket cities. Use the controls at bottom right to zoom.' : '根据票据中的城市定位，路线会显示在真实地图上；可使用右下角控件缩放地图。') + '</div></section>';
+}
+function renderTicketWalletJourneysLegacy() {
   const journeys = ticketWalletJourneys();
   if (!journeys.length) return '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletNoJourney')) + '</h2><p>' + escapeHtml(t('ticketWalletEmpty')) + '</p></div>';
   return ticketWalletJourneyMapMarkup(journeys) + '<div class="ticket-wallet-journey-list">' + journeys.map((group) => '<article class="ticket-wallet-journey-card"><div class="ticket-wallet-journey-head"><div><span class="ticket-wallet-eyebrow">' + escapeHtml(ticketWalletDateLabel(group.start, false)) + '</span><h2>' + escapeHtml(group.from || '—') + ' <span>→</span> ' + escapeHtml(group.to || '—') + '</h2></div><span class="ticket-wallet-count">' + group.records.length + ' ' + escapeHtml(t('ticketWalletCount')) + '</span></div><div class="ticket-wallet-timeline">' + group.records.map((record) => '<div class="ticket-wallet-timeline-item"><span class="ticket-wallet-timeline-dot ' + record.type + '">' + (TICKET_TYPES[record.type] || TICKET_TYPES.other).icon + '</span><div><strong>' + escapeHtml(record.title || ticketTypeLabel(record.type)) + '</strong><small>' + escapeHtml(ticketWalletDateLabel(record.departAt)) + (record.carrier ? ' · ' + escapeHtml(record.carrier) : '') + '</small></div></div>').join('') + '</div>' + (group.memory ? '<div class="ticket-wallet-memory-preview"><strong>' + escapeHtml(group.memory.title || t('ticketWalletMemory')) + '</strong><p>' + escapeHtml(group.memory.description || '') + '</p></div>' : '') + '<div class="ticket-wallet-journey-actions"><button class="secondary" data-ticket-wallet-memory="' + escapeHtml(group.key) + '">' + escapeHtml(group.memory ? t('ticketWalletEditMemory') : t('ticketWalletAddMemory')) + '</button><button class="ghost" data-ticket-wallet-share="' + escapeHtml(group.key) + '">' + escapeHtml(t('ticketWalletShare')) + '</button></div></article>').join('') + '</div>';
+}
+function renderTicketWalletJourneys() {
+  const journeys = ticketWalletJourneys();
+  if (!journeys.length) return '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletNoJourney')) + '</h2><p>' + escapeHtml(t('ticketWalletEmpty')) + '</p></div>';
+  return ticketWalletJourneyMapMarkup(journeys) + '<div class="ticket-wallet-journey-list">' + journeys.map((group) => '<article class="ticket-wallet-journey-card"><div class="ticket-wallet-journey-head"><div><span class="ticket-wallet-eyebrow">' + escapeHtml(ticketWalletDateLabel(group.start, false)) + '</span><h2>' + escapeHtml(group.from || '—') + ' <span>→</span> ' + escapeHtml(group.to || '—') + '</h2></div></div>' + (group.memory ? '<div class="ticket-wallet-memory-preview"><strong>' + escapeHtml(group.memory.title || t('ticketWalletMemory')) + '</strong><p>' + escapeHtml(group.memory.description || '') + '</p></div>' : '') + '<div class="ticket-wallet-journey-actions"><button class="secondary" data-ticket-wallet-memory="' + escapeHtml(group.key) + '">' + escapeHtml(group.memory ? t('ticketWalletEditMemory') : t('ticketWalletAddMemory')) + '</button><button class="ghost" data-ticket-wallet-share="' + escapeHtml(group.key) + '">' + escapeHtml(t('ticketWalletShare')) + '</button></div></article>').join('') + '</div>';
 }
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = [...state.ticketWallet].sort(ticketWalletDepartureAsc); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
@@ -7581,6 +7642,7 @@ function render() {
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
   workspace.innerHTML = state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
+  if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'journeys') requestAnimationFrame(() => { void hydrateTicketWalletMap(); });
   document.body.classList.toggle('dev-tools-fullscreen', developerFullscreen);
   document.body.classList.toggle('dev-history-open', developerFullscreen && state.devTools.historyOpen === true);
   renderHomeSourceNav();
