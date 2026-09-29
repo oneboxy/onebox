@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.397';
+const APP_VERSION = '2.18.399';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -905,7 +905,11 @@ function ticketWalletDepartureAsc(first, second) {
   const firstTime = ticketWalletDepartureTimestamp(first); const secondTime = ticketWalletDepartureTimestamp(second);
   if (firstTime === Number.NEGATIVE_INFINITY) return secondTime === Number.NEGATIVE_INFINITY ? Number(first?.createdAt || 0) - Number(second?.createdAt || 0) : 1;
   if (secondTime === Number.NEGATIVE_INFINITY) return -1;
-  return firstTime - secondTime || Number(first?.createdAt || 0) - Number(second?.createdAt || 0);
+  const now = Date.now();
+  const firstPast = firstTime < now; const secondPast = secondTime < now;
+  if (firstPast !== secondPast) return firstPast ? 1 : -1;
+  const timeOrder = firstPast ? secondTime - firstTime : firstTime - secondTime;
+  return timeOrder || Number(first?.createdAt || 0) - Number(second?.createdAt || 0);
 }
 function ticketWalletJourneys(records = state.ticketWallet) {
   const groups = new Map();

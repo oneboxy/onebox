@@ -11227,11 +11227,15 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   overflow: visible;
 }
 .ticket-wallet-stack {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 0;
   padding: 22px 0 42px;
 }
+.ticket-wallet-stack .ticket-wallet-swipe-row { z-index: calc(100 - var(--ticket-stack-index)); }
+.ticket-wallet-stack .ticket-wallet-swipe-row:first-child { margin-top: 0; }
 .ticket-wallet-focus { margin: 8px 0 26px; }
 .ticket-wallet-focus-head,
 .ticket-wallet-other-head {
