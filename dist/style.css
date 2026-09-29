@@ -11168,11 +11168,20 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   position: relative;
   z-index: calc(40 - var(--ticket-stack-index));
   min-width: 0;
-  margin-top: calc(var(--ticket-stack-index) * -52px);
+  margin-top: calc(var(--ticket-stack-index) * -86px);
   border: 0;
   border-radius: 22px;
   background: transparent;
   overflow: visible;
+}
+.ticket-wallet-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 22px 0 42px;
+}
+.ticket-wallet-swipe-row-train {
+  margin-top: calc(var(--ticket-stack-index) * -320px);
 }
 .ticket-wallet-swipe-row:first-child { margin-top: 0; }
 .ticket-wallet-swipe-row .ticket-wallet-card {
@@ -11228,8 +11237,11 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   .ticket-wallet-swipe-row {
     overflow: hidden;
     border-radius: 19px;
-    margin-top: calc(var(--ticket-stack-index) * -42px);
+    margin-top: calc(var(--ticket-stack-index) * -72px);
     touch-action: pan-y;
+  }
+  .ticket-wallet-swipe-row-train {
+    margin-top: calc(var(--ticket-stack-index) * -128px);
   }
   .ticket-wallet-swipe-row .ticket-wallet-card-actions { display: none; }
   .ticket-wallet-swipe-actions { width: 168px; border-radius: 16px; }
