@@ -11019,7 +11019,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-route-map-head h2 { margin: 4px 0 0; font-size: 19px; letter-spacing: -.03em; }
 .ticket-wallet-route-map-head > span { color: var(--muted); font-size: 11px; font-weight: 800; }
 .ticket-wallet-route-map-canvas { overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--line)); border-radius: 16px; background: color-mix(in srgb, var(--primary) 5%, var(--panel-2)); }
-.ticket-wallet-real-map { position: relative; z-index: 0; min-height: 340px; height: min(52vh, 480px); background: #e8eef5; }
+.ticket-wallet-real-map { position: relative; z-index: 0; min-height: 300px; height: min(48vh, 440px); background: #e8eef5; }
 .ticket-wallet-real-map .leaflet-container { width: 100%; height: 100%; color: var(--ink); font: inherit; }
 .ticket-wallet-real-map .leaflet-control-zoom { margin: 0 12px 12px 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line)); border-radius: 12px; box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 15%, transparent); }
 .ticket-wallet-real-map .leaflet-control-zoom a { width: 32px; height: 32px; line-height: 30px; border: 0; background: color-mix(in srgb, var(--panel) 92%, transparent); color: var(--ink); }
@@ -11031,7 +11031,8 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-real-map .leaflet-popup-content strong, .ticket-wallet-real-map .leaflet-popup-content small { display: inline-block; }
 .ticket-wallet-real-map .leaflet-popup-content strong { margin-bottom: 3px; font-size: 12px; }
 .ticket-wallet-real-map .leaflet-popup-content small { color: var(--muted); font-size: 10px; }
-.ticket-wallet-fallback-map { position: relative; width: 100%; height: 100%; overflow: hidden; background: #e8eef5; }
+.ticket-wallet-fallback-map { position: relative; width: 100%; height: 100%; overflow: hidden; cursor: grab; user-select: none; touch-action: none; background: #e8eef5; }
+.ticket-wallet-fallback-map:active { cursor: grabbing; }
 .ticket-wallet-fallback-tiles, .ticket-wallet-fallback-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ticket-wallet-fallback-tile { position: absolute; display: block; width: 256px !important; height: 256px !important; max-width: none !important; pointer-events: none; }
 .ticket-wallet-fallback-overlay { pointer-events: none; }
@@ -11042,7 +11043,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-fallback-attribution a { color: var(--primary); }
 .ticket-wallet-map-pin-wrap { width: 20px !important; height: 20px !important; margin: 0 !important; border: 0 !important; background: transparent !important; }
 .ticket-wallet-map-pin { display: block; width: 13px; height: 13px; margin: 3px; border: 3px solid #fff; border-radius: 50%; background: var(--ticket-wallet-route-color, var(--primary)); box-shadow: 0 2px 7px rgb(15 23 42 / 28%); }
-.ticket-wallet-map-loading, .ticket-wallet-map-error { display: grid; min-height: 340px; place-content: center; gap: 6px; padding: 24px; color: var(--muted); text-align: center; }
+.ticket-wallet-map-loading, .ticket-wallet-map-error { display: grid; min-height: 300px; place-content: center; gap: 6px; padding: 24px; color: var(--muted); text-align: center; }
 .ticket-wallet-map-loading::before { width: 20px; height: 20px; margin: 0 auto 4px; border: 2px solid color-mix(in srgb, var(--primary) 18%, transparent); border-top-color: var(--primary); border-radius: 50%; animation: ticket-wallet-map-spin .8s linear infinite; content: ''; }
 .ticket-wallet-map-error strong { color: var(--ink); font-size: 14px; }
 .ticket-wallet-map-error small { font-size: 11px; }
