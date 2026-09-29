@@ -10793,6 +10793,24 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
 .ticket-wallet-section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 2px 12px; }
 .ticket-wallet-section-head h2 { margin: 4px 0 0; font-size: 18px; }
 .ticket-wallet-section-head > span { color: var(--muted); font-size: 12px; font-weight: 800; }
+.ticket-wallet-section-tools { display: flex; align-items: center; gap: 12px; }
+.ticket-wallet-section-tools > span { color: var(--muted); font-size: 12px; font-weight: 800; }
+.ticket-wallet-add-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 28px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.ticket-wallet-add-trigger > span { font-size: 16px; font-weight: 500; line-height: 1; }
+.ticket-wallet-add-trigger:hover { color: color-mix(in srgb, var(--primary) 76%, var(--ink)); }
 .ticket-wallet-stack { display: grid; gap: 0; padding: 10px 0 20px; }
 .ticket-wallet-card {
   position: relative;
