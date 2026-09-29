@@ -11705,11 +11705,30 @@ body:has(.ticket-wallet-page) .ticket-wallet-train-card .ticket-wallet-card-acti
 
 @media (max-width: 760px) {
   body:has(.ticket-wallet-page) .ticket-wallet-page {
-    padding-top: 10px;
+    padding-top: 2px;
+    padding-bottom: 18px;
+  }
+  body:has(.ticket-wallet-page) main {
+    padding-top: calc(var(--app-header-height) + 2px) !important;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb {
+    font-size: 11px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-tabs {
+    gap: 12px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-tabs button {
+    padding-top: 5px;
+    padding-bottom: 6px;
+    font-size: 12px;
   }
   body:has(.ticket-wallet-page) .ticket-wallet-category-bar {
-    margin: 0 -14px 18px;
-    padding: 5px 14px 7px;
+    margin: 0 -14px 9px;
+    padding: 3px 14px 4px;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -11718,11 +11737,32 @@ body:has(.ticket-wallet-page) .ticket-wallet-train-card .ticket-wallet-card-acti
   body:has(.ticket-wallet-page) .ticket-wallet-category {
     flex: 0 0 auto;
     min-width: 88px;
+    min-height: 35px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-section-head {
+    gap: 8px;
+    margin: 0 2px 5px;
   }
   body:has(.ticket-wallet-page) .ticket-wallet-section-head h2 {
-    font-size: 18px;
+    font-size: 17px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-section-tools {
+    gap: 7px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-section-tools > span {
+    min-width: 22px;
+    height: 22px;
   }
   body:has(.ticket-wallet-page) .ticket-wallet-add-trigger {
-    padding-inline: 10px;
+    min-height: 28px;
+    padding: 4px 9px;
+    font-size: 11px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-stack {
+    --ticket-stack-peek: 72px;
+    padding-top: 0;
+    padding-bottom: calc(30px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
   }
 }
