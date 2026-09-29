@@ -2090,6 +2090,16 @@ html.layout-simple #languageControl { display: none !important; }
   }
 }
 
+/* Keep breadcrumb and wallet tabs on one horizontal line ---------------- */
+body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+  align-items: center;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb,
+body:has(.ticket-wallet-page) .ticket-wallet-tabs {
+  align-self: center;
+}
+
 /* Ticket wallet breadcrumb back affordance ------------------------------ */
 .ticket-wallet-breadcrumb .ticket-wallet-back {
   display: inline-flex;
