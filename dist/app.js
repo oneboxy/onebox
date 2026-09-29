@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.382';
+const APP_VERSION = '2.18.383';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3409,8 +3409,11 @@ function ticketWalletLegacyMapMarkup(journeys) {
   return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div><span class="ticket-wallet-eyebrow">ONEBOX JOURNEY</span><h2>' + escapeHtml(state.language === 'en' ? 'Travel routes' : '旅迹地图') + '</h2></div><span>' + journeys.length + (state.language === 'en' ? ' routes' : ' 条路线') + '</span></div><div class="ticket-wallet-route-map-canvas"><svg viewBox="0 0 680 280" role="img" aria-label="' + escapeHtml(state.language === 'en' ? 'Journey routes' : '旅迹路线') + '"><path class="ticket-wallet-map-coast" d="M48 36c90-20 156 9 217-7s105 17 167 7 122 16 196 1M42 241c81 13 152-9 215 3s132-9 194 1 119-11 188 1M78 80c86 22 140 6 221 18s131-17 218 1 91 9 122 3M72 184c75-18 132 14 213 0s137-9 221 2 91-1 128-13"/><g class="ticket-wallet-map-grid"><path d="M80 25v230M180 25v230M280 25v230M380 25v230M480 25v230M580 25v230M30 75h620M30 135h620M30 195h620M30 255h620"/></g>' + routes + '</svg></div><div class="ticket-wallet-route-map-note">' + escapeHtml(state.language === 'en' ? 'Routes are grouped by trip and offset automatically when multiple lines overlap.' : '按旅程分组，多条路线重合时会自动错开显示。') + '</div></section>';
 }
 const TICKET_WALLET_LEAFLET_VERSION = '1.9.4';
-const TICKET_WALLET_LEAFLET_CSS_URL = 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.css';
-const TICKET_WALLET_LEAFLET_JS_URL = 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.js';
+const TICKET_WALLET_LEAFLET_ASSETS = Object.freeze([
+  { css: 'https://cdn.jsdelivr.net/npm/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.css', js: 'https://cdn.jsdelivr.net/npm/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.js' },
+  { css: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/' + TICKET_WALLET_LEAFLET_VERSION + '/leaflet.css', js: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/' + TICKET_WALLET_LEAFLET_VERSION + '/leaflet.js' },
+  { css: 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.css', js: 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.js' }
+]);
 const TICKET_WALLET_CITY_COORDINATES = Object.freeze({ 北京: [39.9042, 116.4074], 上海: [31.2304, 121.4737], 苏州: [31.2989, 120.5853], 南京: [32.0603, 118.7969], 杭州: [30.2741, 120.1551], 广州: [23.1291, 113.2644], 深圳: [22.5431, 114.0579], 西安: [34.3416, 108.9398], 成都: [30.5728, 104.0668], 武汉: [30.5928, 114.3055], 青岛: [36.0671, 120.3826], 厦门: [24.4798, 118.0894], 天津: [39.3434, 117.3616], 重庆: [29.5630, 106.5516], 郑州: [34.7466, 113.6254], 济南: [36.6512, 117.1201], 合肥: [31.8206, 117.2272], 福州: [26.0745, 119.2965], 昆明: [25.0389, 102.7183], 长沙: [28.2282, 112.9388], 南昌: [28.6820, 115.8579], 沈阳: [41.8057, 123.4315], 大连: [38.9140, 121.6147], 哈尔滨: [45.8038, 126.5349], 石家庄: [38.0428, 114.5149], 太原: [37.8706, 112.5489], 兰州: [36.0611, 103.8343], 乌鲁木齐: [43.8256, 87.6168], 贵阳: [26.6470, 106.6302], 桂林: [25.2742, 110.2900], 宁波: [29.8683, 121.5440], 无锡: [31.4912, 120.3119], 常州: [31.8107, 119.9737], 嘉兴: [30.7461, 120.7555], 温州: [27.9949, 120.6994], 金华: [29.0895, 119.6495], 徐州: [34.2044, 117.2858], 洛阳: [34.6197, 112.4540], 珠海: [22.2710, 113.5767], 惠州: [23.1115, 114.4152], 海口: [20.0442, 110.1999], 三亚: [18.2528, 109.5119], 拉萨: [29.6500, 91.1000], 呼和浩特: [40.8426, 111.7492], 银川: [38.4872, 106.2309], 西宁: [36.6171, 101.7782] });
 let ticketWalletLeafletPromise = null; let ticketWalletLeafletMap = null; let ticketWalletLeafletMapElement = null; let ticketWalletLeafletPendingElement = null; let ticketWalletLeafletRenderToken = 0; let ticketWalletGeocodeNextAt = 0;
 const ticketWalletGeocodePromises = new Map();
@@ -3436,10 +3439,18 @@ async function ticketWalletGeocodePlace(value) {
 }
 function ticketWalletLoadLeaflet() {
   if (window.L) return Promise.resolve(window.L); if (ticketWalletLeafletPromise) return ticketWalletLeafletPromise;
-  ticketWalletLeafletPromise = new Promise((resolve, reject) => {
-    if (!document.getElementById('ticketWalletLeafletCss')) { const link = document.createElement('link'); link.id = 'ticketWalletLeafletCss'; link.rel = 'stylesheet'; link.href = TICKET_WALLET_LEAFLET_CSS_URL; document.head.appendChild(link); }
-    const script = document.createElement('script'); script.async = true; script.dataset.ticketWalletLeaflet = 'true'; script.src = TICKET_WALLET_LEAFLET_JS_URL; script.onload = () => window.L ? resolve(window.L) : reject(Error('Leaflet unavailable')); script.onerror = () => reject(Error('Leaflet unavailable')); document.head.appendChild(script);
-  });
+  ticketWalletLeafletPromise = (async () => {
+    let lastError = null;
+    for (const [index, asset] of TICKET_WALLET_LEAFLET_ASSETS.entries()) {
+      try {
+        const cssId = 'ticketWalletLeafletCss' + index;
+        if (!document.getElementById(cssId)) { const link = document.createElement('link'); link.id = cssId; link.rel = 'stylesheet'; link.href = asset.css; link.dataset.ticketWalletLeaflet = 'true'; document.head.appendChild(link); }
+        await new Promise((resolve, reject) => { const script = document.createElement('script'); script.async = true; script.dataset.ticketWalletLeaflet = String(index); script.src = asset.js; script.onload = () => window.L ? resolve() : reject(Error('Leaflet unavailable')); script.onerror = () => reject(Error('Leaflet CDN unavailable')); document.head.appendChild(script); });
+        if (window.L) return window.L;
+      } catch (error) { lastError = error; document.querySelector('script[data-ticket-wallet-leaflet="' + index + '"]')?.remove(); }
+    }
+    throw lastError || Error('Leaflet unavailable');
+  })();
   return ticketWalletLeafletPromise;
 }
 function ticketWalletMapError(element) { element.innerHTML = '<div class="ticket-wallet-map-error"><strong>' + escapeHtml(state.language === 'en' ? 'The map could not be loaded' : '地图加载失败') + '</strong><small>' + escapeHtml(state.language === 'en' ? 'Check your network connection and try again.' : '请检查网络连接后重试。') + '</small></div>'; }
