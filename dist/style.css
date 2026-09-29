@@ -11092,7 +11092,13 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   font-weight: 400;
   letter-spacing: 2px;
 }
-.ticket-wallet-train-template .train-number-arrow { fill: #050505; stroke: none; }
+.ticket-wallet-train-template .train-number-arrow {
+  fill: none;
+  stroke: #050505;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .ticket-wallet-train-template .ticket-date,
 .ticket-wallet-train-template .ticket-seat,
 .ticket-wallet-train-template .ticket-price,
@@ -11137,3 +11143,26 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   background: transparent;
 }
 .ticket-wallet-train-card .ticket-wallet-card-actions .ghost { color: var(--muted); }
+
+/* Ticket wallet desktop surface ------------------------------------------
+   The wallet is a full page on desktop, so it should use the available
+   canvas and keep the mobile floating navigation from covering the ticket. */
+@media (min-width: 761px) {
+  body:has(.ticket-wallet-page) .shell { width: min(1440px, 100%); }
+  body:has(.ticket-wallet-page) .app-header {
+    padding-left: max(12px, calc((100% - 1440px) / 2 + 28px));
+    padding-right: max(12px, calc((100% - 1440px) / 2 + 28px));
+  }
+  body:has(.ticket-wallet-page) main {
+    height: calc(100dvh - var(--app-header-height));
+    max-height: none;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 24px;
+  }
+  body:has(.ticket-wallet-page) #bottomNav { display: none; }
+  body:has(.ticket-wallet-page) .ticket-wallet-page {
+    width: min(1360px, 100%);
+    padding-inline: 24px;
+  }
+}

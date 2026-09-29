@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.367';
+const APP_VERSION = '2.18.368';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3236,7 +3236,7 @@ function ticketWalletTrainTemplateMarkup(data, sourceHint = '') {
   const editGroup = (field, label, content) => '<g ' + ticketWalletTrainEditAttrs(data, field, label) + '><title>' + escapeHtml((state.language === 'en' ? 'Edit ' : '点击编辑') + label) + '</title>' + content + '</g>';
   const serial = editGroup('ticketSerial', t('ticketWalletSerial'), '<text class="ticket-serial" x="18" y="58">' + escapeHtml(data.serial) + '</text>');
   const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle">' + escapeHtml(data.from) + '<tspan class="station-suffix">站</tspan></text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
-  const trainNo = editGroup('ticketNo', t('ticketWalletTrainNo'), '<text class="train-number" x="548" y="137" text-anchor="middle">' + escapeHtml(data.trainNo) + '</text><path class="train-number-arrow" d="M432 150H661L693 162L665 154H432Z"/>');
+  const trainNo = editGroup('ticketNo', t('ticketWalletTrainNo'), '<text class="train-number" x="548" y="137" text-anchor="middle">' + escapeHtml(data.trainNo) + '</text><path class="train-number-arrow" d="M432 151H661M648 143L667 151L648 159"/>');
   const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle">' + escapeHtml(data.to) + '<tspan class="station-suffix">站</tspan></text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
   const depart = editGroup('departAt', t('ticketWalletDepart'), '<text class="ticket-date" x="20" y="256">' + escapeHtml(data.depart) + '</text>');
   const price = editGroup('price', t('ticketWalletPrice'), '<text class="ticket-price" x="20" y="324">' + escapeHtml(data.price) + '</text>');
