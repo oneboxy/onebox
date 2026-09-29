@@ -12138,3 +12138,38 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
     box-shadow: none;
   }
 }
+
+/* Compact ticket wallet add action ------------------------------------ */
+body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 72px;
+  min-width: 72px;
+  min-height: 34px;
+  padding: 5px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-add > span {
+  font-size: 15px;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
+    width: 72px;
+    min-width: 72px;
+    min-height: 31px;
+    margin: 3px;
+    padding: 4px 7px;
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-add > span {
+    font-size: 14px;
+  }
+}
