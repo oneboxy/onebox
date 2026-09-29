@@ -12104,3 +12104,37 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
   background: var(--panel);
   box-shadow: -14px 0 18px var(--panel), 0 0 0 1px color-mix(in srgb, var(--primary) 10%, transparent);
 }
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+    gap: 0;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--ink) 7%, transparent);
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll {
+    align-self: stretch;
+    padding: 3px 8px 4px;
+    border-right: 1px solid var(--line);
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 18px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 18px), transparent 100%);
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+    gap: 5px;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-add {
+    width: 94px;
+    min-width: 94px;
+    min-height: 35px;
+    margin: 3px;
+    padding: 5px 7px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--primary) 9%, var(--panel));
+    box-shadow: none;
+  }
+}
