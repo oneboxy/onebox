@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.391';
+const APP_VERSION = '2.18.392';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3470,7 +3470,7 @@ function ticketWalletMapUnproject(point, zoom) {
   const scale = TICKET_WALLET_MAP_TILE_SIZE * (2 ** zoom); const longitude = point.x / scale * 360 - 180; const mercator = Math.PI * (1 - 2 * point.y / scale); const latitude = 180 / Math.PI * Math.atan(Math.sinh(mercator)); return [latitude, longitude];
 }
 function ticketWalletMapFitZoom(points, width, height) {
-  if (points.length < 2) return 9; for (let zoom = 12; zoom >= 4; zoom -= 1) { const projected = points.map((point) => ticketWalletMapProject(point, zoom)); const spanX = Math.max(...projected.map((point) => point.x)) - Math.min(...projected.map((point) => point.x)); const spanY = Math.max(...projected.map((point) => point.y)) - Math.min(...projected.map((point) => point.y)); if (spanX <= Math.max(180, width - 96) && spanY <= Math.max(120, height - 96)) return zoom; } return 4;
+  if (points.length < 2) return 9; for (let zoom = 8; zoom >= 4; zoom -= 1) { const projected = points.map((point) => ticketWalletMapProject(point, zoom)); const spanX = Math.max(...projected.map((point) => point.x)) - Math.min(...projected.map((point) => point.x)); const spanY = Math.max(...projected.map((point) => point.y)) - Math.min(...projected.map((point) => point.y)); if (spanX <= Math.max(180, width - 96) && spanY <= Math.max(120, height - 96)) return zoom; } return 4;
 }
 function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded) {
   const models = []; const duplicateRoutes = new Map(); const colors = ['#4863ee', '#0a9c91', '#d38333', '#8b6adf', '#d35f8a', '#4c8fbe'];
