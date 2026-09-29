@@ -10874,9 +10874,10 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
 .ticket-wallet-original > img { width: 52px; height: 52px; flex: 0 0 auto; border-radius: 9px; object-fit: cover; }
 .ticket-wallet-original-icon { display: grid; width: 52px; height: 52px; flex: 0 0 auto; place-items: center; border-radius: 9px; background: color-mix(in srgb, var(--primary) 12%, var(--panel)); color: var(--primary); }
 .ticket-wallet-original > div { display: grid; min-width: 0; gap: 3px; }
+.ticket-wallet-original-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .ticket-wallet-original strong { font-size: 12px; }
 .ticket-wallet-original small { overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.ticket-wallet-original button { margin-left: auto; flex: 0 0 auto; font-size: 11px; }
+.ticket-wallet-original button { flex: 0 0 auto; font-size: 11px; }
 .ticket-wallet-editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
 .ticket-wallet-journey-list { display: grid; gap: 14px; }
 .ticket-wallet-journey-card { padding: 20px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); }
@@ -10925,7 +10926,8 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   .ticket-wallet-empty-actions { width: 100%; flex-direction: column; }
   .ticket-wallet-empty-actions button { width: 100%; }
   .ticket-wallet-original { align-items: flex-start; flex-wrap: wrap; }
-  .ticket-wallet-original button { width: 100%; margin: 0; }
+  .ticket-wallet-original-actions { width: 100%; margin-left: 0; }
+  .ticket-wallet-original-actions button { flex: 1 1 0; }
   .ticket-wallet-journey-head h2 { font-size: 18px; }
 }
 
@@ -11035,7 +11037,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   min-height: 0;
   padding: 4.4% 4.35%;
   border: 1px solid #e5e6ea;
-  border-radius: 2px;
+  border-radius: 10px;
   background: #fff;
   box-shadow: 0 12px 25px rgba(25, 22, 31, .08);
 }
@@ -11050,6 +11052,13 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-train-template .ticket-paper-pattern { opacity: .19; }
 .ticket-wallet-train-template pattern path { fill: none; stroke: #bd7075; stroke-width: 2; }
 .ticket-wallet-train-template text { fill: #050505; text-rendering: geometricPrecision; }
+.ticket-wallet-train-template .ticket-edit-target { cursor: pointer; outline: none; }
+.ticket-wallet-train-template .ticket-edit-target text,
+.ticket-wallet-train-template .ticket-edit-target path { transition: fill .15s ease, stroke .15s ease, opacity .15s ease; }
+.ticket-wallet-train-template .ticket-edit-target:hover text,
+.ticket-wallet-train-template .ticket-edit-target:focus-visible text { fill: var(--primary); }
+.ticket-wallet-train-template .ticket-edit-target:hover path,
+.ticket-wallet-train-template .ticket-edit-target:focus-visible path { stroke: var(--primary); }
 .ticket-wallet-train-template .ticket-serial {
   fill: #bd5865;
   font-family: Georgia, 'Times New Roman', serif;
