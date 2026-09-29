@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.363';
+const APP_VERSION = '2.18.364';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -656,7 +656,8 @@ function normalizeTicketRecord(value) {
     departAt: String(source.departAt || ''), arriveAt: String(source.arriveAt || ''),
     ticketNo: String(source.ticketNo || '').trim(), ticketSerial: String(source.ticketSerial || '').trim(),
     ticketCode: String(source.ticketCode || '').trim(), price: String(source.price || '').trim(),
-    seat: String(source.seat || '').trim(), passenger: String(source.passenger || '').trim(), journey: String(source.journey || '').trim(),
+    seat: String(source.seat || '').trim(), seatClass: String(source.seatClass || '').trim(),
+    passenger: String(source.passenger || '').trim(), journey: String(source.journey || '').trim(),
     notes: String(source.notes || '').trim(), sourceImageId: String(source.sourceImageId || ''),
     sourceImageName: String(source.sourceImageName || '').trim(), sourceMime: String(source.sourceMime || '').trim(),
     createdAt: Number(source.createdAt) || now, updatedAt: Number(source.updatedAt) || now,
@@ -709,6 +710,8 @@ function ticketWalletRecognitionFromText(text, fileName = '') {
   const ticketCode = source.match(/\b(CRGT[A-Z0-9]+)\b/i)?.[1]?.toUpperCase() || '';
   const price = source.match(/[￥¥]\s*\d+(?:\.\d{1,2})?\s*元?/i)?.[0]?.replace(/\s+/g, '') || '';
   const seat = source.match(/(\d{1,3})\s*车\s*(\d{1,3}\s*[A-Z])\s*(?:号)?/i)?.[0]?.replace(/\s+/g, '') || source.match(/\b\d{1,3}\s*[A-Z]\d?\s*(?:号|座)?\b/i)?.[0]?.replace(/\s+/g, '') || '';
+  const seatClass = source.match(/商务座|特等座|一等座|二等座|软卧|硬卧|软座|硬座|无座/)?.[0] || '';
+  const passenger = source.match(/(?:\d{4}\*{4,}\d{3}[0-9X])\s*[\u4e00-\u9fa5]{2,4}/i)?.[0]?.replace(/\s+/g, ' ') || '';
   const dateText = source.match(/20\d{2}\s*[年\/-]\s*\d{1,2}\s*[月\/-]\s*\d{1,2}\s*(?:日)?/)?.[0] || '';
   const timeText = source.match(/\b\d{1,2}\s*[:：]\s*\d{2}\b/)?.[0] || '';
   const route = source.match(/([\u4e00-\u9fa5A-Za-z]{2,12}(?:站|机场|码头)?)\s*(?:到|至|→|->|—|-)\s*([\u4e00-\u9fa5A-Za-z]{2,12}(?:站|机场|码头)?)/);
@@ -717,7 +720,7 @@ function ticketWalletRecognitionFromText(text, fileName = '') {
   const to = (route || fileRoute)?.[2]?.trim() || '';
   const journey = from && to ? from + '至' + to : '';
   const title = journey || (ticketNo ? ticketNo : '');
-  return { type, title, carrier: type === 'train' ? '中国铁路' : '', from, to, departAt: ticketWalletDateFromText(dateText, timeText), ticketNo, ticketSerial, ticketCode, price, seat, journey };
+  return { type, title, carrier: type === 'train' ? '中国铁路' : '', from, to, departAt: ticketWalletDateFromText(dateText, timeText), ticketNo, ticketSerial, ticketCode, price, seat, seatClass, passenger, journey };
 }
 let ticketWalletOcrPromise = null;
 function loadTicketWalletOcr() {
@@ -3054,36 +3057,84 @@ function renderTicketWalletEditor() {
   return '<section class="ticket-wallet-editor" aria-label="' + escapeHtml(t('ticketWalletEditor')) + '"><div class="ticket-wallet-editor-head"><div><span class="ticket-wallet-eyebrow">' + escapeHtml(t('ticketWalletEditor')) + '</span><h2>' + escapeHtml(t('ticketWalletEditor')) + '</h2><p class="ticket-wallet-editor-note">' + escapeHtml(state.language === 'en' ? 'Recognition fills the essentials; you can correct them before saving.' : '导入后自动识别关键信息，确认无误即可保存。') + '</p></div><button class="icon-btn small" data-ticket-wallet-cancel aria-label="' + escapeHtml(t('ticketWalletCancel')) + '">×</button></div>' + recognitionMarkup + '<div class="ticket-wallet-field-grid">' + '<label class="ticket-wallet-field"><span>' + escapeHtml(t('ticketWalletType')) + '</span><select id="ticketWalletType">' + options + '</select></label>' + ticketWalletField(t('ticketWalletCarrier'), 'ticketWalletCarrier', draft.carrier) + ticketWalletField(t('ticketWalletFrom'), 'ticketWalletFrom', draft.from, 'text', 'required') + ticketWalletField(t('ticketWalletTo'), 'ticketWalletTo', draft.to, 'text', 'required') + ticketWalletField(t('ticketWalletDepart'), 'ticketWalletDepart', draft.departAt, 'datetime-local') + ticketWalletField(t('ticketWalletTicketNo'), 'ticketWalletTicketNo', draft.ticketNo) + ticketWalletField(t('ticketWalletSeat'), 'ticketWalletSeat', draft.seat) + '</div><div class="ticket-wallet-original">' + (image?.src ? '<img src="' + escapeHtml(image.src) + '" alt="">' : '<span class="ticket-wallet-original-icon">' + (TICKET_TYPES[draft.type]?.icon || TICKET_TYPES.other.icon) + '</span>') + '<div><strong>' + escapeHtml(t('ticketWalletOriginal')) + '</strong><small>' + escapeHtml(draft.sourceImageName || t('ticketWalletImportImage')) + '</small></div><button class="secondary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImportImage')) + '</button></div><div class="ticket-wallet-editor-actions"><button class="secondary" data-ticket-wallet-cancel>' + escapeHtml(t('ticketWalletCancel')) + '</button><button class="primary" data-ticket-wallet-save>' + escapeHtml(t('ticketWalletSave')) + '</button></div></section>';
 }
 function ticketWalletTrainDateParts(value) {
-  const date = new Date(value); if (Number.isNaN(date.getTime())) return { date: '—', time: '' };
+  const date = new Date(value); if (Number.isNaN(date.getTime())) return { date: '----年--月--日', time: '--:--' };
   return { date: date.getFullYear() + '年' + pad(date.getMonth() + 1) + '月' + pad(date.getDate()) + '日', time: pad(date.getHours()) + ':' + pad(date.getMinutes()) };
 }
 function ticketWalletTrainStationName(value) {
-  return String(value || '').replace(/\s*(?:站|车站)\s*$/, '').trim();
-}
-function ticketWalletTrainStationDisplay(value) {
-  const station = String(value || '').trim();
-  return station ? (/(?:站|车站)$/.test(station) ? station : station + '站') : '—';
+  return String(value || '').replace(/\s*(?:车站|站)\s*$/, '').trim();
 }
 function ticketWalletTrainStationLatin(value) {
   const station = ticketWalletTrainStationName(value);
   const known = { 苏州: 'Suzhou', 上海: 'Shanghai', 上海虹桥: 'Shanghaihongqiao', 杭州东: 'Hangzhoudong', 南京南: 'Nanjingnan', 北京南: 'Beijingnan', 广州南: 'Guangzhounan', 深圳北: 'Shenzhenbei' };
-  return known[station] || station || '—';
+  return known[station] || station || 'Station';
 }
 function ticketWalletTrainTicketSerial(record) {
-  return String(record.ticketSerial || '').trim() || String(record.sourceImageName || '').match(/\b[A-Z]\d{6}\b/i)?.[0]?.toUpperCase() || '票号待识别';
+  return String(record.ticketSerial || '').trim() || String(record.sourceImageName || '').match(/\b[A-Z]\d{6}\b/i)?.[0]?.toUpperCase() || 'A000000';
+}
+function ticketWalletTrainSeatDisplay(value) {
+  const seat = String(value || '').trim();
+  const match = seat.match(/(\d{1,3})\s*车\s*(\d{1,3}\s*[A-Z])\s*(?:号)?/i);
+  if (match) return match[1] + '车 ' + match[2].replace(/\s+/g, '').toUpperCase() + '号';
+  return seat || '--车 --号';
+}
+function ticketWalletTrainPriceDisplay(value) {
+  const price = String(value || '').trim().replace(/^¥/, '￥');
+  if (!price) return '￥ --.-元';
+  return price.startsWith('￥') ? (price.endsWith('元') ? price : price + '元') : '￥ ' + price.replace(/元$/, '') + '元';
+}
+function ticketWalletTrainTemplateData(record) {
+  const date = ticketWalletTrainDateParts(record.departAt);
+  const serial = ticketWalletTrainTicketSerial(record);
+  const ticketCode = record.ticketCode || 'CRGT' + date.date.replace(/\D/g, '') + serial + 'JN';
+  const from = ticketWalletTrainStationName(record.from) || '出发';
+  const to = ticketWalletTrainStationName(record.to) || '到达';
+  return {
+    id: record.id,
+    serial,
+    trainNo: record.ticketNo || 'G0000',
+    from,
+    fromLatin: ticketWalletTrainStationLatin(record.from),
+    to,
+    toLatin: ticketWalletTrainStationLatin(record.to),
+    depart: date.date + ' ' + date.time + ' 开',
+    price: ticketWalletTrainPriceDisplay(record.price),
+    seat: ticketWalletTrainSeatDisplay(record.seat),
+    seatClass: record.seatClass || '二等座',
+    passenger: record.passenger || '证件号待识别 旅客',
+    ticketCode,
+  };
+}
+function ticketWalletTrainQrMarkup(seed) {
+  const size = 25; const cells = new Set();
+  const add = (x, y) => cells.add(x + ',' + y);
+  const finder = (left, top) => {
+    for (let y = 0; y < 7; y += 1) for (let x = 0; x < 7; x += 1) {
+      if (x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4)) add(left + x, top + y);
+    }
+  };
+  finder(0, 0); finder(size - 7, 0); finder(0, size - 7);
+  let stateValue = 2166136261;
+  for (const char of String(seed || 'ONEBOX')) stateValue = Math.imul(stateValue ^ char.charCodeAt(0), 16777619) >>> 0;
+  const inFinderArea = (x, y) => (x < 8 && y < 8) || (x >= size - 8 && y < 8) || (x < 8 && y >= size - 8);
+  for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
+    if (inFinderArea(x, y)) continue;
+    if (x === 6 || y === 6) { if ((x + y) % 2 === 0) add(x, y); continue; }
+    stateValue = (Math.imul(stateValue, 1664525) + 1013904223) >>> 0;
+    if (((stateValue >>> 29) & 1) ^ ((x * 3 + y * 5) % 7 < 3)) add(x, y);
+  }
+  const path = Array.from(cells).map((cell) => { const [x, y] = cell.split(','); return 'M' + x + ' ' + y + 'h1v1h-1z'; }).join('');
+  return '<g class="ticket-wallet-train-template-qr" transform="translate(795 422) scale(8.4)" shape-rendering="crispEdges"><rect width="25" height="25"/><path d="' + path + '"/></g>';
+}
+function ticketWalletTrainTemplateMarkup(data, sourceHint = '') {
+  const patternId = 'train-ticket-paper-' + String(data.id || 'default').replace(/[^a-zA-Z0-9_-]/g, '').slice(-24);
+  const fromClass = data.from.length > 3 ? ' station-main is-long' : ' station-main';
+  const toClass = data.to.length > 3 ? ' station-main is-long' : ' station-main';
+  return '<div class="ticket-wallet-train-ticket" data-train-ticket-template="pink-physical-v1"' + (sourceHint ? ' aria-label="' + escapeHtml(sourceHint) + '"' : '') + '><svg class="ticket-wallet-train-template" viewBox="0 0 1096 695" role="img" aria-label="' + escapeHtml(data.from + '到' + data.to + '火车票') + '" preserveAspectRatio="xMidYMid meet"><title>' + escapeHtml(data.from + '到' + data.to + ' ' + data.trainNo) + '</title><defs><pattern id="' + patternId + '" width="210" height="154" patternUnits="userSpaceOnUse"><path d="M18 34h42v34H18zM31 42v18M80 25c18 7 29 22 25 42-5 21-26 31-45 22M145 23c24 6 41 27 36 50-4 18-20 31-38 34M130 91c24-17 51-12 66 11"/><path d="M22 119c29-20 56-16 77 7m18-2c22-19 50-15 72 5"/></pattern></defs><rect class="ticket-paper" width="1096" height="695"/><rect class="ticket-paper-pattern" width="1096" height="695" fill="url(#' + patternId + ')"/><text class="ticket-serial" x="18" y="51">' + escapeHtml(data.serial) + '</text><g class="ticket-route"><text class="' + fromClass + '" x="177" y="139" text-anchor="middle">' + escapeHtml(data.from) + '</text><text class="station-suffix" x="310" y="139">站</text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text><text class="train-number" x="548" y="137" text-anchor="middle">' + escapeHtml(data.trainNo) + '</text><path class="train-number-line" d="M432 151h232"/><text class="' + toClass + '" x="843" y="139" text-anchor="middle">' + escapeHtml(data.to) + '</text><text class="station-suffix" x="1006" y="139">站</text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text></g><text class="ticket-date" x="20" y="256">' + escapeHtml(data.depart) + '</text><text class="ticket-seat" x="780" y="256">' + escapeHtml(data.seat) + '</text><text class="ticket-price" x="20" y="324">' + escapeHtml(data.price) + '</text><circle class="ticket-seal-circle" cx="462" cy="302" r="25"/><text class="ticket-seal-text" x="462" y="315" text-anchor="middle">纪</text><text class="ticket-seat-class" x="858" y="324">' + escapeHtml(data.seatClass) + '</text><text class="ticket-memorial" x="20" y="379">仅供纪念使用</text><text class="ticket-passenger" x="20" y="474">' + escapeHtml(data.passenger) + '</text><rect class="ticket-notice-border" x="49" y="494" width="684" height="126"/><text class="ticket-notice" x="391" y="548" text-anchor="middle">买票请到12306 发货请到95306</text><text class="ticket-notice" x="391" y="606" text-anchor="middle">中国铁路祝您旅途愉快</text>' + ticketWalletTrainQrMarkup(data.ticketCode) + '<text class="ticket-code" x="19" y="684">' + escapeHtml(data.ticketCode) + '</text></svg></div>';
 }
 function ticketWalletTrainCardMarkup(record, index) {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
-  const date = ticketWalletTrainDateParts(record.departAt);
-  const from = ticketWalletTrainStationDisplay(record.from);
-  const to = ticketWalletTrainStationDisplay(record.to);
-  const seat = record.seat || '—';
-  const ticketNo = record.ticketNo || '—';
-  const passenger = record.passenger || '旅客信息待识别';
-  const price = record.price || '￥—元';
-  const ticketCode = record.ticketCode || 'CRGT' + (date.date === '—' ? '' : date.date.replace(/\D/g, '')) + (ticketWalletTrainTicketSerial(record) === '票号待识别' ? '' : ticketWalletTrainTicketSerial(record));
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
-  return '<article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card" data-ticket-wallet-card="' + escapeHtml(record.id) + '" style="--ticket-stack-index:' + index + '"><div class="ticket-wallet-train-ticket"' + (sourceHint ? ' aria-label="' + escapeHtml(sourceHint) + '"' : '') + '><div class="ticket-wallet-train-serial-row"><span class="ticket-wallet-train-serial">' + escapeHtml(ticketWalletTrainTicketSerial(record)) + '</span></div><div class="ticket-wallet-train-route"><div class="ticket-wallet-train-station"><strong>' + escapeHtml(from) + '</strong><small>' + escapeHtml(ticketWalletTrainStationLatin(record.from)) + '</small></div><div class="ticket-wallet-train-number"><strong>' + escapeHtml(ticketNo) + '</strong><i></i></div><div class="ticket-wallet-train-station ticket-wallet-train-destination"><strong>' + escapeHtml(to) + '</strong><small>' + escapeHtml(ticketWalletTrainStationLatin(record.to)) + '</small></div></div><div class="ticket-wallet-train-info"><div class="ticket-wallet-train-time"><strong>' + escapeHtml(date.date + ' ' + date.time) + ' 开</strong><strong>' + escapeHtml(price) + '</strong><strong>仅供纪念使用</strong></div><span class="ticket-wallet-train-seal" aria-hidden="true">纪</span><div class="ticket-wallet-train-seat"><strong>' + escapeHtml(seat) + '</strong><strong>二等座</strong></div></div><div class="ticket-wallet-train-passenger">' + escapeHtml(passenger) + '</div><div class="ticket-wallet-train-notice"><strong>买票请到12306 发货请到95306</strong><strong>中国铁路祝您旅途愉快</strong></div><span class="ticket-wallet-train-qr" aria-hidden="true"></span><span class="ticket-wallet-train-code">' + escapeHtml(ticketCode) + '</span></div><div class="ticket-wallet-card-actions"><button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" data-ticket-wallet-apple="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button></div></article>';
+  return '<article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card" data-ticket-wallet-card="' + escapeHtml(record.id) + '" style="--ticket-stack-index:' + index + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint) + '<div class="ticket-wallet-card-actions"><button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" data-ticket-wallet-apple="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button></div></article>';
 }
 function ticketWalletCardMarkup(record, index) {
   if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index);
