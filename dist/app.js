@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.370';
+const APP_VERSION = '2.18.371';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -728,47 +728,78 @@ function ticketWalletDateInputValue(value) {
 function ticketWalletDateFromText(dateText, timeText = '') {
   const normalizedDate = String(dateText || '').replace(/[Oo]/g, '0').replace(/[Il]/g, '1');
   const normalizedTime = String(timeText || '').replace(/[Oo]/g, '0').replace(/[Il]/g, '1');
-  const dateMatch = normalizedDate.match(/(20\d{2})\s*[年\/.-]\s*(\d{1,2})\s*[月\/.-]\s*(\d{1,2})/);
+  const dateMatch = normalizedDate.match(/(20\d{2})\s*[年\/.-]\s*(\d{1,2})\s*[月\/.-]\s*(\d{1,2})/) || normalizedDate.match(/\b(20\d{2})(\d{2})(\d{2})\b/);
   if (!dateMatch) return '';
-  const timeMatch = normalizedTime.match(/(\d{1,2})\s*[:：]\s*(\d{2})/);
+  const timeMatch = normalizedTime.match(/(\d{1,2})\s*[:：]\s*(\d{2})/) || normalizedTime.match(/\b([01]?\d|2[0-3])([0-5]\d)\b/);
   return dateMatch[1] + '-' + pad(Number(dateMatch[2])) + '-' + pad(Number(dateMatch[3])) + 'T' + pad(Number(timeMatch?.[1] || 0)) + ':' + pad(Number(timeMatch?.[2] || 0));
 }
 function ticketWalletRecognitionFromText(text, fileName = '') {
-  const raw = String(text || '').replace(/[|丨]/g, '1');
+  const raw = String(text || '').replace(/[|丨]/g, '1').replace(/[“”]/g, '"');
   const rawLines = raw.split(/[\r\n]+/).map((line) => line.trim()).filter(Boolean);
   const compact = raw.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
   const fileStem = String(fileName || '').replace(/\.[^.]+$/, '').replace(/[（）()【】\[\]]/g, ' ');
   const source = compact + ' ' + fileStem;
   const normalizeOcrDigits = (value) => String(value || '').replace(/[Oo]/g, '0').replace(/[Il]/g, '1').replace(/\s+/g, '');
-  const type = /12306|中国铁路|铁路|车次|检票口|G\s*\d{1,5}|D\s*\d{1,5}|C\s*\d{1,5}/i.test(source) ? 'train' : /登机牌|航班|机场|flight|boarding|[A-Z]{2}\s*\d{2,4}/i.test(source) ? 'flight' : /船票|渡轮|码头|ferry/i.test(source) ? 'ferry' : 'other';
-  const trainCandidate = source.match(/(?:^|[^A-Z0-9])([GDCZTKYS]\s*[0-9O]{1,5})(?=$|[^A-Z0-9])/i)?.[1] || '';
-  const trainNo = normalizeOcrDigits(trainCandidate).toUpperCase();
-  const flightNo = source.match(/\b([A-Z]{2}\s*\d{2,4})\b/)?.[1]?.replace(/\s+/g, '').toUpperCase() || '';
+  const normalizedLine = (line) => String(line || '').replace(/\s+/g, ' ').trim();
+  const tokenFromLines = (pattern, transform = (value) => value) => {
+    for (const line of [...rawLines, compact, fileStem]) {
+      const match = normalizedLine(line).match(pattern);
+      if (match?.[1]) return transform(match[1]);
+    }
+    return '';
+  };
+  const type = /12306|中国铁路|铁路|车次|检票口|G\s*[0-9O]{1,5}|D\s*[0-9O]{1,5}|C\s*[0-9O]{1,5}/i.test(source) ? 'train' : /登机牌|航班|机场|flight|boarding|[A-Z]{2}\s*\d{2,4}/i.test(source) ? 'flight' : /船票|渡轮|码头|ferry/i.test(source) ? 'ferry' : 'other';
+  const trainNo = tokenFromLines(/(?:^|[^A-Z0-9])([GDCZTKYS]\s*[0-9O]{1,5})(?=$|[^A-Z0-9])/i, (value) => normalizeOcrDigits(value).toUpperCase());
+  const flightNo = tokenFromLines(/\b([A-Z]{2}\s*\d{2,4})\b/i, (value) => value.replace(/\s+/g, '').toUpperCase());
   const ticketNo = type === 'train' ? trainNo : type === 'flight' ? flightNo : '';
-  const serialCandidate = source.match(/(?:^|[^A-Z0-9])([A-Z]\s*(?:[0-9O]\s*){6})(?=$|[^A-Z0-9])/i)?.[1] || '';
-  const ticketSerial = normalizeOcrDigits(serialCandidate).toUpperCase();
-  const ticketCodeLine = rawLines.find((line) => /C\s*R\s*G\s*[T7]/i.test(line)) || '';
-  const ticketCodeCompact = ticketCodeLine.replace(/[^A-Z0-9]/gi, '').replace(/^CRG7/i, 'CRGT').toUpperCase();
-  const ticketCode = ticketCodeCompact.match(/CRGT[A-Z0-9]{12,40}(?:JN)?/i)?.[0] || '';
-  const priceCandidate = source.match(/(?:￥|¥|RMB|票价|金额|[Yy])\s*[:：]?\s*([0-9OoIl]{1,4}(?:[.,][0-9OoIl]{1,2})?)/i)?.[1] || '';
+  const ticketSerial = tokenFromLines(/(?:^|[^A-Z0-9])([A-Z]\s*(?:[0-9O]\s*){6})(?=$|[^A-Z0-9])/i, (value) => normalizeOcrDigits(value).toUpperCase());
+  const codeCandidates = rawLines.map((line) => line.replace(/[^A-Z0-9]/gi, '').replace(/^CRG7/i, 'CRGT').toUpperCase()).concat(compact.replace(/[^A-Z0-9]/gi, '').replace(/^CRG7/i, 'CRGT').toUpperCase());
+  const ticketCode = codeCandidates.map((line) => line.match(/CRGT[A-Z0-9]{12,40}/i)?.[0] || '').find(Boolean) || '';
+  const priceCandidates = [...rawLines, compact].flatMap((line) => {
+    const labeled = line.match(/(?:￥|¥|RMB|票价|金额|[Yy])\s*[:：]?\s*([0-9OoIl]{1,4}(?:[.,][0-9OoIl]{1,2})?)/i)?.[1];
+    const bare = line.match(/\b([0-9OoIl]{1,4}[.,][0-9OoIl]{1,2})\s*元/i)?.[1];
+    return [labeled, bare].filter(Boolean);
+  });
+  const priceCandidate = priceCandidates.find((value) => Number(normalizeOcrDigits(value).replace(',', '.')) > 0) || priceCandidates[0] || '';
   const priceAmount = normalizeOcrDigits(priceCandidate).replace(',', '.');
-  const price = priceAmount ? '￥' + priceAmount + '元' : '';
+  const price = priceAmount && (type !== 'train' || Number(priceAmount) > 0) ? '￥' + priceAmount + '元' : '';
   const seat = source.match(/(\d{1,3})\s*车\s*(\d{1,3}\s*[A-Z])\s*(?:号)?/i)?.[0]?.replace(/\s+/g, '') || source.match(/\b\d{1,3}\s*[A-Z]\d?\s*(?:号|座)?\b/i)?.[0]?.replace(/\s+/g, '') || '';
-  const seatClass = source.match(/商务座|特等座|一等座|二等座|软卧|硬卧|软座|硬座|无座/)?.[0] || '';
-  const passengerIdMatch = source.match(/(?:\d\s*){17}[\dXx]|\d{3,4}\s*\*{4,}\s*\d{3,4}[Xx]?/);
+  const seatClassRaw = source.match(/商务座|特等座|一等座|二等座|软卧|硬卧|软座|硬座|无座|一等|二等/)?.[0] || '';
+  const seatClass = seatClassRaw === '一等' ? '一等座' : seatClassRaw === '二等' ? '二等座' : seatClassRaw;
+  const passengerLine = rawLines.find((line) => /(?:\d\s*){17}[\dXx]|\d{3,4}\s*\*{4,}\s*\d{3,4}[Xx]?/.test(line.replace(/\s+/g, ''))) || source;
+  const passengerSearchLine = passengerLine.replace(/\s+/g, '');
+  const passengerIdMatch = passengerSearchLine.match(/(?:\d\s*){17}[\dXx]|\d{3,4}\s*\*{4,}\s*\d{3,4}[Xx]?/);
   const passengerId = passengerIdMatch?.[0]?.replace(/\s+/g, '') || '';
-  const passengerTail = passengerIdMatch ? source.slice(Number(passengerIdMatch.index || 0) + passengerIdMatch[0].length, Number(passengerIdMatch.index || 0) + passengerIdMatch[0].length + 16) : '';
+  const passengerTail = passengerIdMatch ? passengerSearchLine.slice(Number(passengerIdMatch.index || 0) + passengerIdMatch[0].length, Number(passengerIdMatch.index || 0) + passengerIdMatch[0].length + 16) : '';
   const passengerNameCandidate = passengerTail.match(/[\u4e00-\u9fa5]{2,4}/)?.[0] || '';
-  const passengerName = /买票|中国|铁路|旅客|检票/.test(passengerNameCandidate) ? '' : passengerNameCandidate;
+  const passengerName = /买票|中国|铁路|旅客|检票|发货/.test(passengerNameCandidate) ? '' : passengerNameCandidate;
   const passenger = passengerId ? passengerId + (passengerName ? ' ' + passengerName : '') : passengerName;
-  const dateMatch = source.match(/20\d{2}\s*[年\/.-]\s*\d{1,2}\s*[月\/.-]\s*\d{1,2}\s*(?:日)?/);
+  const dateMatch = source.match(/20\d{2}\s*[年\/.-]\s*\d{1,2}\s*[月\/.-]\s*\d{1,2}\s*(?:日)?/) || source.match(/\b20\d{6}\b/);
   const dateText = dateMatch?.[0] || '';
   const dateTail = dateMatch ? source.slice(Number(dateMatch.index || 0), Number(dateMatch.index || 0) + 80) : source;
-  const timeText = dateTail.match(/\d{1,2}\s*[:：]\s*\d{2}/)?.[0] || source.match(/\d{1,2}\s*[:：]\s*\d{2}/)?.[0] || '';
-  const route = source.match(/([\u4e00-\u9fa5A-Za-z]{2,12}(?:站|机场|码头)?)\s*(?:到|至|→|->|—|-)\s*([\u4e00-\u9fa5A-Za-z]{2,12}(?:站|机场|码头)?)/);
-  const fileRoute = !route && fileStem.match(/([\u4e00-\u9fa5A-Za-z]{2,12})\s*(?:到|至|→|->|-)\s*([\u4e00-\u9fa5A-Za-z]{2,12})/);
-  const from = (route || fileRoute)?.[1]?.trim() || '';
-  const to = (route || fileRoute)?.[2]?.trim() || '';
+  const timeText = dateTail.match(/\d{1,2}\s*[:：]\s*\d{2}/)?.[0] || source.match(/\d{1,2}\s*[:：]\s*\d{2}/)?.[0] || dateTail.match(/\b(?:[01]?\d|2[0-3])\s*[：:]?\s*[0-5]\d\b/)?.[0] || '';
+  const stationNames = [];
+  for (const line of rawLines) {
+    const matches = [...line.matchAll(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:车站|站|机场|码头)/g)].map((match) => match[1].trim()).filter((name) => !/^(?:中国铁路|铁路|发货|检票|票据|车次)$/.test(name));
+    stationNames.push(...matches);
+    if (stationNames.length >= 2) break;
+  }
+  const routeCandidate = source.match(/([\u4e00-\u9fa5A-Za-z]{2,12}(?:站|机场|码头)?)\s*(?:到|至|→|->|—|-)\s*([\u4e00-\u9fa5A-Za-z]{2,12}(?:站|机场|码头)?)/);
+  const route = routeCandidate && !/codex|clipboard/i.test(routeCandidate[0]) ? routeCandidate : null;
+  const fileRoute = !route && !/codex|clipboard/i.test(fileStem) && fileStem.match(/([\u4e00-\u9fa5A-Za-z]{2,12})\s*(?:到|至|→|->|-)\s*([\u4e00-\u9fa5A-Za-z]{2,12})/);
+  const latinSource = source.replace(/\s+/g, '').toLowerCase();
+  const stationAliases = [['shanghaihongqiao', '上海虹桥'], ['hangzhoudong', '杭州东'], ['nanjingnan', '南京南'], ['beijingnan', '北京南'], ['guangzhounan', '广州南'], ['shenzhenbei', '深圳北'], ['suzhou', '苏州'], ['shanghai', '上海'], ['hangzhou', '杭州'], ['nanjing', '南京'], ['beijing', '北京'], ['guangzhou', '广州'], ['shenzhen', '深圳'], ['xian', '西安'], ['chengdu', '成都'], ['wuhan', '武汉'], ['qingdao', '青岛'], ['xiamen', '厦门']];
+  const latinStations = [];
+  for (const [token, label] of stationAliases) if (latinSource.includes(token) && !latinStations.some((item) => item.token.includes(token))) latinStations.push({ token, label, index: latinSource.indexOf(token) });
+  latinStations.sort((first, second) => first.index - second.index);
+  const normalizeStationName = (value) => {
+    const compactName = String(value || '').replace(/\s+/g, '').toLowerCase();
+    return stationAliases.find(([token]) => token === compactName)?.[1] || value;
+  };
+  const recognizedStationNames = stationNames.map(normalizeStationName);
+  const useLatinRoute = recognizedStationNames.length < 2 && latinStations.length >= 2;
+  const from = useLatinRoute ? latinStations[0].label : recognizedStationNames[0] || (route || fileRoute)?.[1]?.trim() || '';
+  const to = useLatinRoute ? latinStations[1].label : recognizedStationNames[1] || (route || fileRoute)?.[2]?.trim() || '';
   const journey = from && to ? from + '至' + to : '';
   const title = journey || (ticketNo ? ticketNo : '');
   return { type, title, carrier: type === 'train' ? '中国铁路' : '', from, to, departAt: ticketWalletDateFromText(dateText, timeText), ticketNo, ticketSerial, ticketCode, price, seat, seatClass, passenger, passengerName, passengerId, journey };
@@ -786,27 +817,47 @@ function loadTicketWalletOcr() {
   });
   return ticketWalletOcrPromise;
 }
-async function ticketWalletPreparedOcrImage(file) {
-  if (!file || typeof createImageBitmap !== 'function') return file;
+async function ticketWalletPreparedOcrImages(file) {
+  if (!file || typeof createImageBitmap !== 'function') return [file];
   try {
     const bitmap = await createImageBitmap(file);
     const longest = Math.max(bitmap.width, bitmap.height);
-    const scale = Math.min(3, Math.max(1, 2200 / Math.max(1, longest)));
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height);
-    context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high';
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close?.();
-    const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+    const scale = Math.min(2.8, Math.max(1.2, 2600 / Math.max(1, longest)));
+    const width = Math.round(bitmap.width * scale); const height = Math.round(bitmap.height * scale);
+    const makeCanvas = () => {
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high'; context.drawImage(bitmap, 0, 0, width, height);
+      return { canvas, context };
+    };
+    const color = makeCanvas();
+    const colorBlob = await new Promise((resolve) => color.canvas.toBlob((blob) => resolve(blob || file), 'image/png'));
+    const mono = makeCanvas();
+    const pixels = mono.context.getImageData(0, 0, width, height);
     for (let index = 0; index < pixels.data.length; index += 4) {
       const gray = pixels.data[index] * .299 + pixels.data[index + 1] * .587 + pixels.data[index + 2] * .114;
-      const contrasted = gray > 214 ? 255 : Math.max(0, Math.min(255, (gray - 128) * 1.65 + 108));
-      pixels.data[index] = contrasted; pixels.data[index + 1] = contrasted; pixels.data[index + 2] = contrasted; pixels.data[index + 3] = 255;
+      const ink = gray < 182 ? Math.max(0, Math.round(gray * .42)) : gray > 232 ? 255 : Math.min(255, Math.round(185 + (gray - 182) * 2.3));
+      pixels.data[index] = ink; pixels.data[index + 1] = ink; pixels.data[index + 2] = ink; pixels.data[index + 3] = 255;
     }
-    context.putImageData(pixels, 0, 0);
-    return await new Promise((resolve) => canvas.toBlob((blob) => resolve(blob || file), 'image/png'));
-  } catch { return file; }
+    mono.context.putImageData(pixels, 0, 0);
+    const monoBlob = await new Promise((resolve) => mono.canvas.toBlob((blob) => resolve(blob || file), 'image/png'));
+    const makeFocusBlob = (left, top, cropWidth, cropHeight) => {
+      const focusScale = 1.6;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(cropWidth * focusScale)); canvas.height = Math.max(1, Math.round(cropHeight * focusScale));
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height);
+      context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high';
+      context.drawImage(color.canvas, left, top, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+      return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob || file), 'image/png'));
+    };
+    const routeFocus = await makeFocusBlob(width * .04, height * .07, width * .92, height * .32);
+    const detailFocus = await makeFocusBlob(width * .03, height * .28, width * .70, height * .60);
+    const passengerFocus = await makeFocusBlob(width * .03, height * .56, width * .60, height * .22);
+    const rightFocus = await makeFocusBlob(width * .62, height * .28, width * .35, height * .24);
+    bitmap.close?.();
+    return [colorBlob, monoBlob, routeFocus, detailFocus, passengerFocus, rightFocus];
+  } catch { return [file]; }
 }
 async function recognizeTicketWalletImage(file) {
   const quick = ticketWalletRecognitionFromText('', file?.name || '');
@@ -814,13 +865,20 @@ async function recognizeTicketWalletImage(file) {
   try {
     const Tesseract = await loadTicketWalletOcr();
     const language = state.language === 'en' ? 'eng' : 'chi_sim+eng';
-    const preparedImage = await ticketWalletPreparedOcrImage(file);
-    const result = await Tesseract.recognize(preparedImage, language, { logger: (message) => {
-      if (!state.ticketWalletEditorOpen || message.status !== 'recognizing text') return;
-      state.ticketWalletRecognition = { status: 'running', progress: Math.round(Number(message.progress || 0) * 100), message: state.language === 'en' ? 'Recognizing ticket…' : '正在识别票据…' };
-      render();
-    } });
-    return { ...quick, ...ticketWalletRecognitionFromText(result?.data?.text || '', file.name || '') };
+    const preparedImages = await ticketWalletPreparedOcrImages(file);
+    const passes = preparedImages.slice(0, 6);
+    const texts = [];
+    for (let passIndex = 0; passIndex < passes.length; passIndex += 1) {
+      const result = await Tesseract.recognize(passes[passIndex], language, { tessedit_pageseg_mode: passIndex === 0 ? '6' : passIndex >= 4 ? '7' : '11', logger: (message) => {
+        if (!state.ticketWalletEditorOpen || message.status !== 'recognizing text') return;
+        const progress = ((passIndex + Number(message.progress || 0)) / Math.max(1, passes.length)) * 100;
+        state.ticketWalletRecognition = { status: 'running', progress: Math.round(progress), message: state.language === 'en' ? 'Recognizing ticket…' : '正在识别票据…' };
+        render();
+      } });
+      texts.push(result?.data?.text || '');
+    }
+    const orderedTexts = texts.length > 2 ? texts.slice(2).concat(texts.slice(0, 2)) : texts;
+    return { ...quick, ...ticketWalletRecognitionFromText(orderedTexts.join('\n'), file.name || '') };
   } catch {
     return quick;
   }
