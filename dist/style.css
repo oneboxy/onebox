@@ -14298,7 +14298,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack {
   justify-items: stretch;
   /* The outer card is translated down by the stack step. Reserve that
      visual overflow so its bottom edge is never clipped by the page. */
-  padding-bottom: calc(32px + (var(--ticket-stack-count) * var(--ticket-stack-peek, 20px)));
+  padding-bottom: var(--ticket-stack-bottom, 32px);
   overflow: visible;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-stack > .ticket-wallet-swipe-row {
