@@ -11902,10 +11902,9 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   gap: 0;
   padding: 22px 0 42px;
 }
-/* Keep the original data order as the visual depth order: the first card is
-   the front card and stays fully visible; each following card sits behind it
-   and only reveals the configured stack peek. */
-.ticket-wallet-stack .ticket-wallet-swipe-row { z-index: calc(100 - var(--ticket-stack-index)); }
+/* Match the wallet pack: later cards move toward the front/bottom and remain
+   above earlier cards, while the original data order stays unchanged. */
+.ticket-wallet-stack .ticket-wallet-swipe-row { z-index: calc(100 + var(--ticket-stack-index)); }
 .ticket-wallet-stack .ticket-wallet-swipe-row {
   grid-area: 1 / 1;
   margin-top: 0 !important;

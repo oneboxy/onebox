@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.474';
+const APP_VERSION = '2.18.475';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3663,11 +3663,11 @@ function ticketWalletStackDensity(count) {
 }
 function ticketWalletStackPeek(count) {
   const size = Math.max(1, Number(count) || 1);
-  if (size === 1) return 0;
-  // A normal pack keeps a consistent 20px reveal. Once the pack becomes
-  // large, cap the total exposed depth so the page does not grow endlessly.
-  if (size <= 6) return 20;
-  return Math.max(6, Math.floor(120 / (size - 1)));
+  const mobile = window.matchMedia?.('(max-width: 760px)').matches;
+  const values = mobile
+    ? { single: 0, pair: 96, trio: 78, quad: 64, five: 54, many: 46 }
+    : { single: 0, pair: 132, trio: 108, quad: 88, five: 76, many: 66 };
+  return values[ticketWalletStackDensity(size)];
 }
 function ticketWalletStackAttrs(count) {
   return 'data-ticket-stack-count="' + Math.max(1, Number(count) || 1) + '" data-ticket-stack-density="' + ticketWalletStackDensity(count) + '"';
