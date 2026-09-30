@@ -13367,6 +13367,82 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-c
   }
 }
 
+/* Adaptive physical pack: show more of a small pack and tighten larger
+   packs so the whole stack remains readable without becoming too tall. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="single"] {
+  --ticket-stack-peek: 0px;
+  padding-bottom: 14px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="pair"] {
+  --ticket-stack-peek: 132px;
+  padding-bottom: calc(44px + var(--ticket-stack-peek));
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="trio"] {
+  --ticket-stack-peek: 108px;
+  padding-bottom: calc(44px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="quad"] {
+  --ticket-stack-peek: 88px;
+  padding-bottom: calc(44px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="five"] {
+  --ticket-stack-peek: 76px;
+  padding-bottom: calc(44px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="many"] {
+  --ticket-stack-peek: 66px;
+  padding-bottom: calc(44px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="single"] {
+    padding-bottom: 10px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="pair"] {
+    --ticket-stack-peek: 96px;
+    padding-bottom: calc(30px + var(--ticket-stack-peek));
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="trio"] {
+    --ticket-stack-peek: 78px;
+    padding-bottom: calc(30px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="quad"] {
+    --ticket-stack-peek: 64px;
+    padding-bottom: calc(30px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="five"] {
+    --ticket-stack-peek: 54px;
+    padding-bottom: calc(30px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density="many"] {
+    --ticket-stack-peek: 46px;
+    padding-bottom: calc(30px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek));
+  }
+}
+
+/* A quiet physical-card finish: theme-based depth and a restrained inner
+   highlight make each ticket feel like a card without colored borders or a
+   white wrapper around the artwork. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket {
+  isolation: isolate;
+  box-shadow: 0 15px 28px color-mix(in srgb, var(--ink) 17%, transparent), inset 0 1px 0 color-mix(in srgb, var(--panel) 52%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--ink) 8%, transparent) !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket::after,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket::after {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 58%, transparent);
+  content: '';
+  pointer-events: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last-child .ticket-wallet-train-ticket,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last-child .ticket-wallet-physical-ticket {
+  box-shadow: 0 19px 34px color-mix(in srgb, var(--ink) 22%, transparent), inset 0 1px 0 color-mix(in srgb, var(--panel) 58%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--ink) 10%, transparent) !important;
+}
+
 /* Keep the wallet back action and view switcher in one stable header row at
    every width.  Older responsive rules used grid areas that could stack them. */
 body:has(.ticket-wallet-page) .ticket-wallet-page-head {

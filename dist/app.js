@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.471';
+const APP_VERSION = '2.18.472';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3652,14 +3652,31 @@ function ticketWalletDetailInfoMarkup(record) {
   const notesIcon = '<span class="ticket-wallet-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span>';
   return '<div class="ticket-wallet-detail-info" aria-label="' + escapeHtml(state.language === 'en' ? 'Ticket information' : '票据信息') + '">' + originalRow + '<div class="ticket-wallet-detail-info-row ticket-wallet-detail-notes">' + notesIcon + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(notesTitle) + '</strong><small' + (notes ? ' class="has-content"' : '') + '>' + escapeHtml(notesValue) + '</small></span></div></div>';
 }
+function ticketWalletStackDensity(count) {
+  const size = Math.max(1, Number(count) || 1);
+  if (size === 1) return 'single';
+  if (size === 2) return 'pair';
+  if (size === 3) return 'trio';
+  if (size === 4) return 'quad';
+  if (size === 5) return 'five';
+  return 'many';
+}
+function ticketWalletStackPeek(count) {
+  const mobile = window.matchMedia?.('(max-width: 760px)').matches;
+  const values = mobile ? { single: 0, pair: 96, trio: 78, quad: 64, five: 54, many: 46 } : { single: 0, pair: 132, trio: 108, quad: 88, five: 76, many: 66 };
+  return values[ticketWalletStackDensity(count)];
+}
+function ticketWalletStackAttrs(count) {
+  return 'data-ticket-stack-count="' + Math.max(1, Number(count) || 1) + '" data-ticket-stack-density="' + ticketWalletStackDensity(count) + '"';
+}
 function ticketWalletDetailReturnPackMarkup(records, selectedId) {
-  return '<div class="ticket-wallet-return-pack ticket-wallet-stack-section" aria-hidden="true"><div class="ticket-wallet-stack ticket-wallet-return-pack-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((item, index) => item.id === selectedId ? '' : ticketWalletCardMarkup(item, index)).join('') + '</div></div>';
+  return '<div class="ticket-wallet-return-pack ticket-wallet-stack-section" aria-hidden="true"><div class="ticket-wallet-stack ticket-wallet-return-pack-stack" ' + ticketWalletStackAttrs(records.length) + ' style="--ticket-stack-count:' + records.length + '">' + records.map((item, index) => item.id === selectedId ? '' : ticketWalletCardMarkup(item, index)).join('') + '</div></div>';
 }
 function ticketWalletDetailMarkup(record, records = [record]) {
   const closeLabel = state.language === 'en' ? 'Close ticket detail' : '关闭票据详情';
   const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
   const selectedIndex = Math.max(0, records.findIndex((item) => item.id === record.id));
-  const returnPeek = window.matchMedia?.('(max-width: 760px)').matches ? 96 : 136;
+  const returnPeek = ticketWalletStackPeek(records.length);
   // The return stack no longer has an add slot above it. The selected detail
   // card starts on the same row as the first pack card, so its target is only
   // the original stack index offset; keeping the old top padding made the
@@ -3673,7 +3690,7 @@ function ticketWalletStackMarkup(records) {
   return ticketWalletPackStackMarkup(records);
 }
 function ticketWalletPackStackMarkup(records) {
-  return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
+  return '<div class="ticket-wallet-stack" ' + ticketWalletStackAttrs(records.length) + ' style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
 }
 function syncTicketWalletFocusStack() {
   const stack = $('.ticket-wallet-focus-stack');
