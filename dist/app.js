@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.444';
+const APP_VERSION = '2.18.446';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -999,7 +999,7 @@ const state = {
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
   homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
   navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationDialog: null, navigationFolderDraft: null, navigationSettingsOpen: false,
-  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: Object.prototype.hasOwnProperty.call(TICKET_TYPES, storedTicketWalletTypeFilter) ? storedTicketWalletTypeFilter : 'train', ticketWalletSelectedId: '', ticketWalletEditorOpen: false, ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
+  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: Object.prototype.hasOwnProperty.call(TICKET_TYPES, storedTicketWalletTypeFilter) ? storedTicketWalletTypeFilter : 'train', ticketWalletSelectedId: '', ticketWalletDisplayOrder: [], ticketWalletEditorOpen: false, ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
   notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, githubDialogOpen: false, recentReadingOpen: false,
@@ -3496,6 +3496,16 @@ function ticketWalletStackMarkup(records) {
 function ticketWalletFilteredRecords(records) {
   return state.ticketWalletTypeFilter === 'all' ? records : records.filter((record) => record.type === state.ticketWalletTypeFilter);
 }
+function ticketWalletDisplayRecords(records) {
+  const available = new Map(records.map((record) => [record.id, record]));
+  const rememberedIds = Array.isArray(state.ticketWalletDisplayOrder) ? state.ticketWalletDisplayOrder : [];
+  const stableIds = rememberedIds.filter((id) => available.has(id));
+  const stableIdSet = new Set(stableIds);
+  const newRecords = records.filter((record) => !stableIdSet.has(record.id)).sort(ticketWalletDepartureAsc);
+  const nextIds = stableIds.concat(newRecords.map((record) => record.id));
+  state.ticketWalletDisplayOrder = nextIds;
+  return nextIds.map((id) => available.get(id)).filter(Boolean);
+}
 function renderTicketWalletMemoryEditor() {
   const draft = state.ticketWalletMemoryDraft; if (!draft) return '';
   const image = draft.imageId ? ticketWalletImageCache.get(draft.imageId) : null;
@@ -3644,7 +3654,7 @@ function renderTicketWalletJourneys() {
   return ticketWalletJourneyMapMarkup(journeys);
 }
 function renderTicketWallet() {
-  const journeys = ticketWalletJourneys(); const orderedTickets = [...state.ticketWallet].sort(ticketWalletDepartureAsc); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
+  const journeys = ticketWalletJourneys(); const orderedTickets = ticketWalletDisplayRecords(state.ticketWallet); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
   const ticketWalletFilterRow = '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
   const ticketWalletAddAction = ticketWalletAddEntryMarkup();
   const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) + ticketWalletAddAction : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>' + ticketWalletAddAction) + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button></div></div>';
@@ -8646,7 +8656,7 @@ workspace.addEventListener('touchstart', (event) => {
   if (swipeGesture || event.target.closest('.swipe-delete')) return;
   const row = event.target.closest('[data-swipe-row]');
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
-  if (!row || !ticketCard || event.target.closest('button, a, [data-ticket-wallet-edit-field]')) return;
+  if (!row || !ticketCard || event.target.closest('button, a')) return;
   const touch = event.touches?.[0];
   if (!touch) return;
   swipeGesture = { row, ticketWalletId: ticketCard.dataset.ticketWalletCard, startX: touch.clientX, startY: touch.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
