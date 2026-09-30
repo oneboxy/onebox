@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.459';
+const APP_VERSION = '2.18.460';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9169,6 +9169,15 @@ workspace.addEventListener('click', async (event) => {
   if (event.target.closest('[data-ticket-wallet-clear-selection]')) { state.ticketWalletSelectedId = ''; return render(); }
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   if (ticketCard && !event.target.closest('[data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
+    // iOS may emit the synthetic click after the tap has already selected and
+    // re-rendered the stack. The rendered card under that same point can be a
+    // different ticket, so consume that one click instead of selecting twice.
+    if (ticketWalletMatchesSyntheticClick(event)) {
+      event.preventDefault();
+      ticketWalletSuppressSyntheticClick = false;
+      ticketWalletSyntheticClickPoint = null;
+      return;
+    }
     if (state.ticketWalletSelectedId !== ticketCard.dataset.ticketWalletCard) {
       state.ticketWalletSelectedId = ticketCard.dataset.ticketWalletCard;
       ticketWalletSuppressSyntheticClick = true;
