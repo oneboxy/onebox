@@ -11519,7 +11519,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   clip-path: inset(0);
   contain: paint;
   isolation: isolate;
-  z-index: calc(1100 + var(--ticket-stack-index));
+  z-index: calc(800 + var(--ticket-stack-index));
 }
 .ticket-wallet-focus-stack .ticket-wallet-swipe-row:not(.ticket-wallet-focus-selected) > .swipe-content {
   height: var(--ticket-focus-reveal, 54px);
@@ -11536,7 +11536,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-focus-stack .ticket-wallet-focus-selected {
   position: relative;
   inset: auto;
-  z-index: 1000;
+  z-index: 2000;
   transform: none;
   filter: none;
 }
@@ -11545,7 +11545,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   filter: saturate(.86) brightness(.98);
 }
 .ticket-wallet-focus-stack .ticket-wallet-focus-after {
-  transform: translateY(var(--ticket-focus-shift, -46px)) scale(.985);
+  transform: translateY(calc(var(--ticket-focus-selected-height, 0px) - var(--ticket-focus-peek, 54px) + var(--ticket-focus-shift, 46px))) scale(.985);
   filter: saturate(.86) brightness(.98);
 }
 .ticket-wallet-focus-peek-row {

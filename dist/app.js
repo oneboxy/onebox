@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.453';
+const APP_VERSION = '2.18.454';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3502,6 +3502,13 @@ function ticketWalletStackMarkup(records) {
     return ticketWalletFocusPeekMarkup(record, index, before ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after', '--ticket-focus-shift:' + shift + 'px');
   }).join('');
   return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-stack">' + focusCards + '</div></div>';
+}
+function syncTicketWalletFocusStack() {
+  const stack = $('.ticket-wallet-focus-stack');
+  const selected = stack?.querySelector('.ticket-wallet-focus-selected');
+  if (!stack || !selected) return;
+  const height = selected.getBoundingClientRect().height;
+  if (height > 0) stack.style.setProperty('--ticket-focus-selected-height', height + 'px');
 }
 function ticketWalletFilteredRecords(records) {
   return state.ticketWalletTypeFilter === 'all' ? records : records.filter((record) => record.type === state.ticketWalletTypeFilter);
@@ -7837,6 +7844,7 @@ function render() {
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
   workspace.innerHTML = state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
+  if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets') syncTicketWalletFocusStack();
   if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'journeys') requestAnimationFrame(() => { void hydrateTicketWalletMap(); });
   document.body.classList.toggle('dev-tools-fullscreen', developerFullscreen);
   document.body.classList.toggle('dev-history-open', developerFullscreen && state.devTools.historyOpen === true);
