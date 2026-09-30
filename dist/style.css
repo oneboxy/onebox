@@ -2170,22 +2170,22 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
    single straight theme line instead of a rounded container edge. */
 body:has(.ticket-wallet-page) .ticket-wallet-filter-row,
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
-  border-radius: 0;
+  border-radius: 0 !important;
 }
 
 body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
-  padding-bottom: 0;
+  padding-bottom: 0 !important;
 }
 
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active::after {
-  bottom: -1px;
-  border-radius: 0;
+  bottom: -1px !important;
+  border-radius: 0 !important;
 }
 
 @media (max-width: 760px) {
   body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
-    padding-bottom: 0;
-    border-radius: 0;
+    padding-bottom: 0 !important;
+    border-radius: 0 !important;
   }
 }
 
