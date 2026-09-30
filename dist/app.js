@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.461';
+const APP_VERSION = '2.18.462';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3504,7 +3504,9 @@ function ticketWalletDetailInfoMarkup(record) {
   return '<div class="ticket-wallet-detail-info" aria-label="' + escapeHtml(state.language === 'en' ? 'Ticket information' : '票据信息') + '">' + originalRow + '<div class="ticket-wallet-detail-info-row ticket-wallet-detail-notes">' + notesIcon + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(notesTitle) + '</strong><small' + (notes ? ' class="has-content"' : '') + '>' + escapeHtml(notesValue) + '</small></span></div></div>';
 }
 function ticketWalletDetailMarkup(record) {
-  return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '"><div class="ticket-wallet-detail-card-shell">' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
+  const closeLabel = state.language === 'en' ? 'Close ticket detail' : '关闭票据详情';
+  const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
+  return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '"><div class="ticket-wallet-detail-head"><button type="button" class="ticket-wallet-detail-close" data-ticket-wallet-clear-selection aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button></div><div class="ticket-wallet-detail-card-shell">' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
 }
 function ticketWalletStackMarkup(records) {
   const selectedRecord = records.find((record) => record.id === state.ticketWalletSelectedId);
