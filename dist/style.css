@@ -2166,6 +2166,58 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   height: 15px;
 }
 
+/* Ticket wallet visual cleanup: keep the physical tickets tight and let the
+   theme surface, rather than an extra white/accent frame, separate layers. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack {
+  padding-bottom: calc(14px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 96px));
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket {
+  border: 0;
+  background: transparent;
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-train-ticket,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:first-child .ticket-wallet-physical-ticket {
+  border: 0;
+  box-shadow: 0 12px 23px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-add-entry {
+  min-height: 36px;
+  margin: -8px auto 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-add-entry:hover {
+  border-color: var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-stack {
+    padding-bottom: calc(12px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 96px));
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-add-entry {
+    min-height: 34px;
+    margin-top: -6px;
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    border-radius: 0 0 12px 12px;
+  }
+}
+
 /* Align the category indicator with the rail divider. Keep the divider a
    single straight theme line instead of a rounded container edge. */
 body:has(.ticket-wallet-page) .ticket-wallet-filter-row,
@@ -11462,8 +11514,15 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   transition: transform .22s ease, filter .22s ease;
 }
 .ticket-wallet-focus-stack .ticket-wallet-swipe-row:not(.ticket-wallet-focus-selected) {
-  clip-path: inset(0 0 calc(100% - var(--ticket-focus-reveal, 54px)) 0 round 22px);
+  height: var(--ticket-focus-reveal, 54px);
+  overflow: hidden;
+  clip-path: none;
   z-index: calc(1100 + var(--ticket-stack-index));
+}
+.ticket-wallet-focus-stack .ticket-wallet-swipe-row:not(.ticket-wallet-focus-selected) > .swipe-content {
+  height: var(--ticket-focus-reveal, 54px);
+  min-height: 0;
+  overflow: hidden;
 }
 .ticket-wallet-focus-stack .ticket-wallet-focus-selected {
   position: relative;
