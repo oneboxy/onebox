@@ -13062,3 +13062,26 @@ body:has(.ticket-wallet-page) .ticket-wallet-view-icon svg {
     font-size: 11px;
   }
 }
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--ink) 28%, transparent);
+}
