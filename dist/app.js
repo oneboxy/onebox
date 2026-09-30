@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.417';
+const APP_VERSION = '2.18.418';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8907,7 +8907,15 @@ workspace.addEventListener('click', async (event) => {
     saveTicketWalletTypeFilter();
     state.ticketWalletSelectedId = '';
     render();
-    requestAnimationFrame(() => document.querySelector('.ticket-wallet-filter-scroll')?.scrollTo({ left: 0, behavior: 'smooth' }));
+    requestAnimationFrame(() => {
+      const scroll = document.querySelector('.ticket-wallet-filter-scroll');
+      const active = scroll?.querySelector('.ticket-wallet-category.active');
+      if (!scroll || !active) return;
+      const scrollRect = scroll.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const nextLeft = scroll.scrollLeft + activeRect.left - scrollRect.left - 8;
+      scroll.scrollTo({ left: Math.max(0, nextLeft), behavior: 'smooth' });
+    });
     return;
   }
   if (event.target.closest('[data-ticket-wallet-add]')) return openTicketWalletEditor();
