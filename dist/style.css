@@ -14267,3 +14267,22 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   width: 15px;
   height: 15px;
 }
+
+/* Final ticket surface: no accent-colored outline. The card feeling comes
+   from a restrained theme shadow, so the artwork remains the visual surface. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: 0 7px 15px color-mix(in srgb, var(--ink) 13%, transparent), 0 2px 4px color-mix(in srgb, var(--ink) 7%, transparent) !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket::after,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket::after {
+  display: none !important;
+  content: none !important;
+  box-shadow: none !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last-child .ticket-wallet-train-ticket,
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last-child .ticket-wallet-physical-ticket {
+  box-shadow: 0 11px 20px color-mix(in srgb, var(--ink) 17%, transparent), 0 3px 6px color-mix(in srgb, var(--ink) 8%, transparent) !important;
+}
