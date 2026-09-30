@@ -2166,6 +2166,29 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   height: 15px;
 }
 
+/* Align the category indicator with the rail divider. Keep the divider a
+   single straight theme line instead of a rounded container edge. */
+body:has(.ticket-wallet-page) .ticket-wallet-filter-row,
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+  border-radius: 0;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+  padding-bottom: 0;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active::after {
+  bottom: -1px;
+  border-radius: 0;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+    padding-bottom: 0;
+    border-radius: 0;
+  }
+}
+
 /* Keep breadcrumb and wallet tabs on one horizontal line ---------------- */
 body:has(.ticket-wallet-page) .ticket-wallet-page-head {
   align-items: center;
