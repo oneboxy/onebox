@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.443';
+const APP_VERSION = '2.18.444';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8605,9 +8605,57 @@ workspace.addEventListener('pointerdown', (event) => {
     return;
   }
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
-  const ticketWalletId = ticketCard && !event.target.closest('button, a, [data-ticket-wallet-edit-field]') ? ticketCard.dataset.ticketWalletCard : '';
+  const ticketWalletId = ticketCard && !event.target.closest('button, a') ? ticketCard.dataset.ticketWalletCard : '';
   swipeGesture = { row, ticketWalletId, startX: event.clientX, startY: event.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
 });
+function finishTicketWalletVerticalGesture(gesture) {
+  if (!gesture || gesture.cancelled || !gesture.ticketWalletId || !gesture.ticketVertical) return false;
+  if (Math.abs(gesture.dy) <= 52 || Math.abs(gesture.dy) <= Math.abs(gesture.dx) + 12) return false;
+  const selected = state.ticketWalletSelectedId === gesture.ticketWalletId;
+  const nextSelectedId = gesture.dy < 0 ? gesture.ticketWalletId : selected ? '' : state.ticketWalletSelectedId;
+  if (nextSelectedId !== state.ticketWalletSelectedId) { state.ticketWalletSelectedId = nextSelectedId; render(); }
+  swipeSuppressClickUntil = Date.now() + 350;
+  return true;
+}
+function updateTicketWalletTouchGesture(event) {
+  const gesture = swipeGesture;
+  const touch = event.touches?.[0];
+  if (!gesture?.ticketWalletId || !touch) return;
+  gesture.dx = touch.clientX - gesture.startX;
+  gesture.dy = touch.clientY - gesture.startY;
+  if (Math.abs(gesture.dy) > Math.abs(gesture.dx) + 10 && Math.abs(gesture.dy) > 8) {
+    gesture.ticketVertical = true;
+    // Safari may cancel the pointer stream as soon as the page claims the
+    // vertical pan. Keep receiving touch events so the intended card gesture
+    // can still be committed on touchend.
+    if (Math.abs(gesture.dy) > 14 && event.cancelable) event.preventDefault();
+  }
+}
+function finishTicketWalletTouchGesture(event) {
+  const gesture = swipeGesture;
+  if (!gesture?.ticketWalletId) return;
+  const touch = event.changedTouches?.[0];
+  if (touch) {
+    gesture.dx = touch.clientX - gesture.startX;
+    gesture.dy = touch.clientY - gesture.startY;
+  }
+  swipeGesture = null;
+  if (finishTicketWalletVerticalGesture(gesture)) return;
+}
+workspace.addEventListener('touchstart', (event) => {
+  if (swipeGesture || event.target.closest('.swipe-delete')) return;
+  const row = event.target.closest('[data-swipe-row]');
+  const ticketCard = event.target.closest('[data-ticket-wallet-card]');
+  if (!row || !ticketCard || event.target.closest('button, a, [data-ticket-wallet-edit-field]')) return;
+  const touch = event.touches?.[0];
+  if (!touch) return;
+  swipeGesture = { row, ticketWalletId: ticketCard.dataset.ticketWalletCard, startX: touch.clientX, startY: touch.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
+}, { passive: true });
+workspace.addEventListener('touchmove', updateTicketWalletTouchGesture, { passive: false });
+workspace.addEventListener('touchend', finishTicketWalletTouchGesture, { passive: true });
+workspace.addEventListener('touchcancel', () => {
+  if (swipeGesture?.ticketWalletId) swipeGesture = null;
+}, { passive: true });
 $('#notificationPanel').addEventListener('pointerdown', (event) => {
   const row = event.target.closest('[data-swipe-row]');
   if (!row || event.target.closest('.swipe-delete')) { if (!row) $$('.swipe-row.swiped').forEach((item) => item.classList.remove('swiped')); swipeGesture = null; return; }
@@ -8623,13 +8671,7 @@ workspace.addEventListener('pointermove', (event) => {
 document.addEventListener('pointerup', () => {
   const gesture = swipeGesture; swipeGesture = null;
   if (!gesture || gesture.cancelled) return;
-  if (gesture.ticketWalletId && gesture.ticketVertical && Math.abs(gesture.dy) > 52 && Math.abs(gesture.dy) > Math.abs(gesture.dx) + 12) {
-    const selected = state.ticketWalletSelectedId === gesture.ticketWalletId;
-    const nextSelectedId = gesture.dy < 0 ? gesture.ticketWalletId : selected ? '' : state.ticketWalletSelectedId;
-    if (nextSelectedId !== state.ticketWalletSelectedId) { state.ticketWalletSelectedId = nextSelectedId; render(); }
-    swipeSuppressClickUntil = Date.now() + 350;
-    return;
-  }
+  if (finishTicketWalletVerticalGesture(gesture)) return;
   if (gesture.dx < -52 && Math.abs(gesture.dx) > Math.abs(gesture.dy) + 12) {
     $$('.swipe-row.swiped').forEach((row) => { if (row !== gesture.row) row.classList.remove('swiped'); });
     gesture.row.classList.add('swiped'); swipeSuppressClickUntil = Date.now() + 350;
@@ -8743,13 +8785,14 @@ document.addEventListener('pointerup', finishHomeFeedPull, { passive: true });
 document.addEventListener('pointerup', finishTabSwipe, { passive: true });
 document.addEventListener('pointerup', finishPageSwipe, { passive: true });
 document.addEventListener('pointercancel', () => {
+  const cancelledSwipeGesture = swipeGesture;
   tabSwipeGesture = null; pageSwipeGesture = null; homePullGesture = null;
   workspace.classList.remove('feed-pulling'); workspace.style.removeProperty('--feed-pull-distance');
   if (readerSurfaceGesture?.dragging) settleReaderPageDrag(readerSurfaceGesture, 0, true);
   readerSurfaceGesture = null;
   endLongPress(); cancelReorderDrag();
   if (navigationDrag) { restoreNavigationDrag(navigationDrag); navigationDrag = null; }
-  endNavigationLongPress(); cancelNavigationDialogLongPress(); clearNavigationDragClasses(); swipeGesture = null; resetPageSwipeTransform();
+  endNavigationLongPress(); cancelNavigationDialogLongPress(); clearNavigationDragClasses(); if (!cancelledSwipeGesture?.ticketWalletId) swipeGesture = null; resetPageSwipeTransform();
   if (readerBookDrag) {
     releaseReaderBookPointer(readerBookDrag);
     readerBookDrag.over?.classList.remove('reorder-over');
@@ -9038,7 +9081,7 @@ workspace.addEventListener('click', async (event) => {
   if (ticketFieldEdit) return openTicketWalletEditor(ticketFieldEdit.dataset.ticketWalletId, ticketFieldEdit.dataset.ticketWalletEditField);
   if (event.target.closest('[data-ticket-wallet-clear-selection]')) { state.ticketWalletSelectedId = ''; return render(); }
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
-  if (ticketCard && !event.target.closest('[data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
+  if (ticketCard && !event.target.closest('[data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
     if (state.ticketWalletSelectedId !== ticketCard.dataset.ticketWalletCard) { state.ticketWalletSelectedId = ticketCard.dataset.ticketWalletCard; return render(); }
   }
   const ticketEdit = event.target.closest('[data-ticket-wallet-edit]');
