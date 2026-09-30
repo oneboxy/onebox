@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.438';
+const APP_VERSION = '2.18.440';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3122,6 +3122,7 @@ function openTicketWallet() {
 }
 function closeTicketWallet() {
   state.ticketWalletOpen = false; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
+  closeTicketWalletOriginal();
   history.replaceState(null, '', '#mine'); renderNav(); renderBottomNav(); render();
 }
 function openTicketWalletEditor(id = '', focusField = '') {
@@ -3233,6 +3234,17 @@ async function exportTicketWalletPass(id) {
   }
   toast(t('ticketWalletAppleHint'), 'info');
 }
+async function openTicketWalletOriginal(id) {
+  const record = state.ticketWallet.find((item) => item.id === id);
+  const dialog = $('#ticketWalletOriginalDialog');
+  if (!record?.sourceImageId || !dialog) return;
+  const source = await ticketWalletImageGet(record.sourceImageId);
+  if (!source?.src) return toast(t('ticketWalletSourceMissing'), 'error');
+  const title = record.title || [record.from, record.to].filter(Boolean).join(' → ') || t('ticketWalletOriginal');
+  dialog.innerHTML = '<div class="dialog-card ticket-wallet-original-dialog-card" role="dialog" aria-modal="true"><div class="ticket-wallet-original-dialog-head"><div><strong>' + escapeHtml(state.language === 'en' ? 'Original ticket' : '原件') + '</strong><small>' + escapeHtml(title) + '</small></div><button class="icon-btn small" data-close-ticket-wallet-original aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="ticket-wallet-original-dialog-body"><img class="ticket-wallet-original-dialog-image" src="' + escapeHtml(source.src) + '" alt="' + escapeHtml(title) + '"></div></div>';
+  dialog.hidden = false;
+}
+function closeTicketWalletOriginal() { const dialog = $('#ticketWalletOriginalDialog'); if (dialog) dialog.hidden = true; }
 function ticketWalletField(label, id, value, type = 'text', extra = '') {
   return '<label class="ticket-wallet-field"><span>' + escapeHtml(label) + '</span><input id="' + id + '" type="' + type + '" value="' + escapeHtml(type === 'datetime-local' ? ticketWalletDateInputValue(value) : value || '') + '" ' + extra + '></label>';
 }
@@ -3451,7 +3463,10 @@ function ticketWalletCardActionButtons(record) {
   return '<button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" data-ticket-wallet-apple="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button>';
 }
 function ticketWalletSwipeActionButtons(record) {
-  return '<button class="ticket-wallet-swipe-action" data-ticket-wallet-edit="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5Z"></path><path d="m14 6 3.5 3.5"></path></svg><span>' + escapeHtml(t('ticketWalletEdit')) + '</span></button><button class="ticket-wallet-swipe-action" data-ticket-wallet-apple="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(t('ticketWalletApple')) + '</span></button><button class="ticket-wallet-swipe-action danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
+  const originalLabel = state.language === 'en' ? 'Original' : '原件';
+  const walletLabel = state.language === 'en' ? 'Wallet' : '钱包';
+  const originalDisabled = record.sourceImageId ? '' : ' disabled aria-disabled="true"';
+  return '<button class="ticket-wallet-swipe-action" data-ticket-wallet-edit="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5Z"></path><path d="m14 6 3.5 3.5"></path></svg><span>' + escapeHtml(t('ticketWalletEdit')) + '</span></button><button class="ticket-wallet-swipe-action' + (record.sourceImageId ? '' : ' is-unavailable') + '" data-ticket-wallet-original="' + escapeHtml(record.id) + '"' + originalDisabled + '><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path></svg><span>' + escapeHtml(originalLabel) + '</span></button><button class="ticket-wallet-swipe-action" data-ticket-wallet-apple="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(walletLabel) + '</span></button><button class="ticket-wallet-swipe-action danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
 }
 function ticketWalletTrainCardMarkup(record, index) {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
@@ -9007,13 +9022,15 @@ workspace.addEventListener('click', async (event) => {
   if (ticketFieldEdit) return openTicketWalletEditor(ticketFieldEdit.dataset.ticketWalletId, ticketFieldEdit.dataset.ticketWalletEditField);
   if (event.target.closest('[data-ticket-wallet-clear-selection]')) { state.ticketWalletSelectedId = ''; return render(); }
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
-  if (ticketCard && !event.target.closest('[data-ticket-wallet-edit], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
+  if (ticketCard && !event.target.closest('[data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
     if (state.ticketWalletSelectedId !== ticketCard.dataset.ticketWalletCard) { state.ticketWalletSelectedId = ticketCard.dataset.ticketWalletCard; return render(); }
   }
   const ticketEdit = event.target.closest('[data-ticket-wallet-edit]');
   if (ticketEdit) return openTicketWalletEditor(ticketEdit.dataset.ticketWalletEdit);
   const ticketDelete = event.target.closest('[data-ticket-wallet-delete]');
   if (ticketDelete) return deleteTicketWalletRecord(ticketDelete.dataset.ticketWalletDelete);
+  const ticketOriginal = event.target.closest('[data-ticket-wallet-original]');
+  if (ticketOriginal) return openTicketWalletOriginal(ticketOriginal.dataset.ticketWalletOriginal);
   const ticketApple = event.target.closest('[data-ticket-wallet-apple]');
   if (ticketApple) return exportTicketWalletPass(ticketApple.dataset.ticketWalletApple);
   const ticketMemory = event.target.closest('[data-ticket-wallet-memory]');
@@ -9540,6 +9557,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && $('#ticketWalletOriginalDialog') && !$('#ticketWalletOriginalDialog').hidden) { closeTicketWalletOriginal(); return; }
   const ticketFieldTarget = event.target.closest?.('[data-ticket-wallet-edit-field]');
   if (ticketFieldTarget && (event.key === 'Enter' || event.key === ' ')) {
     event.preventDefault();
@@ -9663,6 +9681,10 @@ $('#petDialog').addEventListener('click', (event) => {
   if (event.target === $('#petDialog') || event.target.closest('[data-close-pet]')) return closePetDialog();
   const outfit = event.target.closest('[data-pet-outfit]');
   if (outfit && setPetOutfit(outfit.dataset.petOutfit)) toast(state.language === 'en' ? 'Outfit equipped' : '服饰已换上', 'info');
+});
+$('#ticketWalletOriginalDialog').addEventListener('click', (event) => {
+  const dialog = $('#ticketWalletOriginalDialog');
+  if (event.target === dialog || event.target.closest('[data-close-ticket-wallet-original]')) closeTicketWalletOriginal();
 });
 $('#petDialog').addEventListener('change', (event) => {
   if (event.target.id === 'petVisibility') {
