@@ -2184,28 +2184,27 @@ body:has(.ticket-wallet-page) .ticket-wallet-header-add {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  min-width: 48px;
-  height: 30px;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
   box-sizing: border-box;
-  padding: 4px 9px;
+  padding: 0;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 50%;
   background: var(--panel);
   color: var(--ink);
   box-shadow: none;
   font: inherit;
-  font-size: 11px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1;
-  white-space: nowrap;
   cursor: pointer;
   transition: background .16s ease, color .16s ease;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-header-add > span:first-child {
-  font-size: 16px;
+body:has(.ticket-wallet-page) .ticket-wallet-header-add > span {
+  display: block;
   font-weight: 400;
-  line-height: .8;
+  line-height: 1;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-header-add:hover,
 body:has(.ticket-wallet-page) .ticket-wallet-header-add:focus-visible {
@@ -2220,10 +2219,10 @@ body:has(.ticket-wallet-page) .ticket-wallet-header-add:active {
     gap: 5px;
   }
   body:has(.ticket-wallet-page) .ticket-wallet-header-add {
-    min-width: 45px;
+    width: 30px;
+    min-width: 30px;
     height: 30px;
-    padding-inline: 7px;
-    font-size: 11px;
+    font-size: 17px;
   }
 }
 
