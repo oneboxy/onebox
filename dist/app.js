@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.469';
+const APP_VERSION = '2.18.470';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -704,7 +704,7 @@ function normalizeTicketRecord(value) {
     journey: String(source.journey || '').trim(),
     notes: String(source.notes || '').trim(), sourceImageId: String(source.sourceImageId || ''),
     sourceImageName: String(source.sourceImageName || '').trim(), sourceMime: String(source.sourceMime || '').trim(),
-    template: source.template === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1',
+    template: source.template === 'crh-blue-v1' ? 'crh-blue-v1' : source.template === 'standard-v1' ? 'standard-v1' : 'pink-physical-v1',
     createdAt, updatedAt: Number(source.updatedAt) || now,
   };
 }
@@ -816,7 +816,36 @@ function ticketWalletRecognitionFromText(text, fileName = '') {
   const title = journey || (ticketNo ? ticketNo : '');
   return { type, title, carrier: type === 'train' ? '中国铁路' : '', from, to, departAt: ticketWalletDateFromText(dateText, timeText), ticketNo, ticketSerial, ticketCode, price, seat, seatClass, passenger, passengerName, passengerId, journey };
 }
+let ticketWalletPaddleOcrPromise = null;
 let ticketWalletOcrPromise = null;
+function loadTicketWalletPaddleOcr() {
+  if (window.__oneboxPaddleOcr) return Promise.resolve(window.__oneboxPaddleOcr);
+  if (ticketWalletPaddleOcrPromise) return ticketWalletPaddleOcrPromise;
+    ticketWalletPaddleOcrPromise = import('https://cdn.jsdelivr.net/npm/@paddleocr/paddleocr-js@0.4.2/+esm').then(async (module) => {
+    if (!module?.PaddleOCR) throw new Error('PaddleOCR unavailable');
+    const ocr = await module.PaddleOCR.create({
+      lang: 'ch',
+      ocrVersion: 'PP-OCRv5',
+      // The static PWA is served from GitHub Pages. PaddleOCR's worker entry is
+      // a separate CDN script and Safari/Chromium reject that cross-origin
+      // Worker constructor, so keep inference on the main thread here. The
+      // recognition flow already has its local Tesseract fallback.
+    worker: false,
+      ortOptions: {
+        backend: 'wasm',
+        wasmPaths: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/',
+        numThreads: 2,
+        simd: true,
+      },
+    });
+    window.__oneboxPaddleOcr = ocr;
+    return ocr;
+  }).catch((error) => {
+    ticketWalletPaddleOcrPromise = null;
+    throw error;
+  });
+  return ticketWalletPaddleOcrPromise;
+}
 function loadTicketWalletOcr() {
   if (window.Tesseract) return Promise.resolve(window.Tesseract);
   if (ticketWalletOcrPromise) return ticketWalletOcrPromise;
@@ -874,6 +903,25 @@ async function ticketWalletPreparedOcrImages(file) {
 async function recognizeTicketWalletImage(file) {
   const quick = ticketWalletRecognitionFromText('', file?.name || '');
   if (!file || !/^image\//i.test(file.type || '')) return quick;
+  try {
+    const paddle = await loadTicketWalletPaddleOcr();
+    const [result] = await paddle.predict(file, { textDetLimitSideLen: 960, textDetLimitType: 'max' });
+    const items = Array.isArray(result?.items) ? result.items : [];
+    const ordered = [...items].sort((first, second) => {
+      const firstY = Math.min(...(first.poly || []).map((point) => Number(point?.[1] ?? point?.y ?? 0)));
+      const secondY = Math.min(...(second.poly || []).map((point) => Number(point?.[1] ?? point?.y ?? 0)));
+      if (Math.abs(firstY - secondY) > 14) return firstY - secondY;
+      const firstX = Math.min(...(first.poly || []).map((point) => Number(point?.[0] ?? point?.x ?? 0)));
+      const secondX = Math.min(...(second.poly || []).map((point) => Number(point?.[0] ?? point?.x ?? 0)));
+      return firstX - secondX;
+    });
+    const text = ordered.map((item) => String(item.text || '').trim()).filter(Boolean).join('\n');
+    const recognized = ticketWalletRecognitionFromText(text, file.name || '');
+    if (text) return { ...quick, ...recognized };
+  } catch {
+    // The static PWA can still work when the PaddleOCR model CDN is blocked;
+    // fall through to the existing local Tesseract path below.
+  }
   try {
     const Tesseract = await loadTicketWalletOcr();
     const language = state.language === 'en' ? 'eng' : 'chi_sim+eng';
@@ -3126,24 +3174,97 @@ function closeTicketWallet() {
   closeTicketWalletOriginal();
   history.replaceState(null, '', '#mine'); renderNav(); renderBottomNav(); render();
 }
-function openTicketWalletEditor(id = '', focusField = '') {
-  const record = state.ticketWallet.find((item) => item.id === id);
-  state.ticketWalletEditingId = id;
-  state.ticketWalletDraft = record ? { ...record } : normalizeTicketRecord({ type: 'train', title: t('ticketWalletTrain'), departAt: '', journey: '' });
+function ticketWalletDefaultTemplate(type) { return type === 'train' ? 'pink-physical-v1' : 'standard-v1'; }
+function openTicketWalletEditor(id = '') {
+  if (id) {
+    state.ticketWalletSelectedId = id;
+    state.ticketWalletEditorOpen = false;
+    state.ticketWalletMemoryDraft = null;
+    render();
+    return;
+  }
+  const type = Object.prototype.hasOwnProperty.call(TICKET_TYPES, state.ticketWalletTypeFilter) ? state.ticketWalletTypeFilter : 'train';
+  state.ticketWalletEditingId = '';
+  state.ticketWalletDraft = normalizeTicketRecord({ type, title: ticketTypeLabel(type), template: ticketWalletDefaultTemplate(type), departAt: '', journey: '' });
   state.ticketWalletRecognition = { status: 'idle', progress: 0, message: '' };
-  state.ticketWalletEditorOpen = true; state.ticketWalletMemoryDraft = null; render();
-  const focusTargets = { from: '#ticketWalletFrom', to: '#ticketWalletTo', ticketSerial: '#ticketWalletSerial', ticketNo: '#ticketWalletTicketNo', price: '#ticketWalletPrice', passenger: '#ticketWalletPassengerName', passengerName: '#ticketWalletPassengerName', passengerId: '#ticketWalletPassengerId', departAt: '#ticketWalletDepart', seat: '#ticketWalletSeat', seatClass: '#ticketWalletSeatClass', ticketCode: '#ticketWalletCode' };
-  requestAnimationFrame(() => {
-    const field = $(focusTargets[focusField] || '#ticketWalletFrom');
-    if (!field) return;
-    field.focus();
-    if (typeof field.setSelectionRange === 'function' && field.type !== 'datetime-local') {
-      const end = field.value.length;
-      try { field.setSelectionRange(end, end); } catch {}
-    }
-  });
+  state.ticketWalletEditorOpen = true; state.ticketWalletSelectedId = ''; state.ticketWalletMemoryDraft = null; render();
 }
 function closeTicketWalletEditor() { state.ticketWalletEditorOpen = false; state.ticketWalletEditingId = ''; state.ticketWalletDraft = null; state.ticketWalletRecognition = { status: 'idle', progress: 0, message: '' }; render(); }
+function ticketWalletInlineFieldValue(record, field) {
+  if (field === 'passengerName') return record.passengerName || ticketWalletPassengerParts(record.passenger).passengerName || '';
+  if (field === 'departAt') return record.departAt || '';
+  return String(record[field] || '');
+}
+function ticketWalletInlineFieldLabel(field) {
+  const labels = { from: t('ticketWalletFrom'), to: t('ticketWalletTo'), ticketNo: t('ticketWalletTrainNo'), ticketSerial: t('ticketWalletSerial'), departAt: t('ticketWalletDepart'), price: t('ticketWalletPrice'), seat: t('ticketWalletSeat'), seatClass: t('ticketWalletSeatClass'), passengerName: t('ticketWalletPassengerName'), ticketCode: t('ticketWalletCode') };
+  return labels[field] || t('ticketWalletEdit');
+}
+function saveTicketWalletInlineField(id, field, value) {
+  const index = state.ticketWallet.findIndex((item) => item.id === id);
+  if (index < 0) return;
+  const record = { ...state.ticketWallet[index] };
+  let nextValue = String(value || '').trim();
+  if (field === 'departAt' && nextValue && !/^\d{4}-\d{2}-\d{2}T/.test(nextValue)) nextValue = ticketWalletDateFromText(nextValue, nextValue) || nextValue;
+  record[field] = nextValue;
+  if (field === 'passengerName') record.passenger = [record.passengerId, nextValue].filter(Boolean).join(' ');
+  if (field === 'from' || field === 'to') {
+    const routeName = record.from && record.to ? record.from + '至' + record.to : '';
+    record.title = routeName || record.title || ticketTypeLabel(record.type);
+    record.journey = routeName || record.journey;
+  }
+  record.updatedAt = Date.now();
+  state.ticketWallet[index] = normalizeTicketRecord(record);
+  saveTicketWallet();
+  render();
+  void hydrateTicketWalletImages();
+}
+function openTicketWalletInlineField(id, field, target) {
+  const record = state.ticketWallet.find((item) => item.id === id);
+  if (!record || !target) return;
+  const shell = target.closest('.ticket-wallet-detail-card-shell');
+  if (!shell) {
+    state.ticketWalletSelectedId = id;
+    render();
+    requestAnimationFrame(() => {
+      const nextTarget = [...document.querySelectorAll('[data-ticket-wallet-edit-field]')].find((item) => item.dataset.ticketWalletId === id && item.dataset.ticketWalletEditField === field);
+      if (nextTarget) openTicketWalletInlineField(id, field, nextTarget);
+    });
+    return;
+  }
+  document.querySelector('.ticket-wallet-inline-editor')?.blur();
+  const targetRect = target.getBoundingClientRect();
+  const shellRect = shell.getBoundingClientRect();
+  const input = document.createElement('input');
+  const label = ticketWalletInlineFieldLabel(field);
+  input.className = 'ticket-wallet-inline-editor';
+  input.type = 'text';
+  input.value = ticketWalletInlineFieldValue(record, field);
+  input.setAttribute('aria-label', label);
+  input.placeholder = label;
+  const left = Math.max(4, targetRect.left - shellRect.left - 6);
+  const top = Math.max(4, targetRect.top - shellRect.top - 7);
+  const width = Math.min(Math.max(92, targetRect.width + 18), Math.max(120, shellRect.width - left - 8));
+  input.style.left = left + 'px'; input.style.top = top + 'px'; input.style.width = width + 'px';
+  shell.append(input);
+  let finished = false;
+  const finish = (save) => {
+    if (finished) return;
+    finished = true;
+    if (save) saveTicketWalletInlineField(id, field, input.value);
+    else input.remove();
+  };
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') { event.preventDefault(); finish(true); }
+    if (event.key === 'Escape') { event.preventDefault(); finish(false); }
+  });
+  input.addEventListener('blur', () => finish(true));
+  input.addEventListener('pointerdown', (event) => event.stopPropagation());
+  input.addEventListener('touchstart', (event) => event.stopPropagation(), { passive: true });
+  requestAnimationFrame(() => {
+    input.focus();
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch {}
+  });
+}
 function ticketWalletValue(selector) { return $(selector)?.value?.trim() || ''; }
 async function saveTicketWalletRecord() {
   const draft = state.ticketWalletDraft || {};
@@ -3159,6 +3280,18 @@ async function saveTicketWalletRecord() {
   else state.ticketWallet.push(next);
   state.ticketWallet = normalizeTicketWallet(state.ticketWallet); saveTicketWallet(); closeTicketWalletEditor(); render(); void hydrateTicketWalletImages(); toast(index >= 0 ? t('ticketWalletSaved') : t('ticketWalletAdded'));
 }
+function createTicketWalletFromDraft(patch = {}) {
+  const draft = state.ticketWalletDraft || normalizeTicketRecord({ type: state.ticketWalletTypeFilter, template: ticketWalletDefaultTemplate(state.ticketWalletTypeFilter) });
+  const next = normalizeTicketRecord({ ...draft, ...patch, id: 'ticket-' + uid(), type: draft.type, template: draft.template || ticketWalletDefaultTemplate(draft.type), title: draft.from && draft.to ? draft.from + '至' + draft.to : draft.title || ticketTypeLabel(draft.type), updatedAt: Date.now() });
+  state.ticketWallet.push(next);
+  state.ticketWallet = normalizeTicketWallet(state.ticketWallet);
+  state.ticketWalletTypeFilter = next.type;
+  state.ticketWalletSelectedId = next.id;
+  saveTicketWalletTypeFilter(); saveTicketWallet();
+  state.ticketWalletEditorOpen = false; state.ticketWalletEditingId = ''; state.ticketWalletDraft = null; state.ticketWalletRecognition = { status: 'idle', progress: 0, message: '' };
+  render(); void hydrateTicketWalletImages();
+  toast(t('ticketWalletAdded'));
+}
 async function importTicketWalletImage(file) {
   if (!file) return;
   const id = 'ticket-image-' + uid();
@@ -3171,9 +3304,13 @@ async function importTicketWalletImage(file) {
   const recognized = await recognizeTicketWalletImage(file);
   const current = state.ticketWalletDraft || {};
   const recognizedPatch = Object.fromEntries(Object.entries(recognized).filter(([key, value]) => value && (key !== 'type' || value !== 'other')));
-  state.ticketWalletDraft = { ...current, ...recognizedPatch, sourceImageId: id, sourceImageName: file.name || '', sourceMime: file.type || '' };
+  state.ticketWalletDraft = { ...current, ...recognizedPatch, type: current.type, sourceImageId: id, sourceImageName: file.name || '', sourceMime: file.type || '' };
   const hasRoute = Boolean(recognized.from && recognized.to);
   state.ticketWalletRecognition = { status: hasRoute ? 'done' : 'warning', progress: 100, message: hasRoute ? (state.language === 'en' ? 'Ticket recognized. Please confirm.' : '已识别，请确认字段') : (state.language === 'en' ? 'Some fields need your confirmation.' : '已识别部分信息，请补充关键字段') };
+  if (!state.ticketWalletEditingId) {
+    createTicketWalletFromDraft({ ...recognizedPatch, type: current.type, sourceImageId: id, sourceImageName: file.name || '', sourceMime: file.type || '' });
+    return;
+  }
   render();
   toast(t('ticketWalletSourceReady'));
 }
@@ -3235,32 +3372,43 @@ async function exportTicketWalletPass(id) {
   }
   toast(t('ticketWalletAppleHint'), 'info');
 }
+async function openTicketWalletOriginalSource(sourceImageId, title = '') {
+  const dialog = $('#ticketWalletOriginalDialog');
+  if (!sourceImageId || !dialog) return;
+  const source = await ticketWalletImageGet(sourceImageId);
+  if (!source?.src) return toast(t('ticketWalletSourceMissing'), 'error');
+  const displayTitle = title || t('ticketWalletOriginal');
+  dialog.innerHTML = '<div class="dialog-card ticket-wallet-original-dialog-card" role="dialog" aria-modal="true"><div class="ticket-wallet-original-dialog-head"><div><strong>' + escapeHtml(state.language === 'en' ? 'Original ticket' : '原件') + '</strong><small>' + escapeHtml(displayTitle) + '</small></div><button class="icon-btn small" data-close-ticket-wallet-original aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="ticket-wallet-original-dialog-body"><img class="ticket-wallet-original-dialog-image" src="' + escapeHtml(source.src) + '" alt="' + escapeHtml(displayTitle) + '"></div></div>';
+  dialog.hidden = false;
+}
 async function openTicketWalletOriginal(id) {
   const record = state.ticketWallet.find((item) => item.id === id);
-  const dialog = $('#ticketWalletOriginalDialog');
-  if (!record?.sourceImageId || !dialog) return;
-  const source = await ticketWalletImageGet(record.sourceImageId);
-  if (!source?.src) return toast(t('ticketWalletSourceMissing'), 'error');
-  const title = record.title || [record.from, record.to].filter(Boolean).join(' → ') || t('ticketWalletOriginal');
-  dialog.innerHTML = '<div class="dialog-card ticket-wallet-original-dialog-card" role="dialog" aria-modal="true"><div class="ticket-wallet-original-dialog-head"><div><strong>' + escapeHtml(state.language === 'en' ? 'Original ticket' : '原件') + '</strong><small>' + escapeHtml(title) + '</small></div><button class="icon-btn small" data-close-ticket-wallet-original aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="ticket-wallet-original-dialog-body"><img class="ticket-wallet-original-dialog-image" src="' + escapeHtml(source.src) + '" alt="' + escapeHtml(title) + '"></div></div>';
-  dialog.hidden = false;
+  if (!record?.sourceImageId) return;
+  return openTicketWalletOriginalSource(record.sourceImageId, record.title || [record.from, record.to].filter(Boolean).join(' → ') || t('ticketWalletOriginal'));
 }
 function closeTicketWalletOriginal() { const dialog = $('#ticketWalletOriginalDialog'); if (dialog) dialog.hidden = true; }
 function ticketWalletField(label, id, value, type = 'text', extra = '') {
   return '<label class="ticket-wallet-field"><span>' + escapeHtml(label) + '</span><input id="' + id + '" type="' + type + '" value="' + escapeHtml(type === 'datetime-local' ? ticketWalletDateInputValue(value) : value || '') + '" ' + extra + '></label>';
 }
-function renderTicketWalletEditor() {
-  const draft = state.ticketWalletDraft || normalizeTicketRecord({});
+function ticketWalletAddTemplateMarkup(draft) {
   const isTrain = draft.type === 'train';
-  const options = Object.keys(TICKET_TYPES).map((type) => '<option value="' + type + '" ' + (draft.type === type ? 'selected' : '') + '>' + escapeHtml(ticketTypeLabel(type)) + '</option>').join('');
+  const options = isTrain ? [
+    { id: 'pink-physical-v1', swatch: 'pink', title: '经典粉色纸票', note: '传统纸质车票' },
+    { id: 'crh-blue-v1', swatch: 'blue', title: '浅蓝高铁票', note: 'CRH 清爽版式' },
+  ] : [{ id: 'standard-v1', swatch: draft.type, title: ticketTypeLabel(draft.type) + '标准票面', note: '根据当前分类自动匹配' }];
+  return '<fieldset class="ticket-wallet-template-picker"><legend>票面样式</legend><div class="ticket-wallet-template-options">' + options.map((item) => '<button type="button" class="ticket-wallet-template-option ' + (draft.template === item.id ? 'active' : '') + '" data-ticket-wallet-template="' + item.id + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>').join('') + '</div></fieldset>';
+}
+function renderTicketWalletEditor() {
+  const draft = state.ticketWalletDraft || normalizeTicketRecord({ type: state.ticketWalletTypeFilter, template: ticketWalletDefaultTemplate(state.ticketWalletTypeFilter) });
   const image = draft.sourceImageId ? ticketWalletImageCache.get(draft.sourceImageId) : null;
   const recognition = state.ticketWalletRecognition || { status: 'idle', progress: 0, message: '' };
   const recognitionMarkup = recognition.status !== 'idle' ? '<div class="ticket-wallet-recognition ' + escapeHtml(recognition.status) + '" role="status"><div><strong>' + escapeHtml(recognition.message) + '</strong><span>' + Math.round(Number(recognition.progress || 0)) + '%</span></div><div class="ticket-wallet-recognition-track"><i style="width:' + Math.min(100, Math.max(0, Number(recognition.progress || 0))) + '%"></i></div></div>' : '';
-  const passengerParts = ticketWalletPassengerParts(draft.passenger, draft.passengerName, draft.passengerId);
-  const trainFields = isTrain ? ticketWalletField(t('ticketWalletSerial'), 'ticketWalletSerial', draft.ticketSerial) + ticketWalletField(t('ticketWalletTrainNo'), 'ticketWalletTicketNo', draft.ticketNo) + ticketWalletField(t('ticketWalletPrice'), 'ticketWalletPrice', draft.price) + ticketWalletField(t('ticketWalletPassengerName'), 'ticketWalletPassengerName', passengerParts.passengerName) + ticketWalletField(t('ticketWalletPassengerId'), 'ticketWalletPassengerId', passengerParts.passengerId) + ticketWalletField(t('ticketWalletSeatClass'), 'ticketWalletSeatClass', draft.seatClass) + ticketWalletField(t('ticketWalletCode'), 'ticketWalletCode', draft.ticketCode) : ticketWalletField(t('ticketWalletTicketNo'), 'ticketWalletTicketNo', draft.ticketNo);
-  const templatePicker = isTrain ? '<fieldset class="ticket-wallet-template-picker"><legend>票面样式</legend><div class="ticket-wallet-template-options"><button type="button" class="ticket-wallet-template-option ' + (draft.template !== 'crh-blue-v1' ? 'active' : '') + '" data-ticket-wallet-template="pink-physical-v1"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-pink" aria-hidden="true"></span><span><strong>经典粉色纸票</strong><small>传统纸质车票</small></span></button><button type="button" class="ticket-wallet-template-option ' + (draft.template === 'crh-blue-v1' ? 'active' : '') + '" data-ticket-wallet-template="crh-blue-v1"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-blue" aria-hidden="true"></span><span><strong>浅蓝高铁票</strong><small>CRH 清爽版式</small></span></button></div></fieldset>' : '';
-  const originalActions = (draft.sourceImageId ? '<button class="secondary" data-ticket-wallet-recognize>' + escapeHtml(t('ticketWalletRecognizeAgain')) + '</button>' : '') + '<button class="secondary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImportImage')) + '</button>';
-  return '<section class="ticket-wallet-editor" aria-label="' + escapeHtml(t('ticketWalletEditor')) + '"><div class="ticket-wallet-editor-head"><div><span class="ticket-wallet-eyebrow">' + escapeHtml(t('ticketWalletEditor')) + '</span><h2>' + escapeHtml(t('ticketWalletEditor')) + '</h2><p class="ticket-wallet-editor-note">' + escapeHtml(state.language === 'en' ? 'Recognition fills the essentials; you can correct them before saving.' : '识别结果均可修改；点击票面字段也能直接进入对应输入项。') + '</p></div><button class="icon-btn small" data-ticket-wallet-cancel aria-label="' + escapeHtml(t('ticketWalletCancel')) + '">×</button></div>' + recognitionMarkup + '<div class="ticket-wallet-field-grid">' + '<label class="ticket-wallet-field"><span>' + escapeHtml(t('ticketWalletType')) + '</span><select id="ticketWalletType">' + options + '</select></label>' + ticketWalletField(t('ticketWalletCarrier'), 'ticketWalletCarrier', draft.carrier) + ticketWalletField(t('ticketWalletFrom'), 'ticketWalletFrom', draft.from, 'text', 'required') + ticketWalletField(t('ticketWalletTo'), 'ticketWalletTo', draft.to, 'text', 'required') + ticketWalletField(t('ticketWalletDepart'), 'ticketWalletDepart', draft.departAt, 'datetime-local') + trainFields + ticketWalletField(t('ticketWalletSeat'), 'ticketWalletSeat', draft.seat) + '</div>' + templatePicker + '<div class="ticket-wallet-original">' + (image?.src ? '<img src="' + escapeHtml(image.src) + '" alt="">' : '<span class="ticket-wallet-original-icon">' + (TICKET_TYPES[draft.type]?.icon || TICKET_TYPES.other.icon) + '</span>') + '<div><strong>' + escapeHtml(t('ticketWalletOriginal')) + '</strong><small>' + escapeHtml(draft.sourceImageName || t('ticketWalletImportImage')) + '</small></div><div class="ticket-wallet-original-actions">' + originalActions + '</div></div><div class="ticket-wallet-editor-actions"><button class="secondary" data-ticket-wallet-cancel>' + escapeHtml(t('ticketWalletCancel')) + '</button><button class="primary" data-ticket-wallet-save>' + escapeHtml(t('ticketWalletSave')) + '</button></div></section>';
+  const typeMeta = TICKET_TYPES[draft.type] || TICKET_TYPES.other;
+  const originalMarkup = image?.src
+    ? '<button type="button" class="ticket-wallet-add-original is-ready" data-ticket-wallet-original-draft="' + escapeHtml(draft.sourceImageId) + '"><img src="' + escapeHtml(image.src) + '" alt=""><span><strong>原始票据</strong><small>' + escapeHtml(draft.sourceImageName || '点击查看原图') + '</small></span><b aria-hidden="true">›</b></button>'
+    : '<div class="ticket-wallet-add-original"><span class="ticket-wallet-original-icon">' + typeMeta.icon + '</span><span><strong>原始票据</strong><small>导入后自动识别并填充票面字段</small></span><button type="button" class="secondary" data-ticket-wallet-import-image>导入</button></div>';
+  const hasImage = Boolean(draft.sourceImageId);
+  return '<section class="ticket-wallet-editor ticket-wallet-add-page" aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><div class="ticket-wallet-editor-head"><div><span class="ticket-wallet-eyebrow">' + escapeHtml(ticketTypeLabel(draft.type)) + '</span><h2>添加票据</h2><p class="ticket-wallet-editor-note">导入原始票据后自动识别；完成后直接进入单张票据，点击票面字段即可编辑。</p></div><button class="icon-btn small" data-ticket-wallet-cancel aria-label="' + escapeHtml(t('ticketWalletCancel')) + '">×</button></div>' + recognitionMarkup + '<div class="ticket-wallet-add-type"><span class="ticket-wallet-type-icon">' + typeMeta.icon + '</span><span><strong>' + escapeHtml(ticketTypeLabel(draft.type)) + '</strong><small>已根据当前筛选 Tab 自动选择票面模板</small></span></div>' + ticketWalletAddTemplateMarkup(draft) + '<div class="ticket-wallet-add-original-field"><span class="ticket-wallet-add-field-label">原始票据</span>' + originalMarkup + '</div><div class="ticket-wallet-editor-actions"><button class="secondary" data-ticket-wallet-create-empty>直接创建空白票面</button>' + (hasImage ? '<button class="primary" data-ticket-wallet-create-empty>进入票面</button>' : '<button class="primary" data-ticket-wallet-import-image>导入原始票据</button>') + '</div></section>';
 }
 function ticketWalletTrainDateParts(value) {
   const date = new Date(value); if (Number.isNaN(date.getTime())) return { date: '日期待补充', time: '' };
@@ -3448,14 +3596,18 @@ function focusTicketWalletFilter(smooth = false) {
 function scheduleTicketWalletFilterFocus(smooth = false) {
   requestAnimationFrame(() => requestAnimationFrame(() => focusTicketWalletFilter(smooth)));
 }
+function ticketWalletPhysicalEditAttrs(record, field, label) {
+  return 'class="ticket-wallet-physical-edit-target" role="button" tabindex="0" data-ticket-wallet-id="' + escapeHtml(record.id) + '" data-ticket-wallet-edit-field="' + escapeHtml(field) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Edit ' : '编辑') + label) + '"';
+}
 function ticketWalletPhysicalTicketMarkup(record) {
   const meta = TICKET_TYPES[record.type] || TICKET_TYPES.other;
   const watermark = { flight: 'BOARDING PASS', ferry: 'FERRY PASS', coach: 'BUS TICKET', transit: 'CITY PASS', movie: 'CINEMA TICKET', concert: 'LIVE EVENT', dining: 'DINING ORDER', other: 'ONEBOX TICKET' }[record.type] || 'ONEBOX TICKET';
   const from = record.from || (record.type === 'dining' ? record.carrier || '门店' : '出发地');
   const to = record.to || (record.type === 'dining' ? '订单' : '目的地');
+  const detailField = record.ticketNo ? 'ticketNo' : 'seat';
   const detail = record.seat || record.ticketNo || record.passenger || '待补充';
   const code = record.ticketCode || record.ticketNo || record.id;
-  return '<div class="ticket-wallet-physical-ticket ticket-wallet-physical-ticket-' + record.type + '"><span class="ticket-wallet-physical-watermark">' + watermark + '</span><div class="ticket-wallet-physical-head"><span class="ticket-wallet-physical-icon">' + meta.icon + '</span><div><small>' + escapeHtml(ticketTypeLabel(record.type)) + '</small><strong>' + escapeHtml(record.carrier || record.title || ticketTypeLabel(record.type)) + '</strong></div><span class="ticket-wallet-source">' + (record.sourceImageId ? escapeHtml(t('ticketWalletSourceReady')) : '电子票证') + '</span></div><div class="ticket-wallet-physical-route"><div><small>' + escapeHtml(record.type === 'movie' || record.type === 'concert' ? '项目' : '出发') + '</small><strong>' + escapeHtml(from) + '</strong></div><span class="ticket-wallet-physical-arrow">→</span><div class="ticket-wallet-physical-route-end"><small>' + escapeHtml(record.type === 'movie' || record.type === 'concert' ? '场次' : '到达') + '</small><strong>' + escapeHtml(to) + '</strong></div></div><div class="ticket-wallet-physical-meta"><span><small>时间</small><strong>' + escapeHtml(ticketWalletDateLabel(record.departAt)) + '</strong></span><span><small>' + escapeHtml(record.type === 'dining' ? '订单信息' : '座位 / 票号') + '</small><strong>' + escapeHtml(detail) + '</strong></span></div><div class="ticket-wallet-physical-footer"><span>' + escapeHtml(code) + '</span><i aria-hidden="true"></i></div></div>';
+  return '<div class="ticket-wallet-physical-ticket ticket-wallet-physical-ticket-' + record.type + '"><span class="ticket-wallet-physical-watermark">' + watermark + '</span><div class="ticket-wallet-physical-head"><span class="ticket-wallet-physical-icon">' + meta.icon + '</span><div><small>' + escapeHtml(ticketTypeLabel(record.type)) + '</small><strong>' + escapeHtml(record.carrier || record.title || ticketTypeLabel(record.type)) + '</strong></div><span class="ticket-wallet-source">' + (record.sourceImageId ? escapeHtml(t('ticketWalletSourceReady')) : '电子票证') + '</span></div><div class="ticket-wallet-physical-route"><div><small>' + escapeHtml(record.type === 'movie' || record.type === 'concert' ? '项目' : '出发') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'from', t('ticketWalletFrom')) + '>' + escapeHtml(from) + '</strong></div><span class="ticket-wallet-physical-arrow">→</span><div class="ticket-wallet-physical-route-end"><small>' + escapeHtml(record.type === 'movie' || record.type === 'concert' ? '场次' : '到达') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'to', t('ticketWalletTo')) + '>' + escapeHtml(to) + '</strong></div></div><div class="ticket-wallet-physical-meta"><span><small>时间</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'departAt', t('ticketWalletDepart')) + '>' + escapeHtml(ticketWalletDateLabel(record.departAt)) + '</strong></span><span><small>' + escapeHtml(record.type === 'dining' ? '订单信息' : '座位 / 票号') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, detailField, detailField === 'ticketNo' ? t('ticketWalletTicketNo') : t('ticketWalletSeat')) + '>' + escapeHtml(detail) + '</strong></span></div><div class="ticket-wallet-physical-footer"><span ' + ticketWalletPhysicalEditAttrs(record, 'ticketCode', t('ticketWalletCode')) + '>' + escapeHtml(code) + '</span><i aria-hidden="true"></i></div></div>';
 }
 function ticketWalletCardActionButtons(record) {
   return '<button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" data-ticket-wallet-apple="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button>';
@@ -3694,10 +3846,10 @@ function renderTicketWalletJourneys() {
 }
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = ticketWalletDisplayRecords(state.ticketWallet); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
-  const ticketWalletFilterRow = '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
-  const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>') + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button></div></div>';
+  const ticketWalletFilterRow = state.ticketWalletEditorOpen ? '' : '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
+  const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>') + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '">＋</button></div></div>';
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
-  const ticketWalletTopAdd = state.ticketWalletView === 'tickets' ? '<button class="ticket-wallet-header-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button>' : '';
+  const ticketWalletTopAdd = state.ticketWalletView === 'tickets' && !state.ticketWalletEditorOpen ? '<button class="ticket-wallet-header-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button>' : '';
   return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav><div class="ticket-wallet-head-actions">' + ticketWalletTopAdd + ticketWalletViewSwitcher + '</div></div>' + ticketWalletFilterRow + '<div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div>';
 }
 
@@ -9188,7 +9340,7 @@ workspace.addEventListener('click', async (event) => {
   const ticketWalletView = event.target.closest('[data-ticket-wallet-view]');
   if (ticketWalletView) { state.ticketWalletView = ticketWalletView.dataset.ticketWalletView === 'journeys' ? 'journeys' : 'tickets'; state.ticketWalletMemoryDraft = null; return render(); }
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
-  if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1'; document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => item.classList.toggle('active', item === ticketWalletTemplate)); return; }
+  if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(state.ticketWalletDraft.type); document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => item.classList.toggle('active', item === ticketWalletTemplate)); return; }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');
   if (ticketWalletFilter) {
     selectTicketWalletFilter(ticketWalletFilter.dataset.ticketWalletFilter || 'train');
@@ -9196,6 +9348,7 @@ workspace.addEventListener('click', async (event) => {
   }
   if (event.target.closest('[data-ticket-wallet-add]')) return openTicketWalletEditor();
   if (event.target.closest('[data-ticket-wallet-import-image]')) { $('#ticketWalletFileInput')?.click(); return; }
+  if (event.target.closest('[data-ticket-wallet-create-empty]')) return createTicketWalletFromDraft();
   if (event.target.closest('[data-ticket-wallet-import-json]')) { $('#ticketWalletJsonInput')?.click(); return; }
   if (event.target.closest('[data-ticket-wallet-cancel]')) return closeTicketWalletEditor();
   if (event.target.closest('[data-ticket-wallet-save]')) return saveTicketWalletRecord();
@@ -9205,8 +9358,11 @@ workspace.addEventListener('click', async (event) => {
     if (ticketWalletMatchesSyntheticClick(event)) { event.preventDefault(); return; }
     ticketWalletSuppressSyntheticClick = false;
     ticketWalletSyntheticClickPoint = null;
-    return openTicketWalletEditor(ticketFieldEdit.dataset.ticketWalletId, ticketFieldEdit.dataset.ticketWalletEditField);
+    event.preventDefault();
+    return openTicketWalletInlineField(ticketFieldEdit.dataset.ticketWalletId, ticketFieldEdit.dataset.ticketWalletEditField, ticketFieldEdit);
   }
+  const ticketOriginalDraft = event.target.closest('[data-ticket-wallet-original-draft]');
+  if (ticketOriginalDraft) return openTicketWalletOriginalSource(ticketOriginalDraft.dataset.ticketWalletOriginalDraft, state.ticketWalletDraft?.sourceImageName || t('ticketWalletOriginal'));
   if (event.target.closest('[data-ticket-wallet-clear-selection]')) { returnTicketWalletToPack(true); return; }
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   if (ticketCard && !event.target.closest('[data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
@@ -9231,7 +9387,7 @@ workspace.addEventListener('click', async (event) => {
     }
   }
   const ticketEdit = event.target.closest('[data-ticket-wallet-edit]');
-  if (ticketEdit) return openTicketWalletEditor(ticketEdit.dataset.ticketWalletEdit);
+  if (ticketEdit) { state.ticketWalletSelectedId = ticketEdit.dataset.ticketWalletEdit; state.ticketWalletEditorOpen = false; return render(); }
   const ticketDelete = event.target.closest('[data-ticket-wallet-delete]');
   if (ticketDelete) return deleteTicketWalletRecord(ticketDelete.dataset.ticketWalletDelete);
   const ticketOriginal = event.target.closest('[data-ticket-wallet-original]');
@@ -9766,7 +9922,7 @@ document.addEventListener('keydown', (event) => {
   const ticketFieldTarget = event.target.closest?.('[data-ticket-wallet-edit-field]');
   if (ticketFieldTarget && (event.key === 'Enter' || event.key === ' ')) {
     event.preventDefault();
-    openTicketWalletEditor(ticketFieldTarget.dataset.ticketWalletId, ticketFieldTarget.dataset.ticketWalletEditField);
+    openTicketWalletInlineField(ticketFieldTarget.dataset.ticketWalletId, ticketFieldTarget.dataset.ticketWalletEditField, ticketFieldTarget);
     return;
   }
   if (state.readerMode === 'reading' && !event.target.matches('input, textarea, select')) {

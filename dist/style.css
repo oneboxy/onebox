@@ -2166,6 +2166,127 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   height: 15px;
 }
 
+/* Ticket add flow: choose the visual first, then import the original. The
+   actual ticket is opened immediately after recognition so edits happen on
+   the ticket surface instead of sending the user through a second form. */
+body:has(.ticket-wallet-page) .ticket-wallet-add-page {
+  max-width: 720px;
+  margin-top: 4px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head {
+  margin-bottom: 18px;
+}
+.ticket-wallet-add-type {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 18px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--panel-2);
+}
+.ticket-wallet-add-type .ticket-wallet-type-icon { width: 34px; height: 34px; border-radius: 10px; }
+.ticket-wallet-add-type strong,
+.ticket-wallet-add-type small { display: block; }
+.ticket-wallet-add-type strong { font-size: 13px; }
+.ticket-wallet-add-type small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+.ticket-wallet-add-field-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+.ticket-wallet-add-original-field { margin-top: 18px; }
+.ticket-wallet-add-original {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 76px;
+  box-sizing: border-box;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--panel-2);
+  color: var(--ink);
+  text-align: left;
+}
+button.ticket-wallet-add-original { cursor: pointer; }
+.ticket-wallet-add-original > img {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  object-fit: cover;
+}
+.ticket-wallet-add-original > span:not(.ticket-wallet-original-icon) { display: grid; min-width: 0; gap: 4px; }
+.ticket-wallet-add-original strong,
+.ticket-wallet-add-original small { display: block; }
+.ticket-wallet-add-original strong { font-size: 12px; }
+.ticket-wallet-add-original small { overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-add-original > b { margin-left: auto; color: var(--muted); font-size: 22px; font-weight: 400; }
+.ticket-wallet-add-original > button { margin-left: auto; flex: 0 0 auto; }
+.ticket-wallet-add-original.is-ready:hover,
+.ticket-wallet-add-original.is-ready:focus-visible { background: var(--soft); }
+.ticket-wallet-template-swatch-standard,
+.ticket-wallet-template-swatch-flight,
+.ticket-wallet-template-swatch-ferry,
+.ticket-wallet-template-swatch-coach,
+.ticket-wallet-template-swatch-transit,
+.ticket-wallet-template-swatch-movie,
+.ticket-wallet-template-swatch-concert,
+.ticket-wallet-template-swatch-dining,
+.ticket-wallet-template-swatch-other {
+  background: linear-gradient(145deg, var(--panel), var(--soft));
+}
+.ticket-wallet-template-swatch-standard::before,
+.ticket-wallet-template-swatch-flight::before,
+.ticket-wallet-template-swatch-ferry::before,
+.ticket-wallet-template-swatch-coach::before,
+.ticket-wallet-template-swatch-transit::before,
+.ticket-wallet-template-swatch-movie::before,
+.ticket-wallet-template-swatch-concert::before,
+.ticket-wallet-template-swatch-dining::before,
+.ticket-wallet-template-swatch-other::before {
+  position: absolute;
+  top: 9px;
+  right: 8px;
+  left: 8px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--muted);
+  content: '';
+  opacity: .55;
+  box-shadow: 0 9px 0 color-mix(in srgb, var(--muted) 58%, transparent), 0 18px 0 color-mix(in srgb, var(--muted) 36%, transparent);
+}
+.ticket-wallet-physical-edit-target { cursor: text; outline: none; transition: opacity .15s ease, fill .15s ease, color .15s ease; }
+.ticket-wallet-physical-edit-target:hover,
+.ticket-wallet-physical-edit-target:focus-visible { color: var(--primary); opacity: .8; }
+.ticket-wallet-inline-editor {
+  position: absolute;
+  z-index: 18;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  outline: none;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 18%, transparent), 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+@media (max-width: 500px) {
+  .ticket-wallet-add-original { min-height: 68px; }
+  .ticket-wallet-add-original > img { width: 48px; height: 48px; }
+  .ticket-wallet-inline-editor { min-height: 36px; font-size: 13px; }
+  body:has(.ticket-wallet-page) .ticket-wallet-add-page { padding: 16px; }
+}
+
 /* Keep the ticket add action in the header, immediately to the left of the
    ticket/journey switcher. It uses only theme surfaces so it never competes
    with the ticket artwork. */
