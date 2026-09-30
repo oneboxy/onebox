@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.454';
+const APP_VERSION = '2.18.455';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3493,7 +3493,10 @@ function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextSt
 }
 function ticketWalletStackMarkup(records) {
   const selectedIndex = records.findIndex((record) => record.id === state.ticketWalletSelectedId);
-  if (selectedIndex < 0) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
+  // The first card is already the visual entry point of the pack. Selecting it
+  // must keep the normal pack composition instead of switching to the focused
+  // layout, otherwise the first card gets hidden behind the later cards.
+  if (selectedIndex <= 0) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
   const focusCards = records.map((record, index) => {
     if (index === selectedIndex) return ticketWalletCardMarkup(record, index, 'ticket-wallet-focus-selected');
     const before = index < selectedIndex;
