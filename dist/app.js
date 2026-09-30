@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.451';
+const APP_VERSION = '2.18.452';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3481,6 +3481,15 @@ function ticketWalletCardMarkup(record, index, contextClass = '', contextStyle =
   const swipeButtons = ticketWalletSwipeActionButtons(record);
   return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div></div>';
 }
+function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextStyle = '') {
+  const from = record.from || (record.type === 'dining' ? record.carrier || '门店' : '出发地');
+  const to = record.to || (record.type === 'dining' ? '订单' : '目的地');
+  const number = record.trainNo || record.flightNo || record.ticketNo || record.title || ticketTypeLabel(record.type);
+  const serial = record.ticketSerial || record.ticketNo || record.id;
+  const buttons = ticketWalletSwipeActionButtons(record);
+  const kind = record.type === 'train' ? 'train' : 'generic';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-focus-peek-row ' + contextClass + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-focus-peek ticket-wallet-focus-peek-' + kind + ' swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><small>' + escapeHtml(serial) + '</small><div><strong>' + escapeHtml(from) + '</strong><span>' + escapeHtml(number) + ' <i aria-hidden="true">→</i></span><strong>' + escapeHtml(to) + '</strong></div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
+}
 function ticketWalletStackMarkup(records) {
   const selectedIndex = records.findIndex((record) => record.id === state.ticketWalletSelectedId);
   if (selectedIndex < 0) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
@@ -3489,7 +3498,7 @@ function ticketWalletStackMarkup(records) {
     const before = index < selectedIndex;
     const depth = Math.min(4, Math.abs(index - selectedIndex));
     const shift = (before ? -1 : 1) * depth * 46;
-    return ticketWalletCardMarkup(record, index, before ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after', '--ticket-focus-shift:' + shift + 'px');
+    return ticketWalletFocusPeekMarkup(record, index, before ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after', '--ticket-focus-shift:' + shift + 'px');
   }).join('');
   return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-stack">' + focusCards + '</div></div>';
 }
@@ -7643,6 +7652,8 @@ function registerVersionedServiceWorker(version = APP_VERSION) {
 }
 async function getAppServiceWorkerRegistration() {
   const existing = await navigator.serviceWorker.getRegistration();
+  const activeScript = existing?.active?.scriptURL || '';
+  if (existing && !activeScript.includes('version=' + encodeURIComponent(APP_VERSION))) return registerVersionedServiceWorker();
   return existing || registerVersionedServiceWorker();
 }
 async function updateServiceWorkerRegistration(registration) {
