@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.419';
+const APP_VERSION = '2.18.420';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -653,6 +653,7 @@ const TICKET_TYPES = Object.freeze({
   other: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>' },
 });
 const TICKET_TYPE_LABELS = Object.freeze({ train: ['火车票', 'Train'], flight: ['飞机票', 'Flight'], ferry: ['船票', 'Ferry'], coach: ['大巴票', 'Coach'], transit: ['公交票', 'Transit'], movie: ['电影票', 'Movie'], concert: ['演唱会票', 'Concert'], dining: ['餐饮单', 'Dining'], other: ['其他', 'Other'] });
+const TICKET_FILTER_LABELS = Object.freeze({ train: ['火车', 'Train'], flight: ['飞机', 'Flight'], ferry: ['轮船', 'Ferry'], coach: ['汽车', 'Bus'], transit: ['公交', 'Transit'], movie: ['电影', 'Movie'], concert: ['赛事', 'Event'], dining: ['餐饮', 'Dining'], other: ['其他', 'Other'] });
 function ticketWalletPassengerParts(value = '', explicitName = '', explicitId = '') {
   const legacy = String(value || '').trim();
   const idMatch = legacy.match(/(?:\d\s*){17}[\dXx]|\d{3,4}\s*\*{4,}\s*\d{3,4}[Xx]?/);
@@ -3402,7 +3403,7 @@ function ticketWalletTrainTemplateMarkup(data, sourceHint = '') {
   ].join('');
 }
 function ticketWalletCategoryMarkup(records) {
-  const categories = Object.keys(TICKET_TYPE_LABELS).map((key) => ({ key, label: ticketTypeLabel(key), icon: TICKET_TYPES[key].icon }));
+  const categories = Object.keys(TICKET_TYPE_LABELS).map((key) => ({ key, label: state?.language === 'en' ? TICKET_FILTER_LABELS[key][1] : TICKET_FILTER_LABELS[key][0], icon: TICKET_TYPES[key].icon }));
   return '<nav class="ticket-wallet-category-bar" aria-label="票据分类">' + categories.map((item) => { const count = records.filter((record) => record.type === item.key).length; const active = state.ticketWalletTypeFilter === item.key; return '<button class="ticket-wallet-category ' + (active ? 'active' : '') + '" data-ticket-wallet-filter="' + item.key + '" aria-pressed="' + active + '"><span class="ticket-wallet-category-icon">' + item.icon + '</span><span>' + escapeHtml(item.label) + '</span><b>' + count + '</b></button>'; }).join('') + '</nav>';
 }
 function ticketWalletAddEntryMarkup() {
