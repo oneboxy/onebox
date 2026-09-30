@@ -11572,35 +11572,60 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-swipe-row .ticket-wallet-train-card { margin: 0; }
 .ticket-wallet-swipe-row-train .swipe-content { background: transparent !important; }
 .ticket-wallet-swipe-actions {
+  --ticket-wallet-actions-width: 192px;
   position: absolute;
   inset: 0 0 0 auto;
   z-index: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  width: 168px;
+  gap: 4px;
+  width: var(--ticket-wallet-actions-width);
+  padding: 5px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--panel-2);
-  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--primary) 12%, transparent);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 8%, transparent);
 }
-.ticket-wallet-swipe-actions button {
+.ticket-wallet-swipe-actions .ticket-wallet-swipe-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
-  padding: 8px 3px;
+  padding: 6px 3px;
   border: 0;
-  border-left: 1px solid var(--line);
+  border-radius: 12px;
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 750;
+  line-height: 1.15;
   cursor: pointer;
 }
-.ticket-wallet-swipe-actions button:first-child { border-left: 0; color: var(--primary); }
-.ticket-wallet-swipe-actions button:hover { background: color-mix(in srgb, var(--primary) 7%, transparent); color: var(--ink); }
-.ticket-wallet-swipe-actions button.danger { color: var(--danger); }
+.ticket-wallet-swipe-actions .ticket-wallet-swipe-action svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+.ticket-wallet-swipe-actions .ticket-wallet-swipe-action:hover,
+.ticket-wallet-swipe-actions .ticket-wallet-swipe-action:focus-visible {
+  outline: none;
+  background: var(--panel);
+  color: var(--ink);
+}
+.ticket-wallet-swipe-actions .ticket-wallet-swipe-action.danger:hover,
+.ticket-wallet-swipe-actions .ticket-wallet-swipe-action.danger:focus-visible {
+  color: var(--danger);
+}
 .ticket-wallet-swipe-row .swipe-content { transform: translateX(0); transition: transform .2s ease; }
-.ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-168px); }
+.ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(calc(-1 * var(--ticket-wallet-actions-width, 192px))); }
 
 /* The first record is the front card. Later records are placed upward into
    the pack so their top edge remains visible behind it. */
@@ -11648,8 +11673,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
     margin-top: calc(var(--ticket-stack-index) * -128px);
   }
   .ticket-wallet-swipe-row .ticket-wallet-card-actions { display: none; }
-  .ticket-wallet-swipe-actions { width: 168px; border-radius: 16px; }
-  .ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-168px); }
+  .ticket-wallet-swipe-actions { border-radius: 16px; }
   .ticket-wallet-stack { padding-bottom: calc(42px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 74px)); }
   .ticket-wallet-stack .ticket-wallet-swipe-row-train { --ticket-stack-peek: 78px; }
 }

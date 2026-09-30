@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.435';
+const APP_VERSION = '2.18.436';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3450,16 +3450,21 @@ function ticketWalletPhysicalTicketMarkup(record) {
 function ticketWalletCardActionButtons(record) {
   return '<button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" data-ticket-wallet-apple="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button>';
 }
+function ticketWalletSwipeActionButtons(record) {
+  return '<button class="ticket-wallet-swipe-action" data-ticket-wallet-edit="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5Z"></path><path d="m14 6 3.5 3.5"></path></svg><span>' + escapeHtml(t('ticketWalletEdit')) + '</span></button><button class="ticket-wallet-swipe-action" data-ticket-wallet-apple="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(t('ticketWalletApple')) + '</span></button><button class="ticket-wallet-swipe-action danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
+}
 function ticketWalletTrainCardMarkup(record, index) {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
   const buttons = ticketWalletCardActionButtons(record);
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train" data-swipe-row style="--ticket-stack-index:' + index + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
+  const swipeButtons = ticketWalletSwipeActionButtons(record);
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train" data-swipe-row style="--ticket-stack-index:' + index + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div></div>';
 }
 function ticketWalletCardMarkup(record, index) {
   if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index);
   const buttons = ticketWalletCardActionButtons(record);
-  return '<div class="swipe-row ticket-wallet-swipe-row" data-swipe-row style="--ticket-stack-index:' + index + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
+  const swipeButtons = ticketWalletSwipeActionButtons(record);
+  return '<div class="swipe-row ticket-wallet-swipe-row" data-swipe-row style="--ticket-stack-index:' + index + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div></div>';
 }
 function ticketWalletStackMarkup(records) {
   const selected = records.find((record) => record.id === state.ticketWalletSelectedId);
