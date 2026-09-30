@@ -12870,3 +12870,100 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-f
   background: transparent;
   box-shadow: none;
 }
+
+/* The ticket/journey view switcher uses the same tool-tab rail treatment as
+   the category filter, so both Tab groups share one visual language. */
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+  display: inline-flex;
+  align-items: stretch;
+  height: 42px;
+  box-sizing: border-box;
+  gap: 2px;
+  padding: 2px 4px 3px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 14px 14px;
+  background: var(--bg);
+  box-shadow: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  min-height: 0;
+  padding: 4px 10px 5px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  transform: none;
+  transition: none;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+  color: var(--ink);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: block;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--primary);
+  opacity: 1;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon,
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+    height: 42px;
+    padding: 2px 4px 3px;
+    border-radius: 0 0 12px 12px;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+    min-height: 0;
+    padding: 4px 8px 5px;
+    font-size: 12px;
+  }
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+  color: var(--ink);
+}
