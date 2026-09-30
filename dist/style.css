@@ -12816,6 +12816,18 @@ body:has(.ticket-wallet-page) .ticket-wallet-empty-add:hover {
   }
 }
 
+/* The ticket artwork is the complete visual surface. Do not add a white
+   wrapper around it in either the initial pack or the focused view. */
+body:has(.ticket-wallet-page) .ticket-wallet-train-card .ticket-wallet-train-ticket,
+body:has(.ticket-wallet-page) .ticket-wallet-physical-ticket {
+  border: 0 !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-train-card .ticket-wallet-train-ticket {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 /* Wallet view switcher: a compact segmented control fits two sibling views
    better than a traditional underlined tab row. All surfaces use theme tokens. */
 body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
