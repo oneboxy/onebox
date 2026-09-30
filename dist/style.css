@@ -12843,3 +12843,30 @@ body:has(.ticket-wallet-page) .ticket-wallet-category-icon svg {
     font-size: 12px;
   }
 }
+
+/* The legacy dark-theme selectors are intentionally overridden at the same
+   specificity so the filter rail cannot regain card borders or shadows. */
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category:hover,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category:hover {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active {
+  color: var(--ink);
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
