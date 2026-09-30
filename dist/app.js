@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.470';
+const APP_VERSION = '2.18.471';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3670,6 +3670,9 @@ function ticketWalletDetailMarkup(record, records = [record]) {
 function ticketWalletStackMarkup(records) {
   const selectedRecord = records.find((record) => record.id === state.ticketWalletSelectedId);
   if (selectedRecord) return ticketWalletDetailMarkup(selectedRecord, records);
+  return ticketWalletPackStackMarkup(records);
+}
+function ticketWalletPackStackMarkup(records) {
   return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
 }
 function syncTicketWalletFocusStack() {
@@ -8840,6 +8843,33 @@ function returnTicketWalletToPack(animate = true) {
     ticketWalletDetailClosingId = '';
     if (state.ticketWalletSelectedId !== selectedId) return;
     state.ticketWalletSelectedId = '';
+    // The detail view already contains the complete return stack underneath
+    // the moving card. Rebuilding the whole workspace here makes Safari
+    // synchronously recreate every filter, control, and ticket SVG on the
+    // animation's last frame, which is the visible hitch in the close video.
+    // Replace only this view with the settled pack so the surrounding page
+    // and its layout stay intact.
+    const panel = detail.closest('[data-ticket-wallet-swipe-panel]');
+    const canReplaceInPlace = panel && detail.isConnected && state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets';
+    if (canReplaceInPlace) {
+      const visibleTickets = ticketWalletFilteredRecords(ticketWalletDisplayRecords(state.ticketWallet));
+      const selectedIndex = visibleTickets.findIndex((record) => record.id === selectedId);
+      const returnStack = detail.querySelector('.ticket-wallet-return-pack-stack');
+      const selectedRow = detail.querySelector('.ticket-wallet-detail-card-shell > .ticket-wallet-detail-row');
+      if (visibleTickets.length && selectedIndex >= 0 && returnStack && selectedRow) {
+        // Reuse the nodes that were animated on screen. Parsing the large
+        // ticket SVGs again on the animation's last frame would simply move
+        // the hitch from workspace render to template parsing.
+        selectedRow.classList.remove('ticket-wallet-detail-row');
+        selectedRow.style.setProperty('--ticket-stack-index', String(selectedIndex));
+        const insertBefore = Array.from(returnStack.children).find((row) => Number(row.style.getPropertyValue('--ticket-stack-index')) > selectedIndex);
+        returnStack.insertBefore(selectedRow, insertBefore || null);
+        returnStack.classList.remove('ticket-wallet-return-pack-stack');
+        returnStack.style.setProperty('--ticket-stack-count', String(visibleTickets.length));
+        detail.replaceWith(returnStack);
+        return;
+      }
+    }
     render();
   };
   const onAnimationEnd = (event) => {
