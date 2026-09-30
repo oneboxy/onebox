@@ -11461,6 +11461,10 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   z-index: calc(100 + var(--ticket-stack-index));
   transition: transform .22s ease, filter .22s ease;
 }
+.ticket-wallet-focus-stack .ticket-wallet-swipe-row:not(.ticket-wallet-focus-selected) {
+  clip-path: inset(0 0 calc(100% - var(--ticket-focus-reveal, 54px)) 0 round 22px);
+  z-index: calc(1100 + var(--ticket-stack-index));
+}
 .ticket-wallet-focus-stack .ticket-wallet-focus-selected {
   position: relative;
   inset: auto;
