@@ -12586,3 +12586,24 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-c
     font-size: 11px;
   }
 }
+
+/* Keep the wallet back action and view switcher in one stable header row at
+   every width.  Older responsive rules used grid areas that could stack them. */
+body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
