@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.452';
+const APP_VERSION = '2.18.453';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3488,7 +3488,8 @@ function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextSt
   const serial = record.ticketSerial || record.ticketNo || record.id;
   const buttons = ticketWalletSwipeActionButtons(record);
   const kind = record.type === 'train' ? 'train' : 'generic';
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-focus-peek-row ' + contextClass + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-focus-peek ticket-wallet-focus-peek-' + kind + ' swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><small>' + escapeHtml(serial) + '</small><div><strong>' + escapeHtml(from) + '</strong><span>' + escapeHtml(number) + ' <i aria-hidden="true">→</i></span><strong>' + escapeHtml(to) + '</strong></div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
+  const template = record.template === 'crh-blue-v1' ? 'blue' : 'pink';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-focus-peek-row ' + contextClass + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-focus-peek ticket-wallet-focus-peek-' + kind + ' ticket-wallet-focus-peek-' + template + ' swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><small>' + escapeHtml(serial) + '</small><div><strong>' + escapeHtml(from) + '</strong><span>' + escapeHtml(number) + ' <i aria-hidden="true">→</i></span><strong>' + escapeHtml(to) + '</strong></div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
 }
 function ticketWalletStackMarkup(records) {
   const selectedIndex = records.findIndex((record) => record.id === state.ticketWalletSelectedId);

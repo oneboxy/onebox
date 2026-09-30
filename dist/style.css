@@ -11560,12 +11560,20 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   min-height: 0;
   overflow: hidden;
   padding: 7px 12px 8px;
-  border: 1px solid color-mix(in srgb, var(--line) 86%, transparent);
+  border: 0;
   border-radius: 12px;
-  background: linear-gradient(135deg, color-mix(in srgb, #efb4b4 92%, var(--panel)), color-mix(in srgb, #f8d3d3 85%, var(--panel)));
-  color: var(--ink);
+  background: #efb4b4 !important;
+  color: #050505 !important;
   box-shadow: 0 9px 16px color-mix(in srgb, var(--ink) 10%, transparent);
   text-align: left;
+}
+.ticket-wallet-focus-peek-pink {
+  background-color: #efb4b4 !important;
+  background-image: radial-gradient(circle at 12px 10px, rgba(189, 112, 117, .18) 0 1px, transparent 1.5px), radial-gradient(circle at 28px 22px, rgba(189, 112, 117, .12) 0 1px, transparent 1.5px) !important;
+  background-size: 34px 28px, 42px 34px !important;
+}
+.ticket-wallet-focus-peek-blue {
+  background: linear-gradient(135deg, #d5f4f7, #a9e3eb) !important;
 }
 .ticket-wallet-focus-peek small,
 .ticket-wallet-focus-peek strong,
@@ -11576,7 +11584,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-focus-peek > div strong:last-child { text-align: right; }
 .ticket-wallet-focus-peek span { color: var(--ink); font: 15px/1.1 Georgia, 'Songti SC', serif; text-align: center; }
 .ticket-wallet-focus-peek span i { font-style: normal; }
-.ticket-wallet-focus-peek-generic { background: linear-gradient(135deg, color-mix(in srgb, var(--panel-2) 88%, var(--primary)), var(--panel)); }
+.ticket-wallet-focus-peek-generic { background: var(--panel-2) !important; color: var(--ink) !important; }
 .ticket-wallet-focus-peek-generic small { color: var(--muted); }
 .ticket-wallet-focus-peek-generic strong { font-family: inherit; }
 .ticket-wallet-focus-peek-generic span { font-family: inherit; font-size: 12px; }
