@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.420';
+const APP_VERSION = '2.18.421';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3404,7 +3404,22 @@ function ticketWalletTrainTemplateMarkup(data, sourceHint = '') {
 }
 function ticketWalletCategoryMarkup(records) {
   const categories = Object.keys(TICKET_TYPE_LABELS).map((key) => ({ key, label: state?.language === 'en' ? TICKET_FILTER_LABELS[key][1] : TICKET_FILTER_LABELS[key][0], icon: TICKET_TYPES[key].icon }));
-  return '<nav class="ticket-wallet-category-bar" aria-label="票据分类">' + categories.map((item) => { const count = records.filter((record) => record.type === item.key).length; const active = state.ticketWalletTypeFilter === item.key; return '<button class="ticket-wallet-category ' + (active ? 'active' : '') + '" data-ticket-wallet-filter="' + item.key + '" aria-pressed="' + active + '"><span class="ticket-wallet-category-icon">' + item.icon + '</span><span>' + escapeHtml(item.label) + '</span><b>' + count + '</b></button>'; }).join('') + '</nav>';
+  return '<nav class="ticket-wallet-category-bar" data-tab-rail="ticket-filters" role="tablist" aria-label="票据分类">' + categories.map((item) => { const count = records.filter((record) => record.type === item.key).length; const active = state.ticketWalletTypeFilter === item.key; return '<button class="ticket-wallet-category ' + (active ? 'active' : '') + '" data-ticket-wallet-filter="' + item.key + '" role="tab" aria-selected="' + active + '" aria-pressed="' + active + '"><span class="ticket-wallet-category-icon">' + item.icon + '</span><span>' + escapeHtml(item.label) + '</span><b>' + count + '</b></button>'; }).join('') + '</nav>';
+}
+function focusTicketWalletFilter(smooth = false) {
+  const scroll = document.querySelector('.ticket-wallet-filter-scroll');
+  const active = scroll?.querySelector('.ticket-wallet-category.active');
+  if (!scroll || !active || scroll.scrollWidth <= scroll.clientWidth + 1) return;
+  const maxScroll = Math.max(0, scroll.scrollWidth - scroll.clientWidth);
+  const padding = 8;
+  const visibleLeft = scroll.scrollLeft + padding;
+  const visibleRight = scroll.scrollLeft + scroll.clientWidth - padding;
+  let target = scroll.scrollLeft;
+  if (active.offsetLeft < visibleLeft) target = active.offsetLeft - padding;
+  else if (active.offsetLeft + active.offsetWidth > visibleRight) target = active.offsetLeft + active.offsetWidth - scroll.clientWidth + padding;
+  target = Math.min(maxScroll, Math.max(0, target));
+  if (Math.abs(target - scroll.scrollLeft) < 1) return;
+  scroll.scrollTo({ left: target, behavior: smooth ? 'smooth' : 'auto' });
 }
 function ticketWalletAddEntryMarkup() {
   return '<button class="ticket-wallet-add-entry" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span class="ticket-wallet-add-entry-icon" aria-hidden="true">＋</span><span>' + escapeHtml(t('ticketWalletAddShort')) + '</span></button>';
@@ -8912,16 +8927,7 @@ workspace.addEventListener('click', async (event) => {
     const nextScroll = document.querySelector('.ticket-wallet-filter-scroll');
     if (nextScroll) nextScroll.scrollLeft = previousFilterScrollLeft;
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const scroll = document.querySelector('.ticket-wallet-filter-scroll');
-        const active = scroll?.querySelector('.ticket-wallet-category.active');
-        if (!scroll || !active) return;
-        const scrollRect = scroll.getBoundingClientRect();
-        const activeRect = active.getBoundingClientRect();
-        const nextLeft = Math.max(0, scroll.scrollLeft + activeRect.left - scrollRect.left - 8);
-        if (Math.abs(nextLeft - scroll.scrollLeft) < 1) return;
-        scroll.scrollTo({ left: nextLeft, behavior: 'smooth' });
-      });
+      requestAnimationFrame(() => focusTicketWalletFilter(true));
     });
     return;
   }

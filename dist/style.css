@@ -12719,23 +12719,80 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-catego
   }
 }
 
-/* Ticket filters follow the same quiet tab treatment as the main tool rail:
-   the active state is carried by text and an underline, never a colored
-   outline. The rail remains horizontally scrollable and reveals the next tab. */
+/* Ticket filters intentionally share the tool rail geometry exactly: the
+   rail is a 42px edge-to-edge surface and only the active tab gets the
+   theme-colored 2px underline. */
+body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+  display: block;
+  height: 42px;
+  box-sizing: border-box;
+  margin: 0 0 20px;
+  padding: 2px 8px 3px;
+  overflow: visible;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 14px 14px;
+  background: var(--bg);
+  box-shadow: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: auto;
+  scroll-padding-left: 0;
+  scroll-snap-type: none;
+  scrollbar-width: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  width: max-content;
+  height: 100%;
+  min-width: max-content;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category,
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active,
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category:hover {
   position: relative;
+  flex: 0 0 auto !important;
   min-width: 0;
-  min-height: 38px;
-  padding: 8px 12px 10px;
+  height: 100%;
+  min-height: 0;
+  padding: 4px 10px 5px;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   color: var(--muted);
   transform: none;
-  transition: color .18s ease, background-color .18s ease;
+  transition: none;
+  white-space: nowrap;
 }
 
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active {
@@ -12745,37 +12802,44 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-catego
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active::after {
   content: '';
   position: absolute;
-  right: 9px;
-  bottom: 3px;
-  left: 9px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: block;
   height: 2px;
-  border-radius: 2px;
+  border-radius: 2px 2px 0 0;
   background: var(--primary);
-  transform-origin: center;
-  animation: ticket-filter-underline-in .2s ease-out both;
+  opacity: 1;
 }
 
 body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category:hover {
-  background: color-mix(in srgb, var(--soft) 55%, transparent);
+  background: transparent;
 }
 
-@keyframes ticket-filter-underline-in {
-  from { opacity: 0; transform: scaleX(.35); }
-  to { opacity: 1; transform: scaleX(1); }
+body:has(.ticket-wallet-page) .ticket-wallet-category-icon {
+  flex-basis: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-category-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 @media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+    height: 42px;
+    margin: 0 -14px 14px;
+    padding: 2px 8px 3px;
+  }
+
   body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category,
   body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active,
   body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category:hover {
-    min-height: 36px;
-    padding: 8px 10px 9px;
+    min-height: 0;
+    padding: 4px 8px 5px;
     font-size: 12px;
-  }
-
-  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active::after {
-    right: 7px;
-    bottom: 2px;
-    left: 7px;
   }
 }
