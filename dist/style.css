@@ -13911,10 +13911,10 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   transition: none;
 }
 @keyframes ticket-wallet-card-return-to-pack {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  52% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .6), 0) scale(.995); }
-  86% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .94), 0) scale(.99); }
-  100% { transform: translate3d(0, var(--ticket-wallet-return-offset), 0) scale(.99); }
+  0% { transform: translate3d(0, 0, 0); }
+  52% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .6), 0); }
+  86% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .94), 0); }
+  100% { transform: translate3d(0, var(--ticket-wallet-return-offset), 0); }
 }
 
 /* Make the add action feel like the open slot at the top of the pack. */

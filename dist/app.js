@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.467';
+const APP_VERSION = '2.18.468';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3508,7 +3508,11 @@ function ticketWalletDetailMarkup(record, records = [record]) {
   const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
   const selectedIndex = Math.max(0, records.findIndex((item) => item.id === record.id));
   const returnPeek = window.matchMedia?.('(max-width: 760px)').matches ? 96 : 136;
-  const returnOffset = (window.matchMedia?.('(max-width: 760px)').matches ? 32 : 34) + selectedIndex * returnPeek;
+  // The return stack no longer has an add slot above it. The selected detail
+  // card starts on the same row as the first pack card, so its target is only
+  // the original stack index offset; keeping the old top padding made the
+  // card overshoot and visibly snap back when the animation ended.
+  const returnOffset = selectedIndex * returnPeek;
   return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '" style="--ticket-wallet-return-offset:' + returnOffset + 'px">' + ticketWalletDetailReturnPackMarkup(records, record.id) + '<div class="ticket-wallet-detail-card-shell"><button type="button" class="ticket-wallet-detail-close" data-ticket-wallet-clear-selection aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button>' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
 }
 function ticketWalletStackMarkup(records) {
