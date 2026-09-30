@@ -12950,7 +12950,13 @@ body:has(.ticket-wallet-page) .ticket-wallet-view-icon svg {
 }
 
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher,
-html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  box-shadow: none;
+}
+
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover,
