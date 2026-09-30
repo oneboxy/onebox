@@ -12457,3 +12457,132 @@ body:has(.ticket-wallet-page) .ticket-wallet-empty-add:hover {
     box-shadow: 0 19px 31px color-mix(in srgb, var(--ink) 22%, transparent);
   }
 }
+
+/* Wallet view switcher: a compact segmented control fits two sibling views
+   better than a traditional underlined tab row. All surfaces use theme tokens. */
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-2);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active::after {
+  display: none;
+  content: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon {
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  flex: 0 0 16px;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-category-bar {
+  border-color: var(--line);
+  background: var(--panel-2);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-category,
+body:has(.ticket-wallet-page) .ticket-wallet-category.active,
+body:has(.ticket-wallet-page) .ticket-wallet-category:hover {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-category.active {
+  background: var(--soft);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line), 0 5px 14px color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-category:hover {
+  background: var(--panel-2);
+  color: var(--ink);
+  transform: none;
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category-bar,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category-bar {
+  border-color: var(--line);
+  background: var(--panel-2);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category.active,
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category:hover,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category:hover {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-category.active,
+html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-category.active {
+  background: var(--soft);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line), 0 5px 14px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+    flex: 0 0 auto;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+    min-height: 30px;
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+}
