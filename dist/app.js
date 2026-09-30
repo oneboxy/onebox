@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.442';
+const APP_VERSION = '2.18.443';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3468,24 +3468,30 @@ function ticketWalletSwipeActionButtons(record) {
   const originalDisabled = record.sourceImageId ? '' : ' disabled aria-disabled="true"';
   return '<button class="ticket-wallet-swipe-action" data-ticket-wallet-edit="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5Z"></path><path d="m14 6 3.5 3.5"></path></svg><span>' + escapeHtml(t('ticketWalletEdit')) + '</span></button><button class="ticket-wallet-swipe-action' + (record.sourceImageId ? '' : ' is-unavailable') + '" data-ticket-wallet-original="' + escapeHtml(record.id) + '"' + originalDisabled + '><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path></svg><span>' + escapeHtml(originalLabel) + '</span></button><button class="ticket-wallet-swipe-action" data-ticket-wallet-apple="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(walletLabel) + '</span></button><button class="ticket-wallet-swipe-action danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
 }
-function ticketWalletTrainCardMarkup(record, index) {
+function ticketWalletTrainCardMarkup(record, index, contextClass = '', contextStyle = '') {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
   const buttons = ticketWalletCardActionButtons(record);
   const swipeButtons = ticketWalletSwipeActionButtons(record);
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train" data-swipe-row style="--ticket-stack-index:' + index + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div></div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div></div>';
 }
-function ticketWalletCardMarkup(record, index) {
-  if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index);
+function ticketWalletCardMarkup(record, index, contextClass = '', contextStyle = '') {
+  if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index, contextClass, contextStyle);
   const buttons = ticketWalletCardActionButtons(record);
   const swipeButtons = ticketWalletSwipeActionButtons(record);
-  return '<div class="swipe-row ticket-wallet-swipe-row" data-swipe-row style="--ticket-stack-index:' + index + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div></div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record) + '<div class="ticket-wallet-card-actions">' + buttons + '</div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div></div>';
 }
 function ticketWalletStackMarkup(records) {
-  const selected = records.find((record) => record.id === state.ticketWalletSelectedId);
-  if (!selected) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map(ticketWalletCardMarkup).join('') + '</div>';
-  const rest = records.filter((record) => record.id !== selected.id);
-  return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-card">' + ticketWalletCardMarkup(selected, 0) + '</div></div>' + (rest.length ? '<div class="ticket-wallet-other-head"><span>其他票据</span><span>' + rest.length + '</span></div><div class="ticket-wallet-stack ticket-wallet-stack-secondary">' + rest.map(ticketWalletCardMarkup).join('') + '</div>' : '');
+  const selectedIndex = records.findIndex((record) => record.id === state.ticketWalletSelectedId);
+  if (selectedIndex < 0) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
+  const focusCards = records.map((record, index) => {
+    if (index === selectedIndex) return ticketWalletCardMarkup(record, index, 'ticket-wallet-focus-selected');
+    const before = index < selectedIndex;
+    const depth = Math.min(4, Math.abs(index - selectedIndex));
+    const shift = (before ? 1 : -1) * depth * 46;
+    return ticketWalletCardMarkup(record, index, before ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after', '--ticket-focus-shift:' + shift + 'px');
+  }).join('');
+  return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-stack">' + focusCards + '</div></div>';
 }
 function ticketWalletFilteredRecords(records) {
   return state.ticketWalletTypeFilter === 'all' ? records : records.filter((record) => record.type === state.ticketWalletTypeFilter);
