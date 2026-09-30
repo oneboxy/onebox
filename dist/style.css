@@ -13081,7 +13081,8 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
 
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
 html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
-  background: var(--panel);
-  color: var(--ink);
+  background: var(--panel) !important;
+  background-color: var(--panel) !important;
+  color: var(--ink) !important;
   box-shadow: 0 3px 9px color-mix(in srgb, var(--ink) 28%, transparent);
 }
