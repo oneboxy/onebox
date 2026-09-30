@@ -12601,9 +12601,33 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-head {
 body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb {
   flex: 0 0 auto;
   align-self: center;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
 }
 
 body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
   flex: 0 0 auto;
   margin-left: auto;
+}
+
+/* Match the switcher height to the back affordance so both visual centers
+   land on exactly the same horizontal guide. */
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+  padding: 2px;
+  border-radius: 11px;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+  min-height: 26px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon,
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon svg {
+  width: 14px;
+  height: 14px;
 }
