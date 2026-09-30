@@ -13787,6 +13787,87 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   }
 }
 
+/* Ticket detail return motion and compact controls. */
+.ticket-wallet-detail-card-shell .ticket-wallet-detail-close {
+  top: 2px;
+  right: 2px;
+  width: 27px;
+  height: 27px;
+  border: 0;
+  background: color-mix(in srgb, var(--panel) 62%, transparent);
+  color: var(--muted);
+  opacity: .78;
+  box-shadow: 0 1px 5px color-mix(in srgb, var(--ink) 8%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.ticket-wallet-detail-card-shell .ticket-wallet-detail-close:hover,
+.ticket-wallet-detail-card-shell .ticket-wallet-detail-close:focus-visible {
+  background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+  color: var(--ink);
+  opacity: 1;
+}
+.ticket-wallet-detail-card-shell .ticket-wallet-detail-close svg {
+  width: 13px;
+  height: 13px;
+}
+.ticket-wallet-detail-view.is-closing {
+  pointer-events: none;
+  animation: ticket-wallet-detail-return-to-pack .27s cubic-bezier(.32,.72,0,1) forwards;
+}
+.ticket-wallet-detail-view.is-closing .ticket-wallet-detail-info {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .18s ease, transform .27s cubic-bezier(.32,.72,0,1);
+}
+.ticket-wallet-stack-returning {
+  transform-origin: top center;
+  animation: ticket-wallet-pack-reveal .28s cubic-bezier(.22,.8,.28,1) both;
+}
+@keyframes ticket-wallet-detail-return-to-pack {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  58% { opacity: .94; transform: translateY(25px) scale(.98); }
+  100% { opacity: 0; transform: translateY(58px) scale(.94); }
+}
+@keyframes ticket-wallet-pack-reveal {
+  from { opacity: .35; transform: translateY(28px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Make the add action feel like the open slot at the top of the pack. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top {
+  min-height: 34px;
+  margin: 0;
+  padding: 5px 14px;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 17px 17px 0 0;
+  background: color-mix(in srgb, var(--panel-2) 78%, var(--panel));
+  color: var(--muted);
+  box-shadow: inset 0 -7px 10px color-mix(in srgb, var(--line) 28%, transparent);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:hover,
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:focus-visible {
+  background: color-mix(in srgb, var(--panel-2) 92%, var(--panel));
+  color: var(--ink);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top + .ticket-wallet-stack {
+  padding-top: 0;
+}
+@media (max-width: 760px) {
+  .ticket-wallet-detail-card-shell .ticket-wallet-detail-close {
+    top: 2px;
+    right: 2px;
+    width: 26px;
+    height: 26px;
+  }
+  .ticket-wallet-stack-section > .ticket-wallet-add-entry-top {
+    min-height: 32px !important;
+    padding: 4px 12px !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+}
+
 /* Final wallet view tabs: one simple capsule, with no underline or nested
    decoration. All surfaces continue to use theme tokens. */
 body:has(.ticket-wallet-page) .ticket-wallet-view-switcher,

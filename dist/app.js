@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.463';
+const APP_VERSION = '2.18.464';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3511,7 +3511,8 @@ function ticketWalletDetailMarkup(record) {
 function ticketWalletStackMarkup(records) {
   const selectedRecord = records.find((record) => record.id === state.ticketWalletSelectedId);
   if (selectedRecord) return ticketWalletDetailMarkup(selectedRecord);
-  return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
+  const enteringClass = ticketWalletPackEntering ? ' ticket-wallet-stack-returning' : '';
+  return '<div class="ticket-wallet-stack' + enteringClass + '" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
 }
 function syncTicketWalletFocusStack() {
   const stack = $('.ticket-wallet-focus-stack');
@@ -7897,6 +7898,9 @@ let swipeGesture = null;
 let swipeSuppressClickUntil = 0;
 let ticketWalletSuppressSyntheticClick = false;
 let ticketWalletSyntheticClickPoint = null;
+let ticketWalletDetailClosingId = '';
+let ticketWalletDetailClosingTimer = 0;
+let ticketWalletPackEntering = false;
 let tabSwipeGesture = null;
 let tabSwipeSuppressClickUntil = 0;
 let pageSwipeGesture = null;
@@ -8657,12 +8661,36 @@ workspace.addEventListener('pointerdown', (event) => {
   const ticketWalletId = ticketCard && (!ticketWalletEditTarget || state.ticketWalletSelectedId !== ticketCard.dataset.ticketWalletCard) ? ticketCard.dataset.ticketWalletCard : '';
   swipeGesture = { row, ticketWalletId, startX: event.clientX, startY: event.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
 });
+function returnTicketWalletToPack(animate = true) {
+  const selectedId = state.ticketWalletSelectedId;
+  if (!selectedId) return false;
+  if (ticketWalletDetailClosingId) return true;
+  const detail = document.querySelector('[data-ticket-wallet-detail]');
+  if (!animate || !detail) {
+    state.ticketWalletSelectedId = '';
+    render();
+    return true;
+  }
+  ticketWalletDetailClosingId = selectedId;
+  detail.classList.add('is-closing');
+  detail.setAttribute('aria-busy', 'true');
+  window.clearTimeout(ticketWalletDetailClosingTimer);
+  ticketWalletDetailClosingTimer = window.setTimeout(() => {
+    ticketWalletDetailClosingTimer = 0;
+    ticketWalletDetailClosingId = '';
+    if (state.ticketWalletSelectedId !== selectedId) return;
+    state.ticketWalletSelectedId = '';
+    ticketWalletPackEntering = true;
+    render();
+    ticketWalletPackEntering = false;
+  }, 270);
+  return true;
+}
 function finishTicketWalletVerticalGesture(gesture) {
   if (!gesture || gesture.cancelled || !gesture.ticketWalletId || !gesture.ticketVertical) return false;
   if (gesture.dy >= -52 || Math.abs(gesture.dy) <= Math.abs(gesture.dx) + 12) return false;
   if (state.ticketWalletSelectedId !== gesture.ticketWalletId) return false;
-  state.ticketWalletSelectedId = '';
-  render();
+  returnTicketWalletToPack(true);
   swipeSuppressClickUntil = Date.now() + 350;
   return true;
 }
@@ -9163,7 +9191,7 @@ workspace.addEventListener('click', async (event) => {
     ticketWalletSyntheticClickPoint = null;
     return openTicketWalletEditor(ticketFieldEdit.dataset.ticketWalletId, ticketFieldEdit.dataset.ticketWalletEditField);
   }
-  if (event.target.closest('[data-ticket-wallet-clear-selection]')) { state.ticketWalletSelectedId = ''; return render(); }
+  if (event.target.closest('[data-ticket-wallet-clear-selection]')) { returnTicketWalletToPack(true); return; }
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   if (ticketCard && !event.target.closest('[data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
     // iOS may emit the synthetic click after the tap has already selected and
