@@ -13826,6 +13826,9 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
 .ticket-wallet-return-pack .ticket-wallet-stack {
   padding-bottom: calc(52px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 136px));
 }
+.ticket-wallet-return-pack .ticket-wallet-return-card-selected {
+  opacity: 0;
+}
 .ticket-wallet-detail-view.is-closing {
   pointer-events: none;
   opacity: 1;
@@ -13834,27 +13837,29 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-return-pack {
   visibility: visible;
-  will-change: transform, opacity;
-  animation: ticket-wallet-return-pack-in .42s cubic-bezier(.22,.75,.18,1) both;
+  opacity: 1;
+  transform: none;
+}
+.ticket-wallet-detail-view.is-closing .ticket-wallet-return-pack .ticket-wallet-return-card-selected {
+  opacity: 0;
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-card-shell {
   z-index: 4;
-  will-change: transform, opacity;
+  will-change: transform;
+  backface-visibility: hidden;
   animation: ticket-wallet-card-return-to-pack .42s cubic-bezier(.22,.75,.18,1) both;
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-info {
+  visibility: hidden;
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity .22s ease, transform .42s cubic-bezier(.22,.75,.18,1);
-}
-@keyframes ticket-wallet-return-pack-in {
-  0% { opacity: .06; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
+  transform: none;
+  transition: none;
 }
 @keyframes ticket-wallet-card-return-to-pack {
-  0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-  52% { opacity: .98; transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .6), 0) scale(.995); }
-  100% { opacity: .16; transform: translate3d(0, var(--ticket-wallet-return-offset), 0) scale(.99); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  52% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .6), 0) scale(.995); }
+  86% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .94), 0) scale(.99); }
+  100% { transform: translate3d(0, var(--ticket-wallet-return-offset), 0) scale(.99); }
 }
 
 /* Make the add action feel like the open slot at the top of the pack. */
