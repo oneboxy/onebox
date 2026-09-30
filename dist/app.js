@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.429';
+const APP_VERSION = '2.18.430';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8338,11 +8338,14 @@ function pageSwipeItems() {
   if (state.section === 'home') {
     return homeTabIds().map((id) => ({ kind: 'home', id }));
   }
+  if (state.section === 'mine' && state.ticketWalletOpen && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft) {
+    return Object.keys(TICKET_TYPE_LABELS).map((id) => ({ kind: 'ticket-filter', id }));
+  }
   if (state.section === 'tools') return (state.navigationLocation === 'tools' ? state.toolOrder : state.toolOrder.filter((id) => id !== 'navigation')).map((id) => ({ kind: 'tool', id }));
   return [];
 }
 function pageSwipeIndex(items) {
-  const currentId = state.section === 'home' ? state.homeFeed.active : state.section === 'navigation' ? 'navigation' : state.tool;
+  const currentId = state.section === 'home' ? state.homeFeed.active : state.section === 'mine' && state.ticketWalletOpen ? state.ticketWalletTypeFilter : state.section === 'navigation' ? 'navigation' : state.tool;
   return items.findIndex((item) => item.id === currentId);
 }
 function pageSwipeTarget(event) {
@@ -8364,6 +8367,13 @@ function pageSwipeMarkup(item) {
     const markup = renderHome();
     state.homeFeed.active = previousSource;
     return { tool: 'home', markup };
+  }
+  if (item.kind === 'ticket-filter') {
+    const previousFilter = state.ticketWalletTypeFilter;
+    state.ticketWalletTypeFilter = item.id;
+    const markup = renderTicketWallet();
+    state.ticketWalletTypeFilter = previousFilter;
+    return { tool: 'mine', markup };
   }
   const previousTool = state.tool;
   state.tool = item.id;
@@ -8402,7 +8412,7 @@ function preparePageSwipeTrack(gesture, direction) {
   const pageWidth = Math.max(1, workspace.getBoundingClientRect().width);
   pageSwipeStage.classList.add('is-active', direction === 1 ? 'forward' : 'backward');
   pageSwipeStage.style.transform = 'translate3d(' + (direction === 1 ? 0 : -pageWidth) + 'px, 0, 0)';
-  const navContainer = target.kind === 'tool' ? nav : homeSourceNav.querySelector('.feed-source-tabs');
+  const navContainer = target.kind === 'tool' ? nav : target.kind === 'ticket-filter' ? workspace.querySelector('.ticket-wallet-filter-scroll') : homeSourceNav.querySelector('.feed-source-tabs');
   pageSwipeTrackState = { target, direction, pageWidth, nav: beginPageSwipeNav(navContainer, direction) };
   return pageSwipeTrackState;
 }
@@ -8434,6 +8444,7 @@ function settlePageSwipeBack() {
 }
 function selectPageSwipeItem(item) {
   if (item.kind === 'tool') return selectTool(item.id);
+  if (item.kind === 'ticket-filter') return selectTicketWalletFilter(item.id);
   return selectHomeFeedSource(item.id);
 }
 function settlePageSwipe(target, direction) {
