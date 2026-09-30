@@ -12973,3 +12973,20 @@ html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-view-switch
 html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
   color: var(--ink);
 }
+
+/* Keep ticket filter labels as compact as the tool-tab content while leaving
+   enough room for the icon and count to remain legible. */
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category {
+  gap: 3px;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category b {
+  min-width: 0;
+  margin-left: -1px;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category {
+    gap: 3px;
+  }
+}

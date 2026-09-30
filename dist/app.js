@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.424';
+const APP_VERSION = '2.18.425';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3405,6 +3405,17 @@ function ticketWalletTrainTemplateMarkup(data, sourceHint = '') {
 function ticketWalletCategoryMarkup(records) {
   const categories = Object.keys(TICKET_TYPE_LABELS).map((key) => ({ key, label: state?.language === 'en' ? TICKET_FILTER_LABELS[key][1] : TICKET_FILTER_LABELS[key][0], icon: TICKET_TYPES[key].icon }));
   return '<nav class="ticket-wallet-category-bar" data-tab-rail="ticket-filters" role="tablist" aria-label="票据分类">' + categories.map((item) => { const count = records.filter((record) => record.type === item.key).length; const active = state.ticketWalletTypeFilter === item.key; return '<button class="ticket-wallet-category ' + (active ? 'active' : '') + '" data-ticket-wallet-filter="' + item.key + '" role="tab" aria-selected="' + active + '" aria-pressed="' + active + '"><span class="ticket-wallet-category-icon">' + item.icon + '</span><span>' + escapeHtml(item.label) + '</span><b>' + count + '</b></button>'; }).join('') + '</nav>';
+}
+function selectTicketWalletFilter(type) {
+  if (!Object.prototype.hasOwnProperty.call(TICKET_TYPES, type)) return;
+  const previousFilterScrollLeft = document.querySelector('.ticket-wallet-filter-scroll')?.scrollLeft || 0;
+  state.ticketWalletTypeFilter = type;
+  saveTicketWalletTypeFilter();
+  state.ticketWalletSelectedId = '';
+  render();
+  const nextScroll = document.querySelector('.ticket-wallet-filter-scroll');
+  if (nextScroll) nextScroll.scrollLeft = previousFilterScrollLeft;
+  requestAnimationFrame(() => requestAnimationFrame(() => focusTicketWalletFilter(true)));
 }
 function focusTicketWalletFilter(smooth = false) {
   const scroll = document.querySelector('.ticket-wallet-filter-scroll');
@@ -8204,7 +8215,9 @@ function handleReorderClick(target, type, index) {
   return true;
 }
 function pageSwipeNavSelector(container) {
-  return container?.dataset.tabRail === 'tools' ? '[data-tool]' : '[data-feed-source]';
+  if (container?.dataset.tabRail === 'tools') return '[data-tool]';
+  if (container?.dataset.tabRail === 'ticket-filters') return '[data-ticket-wallet-filter]';
+  return '[data-feed-source]';
 }
 function clearPageSwipeNav() {
   if (!pageSwipeNavState) return;
@@ -8294,13 +8307,15 @@ function updateTabSwipe(event) {
 function finishTabSwipe() {
   const gesture = tabSwipeGesture;
   tabSwipeGesture = null;
-  if (!gesture || gesture.cancelled || Math.abs(gesture.dx) < 52 || Math.abs(gesture.dx) <= Math.abs(gesture.dy) + 12) {
+  if (!gesture) return;
+  if (gesture.cancelled || Math.abs(gesture.dx) < 52 || Math.abs(gesture.dx) <= Math.abs(gesture.dy) + 12) {
     settlePageSwipeNav(false);
     clearPageSwipeNav();
     return;
   }
   const isToolRail = gesture.container.dataset.tabRail === 'tools';
-  const selector = isToolRail ? '[data-tool]' : '[data-feed-source]';
+  const isTicketFilterRail = gesture.container.dataset.tabRail === 'ticket-filters';
+  const selector = isToolRail ? '[data-tool]' : isTicketFilterRail ? '[data-ticket-wallet-filter]' : '[data-feed-source]';
   const tabs = [...gesture.container.querySelectorAll(selector)];
   const currentIndex = tabs.findIndex((tab) => tab.classList.contains('active'));
   const nextIndex = currentIndex + (gesture.dx < 0 ? 1 : -1);
@@ -8314,8 +8329,9 @@ function finishTabSwipe() {
   settlePageSwipeNav(true);
   clearPageSwipeNav();
   if (isToolRail) selectTool(nextTab.dataset.tool);
+  else if (isTicketFilterRail) selectTicketWalletFilter(nextTab.dataset.ticketWalletFilter);
   else selectHomeFeedSource(nextTab.dataset.feedSource);
-  requestAnimationFrame(() => gesture.container.querySelector('.active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }));
+  if (!isTicketFilterRail) requestAnimationFrame(() => gesture.container.querySelector('.active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }));
 }
 
 function pageSwipeItems() {
@@ -8332,7 +8348,7 @@ function pageSwipeIndex(items) {
 function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
-  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], [data-swipe-row], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list')) return null;
+  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], [data-swipe-row], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher')) return null;
   const items = pageSwipeItems();
   const index = pageSwipeIndex(items);
   if (index < 0 || items.length < 2) return null;
@@ -8590,6 +8606,11 @@ homeSourceNav.addEventListener('dragstart', (event) => { const source = event.ta
 homeSourceNav.addEventListener('dragover', (event) => { if (event.target.closest('[data-feed-source]')) event.preventDefault(); });
 homeSourceNav.addEventListener('drop', (event) => { event.preventDefault(); const source = event.target.closest('[data-feed-source]'); if (source) swapHomeFeedSources(Number(event.dataTransfer.getData('text/plain')), Number(source.dataset.feedSourceIndex)); });
 
+workspace.addEventListener('pointerdown', (event) => {
+  const filterRail = event.target.closest('.ticket-wallet-filter-scroll');
+  if (filterRail) beginTabSwipe(filterRail, event);
+});
+
 workspace.addEventListener('pointerdown', (event) => { const card = event.target.closest('[data-weather-card]'); if (card && !event.target.closest('[data-delete-weather]')) startLongPress(card, 'weather', Number(card.dataset.weatherIndex), event); });
 // Weather cards are draggable and also own a long-press gesture. Handle the
 // delete control during capture so touch/PWA pointer events cannot be claimed
@@ -8633,8 +8654,10 @@ document.addEventListener('pointerdown', (event) => {
 document.querySelector('main')?.addEventListener('pointerdown', beginHomeFeedPull);
 document.querySelector('main')?.addEventListener('pointerdown', beginPageSwipe);
 document.addEventListener('pointermove', updateHomeFeedPull, { passive: false });
+document.addEventListener('pointermove', updateTabSwipe, { passive: false });
 document.addEventListener('pointermove', updatePageSwipe, { passive: false });
 document.addEventListener('pointerup', finishHomeFeedPull, { passive: true });
+document.addEventListener('pointerup', finishTabSwipe, { passive: true });
 document.addEventListener('pointerup', finishPageSwipe, { passive: true });
 document.addEventListener('pointercancel', () => {
   tabSwipeGesture = null; pageSwipeGesture = null; homePullGesture = null;
@@ -8919,16 +8942,7 @@ workspace.addEventListener('click', async (event) => {
   if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1'; document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => item.classList.toggle('active', item === ticketWalletTemplate)); return; }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');
   if (ticketWalletFilter) {
-    const previousFilterScrollLeft = ticketWalletFilter.closest('.ticket-wallet-filter-scroll')?.scrollLeft || 0;
-    state.ticketWalletTypeFilter = ticketWalletFilter.dataset.ticketWalletFilter || 'train';
-    saveTicketWalletTypeFilter();
-    state.ticketWalletSelectedId = '';
-    render();
-    const nextScroll = document.querySelector('.ticket-wallet-filter-scroll');
-    if (nextScroll) nextScroll.scrollLeft = previousFilterScrollLeft;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => focusTicketWalletFilter(true));
-    });
+    selectTicketWalletFilter(ticketWalletFilter.dataset.ticketWalletFilter || 'train');
     return;
   }
   if (event.target.closest('[data-ticket-wallet-add]')) return openTicketWalletEditor();
