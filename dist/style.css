@@ -14296,10 +14296,15 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack {
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   justify-items: stretch;
+  /* The outer card is translated down by the stack step. Reserve that
+     visual overflow so its bottom edge is never clipped by the page. */
+  padding-bottom: calc(32px + (var(--ticket-stack-count) * var(--ticket-stack-peek, 20px)));
+  overflow: visible;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-stack > .ticket-wallet-swipe-row {
   width: 100%;
   min-width: 0;
   margin-inline: 0 !important;
+  overflow: visible;
   transform: translateY(calc(var(--ticket-stack-index) * var(--ticket-stack-peek, 20px)));
 }
