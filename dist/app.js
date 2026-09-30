@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.464';
+const APP_VERSION = '2.18.465';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3449,7 +3449,7 @@ function scheduleTicketWalletFilterFocus(smooth = false) {
   requestAnimationFrame(() => requestAnimationFrame(() => focusTicketWalletFilter(smooth)));
 }
 function ticketWalletAddEntryMarkup() {
-  return '<button class="ticket-wallet-add-entry ticket-wallet-add-entry-top" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span class="ticket-wallet-add-entry-icon" aria-hidden="true">＋</span><span>' + escapeHtml(t('ticketWalletAddShort')) + '</span></button>';
+  return '<button class="ticket-wallet-add-entry ticket-wallet-add-entry-top" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span class="ticket-wallet-add-entry-slot" aria-hidden="true"><span class="ticket-wallet-add-entry-icon">＋</span></span><span class="ticket-wallet-add-entry-copy">' + escapeHtml(t('ticketWalletAddShort')) + '</span></button>';
 }
 function ticketWalletPhysicalTicketMarkup(record) {
   const meta = TICKET_TYPES[record.type] || TICKET_TYPES.other;
@@ -3503,16 +3503,21 @@ function ticketWalletDetailInfoMarkup(record) {
   const notesIcon = '<span class="ticket-wallet-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span>';
   return '<div class="ticket-wallet-detail-info" aria-label="' + escapeHtml(state.language === 'en' ? 'Ticket information' : '票据信息') + '">' + originalRow + '<div class="ticket-wallet-detail-info-row ticket-wallet-detail-notes">' + notesIcon + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(notesTitle) + '</strong><small' + (notes ? ' class="has-content"' : '') + '>' + escapeHtml(notesValue) + '</small></span></div></div>';
 }
-function ticketWalletDetailMarkup(record) {
+function ticketWalletDetailReturnPackMarkup(records) {
+  return '<div class="ticket-wallet-return-pack ticket-wallet-stack-section" aria-hidden="true">' + ticketWalletAddEntryMarkup() + '<div class="ticket-wallet-stack ticket-wallet-return-pack-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((item, index) => ticketWalletCardMarkup(item, index)).join('') + '</div></div>';
+}
+function ticketWalletDetailMarkup(record, records = [record]) {
   const closeLabel = state.language === 'en' ? 'Close ticket detail' : '关闭票据详情';
   const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
-  return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '"><div class="ticket-wallet-detail-card-shell"><button type="button" class="ticket-wallet-detail-close" data-ticket-wallet-clear-selection aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button>' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
+  const selectedIndex = Math.max(0, records.findIndex((item) => item.id === record.id));
+  const returnPeek = window.matchMedia?.('(max-width: 760px)').matches ? 96 : 136;
+  const returnOffset = (window.matchMedia?.('(max-width: 760px)').matches ? 32 : 34) + selectedIndex * returnPeek;
+  return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '" style="--ticket-wallet-return-offset:' + returnOffset + 'px">' + ticketWalletDetailReturnPackMarkup(records) + '<div class="ticket-wallet-detail-card-shell"><button type="button" class="ticket-wallet-detail-close" data-ticket-wallet-clear-selection aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button>' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
 }
 function ticketWalletStackMarkup(records) {
   const selectedRecord = records.find((record) => record.id === state.ticketWalletSelectedId);
-  if (selectedRecord) return ticketWalletDetailMarkup(selectedRecord);
-  const enteringClass = ticketWalletPackEntering ? ' ticket-wallet-stack-returning' : '';
-  return '<div class="ticket-wallet-stack' + enteringClass + '" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
+  if (selectedRecord) return ticketWalletDetailMarkup(selectedRecord, records);
+  return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
 }
 function syncTicketWalletFocusStack() {
   const stack = $('.ticket-wallet-focus-stack');
@@ -7900,7 +7905,6 @@ let ticketWalletSuppressSyntheticClick = false;
 let ticketWalletSyntheticClickPoint = null;
 let ticketWalletDetailClosingId = '';
 let ticketWalletDetailClosingTimer = 0;
-let ticketWalletPackEntering = false;
 let tabSwipeGesture = null;
 let tabSwipeSuppressClickUntil = 0;
 let pageSwipeGesture = null;
@@ -8680,10 +8684,8 @@ function returnTicketWalletToPack(animate = true) {
     ticketWalletDetailClosingId = '';
     if (state.ticketWalletSelectedId !== selectedId) return;
     state.ticketWalletSelectedId = '';
-    ticketWalletPackEntering = true;
     render();
-    ticketWalletPackEntering = false;
-  }, 270);
+  }, 420);
   return true;
 }
 function finishTicketWalletVerticalGesture(gesture) {
@@ -8691,7 +8693,7 @@ function finishTicketWalletVerticalGesture(gesture) {
   if (gesture.dy >= -52 || Math.abs(gesture.dy) <= Math.abs(gesture.dx) + 12) return false;
   if (state.ticketWalletSelectedId !== gesture.ticketWalletId) return false;
   returnTicketWalletToPack(true);
-  swipeSuppressClickUntil = Date.now() + 350;
+  swipeSuppressClickUntil = Date.now() + 500;
   return true;
 }
 function finishTicketWalletTapGesture(gesture) {

@@ -13788,6 +13788,9 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
 }
 
 /* Ticket detail return motion and compact controls. */
+.ticket-wallet-detail-view {
+  isolation: isolate;
+}
 .ticket-wallet-detail-card-shell .ticket-wallet-detail-close {
   top: 2px;
   right: 2px;
@@ -13811,40 +13814,91 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   width: 13px;
   height: 13px;
 }
+.ticket-wallet-return-pack {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  overflow: visible;
+}
+.ticket-wallet-return-pack .ticket-wallet-stack {
+  padding-bottom: calc(52px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 136px));
+}
 .ticket-wallet-detail-view.is-closing {
   pointer-events: none;
-  animation: ticket-wallet-detail-return-to-pack .27s cubic-bezier(.32,.72,0,1) forwards;
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+.ticket-wallet-detail-view.is-closing .ticket-wallet-return-pack {
+  visibility: visible;
+  will-change: transform, opacity;
+  animation: ticket-wallet-return-pack-in .42s cubic-bezier(.22,.75,.18,1) both;
+}
+.ticket-wallet-detail-view.is-closing .ticket-wallet-detail-card-shell {
+  z-index: 4;
+  will-change: transform, opacity;
+  animation: ticket-wallet-card-return-to-pack .42s cubic-bezier(.22,.75,.18,1) both;
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-info {
   opacity: 0;
   transform: translateY(14px);
-  transition: opacity .18s ease, transform .27s cubic-bezier(.32,.72,0,1);
+  transition: opacity .22s ease, transform .42s cubic-bezier(.22,.75,.18,1);
 }
-.ticket-wallet-stack-returning {
-  transform-origin: top center;
-  animation: ticket-wallet-pack-reveal .28s cubic-bezier(.22,.8,.28,1) both;
+@keyframes ticket-wallet-return-pack-in {
+  0% { opacity: .06; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
-@keyframes ticket-wallet-detail-return-to-pack {
-  0% { opacity: 1; transform: translateY(0) scale(1); }
-  58% { opacity: .94; transform: translateY(25px) scale(.98); }
-  100% { opacity: 0; transform: translateY(58px) scale(.94); }
-}
-@keyframes ticket-wallet-pack-reveal {
-  from { opacity: .35; transform: translateY(28px) scale(.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes ticket-wallet-card-return-to-pack {
+  0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  52% { opacity: .98; transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .6), 0) scale(.995); }
+  100% { opacity: .16; transform: translate3d(0, var(--ticket-wallet-return-offset), 0) scale(.99); }
 }
 
 /* Make the add action feel like the open slot at the top of the pack. */
 body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top {
   min-height: 34px;
   margin: 0;
-  padding: 5px 14px;
-  border: 1px solid var(--line);
-  border-bottom: 0;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
   border-radius: 17px 17px 0 0;
-  background: color-mix(in srgb, var(--panel-2) 78%, var(--panel));
+  background: color-mix(in srgb, var(--panel-2) 68%, var(--panel));
   color: var(--muted);
-  box-shadow: inset 0 -7px 10px color-mix(in srgb, var(--line) 28%, transparent);
+  box-shadow: inset 0 -9px 12px color-mix(in srgb, var(--line) 28%, transparent);
+  position: relative;
+  gap: 7px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top::before {
+  position: absolute;
+  right: 16px;
+  bottom: -1px;
+  left: 16px;
+  height: 1px;
+  background: var(--line);
+  content: '';
+  opacity: .72;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-slot {
+  display: grid;
+  width: 21px;
+  height: 18px;
+  place-items: center;
+  border: 1px dashed var(--line);
+  border-radius: 5px;
+  color: var(--muted);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-icon {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-copy {
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:hover,
 body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:focus-visible {
@@ -13853,6 +13907,11 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-
 }
 body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top + .ticket-wallet-stack {
   padding-top: 0;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:hover .ticket-wallet-add-entry-slot,
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:focus-visible .ticket-wallet-add-entry-slot {
+  background: var(--soft);
+  color: var(--ink);
 }
 @media (max-width: 760px) {
   .ticket-wallet-detail-card-shell .ticket-wallet-detail-close {
@@ -13863,8 +13922,21 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-
   }
   .ticket-wallet-stack-section > .ticket-wallet-add-entry-top {
     min-height: 32px !important;
-    padding: 4px 12px !important;
+    padding: 0 12px !important;
     border-radius: 14px 14px 0 0 !important;
+  }
+  .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-slot {
+    width: 20px;
+    height: 17px;
+  }
+  .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-icon {
+    font-size: 14px;
+  }
+  .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-copy {
+    font-size: 11px;
+  }
+  .ticket-wallet-return-pack .ticket-wallet-stack {
+    padding-bottom: calc(44px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 96px));
   }
 }
 
