@@ -11533,6 +11533,23 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-focus-stack .ticket-wallet-swipe-row:not(.ticket-wallet-focus-selected) > .swipe-content > .ticket-wallet-physical-ticket {
   clip-path: inset(0);
 }
+.ticket-wallet-focus-stack .ticket-wallet-swipe-row.ticket-wallet-focus-full {
+  height: auto !important;
+  overflow: visible;
+  clip-path: none;
+  contain: none;
+}
+.ticket-wallet-focus-stack .ticket-wallet-swipe-row.ticket-wallet-focus-full > .swipe-content {
+  height: auto !important;
+  min-height: 0;
+  overflow: visible;
+  clip-path: none;
+  contain: none;
+}
+.ticket-wallet-focus-stack .ticket-wallet-focus-full > .swipe-content > .ticket-wallet-train-ticket,
+.ticket-wallet-focus-stack .ticket-wallet-focus-full > .swipe-content > .ticket-wallet-physical-ticket {
+  clip-path: none;
+}
 .ticket-wallet-focus-stack .ticket-wallet-focus-selected {
   position: absolute;
   inset: 0 0 auto;
