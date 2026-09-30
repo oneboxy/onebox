@@ -2166,6 +2166,75 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   height: 15px;
 }
 
+/* Keep the add action at the mouth of the pack. It should read as the next
+   ticket being inserted, rather than an unrelated action below the cards. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  padding: 7px 16px;
+  border: 1px dashed var(--line);
+  border-bottom: 0;
+  border-radius: 17px 17px 0 0;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: inset 0 -6px 0 color-mix(in srgb, var(--line) 42%, transparent);
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:hover,
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top:focus-visible {
+  background: var(--panel-2);
+  color: var(--ink);
+  transform: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-icon {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top + .ticket-wallet-stack {
+  padding-top: 0;
+}
+
+/* The close affordance belongs to the selected ticket, not to the page
+   header. Keep it attached to the card's upper-right corner. */
+.ticket-wallet-detail-card-shell .ticket-wallet-detail-close {
+  top: 10px;
+  right: 10px;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top {
+    min-height: 38px;
+    padding: 6px 12px;
+    border-radius: 14px 14px 0 0;
+    font-size: 11px;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-entry-top .ticket-wallet-add-entry-icon {
+    font-size: 16px;
+  }
+
+  .ticket-wallet-detail-card-shell .ticket-wallet-detail-close {
+    top: 9px;
+    right: 9px;
+  }
+}
+
 /* Ticket detail interaction: tap one ticket to lift it out of the pack. */
 .ticket-wallet-detail-view {
   position: relative;
@@ -2180,6 +2249,10 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   margin-bottom: 8px;
 }
 .ticket-wallet-detail-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 12;
   display: grid;
   width: 34px;
   height: 34px;
@@ -2318,8 +2391,7 @@ button.ticket-wallet-detail-info-row:active {
 }
 @media (max-width: 600px) {
   .ticket-wallet-detail-view { margin-top: 0; }
-  .ticket-wallet-detail-head { min-height: 34px; margin-bottom: 6px; }
-  .ticket-wallet-detail-close { width: 32px; height: 32px; }
+  .ticket-wallet-detail-close { top: 9px; right: 9px; width: 32px; height: 32px; }
   .ticket-wallet-detail-card-shell { margin-bottom: 8px; transform: none; }
 }
 
