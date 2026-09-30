@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.441';
+const APP_VERSION = '2.18.442';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3485,7 +3485,7 @@ function ticketWalletStackMarkup(records) {
   const selected = records.find((record) => record.id === state.ticketWalletSelectedId);
   if (!selected) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map(ticketWalletCardMarkup).join('') + '</div>';
   const rest = records.filter((record) => record.id !== selected.id);
-  return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-head"><span>当前票据</span><button class="ghost" data-ticket-wallet-clear-selection>返回卡包</button></div>' + '<div class="ticket-wallet-focus-card">' + ticketWalletCardMarkup(selected, 0) + '</div></div>' + (rest.length ? '<div class="ticket-wallet-other-head"><span>其他票据</span><span>' + rest.length + '</span></div><div class="ticket-wallet-stack ticket-wallet-stack-secondary">' + rest.map(ticketWalletCardMarkup).join('') + '</div>' : '');
+  return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-card">' + ticketWalletCardMarkup(selected, 0) + '</div></div>' + (rest.length ? '<div class="ticket-wallet-other-head"><span>其他票据</span><span>' + rest.length + '</span></div><div class="ticket-wallet-stack ticket-wallet-stack-secondary">' + rest.map(ticketWalletCardMarkup).join('') + '</div>' : '');
 }
 function ticketWalletFilteredRecords(records) {
   return state.ticketWalletTypeFilter === 'all' ? records : records.filter((record) => record.type === state.ticketWalletTypeFilter);
@@ -8598,7 +8598,9 @@ workspace.addEventListener('pointerdown', (event) => {
     swipeGesture = null;
     return;
   }
-  swipeGesture = { row, startX: event.clientX, startY: event.clientY, dx: 0, dy: 0, dragging: false, cancelled: false };
+  const ticketCard = event.target.closest('[data-ticket-wallet-card]');
+  const ticketWalletId = ticketCard && !event.target.closest('button, a, [data-ticket-wallet-edit-field]') ? ticketCard.dataset.ticketWalletCard : '';
+  swipeGesture = { row, ticketWalletId, startX: event.clientX, startY: event.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
 });
 $('#notificationPanel').addEventListener('pointerdown', (event) => {
   const row = event.target.closest('[data-swipe-row]');
@@ -8608,12 +8610,20 @@ $('#notificationPanel').addEventListener('pointerdown', (event) => {
 workspace.addEventListener('pointermove', (event) => {
   if (!swipeGesture) return;
   swipeGesture.dx = event.clientX - swipeGesture.startX; swipeGesture.dy = event.clientY - swipeGesture.startY;
+  if (swipeGesture.ticketWalletId && Math.abs(swipeGesture.dy) > Math.abs(swipeGesture.dx) + 10 && Math.abs(swipeGesture.dy) > 8) { swipeGesture.ticketVertical = true; return; }
   if (Math.abs(swipeGesture.dy) > Math.abs(swipeGesture.dx) + 10 && Math.abs(swipeGesture.dy) > 8) { swipeGesture.cancelled = true; return; }
   if (Math.abs(swipeGesture.dx) > 14) swipeGesture.dragging = true;
 });
 document.addEventListener('pointerup', () => {
   const gesture = swipeGesture; swipeGesture = null;
   if (!gesture || gesture.cancelled) return;
+  if (gesture.ticketWalletId && gesture.ticketVertical && Math.abs(gesture.dy) > 52 && Math.abs(gesture.dy) > Math.abs(gesture.dx) + 12) {
+    const selected = state.ticketWalletSelectedId === gesture.ticketWalletId;
+    const nextSelectedId = gesture.dy < 0 ? gesture.ticketWalletId : selected ? '' : state.ticketWalletSelectedId;
+    if (nextSelectedId !== state.ticketWalletSelectedId) { state.ticketWalletSelectedId = nextSelectedId; render(); }
+    swipeSuppressClickUntil = Date.now() + 350;
+    return;
+  }
   if (gesture.dx < -52 && Math.abs(gesture.dx) > Math.abs(gesture.dy) + 12) {
     $$('.swipe-row.swiped').forEach((row) => { if (row !== gesture.row) row.classList.remove('swiped'); });
     gesture.row.classList.add('swiped'); swipeSuppressClickUntil = Date.now() + 350;
