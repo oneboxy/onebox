@@ -14288,3 +14288,18 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last
 body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last-child .ticket-wallet-physical-ticket {
   box-shadow: 0 11px 20px color-mix(in srgb, var(--ink) 17%, transparent), 0 3px 6px color-mix(in srgb, var(--ink) 8%, transparent) !important;
 }
+
+/* Confirmed pack geometry: all cards share one horizontal frame. Only their
+   vertical position changes, with the last/outer card on top and fully shown. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  justify-items: stretch;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack > .ticket-wallet-swipe-row {
+  width: 100%;
+  min-width: 0;
+  margin-inline: 0 !important;
+  transform: translateY(calc(var(--ticket-stack-index) * var(--ticket-stack-peek, 20px)));
+}
