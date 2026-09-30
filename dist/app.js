@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.432';
+const APP_VERSION = '2.18.433';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3118,7 +3118,7 @@ function renderMine() {
 
 function openTicketWallet() {
   state.section = 'mine'; state.ticketWalletOpen = true; state.ticketWalletTypeFilter = Object.prototype.hasOwnProperty.call(TICKET_TYPES, state.ticketWalletTypeFilter) ? state.ticketWalletTypeFilter : 'train'; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
-  history.replaceState(null, '', '#ticket-wallet'); window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); void hydrateTicketWalletImages();
+  history.replaceState(null, '', '#ticket-wallet'); window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages();
 }
 function closeTicketWallet() {
   state.ticketWalletOpen = false; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
@@ -3415,7 +3415,7 @@ function selectTicketWalletFilter(type) {
   render();
   const nextScroll = document.querySelector('.ticket-wallet-filter-scroll');
   if (nextScroll) nextScroll.scrollLeft = previousFilterScrollLeft;
-  requestAnimationFrame(() => requestAnimationFrame(() => focusTicketWalletFilter(true)));
+  scheduleTicketWalletFilterFocus(true);
 }
 function focusTicketWalletFilter(smooth = false) {
   const scroll = document.querySelector('.ticket-wallet-filter-scroll');
@@ -3431,6 +3431,9 @@ function focusTicketWalletFilter(smooth = false) {
   target = Math.min(maxScroll, Math.max(0, target));
   if (Math.abs(target - scroll.scrollLeft) < 1) return;
   scroll.scrollTo({ left: target, behavior: smooth ? 'smooth' : 'auto' });
+}
+function scheduleTicketWalletFilterFocus(smooth = false) {
+  requestAnimationFrame(() => requestAnimationFrame(() => focusTicketWalletFilter(smooth)));
 }
 function ticketWalletAddEntryMarkup() {
   return '<button class="ticket-wallet-add-entry" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span class="ticket-wallet-add-entry-icon" aria-hidden="true">＋</span><span>' + escapeHtml(t('ticketWalletAddShort')) + '</span></button>';
@@ -9752,7 +9755,7 @@ window.addEventListener('online', () => { $('#connectionStatus').textContent = t
 window.addEventListener('offline', () => { $('#connectionStatus').textContent = t('offline'); toast(state.language === 'en' ? 'Offline mode' : '已切换到离线模式'); });
 window.addEventListener('hashchange', () => {
   const route = location.hash.slice(1);
-  if (route === 'ticket-wallet') { state.section = 'mine'; state.ticketWalletOpen = true; window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); void hydrateTicketWalletImages(); }
+  if (route === 'ticket-wallet') { state.section = 'mine'; state.ticketWalletOpen = true; window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages(); }
   else if (['home', 'navigation', 'messages', 'mine'].includes(route)) selectSection(route);
   else selectTool(route);
 });
@@ -9787,7 +9790,7 @@ function bootApp() {
   try { history.scrollRestoration = 'manual'; } catch { /* unsupported */ }
   mountMascot();
   setInterval(checkNotifications, 30000);
-  applyLanguage(); renderNav(); render(); checkNotifications(); scheduleHomeFeedPolling(); loadHomeFeeds(); void hydrateTicketWalletImages();
+  applyLanguage(); renderNav(); render(); if (state.ticketWalletOpen) scheduleTicketWalletFilterFocus(false); checkNotifications(); scheduleHomeFeedPolling(); loadHomeFeeds(); void hydrateTicketWalletImages();
   void hydrateGithubUser();
   setupServiceWorker();
   if (githubCallback?.token) toast(state.language === 'en' ? 'GitHub connected' : 'GitHub 已连接');
