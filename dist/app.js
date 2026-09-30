@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.457';
+const APP_VERSION = '2.18.458';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3502,11 +3502,14 @@ function ticketWalletStackMarkup(records) {
     // the visual slots: the last card stays at the top, then the middle card,
     // while earlier cards move downward to make room for the focused card.
     const focusPosition = records.length - 1 - index;
-    const focusOverlap = 'var(--ticket-focus-front-overlap, 18px)';
-    const focusTop = index < selectedIndex
-      ? 'calc(' + (records.length - 1 - selectedIndex) + ' * var(--ticket-focus-peek) + var(--ticket-focus-selected-height, 226px) - ' + focusOverlap + ' + ' + (selectedIndex - 1 - index) + ' * (var(--ticket-focus-selected-height, 226px) - ' + focusOverlap + '))'
-      : 'calc(' + focusPosition + ' * var(--ticket-focus-peek))';
-    const focusStyle = '--ticket-focus-top:' + focusTop + ';--ticket-focus-layer:' + (records.length - index) + ';';
+    // Keep the focused view as a compact version of the initial pack. Every
+    // ticket remains a full ticket; only its visual slot changes. Using one
+    // fixed step for every slot prevents the cards below the focused ticket
+    // from spreading apart by their full height.
+    const focusTop = 'calc(' + focusPosition + ' * var(--ticket-focus-peek))';
+    // Keep the original occlusion order while moving the cards. C remains
+    // the front-most record just as it is in the initial pack.
+    const focusStyle = '--ticket-focus-top:' + focusTop + ';--ticket-focus-layer:' + (index + 1) + ';';
     if (index === selectedIndex) return ticketWalletCardMarkup(record, index, 'ticket-wallet-focus-selected', focusStyle);
     const contextClass = index < selectedIndex ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after';
     return ticketWalletCardMarkup(record, index, contextClass + ' ticket-wallet-focus-full', focusStyle);

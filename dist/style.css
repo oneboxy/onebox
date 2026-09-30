@@ -11501,7 +11501,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-stack .ticket-wallet-swipe-row:first-child { margin-top: 0 !important; }
 .ticket-wallet-focus { margin: 8px 0 26px; }
 .ticket-wallet-focus-stack {
-  --ticket-focus-peek: 54px;
+  --ticket-focus-peek: 96px;
   position: relative;
   min-height: 0;
   padding: 0;
@@ -11876,6 +11876,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   .ticket-wallet-original-dialog-image { max-height: calc(100dvh - 104px); border-radius: 9px; }
   .ticket-wallet-stack { padding-bottom: calc(42px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 74px)); }
   .ticket-wallet-stack .ticket-wallet-swipe-row-train { --ticket-stack-peek: 78px; }
+  .ticket-wallet-focus-stack { --ticket-focus-peek: 78px; }
 }
 
 /* Ticket wallet desktop surface ------------------------------------------
