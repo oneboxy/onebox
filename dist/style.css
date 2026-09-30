@@ -12990,3 +12990,75 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-catego
     gap: 3px;
   }
 }
+
+/* The ticket/journey switcher is a compact segmented control. Keep this
+   control distinct from the horizontally scrolling tool-style filter rail. */
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-2);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: auto;
+  min-height: 32px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  transform: none;
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active::after {
+  display: none;
+  content: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon,
+body:has(.ticket-wallet-page) .ticket-wallet-view-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher {
+    padding: 3px;
+    border-radius: 14px;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button,
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button.active,
+  body:has(.ticket-wallet-page) .ticket-wallet-view-switcher button:hover {
+    min-height: 30px;
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+}
