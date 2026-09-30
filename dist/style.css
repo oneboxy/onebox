@@ -2166,6 +2166,126 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   height: 15px;
 }
 
+/* Ticket detail interaction: tap one ticket to lift it out of the pack. */
+.ticket-wallet-detail-view {
+  position: relative;
+  margin: -8px 0 26px;
+  animation: ticket-wallet-detail-enter .22s ease both;
+}
+.ticket-wallet-detail-card-shell {
+  position: relative;
+  margin-bottom: -12px;
+  transform: translateY(-14px);
+}
+.ticket-wallet-detail-row {
+  z-index: 2 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  transform: none !important;
+}
+.ticket-wallet-detail-row > .swipe-content {
+  transform: none !important;
+}
+.ticket-wallet-detail-row .ticket-wallet-card-actions,
+.ticket-wallet-detail-row .ticket-wallet-swipe-actions {
+  display: none !important;
+}
+.ticket-wallet-detail-info {
+  display: grid;
+  gap: 8px;
+  position: relative;
+  z-index: 3;
+}
+.ticket-wallet-detail-info-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 58px;
+  box-sizing: border-box;
+  gap: 11px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--panel);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: none;
+}
+button.ticket-wallet-detail-info-row {
+  cursor: pointer;
+  transition: background .16s ease, transform .16s ease;
+}
+button.ticket-wallet-detail-info-row:hover,
+button.ticket-wallet-detail-info-row:focus-visible {
+  background: var(--panel-2);
+}
+button.ticket-wallet-detail-info-row:active {
+  transform: translateY(1px);
+}
+.ticket-wallet-detail-info-row.is-unavailable {
+  color: var(--muted);
+}
+.ticket-wallet-detail-info-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--muted);
+}
+.ticket-wallet-detail-info-icon-image {
+  color: var(--ink);
+}
+.ticket-wallet-detail-info-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+.ticket-wallet-detail-info-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.ticket-wallet-detail-info-copy strong,
+.ticket-wallet-detail-info-copy small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ticket-wallet-detail-info-copy strong {
+  font-size: 12px;
+}
+.ticket-wallet-detail-info-copy small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.ticket-wallet-detail-info-copy small.has-content {
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+.ticket-wallet-detail-info-arrow {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1;
+}
+@keyframes ticket-wallet-detail-enter {
+  from { opacity: .72; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 600px) {
+  .ticket-wallet-detail-view { margin-top: -4px; }
+  .ticket-wallet-detail-card-shell { margin-bottom: -8px; transform: translateY(-10px); }
+}
+
 /* Ticket wallet visual cleanup: keep the physical tickets tight and let the
    theme surface, rather than an extra white/accent frame, separate layers. */
 body:has(.ticket-wallet-page) .ticket-wallet-stack {

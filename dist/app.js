@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.460';
+const APP_VERSION = '2.18.461';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3492,30 +3492,24 @@ function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextSt
   const template = record.template === 'crh-blue-v1' ? 'blue' : 'pink';
   return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-focus-peek-row ' + contextClass + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-focus-peek ticket-wallet-focus-peek-' + kind + ' ticket-wallet-focus-peek-' + template + ' swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><small>' + escapeHtml(serial) + '</small><div><strong>' + escapeHtml(from) + '</strong><span>' + escapeHtml(number) + ' <i aria-hidden="true">→</i></span><strong>' + escapeHtml(to) + '</strong></div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
 }
+function ticketWalletDetailInfoMarkup(record) {
+  const originalTitle = state.language === 'en' ? 'Original attachment' : '原附件';
+  const originalHint = record.sourceImageId ? (record.sourceImageName || (state.language === 'en' ? 'Tap to view the original' : '点击查看原始图片')) : (state.language === 'en' ? 'No original attachment' : '暂无原附件');
+  const originalThumb = record.sourceImageId ? '<span class="ticket-wallet-detail-info-icon ticket-wallet-detail-info-icon-image" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path></svg></span>' : '<span class="ticket-wallet-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8 12h8"></path></svg></span>';
+  const originalRow = record.sourceImageId ? '<button type="button" class="ticket-wallet-detail-info-row" data-ticket-wallet-original="' + escapeHtml(record.id) + '">' + originalThumb + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(originalTitle) + '</strong><small>' + escapeHtml(originalHint) + '</small></span><span class="ticket-wallet-detail-info-arrow" aria-hidden="true">›</span></button>' : '<div class="ticket-wallet-detail-info-row is-unavailable">' + originalThumb + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(originalTitle) + '</strong><small>' + escapeHtml(originalHint) + '</small></span></div>';
+  const notes = String(record.notes || '').trim();
+  const notesTitle = state.language === 'en' ? 'Notes' : '备注';
+  const notesValue = notes || (state.language === 'en' ? 'No notes' : '暂无备注');
+  const notesIcon = '<span class="ticket-wallet-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span>';
+  return '<div class="ticket-wallet-detail-info" aria-label="' + escapeHtml(state.language === 'en' ? 'Ticket information' : '票据信息') + '">' + originalRow + '<div class="ticket-wallet-detail-info-row ticket-wallet-detail-notes">' + notesIcon + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(notesTitle) + '</strong><small' + (notes ? ' class="has-content"' : '') + '>' + escapeHtml(notesValue) + '</small></span></div></div>';
+}
+function ticketWalletDetailMarkup(record) {
+  return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '"><div class="ticket-wallet-detail-card-shell">' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
+}
 function ticketWalletStackMarkup(records) {
-  const selectedIndex = records.findIndex((record) => record.id === state.ticketWalletSelectedId);
-  // The first card is already the visual entry point of the pack. Selecting it
-  // must keep the normal pack composition instead of switching to the focused
-  // layout, otherwise the first card gets hidden behind the later cards.
-  if (selectedIndex <= 0) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
-  const focusCards = records.map((record, index) => {
-    // Keep A → B → C in the data/DOM order. The focused view only changes
-    // the visual slots: the last card stays at the top, then the middle card,
-    // while earlier cards move downward to make room for the focused card.
-    const focusPosition = records.length - 1 - index;
-    // Keep the focused view as a compact version of the initial pack. Every
-    // ticket remains a full ticket; only its visual slot changes. Using one
-    // fixed step for every slot prevents the cards below the focused ticket
-    // from spreading apart by their full height.
-    const focusTop = 'calc(' + focusPosition + ' * var(--ticket-focus-peek))';
-    // Keep the original occlusion order while moving the cards. C remains
-    // the front-most record just as it is in the initial pack.
-    const focusStyle = '--ticket-focus-top:' + focusTop + ';--ticket-focus-layer:' + (index + 1) + ';';
-    if (index === selectedIndex) return ticketWalletCardMarkup(record, index, 'ticket-wallet-focus-selected', focusStyle);
-    const contextClass = index < selectedIndex ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after';
-    return ticketWalletCardMarkup(record, index, contextClass + ' ticket-wallet-focus-full', focusStyle);
-  }).join('');
-  return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-stack" style="--ticket-focus-count:' + records.length + '">' + focusCards + '</div></div>';
+  const selectedRecord = records.find((record) => record.id === state.ticketWalletSelectedId);
+  if (selectedRecord) return ticketWalletDetailMarkup(selectedRecord);
+  return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
 }
 function syncTicketWalletFocusStack() {
   const stack = $('.ticket-wallet-focus-stack');
@@ -3693,7 +3687,8 @@ function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = ticketWalletDisplayRecords(state.ticketWallet); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
   const ticketWalletFilterRow = '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
   const ticketWalletAddAction = ticketWalletAddEntryMarkup();
-  const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) + ticketWalletAddAction : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>' + ticketWalletAddAction) + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button></div></div>';
+  const ticketWalletIsDetail = visibleTickets.some((record) => record.id === state.ticketWalletSelectedId);
+  const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) + (ticketWalletIsDetail ? '' : ticketWalletAddAction) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>' + ticketWalletAddAction) + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button></div></div>';
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
   return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav>' + ticketWalletViewSwitcher + '</div>' + ticketWalletFilterRow + '<div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div>';
 }
@@ -8662,10 +8657,10 @@ workspace.addEventListener('pointerdown', (event) => {
 });
 function finishTicketWalletVerticalGesture(gesture) {
   if (!gesture || gesture.cancelled || !gesture.ticketWalletId || !gesture.ticketVertical) return false;
-  if (Math.abs(gesture.dy) <= 52 || Math.abs(gesture.dy) <= Math.abs(gesture.dx) + 12) return false;
-  const selected = state.ticketWalletSelectedId === gesture.ticketWalletId;
-  const nextSelectedId = gesture.dy < 0 ? gesture.ticketWalletId : selected ? '' : state.ticketWalletSelectedId;
-  if (nextSelectedId !== state.ticketWalletSelectedId) { state.ticketWalletSelectedId = nextSelectedId; render(); }
+  if (gesture.dy >= -52 || Math.abs(gesture.dy) <= Math.abs(gesture.dx) + 12) return false;
+  if (state.ticketWalletSelectedId !== gesture.ticketWalletId) return false;
+  state.ticketWalletSelectedId = '';
+  render();
   swipeSuppressClickUntil = Date.now() + 350;
   return true;
 }
