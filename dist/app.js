@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.418';
+const APP_VERSION = '2.18.419';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8903,18 +8903,24 @@ workspace.addEventListener('click', async (event) => {
   if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1'; document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => item.classList.toggle('active', item === ticketWalletTemplate)); return; }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');
   if (ticketWalletFilter) {
+    const previousFilterScrollLeft = ticketWalletFilter.closest('.ticket-wallet-filter-scroll')?.scrollLeft || 0;
     state.ticketWalletTypeFilter = ticketWalletFilter.dataset.ticketWalletFilter || 'train';
     saveTicketWalletTypeFilter();
     state.ticketWalletSelectedId = '';
     render();
+    const nextScroll = document.querySelector('.ticket-wallet-filter-scroll');
+    if (nextScroll) nextScroll.scrollLeft = previousFilterScrollLeft;
     requestAnimationFrame(() => {
-      const scroll = document.querySelector('.ticket-wallet-filter-scroll');
-      const active = scroll?.querySelector('.ticket-wallet-category.active');
-      if (!scroll || !active) return;
-      const scrollRect = scroll.getBoundingClientRect();
-      const activeRect = active.getBoundingClientRect();
-      const nextLeft = scroll.scrollLeft + activeRect.left - scrollRect.left - 8;
-      scroll.scrollTo({ left: Math.max(0, nextLeft), behavior: 'smooth' });
+      requestAnimationFrame(() => {
+        const scroll = document.querySelector('.ticket-wallet-filter-scroll');
+        const active = scroll?.querySelector('.ticket-wallet-category.active');
+        if (!scroll || !active) return;
+        const scrollRect = scroll.getBoundingClientRect();
+        const activeRect = active.getBoundingClientRect();
+        const nextLeft = Math.max(0, scroll.scrollLeft + activeRect.left - scrollRect.left - 8);
+        if (Math.abs(nextLeft - scroll.scrollLeft) < 1) return;
+        scroll.scrollTo({ left: nextLeft, behavior: 'smooth' });
+      });
     });
     return;
   }
