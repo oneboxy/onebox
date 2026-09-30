@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.425';
+const APP_VERSION = '2.18.426';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3616,7 +3616,7 @@ function renderTicketWalletJourneys() {
 }
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = [...state.ticketWallet].sort(ticketWalletDepartureAsc); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
-  const ticketWalletFilterRow = '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
+  const ticketWalletFilterRow = '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
   const ticketWalletAddAction = ticketWalletAddEntryMarkup();
   const body = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) + ticketWalletAddAction : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>' + ticketWalletAddAction) + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button></div></div>';
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
