@@ -11629,7 +11629,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   color: var(--danger);
 }
 .ticket-wallet-swipe-row .swipe-content { transform: translateX(0); transition: transform .2s ease; }
-.ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(var(--ticket-wallet-actions-offset, -192px)); }
+.ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-192px) !important; }
 
 /* The first record is the front card. Later records are placed upward into
    the pack so their top edge remains visible behind it. */
