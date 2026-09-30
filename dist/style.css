@@ -14301,6 +14301,9 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack {
   padding-bottom: var(--ticket-stack-bottom, 32px);
   overflow: visible;
 }
+body:has(.ticket-wallet-page) .ticket-wallet-stack[data-ticket-stack-density] {
+  padding-bottom: var(--ticket-stack-bottom, 32px) !important;
+}
 body:has(.ticket-wallet-page) .ticket-wallet-stack > .ticket-wallet-swipe-row {
   width: 100%;
   min-width: 0;
