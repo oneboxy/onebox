@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.430';
+const APP_VERSION = '2.18.431';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3618,9 +3618,9 @@ function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = [...state.ticketWallet].sort(ticketWalletDepartureAsc); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
   const ticketWalletFilterRow = '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
   const ticketWalletAddAction = ticketWalletAddEntryMarkup();
-  const body = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) + ticketWalletAddAction : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>' + ticketWalletAddAction) + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button></div></div>';
+  const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) + ticketWalletAddAction : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>' + ticketWalletAddAction) + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="primary" data-ticket-wallet-import-image>' + escapeHtml(t('ticketWalletImport')) + '</button><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button></div></div>';
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
-  return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav>' + ticketWalletViewSwitcher + '</div>' + ticketWalletFilterRow + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : body) + '</div>';
+  return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav>' + ticketWalletViewSwitcher + '</div>' + ticketWalletFilterRow + '<div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div>';
 }
 
 function renderPetDialog() {
@@ -8382,10 +8382,24 @@ function pageSwipeMarkup(item) {
   state.tool = previousTool;
   return { tool: item.id, markup };
 }
+function ticketWalletPageSwipeBodyMarkup(markup) {
+  const holder = document.createElement('div');
+  holder.innerHTML = markup;
+  const panel = holder.querySelector('[data-ticket-wallet-swipe-panel]');
+  return panel ? panel.innerHTML : '';
+}
 function clearPageSwipeTrack() {
-  pageSwipeStage.querySelector('.page-swipe-preview')?.remove();
-  pageSwipeStage.className = 'page-swipe-stage';
-  pageSwipeStage.style.transform = '';
+  const track = pageSwipeTrackState;
+  const trackStage = track?.stage;
+  if (trackStage && trackStage !== pageSwipeStage) {
+    track.preview?.remove();
+    trackStage.classList.remove('is-active', 'forward', 'backward', 'page-swipe-dragging', 'page-swipe-settling');
+    trackStage.style.transform = '';
+  } else {
+    pageSwipeStage.querySelector('.page-swipe-preview')?.remove();
+    pageSwipeStage.className = 'page-swipe-stage';
+    pageSwipeStage.style.transform = '';
+  }
   workspace.classList.remove('page-swipe-dragging', 'page-swipe-settling');
   workspace.style.transform = '';
   clearPageSwipeNav();
@@ -8401,6 +8415,22 @@ function preparePageSwipeTrack(gesture, direction) {
   if (pageSwipeTrackState?.target?.id === target.id && pageSwipeTrackState.direction === direction) return pageSwipeTrackState;
   clearPageSwipeTrack();
   const rendered = pageSwipeMarkup(target);
+  if (target.kind === 'ticket-filter') {
+    const stage = workspace.querySelector('[data-ticket-wallet-swipe-stage]');
+    const panel = stage?.querySelector('[data-ticket-wallet-swipe-panel]');
+    if (!stage || !panel) return null;
+    const preview = document.createElement('div');
+    preview.className = 'ticket-wallet-page-swipe-panel ticket-wallet-page-swipe-preview';
+    preview.setAttribute('aria-hidden', 'true');
+    preview.innerHTML = ticketWalletPageSwipeBodyMarkup(rendered.markup);
+    stage.appendChild(preview);
+    const pageWidth = Math.max(1, panel.getBoundingClientRect().width || stage.getBoundingClientRect().width);
+    stage.classList.add('is-active', direction === 1 ? 'forward' : 'backward');
+    stage.style.transform = 'translate3d(' + (direction === 1 ? 0 : -pageWidth) + 'px, 0, 0)';
+    const navContainer = workspace.querySelector('.ticket-wallet-filter-scroll');
+    pageSwipeTrackState = { target, direction, pageWidth, stage, preview, nav: beginPageSwipeNav(navContainer, direction) };
+    return pageSwipeTrackState;
+  }
   const preview = document.createElement('section');
   preview.id = 'workspace';
   preview.className = 'workspace page-swipe-preview';
@@ -8426,11 +8456,12 @@ function resetPageSwipeTransform() {
 function settlePageSwipeBack() {
   const token = ++pageSwipeAnimationToken;
   const track = pageSwipeTrackState;
+  const swipeStage = track?.stage || pageSwipeStage;
   settlePageSwipeNav(false);
   if (track) {
-    pageSwipeStage.classList.remove('page-swipe-dragging');
-    pageSwipeStage.classList.add('page-swipe-settling');
-    pageSwipeStage.style.transform = 'translate3d(' + (track.direction === 1 ? 0 : -track.pageWidth) + 'px, 0, 0)';
+    swipeStage.classList.remove('page-swipe-dragging');
+    swipeStage.classList.add('page-swipe-settling');
+    swipeStage.style.transform = 'translate3d(' + (track.direction === 1 ? 0 : -track.pageWidth) + 'px, 0, 0)';
   } else {
     workspace.classList.remove('page-swipe-dragging');
     workspace.classList.add('page-swipe-settling');
@@ -8451,10 +8482,11 @@ function settlePageSwipe(target, direction) {
   const token = ++pageSwipeAnimationToken;
   const track = pageSwipeTrackState;
   if (!track) return settlePageSwipeBack();
+  const swipeStage = track.stage || pageSwipeStage;
   settlePageSwipeNav(true);
-  pageSwipeStage.classList.remove('page-swipe-dragging');
-  pageSwipeStage.classList.add('page-swipe-settling');
-  pageSwipeStage.style.transform = 'translate3d(' + (direction === 1 ? -track.pageWidth : 0) + 'px, 0, 0)';
+  swipeStage.classList.remove('page-swipe-dragging');
+  swipeStage.classList.add('page-swipe-settling');
+  swipeStage.style.transform = 'translate3d(' + (direction === 1 ? -track.pageWidth : 0) + 'px, 0, 0)';
   window.setTimeout(() => {
     if (token !== pageSwipeAnimationToken) return;
     pageSwipeAnimationToken = 0;
@@ -8485,9 +8517,10 @@ function updatePageSwipe(event) {
     workspace.style.transform = 'translate3d(' + visualDx + 'px, 0, 0)';
     return;
   }
-  pageSwipeStage.classList.add('page-swipe-dragging');
+  const swipeStage = track.stage || pageSwipeStage;
+  swipeStage.classList.add('page-swipe-dragging');
   const baseOffset = direction === 1 ? 0 : -track.pageWidth;
-  pageSwipeStage.style.transform = 'translate3d(' + (baseOffset + gesture.dx) + 'px, 0, 0)';
+  swipeStage.style.transform = 'translate3d(' + (baseOffset + gesture.dx) + 'px, 0, 0)';
   const swipeThreshold = Math.max(56, Math.min(112, window.innerWidth * 0.18));
   const indicatorDistance = Math.min(swipeThreshold, track.nav?.navDistance || swipeThreshold);
   setPageSwipeNavProgress(Math.abs(gesture.dx) / indicatorDistance);

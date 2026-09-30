@@ -4336,6 +4336,40 @@ html[data-theme="dark"][data-color="mono"] #settingsDialog .setting-toggle input
   will-change: transform;
   transition: transform .28s cubic-bezier(.22, .8, .22, 1) !important;
 }
+.ticket-wallet-page-swipe-stage {
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+.ticket-wallet-page-swipe-stage.is-active {
+  display: flex;
+  width: 200%;
+  align-items: flex-start;
+}
+.ticket-wallet-page-swipe-stage.is-active > .ticket-wallet-page-swipe-panel {
+  flex: 0 0 50%;
+  width: 50%;
+  min-width: 0;
+}
+.ticket-wallet-page-swipe-stage.is-active .ticket-wallet-page-swipe-preview {
+  order: 1;
+  pointer-events: none;
+}
+.ticket-wallet-page-swipe-stage.is-active.backward .ticket-wallet-page-swipe-preview {
+  order: -1;
+}
+.ticket-wallet-page-swipe-stage.page-swipe-dragging {
+  will-change: transform;
+  transition: none !important;
+  user-select: none;
+}
+.ticket-wallet-page-swipe-stage.page-swipe-settling {
+  will-change: transform;
+  transition: transform .28s cubic-bezier(.22, .8, .22, 1) !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll.page-swipe-nav-dragging .ticket-wallet-category.active::after {
+  opacity: 0 !important;
+}
 main { overflow-x: hidden; }
 
 /* 2.18.110: a feed click can hand control to an external site. Keep the
