@@ -11561,8 +11561,8 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-card-concert { --ticket-accent: #d34e86; }
 .ticket-wallet-card-dining { --ticket-accent: #c78635; }
 .ticket-wallet-swipe-row {
-  --ticket-wallet-actions-width: 132px;
-  --ticket-wallet-actions-offset: -132px;
+  --ticket-wallet-actions-width: 112px;
+  --ticket-wallet-actions-offset: -112px;
 }
 .ticket-wallet-swipe-row-train {
   margin-top: calc(var(--ticket-stack-index) * -320px);
@@ -11576,44 +11576,45 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-swipe-row .ticket-wallet-train-card { margin: 0; }
 .ticket-wallet-swipe-row-train .swipe-content { background: transparent !important; }
 .ticket-wallet-swipe-actions {
-  --ticket-wallet-actions-width: 132px;
+  --ticket-wallet-actions-width: 112px;
   position: absolute;
   inset: 0 0 0 auto;
   z-index: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: repeat(4, minmax(0, 1fr));
-  gap: 2px;
+  gap: 3px;
   width: var(--ticket-wallet-actions-width);
-  padding: 5px 6px;
+  padding: 5px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 16px;
   background: var(--panel-2);
   box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 8%, transparent);
 }
 .ticket-wallet-swipe-actions .ticket-wallet-swipe-action {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   flex-direction: row;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-  padding: 6px 8px;
+  padding: 5px 4px;
   border: 0;
   border-radius: 12px;
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 750;
   line-height: 1.2;
-  text-align: left;
+  text-align: center;
+  white-space: nowrap;
   cursor: pointer;
 }
 .ticket-wallet-swipe-actions .ticket-wallet-swipe-action svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -11641,7 +11642,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   color: var(--muted);
 }
 .ticket-wallet-swipe-row .swipe-content { transform: translateX(0); transition: transform .2s ease; }
-.ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-132px) !important; }
+.ticket-wallet-swipe-row.swiped .swipe-content { transform: translateX(-112px) !important; }
 
 .ticket-wallet-original-dialog-card {
   width: min(920px, 100%);
