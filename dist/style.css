@@ -11504,13 +11504,14 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   --ticket-focus-peek: 54px;
   position: relative;
   min-height: 0;
-  padding: var(--ticket-focus-peek) 0;
+  padding: 0;
 }
 .ticket-wallet-focus-stack .ticket-wallet-swipe-row {
   position: absolute;
-  inset: var(--ticket-focus-peek) 0 auto;
+  inset: 0 0 auto;
   margin: 0 !important;
-  z-index: calc(100 + var(--ticket-stack-index));
+  z-index: calc(800 + var(--ticket-focus-layer, 1));
+  transform: translateY(var(--ticket-focus-top, 0));
   transition: transform .22s ease, filter .22s ease;
 }
 .ticket-wallet-focus-stack .ticket-wallet-swipe-row:not(.ticket-wallet-focus-selected) {
@@ -11519,7 +11520,6 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   clip-path: inset(0);
   contain: paint;
   isolation: isolate;
-  z-index: calc(800 + var(--ticket-stack-index));
 }
 .ticket-wallet-focus-stack .ticket-wallet-swipe-row:not(.ticket-wallet-focus-selected) > .swipe-content {
   height: var(--ticket-focus-reveal, 54px);
@@ -11534,18 +11534,16 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   clip-path: inset(0);
 }
 .ticket-wallet-focus-stack .ticket-wallet-focus-selected {
-  position: relative;
-  inset: auto;
-  z-index: 2000;
-  transform: none;
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: calc(800 + var(--ticket-focus-layer, 1));
+  transform: translateY(var(--ticket-focus-top, 0));
   filter: none;
 }
 .ticket-wallet-focus-stack .ticket-wallet-focus-before {
-  transform: translateY(var(--ticket-focus-shift, 46px)) scale(.985);
   filter: saturate(.86) brightness(.98);
 }
 .ticket-wallet-focus-stack .ticket-wallet-focus-after {
-  transform: translateY(calc(var(--ticket-focus-selected-height, 0px) - var(--ticket-focus-peek, 54px) + var(--ticket-focus-shift, 46px))) scale(.985);
   filter: saturate(.86) brightness(.98);
 }
 .ticket-wallet-focus-peek-row {

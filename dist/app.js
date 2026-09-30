@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.455';
+const APP_VERSION = '2.18.456';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3498,20 +3498,31 @@ function ticketWalletStackMarkup(records) {
   // layout, otherwise the first card gets hidden behind the later cards.
   if (selectedIndex <= 0) return '<div class="ticket-wallet-stack" style="--ticket-stack-count:' + records.length + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
   const focusCards = records.map((record, index) => {
-    if (index === selectedIndex) return ticketWalletCardMarkup(record, index, 'ticket-wallet-focus-selected');
-    const before = index < selectedIndex;
-    const depth = Math.min(4, Math.abs(index - selectedIndex));
-    const shift = (before ? -1 : 1) * depth * 46;
-    return ticketWalletFocusPeekMarkup(record, index, before ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after', '--ticket-focus-shift:' + shift + 'px');
+    // Keep A → B → C in the data/DOM order. The focused view only changes
+    // the visual slots: the last card stays at the top, then the middle card,
+    // while earlier cards move downward to make room for the focused card.
+    const focusPosition = records.length - 1 - index;
+    const focusTop = index < selectedIndex
+      ? 'calc(' + (records.length - 1 - selectedIndex) + ' * var(--ticket-focus-peek) + var(--ticket-focus-selected-height, 226px) - var(--ticket-focus-reveal, 54px) + ' + (selectedIndex - 1 - index) + ' * var(--ticket-focus-peek))'
+      : 'calc(' + focusPosition + ' * var(--ticket-focus-peek))';
+    const focusStyle = '--ticket-focus-top:' + focusTop + ';--ticket-focus-layer:' + (records.length - index) + ';';
+    if (index === selectedIndex) return ticketWalletCardMarkup(record, index, 'ticket-wallet-focus-selected', focusStyle);
+    const contextClass = index < selectedIndex ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after';
+    return ticketWalletFocusPeekMarkup(record, index, contextClass, focusStyle);
   }).join('');
-  return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-stack">' + focusCards + '</div></div>';
+  return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-stack" style="--ticket-focus-count:' + records.length + '">' + focusCards + '</div></div>';
 }
 function syncTicketWalletFocusStack() {
   const stack = $('.ticket-wallet-focus-stack');
   const selected = stack?.querySelector('.ticket-wallet-focus-selected');
   if (!stack || !selected) return;
   const height = selected.getBoundingClientRect().height;
-  if (height > 0) stack.style.setProperty('--ticket-focus-selected-height', height + 'px');
+  if (height > 0) {
+    stack.style.setProperty('--ticket-focus-selected-height', height + 'px');
+    const stackTop = stack.getBoundingClientRect().top;
+    const maxBottom = Math.max(...Array.from(stack.querySelectorAll('[data-swipe-row]')).map((row) => row.getBoundingClientRect().bottom - stackTop));
+    if (maxBottom > 0) stack.style.height = maxBottom + 'px';
+  }
 }
 function ticketWalletFilteredRecords(records) {
   return state.ticketWalletTypeFilter === 'all' ? records : records.filter((record) => record.type === state.ticketWalletTypeFilter);
