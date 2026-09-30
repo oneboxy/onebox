@@ -1,5 +1,5 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-const APP_VERSION = '2.18.446';
+const APP_VERSION = '2.18.449';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3488,7 +3488,7 @@ function ticketWalletStackMarkup(records) {
     if (index === selectedIndex) return ticketWalletCardMarkup(record, index, 'ticket-wallet-focus-selected');
     const before = index < selectedIndex;
     const depth = Math.min(4, Math.abs(index - selectedIndex));
-    const shift = (before ? 1 : -1) * depth * 46;
+    const shift = (before ? -1 : 1) * depth * 46;
     return ticketWalletCardMarkup(record, index, before ? 'ticket-wallet-focus-before' : 'ticket-wallet-focus-after', '--ticket-focus-shift:' + shift + 'px');
   }).join('');
   return '<div class="ticket-wallet-focus"><div class="ticket-wallet-focus-stack">' + focusCards + '</div></div>';
