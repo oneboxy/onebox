@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.495';
+const APP_VERSION = '2.18.496';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -51,6 +51,7 @@ const STORAGE = {
   mascotDisplayMode: 'onebox.mascot-display-mode',
   petProfile: 'onebox.pet-profile',
   ticketWallet: 'onebox.ticket-wallet',
+  ticketWalletDisplayOrder: 'onebox.ticket-wallet-display-order',
   ticketWalletTypeFilter: 'onebox.ticket-wallet-type-filter',
   ticketWalletMemories: 'onebox.ticket-wallet-memories',
   ticketWalletMapCache: 'onebox.ticket-wallet-map-cache',
@@ -720,6 +721,7 @@ function normalizeTicketMemories(value) {
   }]));
 }
 const storedTicketWallet = normalizeTicketWallet(parseStored(STORAGE.ticketWallet, []));
+const storedTicketWalletDisplayOrder = parseStored(STORAGE.ticketWalletDisplayOrder, []);
 const storedTicketWalletTypeFilter = localStorage.getItem(STORAGE.ticketWalletTypeFilter);
 const storedTicketMemories = normalizeTicketMemories(parseStored(STORAGE.ticketWalletMemories, {}));
 function ticketTypeLabel(type) {
@@ -975,6 +977,7 @@ function ticketWalletJourneys(records = state.ticketWallet) {
   return [...groups.values()].map((group) => ({ ...group, memory: state.ticketWalletMemories[group.key] || null })).sort((a, b) => ticketWalletDepartureAsc({ departAt: a.start }, { departAt: b.start }));
 }
 function saveTicketWallet() { saveStored(STORAGE.ticketWallet, state.ticketWallet); }
+function saveTicketWalletDisplayOrder() { saveStored(STORAGE.ticketWalletDisplayOrder, state.ticketWalletDisplayOrder); }
 function saveTicketWalletTypeFilter() { localStorage.setItem(STORAGE.ticketWalletTypeFilter, state.ticketWalletTypeFilter); }
 function saveTicketWalletMemories() { saveStored(STORAGE.ticketWalletMemories, state.ticketWalletMemories); }
 async function hydrateTicketWalletImages() {
@@ -1048,7 +1051,7 @@ const state = {
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
   homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
   navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationDialog: null, navigationFolderDraft: null, navigationSettingsOpen: false,
-  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: Object.prototype.hasOwnProperty.call(TICKET_TYPES, storedTicketWalletTypeFilter) ? storedTicketWalletTypeFilter : 'train', ticketWalletSelectedId: '', ticketWalletDisplayOrder: [], ticketWalletEditorOpen: false, ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
+  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: Object.prototype.hasOwnProperty.call(TICKET_TYPES, storedTicketWalletTypeFilter) ? storedTicketWalletTypeFilter : 'train', ticketWalletSelectedId: '', ticketWalletDisplayOrder: Array.isArray(storedTicketWalletDisplayOrder) ? storedTicketWalletDisplayOrder.filter((id) => typeof id === 'string') : [], ticketWalletEditorOpen: false, ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
   notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, githubDialogOpen: false, recentReadingOpen: false,
@@ -8103,6 +8106,8 @@ let reorderTimer = null;
 let reorderTarget = null;
 let reorderDrag = null;
 let reorderSuppressClickUntil = 0;
+let ticketWalletReorder = null;
+let ticketWalletReorderSuppressClickUntil = 0;
 let swipeGesture = null;
 let swipeSuppressClickUntil = 0;
 let ticketWalletSuppressSyntheticClick = false;
@@ -9028,6 +9033,176 @@ function finishTicketWalletTouchGesture(event) {
   if (finishTicketWalletTapGesture(gesture)) return;
   finishTicketWalletHorizontalGesture(gesture);
 }
+const TICKET_WALLET_REORDER_HOLD_MS = 360;
+const TICKET_WALLET_REORDER_MOVE_TOLERANCE = 10;
+function ticketWalletReorderRows(stack) {
+  return stack ? Array.from(stack.children).filter((row) => row.matches('[data-ticket-wallet-pack-row="true"]')) : [];
+}
+function ticketWalletReorderEnabled() {
+  return state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets' && !state.ticketWalletSelectedId && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft;
+}
+function clearTicketWalletReorderStyles(drag) {
+  if (!drag?.stack) return;
+  drag.stack.classList.remove('ticket-wallet-reorder-active');
+  drag.rows.forEach((row) => {
+    row.classList.remove('ticket-wallet-reorder-dragging', 'ticket-wallet-reorder-shifted');
+    row.style.removeProperty('--ticket-reorder-offset');
+  });
+}
+function ticketWalletReorderSlot(drag, projectedCenter) {
+  const otherRows = drag.rows.filter((row) => row !== drag.row);
+  let slot = 0;
+  for (const row of otherRows) {
+    const index = drag.rows.indexOf(row);
+    if (projectedCenter > drag.centers[index]) slot += 1;
+  }
+  return Math.max(0, Math.min(drag.rows.length - 1, slot));
+}
+function applyTicketWalletReorderPositions(drag, settling = false) {
+  if (!drag?.rows?.length) return;
+  const step = drag.step;
+  const start = drag.startIndex;
+  const target = drag.currentIndex;
+  drag.rows.forEach((row, index) => {
+    let offset = 0;
+    if (index === start) {
+      offset = settling ? (target - start) * step : drag.deltaY;
+    } else if (target > start && index > start && index <= target) {
+      offset = -step;
+    } else if (target < start && index >= target && index < start) {
+      offset = step;
+    }
+    row.style.setProperty('--ticket-reorder-offset', offset + 'px');
+    row.classList.toggle('ticket-wallet-reorder-shifted', index !== start && offset !== 0);
+  });
+}
+function activateTicketWalletReorder(drag) {
+  if (!drag || ticketWalletReorder !== drag || !ticketWalletReorderEnabled()) return;
+  drag.longPressed = true;
+  drag.active = true;
+  drag.deltaY = 0;
+  drag.stack.classList.add('ticket-wallet-reorder-active');
+  drag.row.classList.add('ticket-wallet-reorder-dragging');
+  // A pack card has two gesture systems: a short tap opens it, while a long
+  // press owns the pointer from this point onward. Cancel the tap gesture as
+  // soon as the hold is recognized so Safari cannot select a different card
+  // after the reorder finishes.
+  swipeGesture = null;
+  ticketWalletReorderSuppressClickUntil = Date.now() + 900;
+  swipeSuppressClickUntil = Date.now() + 900;
+  const point = { x: drag.startX, y: drag.startY, expiresAt: Date.now() + 1200 };
+  ticketWalletSuppressSyntheticClick = true;
+  ticketWalletSyntheticClickPoint = point;
+  window.setTimeout(() => {
+    if (ticketWalletSyntheticClickPoint === point) {
+      ticketWalletSuppressSyntheticClick = false;
+      ticketWalletSyntheticClickPoint = null;
+    }
+  }, 1200);
+  try { drag.row.setPointerCapture?.(drag.pointerId); } catch {}
+  try { navigator.vibrate?.(8); } catch {}
+}
+function beginTicketWalletReorder(event) {
+  if (!ticketWalletReorderEnabled() || !event.isPrimary || (event.button != null && event.button !== 0)) return;
+  const row = event.target.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]');
+  const card = event.target.closest('[data-ticket-wallet-card]');
+  if (!row || !card) return;
+  const stack = row.closest('.ticket-wallet-stack');
+  const rows = ticketWalletReorderRows(stack);
+  const startIndex = rows.indexOf(row);
+  if (!stack || startIndex < 0 || rows.length < 2) return;
+  const rects = rows.map((item) => item.getBoundingClientRect());
+  const stepValue = parseFloat(getComputedStyle(stack).getPropertyValue('--ticket-stack-step')) || 20;
+  const drag = {
+    stack,
+    row,
+    rows,
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    startIndex,
+    currentIndex: startIndex,
+    centers: rects.map((rect) => rect.top + rect.height / 2),
+    step: Math.max(1, stepValue),
+    deltaY: 0,
+    longPressed: false,
+    active: false,
+    moved: false,
+    timer: 0
+  };
+  clearTimeout(ticketWalletReorder?.timer);
+  ticketWalletReorder = drag;
+  drag.timer = window.setTimeout(() => activateTicketWalletReorder(drag), TICKET_WALLET_REORDER_HOLD_MS);
+}
+function updateTicketWalletReorder(event) {
+  const drag = ticketWalletReorder;
+  if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return;
+  const dx = event.clientX - drag.startX;
+  const dy = event.clientY - drag.startY;
+  if (!drag.active) {
+    if (Math.hypot(dx, dy) > TICKET_WALLET_REORDER_MOVE_TOLERANCE) {
+      clearTimeout(drag.timer);
+      ticketWalletReorder = null;
+    }
+    return;
+  }
+  if (event.cancelable) event.preventDefault();
+  drag.deltaY = dy;
+  drag.moved = drag.moved || Math.abs(dy) > 4;
+  drag.currentIndex = ticketWalletReorderSlot(drag, drag.centers[drag.startIndex] + dy);
+  applyTicketWalletReorderPositions(drag);
+}
+function commitTicketWalletReorder(drag) {
+  if (!drag?.rows?.length) return;
+  const visibleRecords = ticketWalletFilteredRecords(ticketWalletDisplayRecords(state.ticketWallet));
+  const visibleIds = new Set(visibleRecords.map((record) => record.id));
+  const ids = drag.rows.map((row) => row.querySelector('[data-ticket-wallet-card]')?.dataset.ticketWalletCard).filter((id) => id && visibleIds.has(id));
+  const movedId = ids.splice(drag.startIndex, 1)[0];
+  if (!movedId) return;
+  ids.splice(drag.currentIndex, 0, movedId);
+  const recordById = new Map(visibleRecords.map((record) => [record.id, record]));
+  const reorderedVisible = ids.map((id) => recordById.get(id)).filter(Boolean);
+  let cursor = 0;
+  state.ticketWallet = state.ticketWallet.map((record) => visibleIds.has(record.id) ? reorderedVisible[cursor++] : record);
+  state.ticketWalletDisplayOrder = state.ticketWallet.map((record) => record.id);
+  saveTicketWallet();
+  saveTicketWalletDisplayOrder();
+}
+function finishTicketWalletReorder(event) {
+  const drag = ticketWalletReorder;
+  if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return false;
+  clearTimeout(drag.timer);
+  ticketWalletReorder = null;
+  if (!drag.longPressed) return false;
+  if (event.cancelable) event.preventDefault();
+  ticketWalletReorderSuppressClickUntil = Date.now() + 700;
+  swipeSuppressClickUntil = Date.now() + 700;
+  if (!drag.active || !drag.moved || drag.currentIndex === drag.startIndex) {
+    clearTicketWalletReorderStyles(drag);
+    return true;
+  }
+  drag.stack.classList.add('ticket-wallet-reorder-active');
+  drag.row.classList.remove('ticket-wallet-reorder-dragging');
+  applyTicketWalletReorderPositions(drag, true);
+  window.setTimeout(() => {
+    clearTicketWalletReorderStyles(drag);
+    commitTicketWalletReorder(drag);
+    render();
+    toast(state.language === 'en' ? 'Ticket order saved' : '票据顺序已保存');
+  }, 190);
+  return true;
+}
+function cancelTicketWalletReorder() {
+  const drag = ticketWalletReorder;
+  if (!drag) return;
+  clearTimeout(drag.timer);
+  ticketWalletReorder = null;
+  clearTicketWalletReorderStyles(drag);
+}
+workspace.addEventListener('pointerdown', beginTicketWalletReorder, true);
+workspace.addEventListener('contextmenu', (event) => {
+  if (event.target.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]')) event.preventDefault();
+}, true);
 workspace.addEventListener('touchstart', (event) => {
   if (swipeGesture || event.target.closest('.swipe-delete')) return;
   const row = event.target.closest('[data-swipe-row]');
@@ -9149,6 +9324,9 @@ workspace.addEventListener('pointerdown', (event) => {
 });
 workspace.addEventListener('pointerup', endLongPress);
 workspace.addEventListener('pointercancel', endLongPress);
+document.addEventListener('pointermove', updateTicketWalletReorder, { passive: false });
+document.addEventListener('pointerup', finishTicketWalletReorder, { passive: false });
+document.addEventListener('pointercancel', cancelTicketWalletReorder, { passive: true });
 document.addEventListener('pointermove', updateReorderDrag, { passive: false });
 document.addEventListener('pointermove', updateReaderBookDrag, { passive: false });
 document.addEventListener('pointermove', updateNavigationDrag, { passive: false });
@@ -9422,6 +9600,7 @@ workspace.addEventListener('contextmenu', (event) => {
 });
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
+  if (Date.now() < ticketWalletReorderSuppressClickUntil && event.target.closest('.ticket-wallet-stack')) { event.preventDefault(); event.stopPropagation(); return; }
   if (ticketWalletMatchesSyntheticClick(event) && event.target.closest('[data-ticket-wallet-edit-field]')) {
     event.preventDefault();
     return;

@@ -14452,3 +14452,25 @@ body:has(.ticket-wallet-page) .ticket-wallet-create-option small {
     font-size: 9px;
   }
 }
+
+/* Long-press sorting for the wallet pack. The dragged row follows the
+   pointer directly; the neighbouring rows only use the stack step to make a
+   smooth lane for it, so the data order never changes during the gesture. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-active {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-active > .ticket-wallet-swipe-row {
+  cursor: grab;
+  will-change: transform;
+  transition: transform 180ms cubic-bezier(.2, .8, .2, 1), filter 180ms ease;
+  transform: translate3d(0, calc(var(--ticket-stack-index) * var(--ticket-stack-step, 20px) + var(--ticket-reorder-offset, 0px)), 0);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-active > .ticket-wallet-swipe-row.ticket-wallet-reorder-dragging {
+  z-index: 1000 !important;
+  cursor: grabbing;
+  transition: none !important;
+  transform: translate3d(0, calc(var(--ticket-stack-index) * var(--ticket-stack-step, 20px) + var(--ticket-reorder-offset, 0px)), 0) scale(1.012) !important;
+  filter: drop-shadow(0 14px 20px color-mix(in srgb, var(--ink) 18%, transparent));
+}
