@@ -14314,3 +14314,123 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack > .ticket-wallet-swipe-row {
      the visual offset larger than the space reserved by the pack. */
   transform: translateY(calc(var(--ticket-stack-index) * var(--ticket-stack-step, 20px)));
 }
+
+/* Ticket add flow: keep the page focused on the two creation choices. The
+   category is already represented by the selected wallet tab, so it should
+   not be repeated in the dialog. */
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head {
+  margin-bottom: 14px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-option,
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-option:hover,
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-option.active {
+  border-color: var(--line) !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-option.active {
+  background: var(--soft);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option,
+body:has(.ticket-wallet-page) .ticket-wallet-create-option:hover,
+body:has(.ticket-wallet-page) .ticket-wallet-create-option:focus-visible {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 68px;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid var(--line) !important;
+  border-radius: 16px;
+  background: var(--panel-2);
+  color: var(--ink);
+  box-shadow: none;
+  text-align: left;
+  transform: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option:hover,
+body:has(.ticket-wallet-page) .ticket-wallet-create-option:focus-visible {
+  background: var(--soft);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option strong,
+body:has(.ticket-wallet-page) .ticket-wallet-create-option small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option strong {
+  font-size: 12px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-create-option small {
+  color: var(--muted);
+  font-size: 10px;
+}
+@media (max-width: 500px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-option {
+    gap: 8px;
+    padding: 10px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-swatch {
+    width: 48px;
+    height: 34px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-create-options {
+    gap: 8px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-create-option {
+    gap: 7px;
+    min-height: 62px;
+    padding: 9px;
+    border-radius: 14px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-create-option-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-create-option strong {
+    font-size: 11px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-create-option small {
+    font-size: 9px;
+  }
+}
