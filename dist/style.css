@@ -2479,6 +2479,13 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-
 .ticket-wallet-detail-row .ticket-wallet-swipe-actions {
   display: none !important;
 }
+.ticket-wallet-detail-row .ticket-wallet-swipe-actions {
+  display: grid !important;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+[data-ticket-wallet-pack-row] .ticket-wallet-swipe-actions {
+  display: none !important;
+}
 .ticket-wallet-detail-info {
   display: grid;
   gap: 8px;
