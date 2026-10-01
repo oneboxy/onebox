@@ -14309,5 +14309,8 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack > .ticket-wallet-swipe-row {
   min-width: 0;
   margin-inline: 0 !important;
   overflow: visible;
-  transform: translateY(calc(var(--ticket-stack-index) * var(--ticket-stack-peek, 20px)));
+  /* Use the pack step, not the legacy row-level --ticket-stack-peek. The
+     latter is still present for the old swipe/detail surface and can make
+     the visual offset larger than the space reserved by the pack. */
+  transform: translateY(calc(var(--ticket-stack-index) * var(--ticket-stack-step, 20px)));
 }

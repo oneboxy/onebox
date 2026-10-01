@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.479';
+const APP_VERSION = '2.18.480';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3676,7 +3676,10 @@ function ticketWalletStackStyle(count) {
   const size = Math.max(1, Number(count) || 1);
   const peek = ticketWalletStackPeek(size);
   const bottom = 32 + size * peek;
-  return '--ticket-stack-count:' + size + ';--ticket-stack-peek:' + peek + 'px;--ticket-stack-bottom:' + bottom + 'px';
+  // Keep the pack step on the stack itself. Older responsive rules also set
+  // --ticket-stack-peek on train rows, which made the row transform use a
+  // different step from the stack's reserved space in Safari.
+  return '--ticket-stack-count:' + size + ';--ticket-stack-peek:' + peek + 'px;--ticket-stack-step:' + peek + 'px;--ticket-stack-bottom:' + bottom + 'px';
 }
 function ticketWalletDetailReturnPackMarkup(records, selectedId) {
   return '<div class="ticket-wallet-return-pack ticket-wallet-stack-section" aria-hidden="true"><div class="ticket-wallet-stack ticket-wallet-return-pack-stack" ' + ticketWalletStackAttrs(records.length) + ' style="' + ticketWalletStackStyle(records.length) + '">' + records.map((item, index) => item.id === selectedId ? '' : ticketWalletCardMarkup(item, index)).join('') + '</div></div>';
