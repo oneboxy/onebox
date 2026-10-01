@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.496';
+const APP_VERSION = '2.18.497';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3249,39 +3249,76 @@ function openTicketWalletInlineField(id, field, target) {
     });
     return;
   }
+  if (target.querySelector('.ticket-wallet-inline-editor')) return;
   document.querySelector('.ticket-wallet-inline-editor')?.blur();
-  const targetRect = target.getBoundingClientRect();
-  const shellRect = shell.getBoundingClientRect();
+  // Saving another field renders the card again; use its current node.
+  target = [...document.querySelectorAll('[data-ticket-wallet-edit-field]')].find((item) => item.dataset.ticketWalletId === id && item.dataset.ticketWalletEditField === field);
+  if (!target) return;
   const input = document.createElement('input');
   const label = ticketWalletInlineFieldLabel(field);
+  const originalValue = ticketWalletInlineFieldValue(record, field);
   input.className = 'ticket-wallet-inline-editor';
   input.type = 'text';
-  input.value = ticketWalletInlineFieldValue(record, field);
+  input.value = originalValue;
   input.setAttribute('aria-label', label);
   input.placeholder = label;
-  const left = Math.max(4, targetRect.left - shellRect.left - 6);
-  const top = Math.max(4, targetRect.top - shellRect.top - 7);
-  const width = Math.min(Math.max(92, targetRect.width + 18), Math.max(120, shellRect.width - left - 8));
-  input.style.left = left + 'px'; input.style.top = top + 'px'; input.style.width = width + 'px';
-  shell.append(input);
+  const text = target instanceof SVGElement ? target.querySelector('text') : target;
+  const style = getComputedStyle(text);
+  const hiddenNodes = [];
+  let editor;
+  if (target instanceof SVGElement) {
+    const box = text.getBBox();
+    editor = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    const fontSize = parseFloat(style.fontSize);
+    const height = Math.max(box.height, fontSize * 1.2);
+    editor.setAttribute('x', box.x);
+    editor.setAttribute('y', box.y - (height - box.height) / 2);
+    editor.setAttribute('width', Math.max(box.width, fontSize * 2));
+    editor.setAttribute('height', height);
+    input.style.fontSize = style.fontSize;
+    input.style.color = style.fill;
+    input.style.textAlign = text.getAttribute('text-anchor') === 'middle' ? 'center' : 'left';
+    // Keep secondary station text and train arrows in place.
+    text.style.visibility = 'hidden';
+    hiddenNodes.push(text);
+    editor.append(input);
+    target.append(editor);
+  } else {
+    editor = input;
+    input.style.fontSize = style.fontSize;
+    input.style.color = style.color;
+    input.style.textAlign = style.textAlign;
+    const width = target.getBoundingClientRect().width;
+    [...target.childNodes].forEach((node) => { hiddenNodes.push(node); node.remove(); });
+    input.style.width = Math.max(width, 40) + 'px';
+    target.append(input);
+  }
+  input.style.fontFamily = style.fontFamily;
+  input.style.fontWeight = style.fontWeight;
+  input.style.letterSpacing = style.letterSpacing;
   let finished = false;
   const finish = (save) => {
     if (finished) return;
     finished = true;
-    if (save) saveTicketWalletInlineField(id, field, input.value);
-    else input.remove();
+    editor.remove();
+    if (target instanceof SVGElement) hiddenNodes.forEach((node) => { node.style.visibility = ''; });
+    else hiddenNodes.forEach((node) => target.append(node));
+    if (save && input.value !== originalValue) saveTicketWalletInlineField(id, field, input.value);
   };
   input.addEventListener('keydown', (event) => {
+    event.stopPropagation();
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Enter') { event.preventDefault(); finish(true); }
     if (event.key === 'Escape') { event.preventDefault(); finish(false); }
   });
   input.addEventListener('blur', () => finish(true));
+  input.addEventListener('click', (event) => event.stopPropagation());
   input.addEventListener('pointerdown', (event) => event.stopPropagation());
   input.addEventListener('touchstart', (event) => event.stopPropagation(), { passive: true });
-  requestAnimationFrame(() => {
-    input.focus();
-    try { input.setSelectionRange(input.value.length, input.value.length); } catch {}
-  });
+  // Focus during the user gesture so the iOS keyboard opens reliably.
+  input.focus();
+  try { input.setSelectionRange(input.value.length, input.value.length); } catch {}
+
 }
 function ticketWalletValue(selector) { return $(selector)?.value?.trim() || ''; }
 async function saveTicketWalletRecord() {
