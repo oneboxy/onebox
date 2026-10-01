@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.497';
+const APP_VERSION = '2.18.498';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3195,11 +3195,12 @@ function openTicketWalletEditor(id = '') {
 function closeTicketWalletEditor() { state.ticketWalletEditorOpen = false; state.ticketWalletEditingId = ''; state.ticketWalletDraft = null; state.ticketWalletRecognition = { status: 'idle', progress: 0, message: '' }; render(); }
 function ticketWalletInlineFieldValue(record, field) {
   if (field === 'passengerName') return record.passengerName || ticketWalletPassengerParts(record.passenger).passengerName || '';
+  if (field === 'passengerId') return record.passengerId || ticketWalletPassengerParts(record.passenger).passengerId || '';
   if (field === 'departAt') return record.departAt || '';
   return String(record[field] || '');
 }
 function ticketWalletInlineFieldLabel(field) {
-  const labels = { from: t('ticketWalletFrom'), to: t('ticketWalletTo'), ticketNo: t('ticketWalletTrainNo'), ticketSerial: t('ticketWalletSerial'), departAt: t('ticketWalletDepart'), price: t('ticketWalletPrice'), seat: t('ticketWalletSeat'), seatClass: t('ticketWalletSeatClass'), passengerName: t('ticketWalletPassengerName'), ticketCode: t('ticketWalletCode') };
+  const labels = { from: t('ticketWalletFrom'), to: t('ticketWalletTo'), ticketNo: t('ticketWalletTrainNo'), ticketSerial: t('ticketWalletSerial'), departAt: t('ticketWalletDepart'), price: t('ticketWalletPrice'), seat: t('ticketWalletSeat'), seatClass: t('ticketWalletSeatClass'), passengerName: t('ticketWalletPassengerName'), passengerId: t('ticketWalletPassengerId'), ticketCode: t('ticketWalletCode') };
   return labels[field] || t('ticketWalletEdit');
 }
 function saveTicketWalletInlineField(id, field, value) {
@@ -3209,7 +3210,7 @@ function saveTicketWalletInlineField(id, field, value) {
   let nextValue = String(value || '').trim();
   if (field === 'departAt' && nextValue && !/^\d{4}-\d{2}-\d{2}T/.test(nextValue)) nextValue = ticketWalletDateFromText(nextValue, nextValue) || nextValue;
   record[field] = nextValue;
-  if (field === 'passengerName') record.passenger = [record.passengerId, nextValue].filter(Boolean).join(' ');
+  if (field === 'passengerName' || field === 'passengerId') record.passenger = [field === 'passengerId' ? nextValue : record.passengerId, field === 'passengerName' ? nextValue : record.passengerName].filter(Boolean).join(' ');
   if (field === 'from' || field === 'to') {
     const routeName = record.from && record.to ? record.from + '至' + record.to : '';
     record.title = routeName || record.title || ticketTypeLabel(record.type);
@@ -3262,27 +3263,32 @@ function openTicketWalletInlineField(id, field, target) {
   input.value = originalValue;
   input.setAttribute('aria-label', label);
   input.placeholder = label;
-  const text = target instanceof SVGElement ? target.querySelector('text') : target;
+  const text = target instanceof SVGElement ? (target.matches('text, tspan') ? target : target.querySelector('text')) : target;
   const style = getComputedStyle(text);
   const hiddenNodes = [];
   let editor;
   if (target instanceof SVGElement) {
-    const box = text.getBBox();
-    editor = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    const fontSize = parseFloat(style.fontSize);
+    const editableText = target.matches('tspan') ? target : (text.querySelector('.station-main-name') || text);
+    const fieldText = editableText.matches('tspan') ? editableText.parentElement : editableText;
+    const box = editableText.getBBox();
+    const fontSize = parseFloat(getComputedStyle(editableText).fontSize) || parseFloat(style.fontSize);
     const height = Math.max(box.height, fontSize * 1.2);
-    editor.setAttribute('x', box.x);
+    const width = Math.max(box.width + fontSize * 3, fontSize * 4);
+    const centered = fieldText.getAttribute('text-anchor') === 'middle';
+    editor = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    editor.setAttribute('x', centered ? box.x - (width - box.width) / 2 : box.x);
     editor.setAttribute('y', box.y - (height - box.height) / 2);
-    editor.setAttribute('width', Math.max(box.width, fontSize * 2));
+    editor.setAttribute('width', width);
     editor.setAttribute('height', height);
-    input.style.fontSize = style.fontSize;
-    input.style.color = style.fill;
-    input.style.textAlign = text.getAttribute('text-anchor') === 'middle' ? 'center' : 'left';
-    // Keep secondary station text and train arrows in place.
-    text.style.visibility = 'hidden';
-    hiddenNodes.push(text);
+    input.style.fontSize = getComputedStyle(editableText).fontSize;
+    input.style.color = getComputedStyle(editableText).fill || style.fill || 'currentColor';
+    input.style.caretColor = input.style.color;
+    input.style.textAlign = centered ? 'center' : 'left';
+    // Hide only the value being edited; the station suffix stays template-sized.
+    editableText.style.visibility = 'hidden';
+    hiddenNodes.push(editableText);
     editor.append(input);
-    target.append(editor);
+    (editableText.matches('tspan') ? (target.closest('g') || target.ownerSVGElement) : target).append(editor);
   } else {
     editor = input;
     input.style.fontSize = style.fontSize;
@@ -3295,6 +3301,7 @@ function openTicketWalletInlineField(id, field, target) {
   }
   input.style.fontFamily = style.fontFamily;
   input.style.fontWeight = style.fontWeight;
+  input.style.caretColor = input.style.caretColor || style.color || style.fill || 'currentColor';
   input.style.letterSpacing = style.letterSpacing;
   let finished = false;
   const finish = (save) => {
@@ -3526,6 +3533,8 @@ function ticketWalletTrainTemplateData(record) {
     seat: ticketWalletTrainSeatDisplay(record.seat),
     seatClass: record.seatClass || '席别待补充',
     passenger: ticketWalletTrainPassengerDisplay(record),
+    passengerId: ticketWalletPassengerParts(record.passenger, record.passengerName, record.passengerId).passengerId,
+    passengerName: ticketWalletPassengerParts(record.passenger, record.passengerName, record.passengerId).passengerName,
     ticketCode,
     template: record.template === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1',
   };
@@ -3555,20 +3564,26 @@ function ticketWalletTrainEditAttrs(data, field, label, editable = true) {
   if (!editable) return '';
   return 'class="ticket-edit-target" role="button" tabindex="0" data-ticket-wallet-id="' + escapeHtml(data.id) + '" data-ticket-wallet-edit-field="' + escapeHtml(field) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Edit ' : '编辑') + label) + '"';
 }
+function ticketWalletTrainPassengerMarkup(data, editable = true) {
+  const maskedId = ticketWalletMaskedPassengerId(data.passengerId || '');
+  const visibleId = maskedId || (state.language === 'en' ? 'Document number' : '证件号待补充');
+  const visibleName = data.passengerName || (state.language === 'en' ? 'Passenger name' : '姓名待补充');
+  return '<text class="ticket-passenger" x="20" y="474"><tspan ' + ticketWalletTrainEditAttrs(data, 'passengerId', t('ticketWalletPassengerId'), editable) + '>' + escapeHtml(visibleId) + '</tspan><tspan> </tspan><tspan ' + ticketWalletTrainEditAttrs(data, 'passengerName', t('ticketWalletPassengerName'), editable) + '>' + escapeHtml(visibleName) + '</tspan></text>';
+}
 function ticketWalletTrainBlueTemplateMarkup(data, sourceHint = '', editable = true) {
   const gradientId = 'train-ticket-blue-' + String(data.id || 'default').replace(/[^a-zA-Z0-9_-]/g, '').slice(-24);
   const fromClass = data.from.length > 3 ? ' station-main is-long' : ' station-main';
   const toClass = data.to.length > 3 ? ' station-main is-long' : ' station-main';
   const editGroup = (field, label, content) => '<g ' + ticketWalletTrainEditAttrs(data, field, label, editable) + '>' + (editable ? '<title>' + escapeHtml((state.language === 'en' ? 'Edit ' : '点击编辑') + label) + '</title>' : '') + content + '</g>';
   const serial = editGroup('ticketSerial', t('ticketWalletSerial'), '<text class="ticket-serial" x="18" y="58">' + escapeHtml(data.serial) + '</text>');
-  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle">' + escapeHtml(data.from) + '<tspan class="station-suffix">站</tspan></text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
+  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.from) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
   const trainNo = editGroup('ticketNo', t('ticketWalletTrainNo'), '<text class="train-number" x="548" y="137" text-anchor="middle">' + escapeHtml(data.trainNo) + '</text><path class="train-number-arrow" d="M432 151H661M648 143L667 151L648 159"/>');
-  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle">' + escapeHtml(data.to) + '<tspan class="station-suffix">站</tspan></text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
+  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.to) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
   const depart = editGroup('departAt', t('ticketWalletDepart'), '<text class="ticket-date" x="20" y="256">' + escapeHtml(data.depart) + '</text>');
   const price = editGroup('price', t('ticketWalletPrice'), '<text class="ticket-price" x="20" y="324">' + escapeHtml(data.price) + '</text>');
   const seat = editGroup('seat', t('ticketWalletSeat'), '<text class="ticket-seat" x="780" y="256">' + escapeHtml(data.seat) + '</text>');
   const seatClass = editGroup('seatClass', t('ticketWalletSeatClass'), '<text class="ticket-seat-class" x="858" y="324">' + escapeHtml(data.seatClass) + '</text>');
-  const passenger = editGroup('passengerName', t('ticketWalletPassengerInfo'), '<text class="ticket-passenger" x="20" y="474">' + escapeHtml(data.passenger) + '</text>');
+  const passenger = ticketWalletTrainPassengerMarkup(data, editable);
   const ticketCode = editGroup('ticketCode', t('ticketWalletCode'), '<text class="ticket-code" x="19" y="684">' + escapeHtml(data.ticketCode) + '</text>');
   return [
     '<div class="ticket-wallet-train-ticket" data-train-ticket-template="crh-blue-v1"', sourceHint ? ' aria-label="' + escapeHtml(sourceHint) + '"' : '', '>',
@@ -3594,14 +3609,14 @@ function ticketWalletTrainTemplateMarkup(data, sourceHint = '', editable = true)
   const toClass = data.to.length > 3 ? ' station-main is-long' : ' station-main';
   const editGroup = (field, label, content) => '<g ' + ticketWalletTrainEditAttrs(data, field, label, editable) + '>' + (editable ? '<title>' + escapeHtml((state.language === 'en' ? 'Edit ' : '点击编辑') + label) + '</title>' : '') + content + '</g>';
   const serial = editGroup('ticketSerial', t('ticketWalletSerial'), '<text class="ticket-serial" x="18" y="58">' + escapeHtml(data.serial) + '</text>');
-  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle">' + escapeHtml(data.from) + '<tspan class="station-suffix">站</tspan></text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
+  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.from) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
   const trainNo = editGroup('ticketNo', t('ticketWalletTrainNo'), '<text class="train-number" x="548" y="137" text-anchor="middle">' + escapeHtml(data.trainNo) + '</text><path class="train-number-arrow" d="M432 151H661M648 143L667 151L648 159"/>');
-  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle">' + escapeHtml(data.to) + '<tspan class="station-suffix">站</tspan></text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
+  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.to) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
   const depart = editGroup('departAt', t('ticketWalletDepart'), '<text class="ticket-date" x="20" y="256">' + escapeHtml(data.depart) + '</text>');
   const price = editGroup('price', t('ticketWalletPrice'), '<text class="ticket-price" x="20" y="324">' + escapeHtml(data.price) + '</text>');
   const seat = editGroup('seat', t('ticketWalletSeat'), '<text class="ticket-seat" x="780" y="256">' + escapeHtml(data.seat) + '</text>');
   const seatClass = editGroup('seatClass', t('ticketWalletSeatClass'), '<text class="ticket-seat-class" x="858" y="324">' + escapeHtml(data.seatClass) + '</text>');
-  const passenger = editGroup('passengerName', t('ticketWalletPassengerInfo'), '<text class="ticket-passenger" x="20" y="474">' + escapeHtml(data.passenger) + '</text>');
+  const passenger = ticketWalletTrainPassengerMarkup(data, editable);
   const ticketCode = editGroup('ticketCode', t('ticketWalletCode'), '<text class="ticket-code" x="19" y="684">' + escapeHtml(data.ticketCode) + '</text>');
   return [
     '<div class="ticket-wallet-train-ticket" data-train-ticket-template="pink-physical-v1"', sourceHint ? ' aria-label="' + escapeHtml(sourceHint) + '"' : '', '>',

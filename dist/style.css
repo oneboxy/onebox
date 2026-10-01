@@ -2278,6 +2278,7 @@ button.ticket-wallet-add-original { cursor: pointer; }
   outline: none;
   background: transparent;
   box-shadow: none;
+  caret-color: var(--ink, #111827);
   font: inherit;
   line-height: normal;
   appearance: none;
