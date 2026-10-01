@@ -14289,9 +14289,18 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticke
 }
 body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-train-ticket::after,
 body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket::after {
-  display: none !important;
-  content: none !important;
-  box-shadow: none !important;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: block !important;
+  height: 20px;
+  border-radius: inherit;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 42%, transparent), transparent 92%);
+  content: '' !important;
+  pointer-events: none;
+  box-shadow: 0 3px 7px color-mix(in srgb, var(--bg) 28%, transparent) !important;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last-child .ticket-wallet-train-ticket,
 body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-swipe-row:last-child .ticket-wallet-physical-ticket {
