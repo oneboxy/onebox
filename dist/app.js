@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.510';
+const APP_VERSION = '2.18.511';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8992,6 +8992,20 @@ function returnTicketWalletToPack(animate = true) {
   window.clearTimeout(ticketWalletDetailClosingTimer);
   const finish = () => {
     if (ticketWalletDetailClosingId !== selectedId) return;
+    // Reparenting the selected row changes its top edge by one stack step.
+    // Browsers with scroll anchoring can mistake that row for the page anchor
+    // and scroll the whole pack to keep it in place, which makes the first
+    // card visibly jump upward at the exact handoff frame.
+    const scrollElement = appScrollElement();
+    const scrollTopBeforeHandoff = appScrollTop();
+    const previousOverflowAnchor = scrollElement?.style.overflowAnchor || '';
+    if (scrollElement) scrollElement.style.overflowAnchor = 'none';
+    const restoreWalletScroll = (restoreAnchor = false) => {
+      if (!scrollElement?.isConnected) return;
+      const maxTop = Math.max(0, scrollElement.scrollHeight - scrollElement.clientHeight);
+      scrollAppTo(Math.min(scrollTopBeforeHandoff, maxTop), 'instant');
+      if (restoreAnchor) scrollElement.style.overflowAnchor = previousOverflowAnchor;
+    };
     ticketWalletDetailClosingCleanup?.();
     ticketWalletDetailClosingTimer = 0;
     ticketWalletDetailClosingId = '';
@@ -9021,10 +9035,17 @@ function returnTicketWalletToPack(animate = true) {
         returnStack.classList.remove('ticket-wallet-return-pack-stack');
         returnStack.style.setProperty('--ticket-stack-count', String(visibleTickets.length));
         detail.replaceWith(returnStack);
+        // Restore once now and once before the next paint. This also covers
+        // engines that apply their scroll-anchor adjustment after the DOM
+        // mutation has completed.
+        restoreWalletScroll();
+        window.requestAnimationFrame(() => restoreWalletScroll(true));
         return;
       }
     }
     render();
+    restoreWalletScroll();
+    window.requestAnimationFrame(() => restoreWalletScroll(true));
   };
   let fallbackTransitionEnd = null;
   let fallbackFrame = 0;
