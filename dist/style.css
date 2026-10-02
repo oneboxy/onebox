@@ -14459,9 +14459,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-create-option small {
   }
 }
 
-/* Long-press sorting for the wallet pack. The dragged row follows the
-   pointer directly; the neighbouring rows only use the stack step to make a
-   smooth lane for it, so the data order never changes during the gesture. */
+/* Wallet sorting applies only in the explicit reorder mode. */
 body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-active {
   touch-action: none;
   user-select: none;
@@ -14585,4 +14583,198 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-add-close {
   #ticketWalletOriginalDialog:not([hidden]) { padding-right: 12px; padding-left: 12px; }
   #ticketWalletOriginalDialog .ticket-wallet-original-dialog-head { top: -52px; }
   #ticketWalletOriginalDialog .ticket-wallet-original-dialog-image { max-height: calc(100dvh - 144px); }
+}
+
+
+/* Sorting is an explicit mode. Cards spread into a list, while only the grip
+   owns touch movement; touching the rest of the page keeps native scrolling. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-mode {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch;
+  gap: 12px !important;
+  padding: 8px 0 18px !important;
+  touch-action: pan-y;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-mode > .ticket-wallet-swipe-row {
+  position: relative !important;
+  inset: auto !important;
+  grid-area: auto !important;
+  width: 100%;
+  margin: 0 !important;
+  overflow: visible !important;
+  border-radius: 14px;
+  z-index: 1 !important;
+  transform: translate3d(0, var(--ticket-reorder-offset, 0px), 0) !important;
+  transition: transform 180ms cubic-bezier(.2, .8, .2, 1), filter 180ms ease;
+  touch-action: pan-y;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-mode > .ticket-wallet-swipe-row .ticket-wallet-card {
+  width: 100%;
+  margin: 0 !important;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-active {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-active > .ticket-wallet-swipe-row.ticket-wallet-reorder-dragging {
+  z-index: 2000 !important;
+  transform: translate3d(0, var(--ticket-reorder-offset, 0px), 0) scale(1.012) !important;
+  transition: none !important;
+  filter: drop-shadow(0 14px 20px color-mix(in srgb, var(--ink) 18%, transparent));
+}
+
+.ticket-wallet-sort-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 0 0 8px;
+}
+
+.ticket-wallet-sort-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.ticket-wallet-sort-toggle > span {
+  color: var(--primary);
+  font-size: 19px;
+  line-height: 1;
+}
+
+.ticket-wallet-sort-toggle.is-active {
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--line));
+  background: var(--soft);
+}
+
+.ticket-wallet-sort-toggle:active {
+  transform: translateY(1px);
+}
+
+.ticket-wallet-sort-hint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ticket-wallet-reorder-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  min-height: 42px;
+  padding: 0 2px 4px;
+}
+
+.ticket-wallet-reorder-position {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticket-wallet-reorder-button {
+  display: inline-grid;
+  width: 42px;
+  min-width: 42px;
+  height: 38px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: none;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background .14s ease, border-color .14s ease, color .14s ease, transform .14s ease;
+}
+
+.ticket-wallet-reorder-button:active {
+  transform: scale(.96);
+}
+
+.ticket-wallet-reorder-button:disabled {
+  color: var(--muted);
+  opacity: .38;
+  cursor: default;
+}
+
+.ticket-wallet-reorder-handle {
+  width: 48px;
+  min-width: 48px;
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--line));
+  background: var(--soft);
+  color: var(--primary);
+  cursor: grab;
+  touch-action: none;
+}
+
+.ticket-wallet-reorder-handle:active {
+  cursor: grabbing;
+}
+
+.ticket-wallet-reorder-handle svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+@media (max-width: 760px) {
+  .ticket-wallet-sort-toolbar {
+    gap: 7px;
+    margin-bottom: 6px;
+  }
+
+  .ticket-wallet-sort-toggle {
+    min-height: 36px;
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+
+  .ticket-wallet-sort-hint {
+    font-size: 11px;
+  }
+
+  body:has(.ticket-wallet-page) .ticket-wallet-stack.ticket-wallet-reorder-mode {
+    gap: 10px !important;
+    padding-top: 6px !important;
+  }
+
+  .ticket-wallet-reorder-controls {
+    min-height: 40px;
+  }
+
+  .ticket-wallet-reorder-button {
+    width: 40px;
+    min-width: 40px;
+    height: 36px;
+  }
+
+  .ticket-wallet-reorder-handle {
+    width: 46px;
+    min-width: 46px;
+  }
 }
