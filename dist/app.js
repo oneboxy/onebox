@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.505';
+const APP_VERSION = '2.18.506';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3699,26 +3699,19 @@ function ticketWalletSwipeActionButtons(record, detail = false) {
   const walletLabel = state.language === 'en' ? 'Wallet' : '钱包';
   return '<button class="ticket-wallet-swipe-action" data-ticket-wallet-notes="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg><span>' + escapeHtml(t('ticketWalletNotes')) + '</span></button><button class="ticket-wallet-swipe-action" data-ticket-wallet-apple="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(walletLabel) + '</span></button><button class="ticket-wallet-swipe-action danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l-.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
 }
-function ticketWalletReorderHandleMarkup(interactive = false) {
-  if (interactive) return '';
-  const english = state.language === 'en';
-  const label = english ? 'Hold and drag to reorder' : '按住拖动排序';
-  const text = english ? 'Move' : '拖动';
-  return '<button type="button" class="ticket-wallet-reorder-handle" data-ticket-wallet-drag-handle aria-label="' + label + '" title="' + label + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="6" r="1.5"></circle><circle cx="16" cy="6" r="1.5"></circle><circle cx="8" cy="12" r="1.5"></circle><circle cx="16" cy="12" r="1.5"></circle><circle cx="8" cy="18" r="1.5"></circle><circle cx="16" cy="18" r="1.5"></circle></svg><span>' + text + '</span></button>';
-}
 function ticketWalletTrainCardMarkup(record, index, contextClass = '', contextStyle = '', interactive = false) {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
   const rowAttributes = interactive ? ' data-swipe-row' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + ticketWalletReorderHandleMarkup(interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
 }
 function ticketWalletCardMarkup(record, index, contextClass = '', contextStyle = '') {
   const interactive = contextClass.includes('ticket-wallet-detail-row');
   if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index, contextClass, contextStyle, interactive);
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
   const rowAttributes = interactive ? ' data-swipe-row' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record, interactive) + ticketWalletReorderHandleMarkup(interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record, interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
 }
 function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextStyle = '') {
   const from = record.from || (record.type === 'dining' ? record.carrier || '门店' : '出发地');
@@ -9082,6 +9075,12 @@ function finishTicketWalletHorizontalGesture(gesture) {
 function updateTicketWalletTouchGesture(event) {
   const gesture = swipeGesture;
   const touch = event.touches?.[0];
+  const reorderDrag = ticketWalletReorder;
+  if (touch && reorderDrag?.longPressed) {
+    if (event.cancelable) event.preventDefault();
+    updateTicketWalletReorderAtPoint(touch.clientX, touch.clientY, event);
+    return;
+  }
   if (!gesture?.ticketWalletId || !touch) return;
   gesture.dx = touch.clientX - gesture.startX;
   gesture.dy = touch.clientY - gesture.startY;
@@ -9119,7 +9118,7 @@ function clearTicketWalletReorderTarget(row) {
   if (!target || (row && target !== row)) return;
   window.clearTimeout(ticketWalletReorderRevealTimer);
   ticketWalletReorderRevealTimer = 0;
-  target.classList.remove('ticket-wallet-reorder-handle-visible');
+  target.classList.remove('ticket-wallet-reorder-armed');
   ticketWalletReorderTargetRow = null;
 }
 function clearTicketWalletReorderStyles(drag) {
@@ -9157,53 +9156,30 @@ function applyTicketWalletReorderPositions(drag, settling = false) {
     row.classList.toggle('ticket-wallet-reorder-shifted', index !== start && offset !== 0);
   });
 }
-function revealTicketWalletReorderHandle(drag) {
+function armTicketWalletReorder(drag) {
   if (!drag || ticketWalletReorder !== drag || !ticketWalletReorderEnabled()) return;
   window.clearTimeout(drag.timer);
-  ticketWalletReorder = null;
   clearTicketWalletReorderTarget();
+  drag.longPressed = true;
   ticketWalletReorderTargetRow = drag.row;
-  drag.row.classList.add('ticket-wallet-reorder-handle-visible');
-  ticketWalletReorderSuppressClickUntil = Date.now() + 800;
+  drag.row.classList.add('ticket-wallet-reorder-armed');
+  ticketWalletReorderRevealTimer = 0;
+  try { if (drag.pointerId != null) drag.row.setPointerCapture?.(drag.pointerId); } catch {}
   swipeGesture = null;
   try { navigator.vibrate?.(8); } catch {}
-  ticketWalletReorderRevealTimer = window.setTimeout(() => clearTicketWalletReorderTarget(drag.row), 9000);
 }
-function activateTicketWalletReorder(drag) {
+function activateTicketWalletReorder(drag, event) {
   if (!drag || ticketWalletReorder !== drag || !ticketWalletReorderEnabled()) return;
   drag.active = true;
   drag.deltaY = 0;
   drag.stack.classList.add('ticket-wallet-reorder-active');
   drag.row.classList.add('ticket-wallet-reorder-dragging');
+  try { if (event?.pointerId != null) drag.row.setPointerCapture?.(event.pointerId); } catch {}
   swipeGesture = null;
 }
 function beginTicketWalletReorder(event) {
   if (!ticketWalletReorderEnabled() || !event.isPrimary || (event.button != null && event.button !== 0)) return;
-  const handle = event.target.closest('[data-ticket-wallet-drag-handle]');
   const card = event.target.closest('[data-ticket-wallet-card]');
-  const handleRow = handle?.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]');
-  if (handle) {
-    if (!handleRow || ticketWalletReorderTargetRow !== handleRow) return;
-    window.clearTimeout(ticketWalletReorderRevealTimer);
-    ticketWalletReorderRevealTimer = 0;
-    const stack = handleRow.closest('.ticket-wallet-stack');
-    const rows = ticketWalletReorderRows(stack);
-    const startIndex = rows.indexOf(handleRow);
-    if (!stack || startIndex < 0 || rows.length < 2) return;
-    const rects = rows.map((item) => item.getBoundingClientRect());
-    const stepValue = parseFloat(getComputedStyle(stack).getPropertyValue('--ticket-stack-step')) || 20;
-    const drag = {
-      handle, stack, row: handleRow, rows, pointerId: event.pointerId,
-      startX: event.clientX, startY: event.clientY,
-      startIndex, currentIndex: startIndex,
-      centers: rects.map((rect) => rect.top + rect.height / 2),
-      step: Math.max(1, stepValue), deltaY: 0, active: false, moved: false,
-      fromHandle: true, timer: 0
-    };
-    ticketWalletReorder = drag;
-    try { handle.setPointerCapture?.(event.pointerId); } catch {}
-    return;
-  }
   const row = card?.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]');
   if (!card || !row) {
     clearTicketWalletReorderTarget();
@@ -9212,7 +9188,12 @@ function beginTicketWalletReorder(event) {
   const stack = row.closest('.ticket-wallet-stack');
   const rows = ticketWalletReorderRows(stack);
   if (!stack || rows.length < 2) return;
-  clearTicketWalletReorderTarget();
+  const alreadyArmed = ticketWalletReorderTargetRow === row;
+  if (!alreadyArmed) clearTicketWalletReorderTarget();
+  else {
+    window.clearTimeout(ticketWalletReorderRevealTimer);
+    ticketWalletReorderRevealTimer = 0;
+  }
   const startIndex = rows.indexOf(row);
   const rects = rows.map((item) => item.getBoundingClientRect());
   const stepValue = parseFloat(getComputedStyle(stack).getPropertyValue('--ticket-stack-step')) || 20;
@@ -9222,26 +9203,29 @@ function beginTicketWalletReorder(event) {
     startIndex, currentIndex: startIndex,
     centers: rects.map((rect) => rect.top + rect.height / 2),
     step: Math.max(1, stepValue), deltaY: 0,
-    active: false, moved: false, fromHandle: false, timer: 0
+    active: false, moved: false, longPressed: alreadyArmed, timer: 0
   };
   ticketWalletReorder = drag;
-  drag.timer = window.setTimeout(() => revealTicketWalletReorderHandle(drag), TICKET_WALLET_REORDER_HOLD_MS);
+  if (!alreadyArmed) drag.timer = window.setTimeout(() => armTicketWalletReorder(drag), TICKET_WALLET_REORDER_HOLD_MS);
 }
-function updateTicketWalletReorder(event) {
+function updateTicketWalletReorderAtPoint(clientX, clientY, event) {
   const drag = ticketWalletReorder;
-  if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return;
-  const dx = event.clientX - drag.startX;
-  const dy = event.clientY - drag.startY;
+  if (!drag) return;
+  const dx = clientX - drag.startX;
+  const dy = clientY - drag.startY;
   if (!drag.active) {
-    if (!drag.fromHandle) {
+    if (!drag.longPressed) {
       if (Math.hypot(dx, dy) > TICKET_WALLET_REORDER_MOVE_TOLERANCE) {
         clearTimeout(drag.timer);
         ticketWalletReorder = null;
       }
       return;
     }
-    if (Math.hypot(dx, dy) < 5) return;
-    activateTicketWalletReorder(drag);
+    if (Math.hypot(dx, dy) < 5) {
+      if (event.cancelable) event.preventDefault();
+      return;
+    }
+    activateTicketWalletReorder(drag, event);
     if (!drag.active) return;
   }
   if (event.cancelable) event.preventDefault();
@@ -9249,6 +9233,11 @@ function updateTicketWalletReorder(event) {
   drag.moved = drag.moved || Math.abs(dy) > 4;
   drag.currentIndex = ticketWalletReorderSlot(drag, drag.centers[drag.startIndex] + dy);
   applyTicketWalletReorderPositions(drag);
+}
+function updateTicketWalletReorder(event) {
+  const drag = ticketWalletReorder;
+  if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return;
+  updateTicketWalletReorderAtPoint(event.clientX, event.clientY, event);
 }
 function commitTicketWalletReorder(drag) {
   if (!drag?.rows?.length) return;
@@ -9271,12 +9260,21 @@ function finishTicketWalletReorder(event) {
   if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return false;
   clearTimeout(drag.timer);
   ticketWalletReorder = null;
-  if (!drag.active) return false;
+  if (!drag.active) {
+    if (!drag.longPressed) return false;
+    ticketWalletReorderSuppressClickUntil = Date.now() + 900;
+    ticketWalletReorderRevealTimer = window.setTimeout(() => clearTicketWalletReorderTarget(drag.row), 9000);
+    return true;
+  }
   if (event.cancelable) event.preventDefault();
   if (!drag.moved || drag.currentIndex === drag.startIndex) {
     clearTicketWalletReorderStyles(drag);
+    clearTicketWalletReorderTarget(drag.row);
+    ticketWalletReorderSuppressClickUntil = Date.now() + 900;
     return true;
   }
+  clearTicketWalletReorderTarget(drag.row);
+  ticketWalletReorderSuppressClickUntil = Date.now() + 900;
   drag.stack.classList.add('ticket-wallet-reorder-active');
   drag.row.classList.remove('ticket-wallet-reorder-dragging');
   applyTicketWalletReorderPositions(drag, true);
@@ -9295,13 +9293,14 @@ function cancelTicketWalletReorder() {
   clearTimeout(drag.timer);
   ticketWalletReorder = null;
   clearTicketWalletReorderStyles(drag);
+  clearTicketWalletReorderTarget(drag.row);
 }
 workspace.addEventListener('pointerdown', beginTicketWalletReorder, true);
 workspace.addEventListener('contextmenu', (event) => {
   if (event.target.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]')) event.preventDefault();
 }, true);
 workspace.addEventListener('touchstart', (event) => {
-  if (swipeGesture || event.target.closest('.swipe-delete, [data-ticket-wallet-drag-handle]')) return;
+  if (swipeGesture || event.target.closest('.swipe-delete')) return;
   const row = event.target.closest('[data-swipe-row]');
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   const ticketWalletEditTarget = event.target.closest('button, a, [data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]');
@@ -9697,7 +9696,6 @@ workspace.addEventListener('contextmenu', (event) => {
 });
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
-  if (event.target.closest('[data-ticket-wallet-drag-handle]')) { event.preventDefault(); event.stopPropagation(); return; }
   const walletPage = event.target.closest('.ticket-wallet-page');
   const blankWalletClick = walletPage && !event.target.closest('.ticket-wallet-swipe-row, button, a, input, textarea, select, [role="tab"]');
   if (ticketWalletReorderTargetRow && blankWalletClick) clearTicketWalletReorderTarget();

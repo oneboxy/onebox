@@ -14588,83 +14588,15 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-add-close {
 
 
 
-/* Preserve the card pack. Long-press raises only the chosen card and reveals
-   its own compact drag control; blank-page taps dismiss that control. */
-body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-active) > .ticket-wallet-swipe-row.ticket-wallet-reorder-handle-visible {
+/* Long-press arms the entire ticket as a transparent drag area. The card
+   remains raised until a blank-page tap or a completed drag clears the state. */
+body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-active) > .ticket-wallet-swipe-row.ticket-wallet-reorder-armed {
   z-index: 1200 !important;
   transform: translate3d(0, calc(var(--ticket-stack-index) * var(--ticket-stack-step, 20px)), 0) scale(1.006) !important;
   filter: drop-shadow(0 12px 18px color-mix(in srgb, var(--ink) 20%, transparent));
   transition: transform 180ms cubic-bezier(.2, .8, .2, 1), filter 180ms ease;
-}
-
-.ticket-wallet-reorder-handle {
-  position: absolute;
-  top: 9px;
-  right: 10px;
-  z-index: 20;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: 72px;
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid color-mix(in srgb, var(--ticket-accent, var(--primary)) 34%, rgba(255, 255, 255, .78));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ticket-accent, var(--primary)) 14%, rgba(255, 255, 255, .92));
-  color: color-mix(in srgb, var(--ticket-accent, var(--primary)) 70%, #18202a);
-  box-shadow: 0 5px 16px rgba(15, 24, 34, .2);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1;
   cursor: grab;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(-3px) scale(.96);
-  transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
   touch-action: none;
-}
-
-.ticket-wallet-reorder-handle svg {
-  width: 15px;
-  height: 15px;
-  flex: 0 0 auto;
-  fill: currentColor;
-}
-
-.ticket-wallet-swipe-row.ticket-wallet-reorder-handle-visible .ticket-wallet-reorder-handle,
-.ticket-wallet-swipe-row.ticket-wallet-reorder-dragging .ticket-wallet-reorder-handle {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0) scale(1);
-}
-
-.ticket-wallet-swipe-row.ticket-wallet-reorder-dragging .ticket-wallet-reorder-handle {
-  cursor: grabbing;
-  box-shadow: 0 7px 20px rgba(15, 24, 34, .26);
-}
-
-.ticket-wallet-reorder-handle:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-@media (max-width: 760px) {
-  .ticket-wallet-reorder-handle {
-    top: 8px;
-    right: 8px;
-    min-width: 68px;
-    height: 32px;
-    font-size: 11px;
-  }
-
-  .ticket-wallet-reorder-handle svg {
-    width: 14px;
-    height: 14px;
-  }
+  user-select: none;
+  -webkit-user-select: none;
 }
