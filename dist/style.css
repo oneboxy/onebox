@@ -14523,15 +14523,35 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-add-close {
   border: 0;
 }
 #ticketWalletOriginalDialog .ticket-wallet-original-dialog-head > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: calc(100% - 50px);
   padding: 9px 13px;
   border: 1px solid rgba(255, 255, 255, .16);
   border-radius: 14px;
   background: rgba(24, 28, 38, .44);
   color: #fff;
+  white-space: nowrap;
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
-#ticketWalletOriginalDialog .ticket-wallet-original-dialog-head small { color: rgba(255, 255, 255, .72); }
+#ticketWalletOriginalDialog .ticket-wallet-original-dialog-head strong {
+  flex: 0 0 auto;
+  font-size: 14px;
+  line-height: 1.25;
+}
+#ticketWalletOriginalDialog .ticket-wallet-original-dialog-head small {
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  color: rgba(255, 255, 255, .78);
+  font-size: 13px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 #ticketWalletOriginalDialog .ticket-wallet-original-dialog-head .icon-btn {
   display: grid;
   width: 38px;

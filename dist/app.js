@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.501';
+const APP_VERSION = '2.18.502';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8688,23 +8688,20 @@ function pageSwipeItems() {
     return homeTabIds().map((id) => ({ kind: 'home', id }));
   }
   if (state.section === 'mine' && state.ticketWalletOpen && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft) {
-    return [{ kind: 'wallet-back', id: 'wallet-back' }, ...Object.keys(TICKET_TYPE_LABELS).map((id) => ({ kind: 'ticket-filter', id }))];
+    return Object.keys(TICKET_TYPE_LABELS).map((id) => ({ kind: 'ticket-filter', id }));
   }
   if (state.section === 'tools') return (state.navigationLocation === 'tools' ? state.toolOrder : state.toolOrder.filter((id) => id !== 'navigation')).map((id) => ({ kind: 'tool', id }));
   return [];
 }
 function pageSwipeIndex(items) {
   const currentId = state.section === 'home' ? state.homeFeed.active : state.section === 'mine' && state.ticketWalletOpen ? state.ticketWalletTypeFilter : state.section === 'navigation' ? 'navigation' : state.tool;
-  const index = items.findIndex((item) => item.id === currentId);
-  return state.section === 'mine' && state.ticketWalletOpen ? index + 1 : index;
+  return items.findIndex((item) => item.id === currentId);
 }
 function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
   if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher')) return null;
-  const walletPage = state.section === 'mine' && state.ticketWalletOpen && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft;
-  const walletEdgeBack = walletPage && event.clientX <= 28;
-  if (event.target.closest('[data-swipe-row]') && !walletEdgeBack) return null;
+  if (event.target.closest('[data-swipe-row]')) return null;
   const items = pageSwipeItems();
   const index = pageSwipeIndex(items);
   if (index < 0 || items.length < 2) return null;
@@ -8714,7 +8711,6 @@ function beginPageSwipe(event) {
   pageSwipeGesture = pageSwipeTarget(event);
 }
 function pageSwipeMarkup(item) {
-  if (item.kind === 'wallet-back') return { tool: 'mine', markup: renderMine() };
   if (item.kind === 'home') {
     const previousSource = state.homeFeed.active;
     state.homeFeed.active = item.id;
@@ -8768,7 +8764,6 @@ function preparePageSwipeTrack(gesture, direction) {
   const target = gesture.items[nextIndex];
   if (pageSwipeTrackState?.target?.id === target.id && pageSwipeTrackState.direction === direction) return pageSwipeTrackState;
   clearPageSwipeTrack();
-  if (target.kind === 'wallet-back') return null;
   const rendered = pageSwipeMarkup(target);
   if (target.kind === 'ticket-filter') {
     const stage = workspace.querySelector('[data-ticket-wallet-swipe-stage]');
@@ -8829,7 +8824,6 @@ function settlePageSwipeBack() {
   }, 300);
 }
 function selectPageSwipeItem(item) {
-  if (item.kind === 'wallet-back') return closeTicketWallet();
   if (item.kind === 'tool') return selectTool(item.id);
   if (item.kind === 'ticket-filter') return selectTicketWalletFilter(item.id);
   return selectHomeFeedSource(item.id);
@@ -8893,11 +8887,7 @@ function finishPageSwipe(event) {
   const threshold = Math.max(56, Math.min(112, window.innerWidth * 0.18));
   const track = pageSwipeTrackState;
   const target = track?.direction === direction && distance >= threshold ? track.target : null;
-  const walletBack = gesture.items[gesture.index + direction]?.kind === 'wallet-back' && distance >= threshold;
-  if (target?.kind === 'wallet-back' || (!target && walletBack)) {
-    clearPageSwipeTrack();
-    closeTicketWallet();
-  } else if (target) settlePageSwipe(target, direction);
+  if (target) settlePageSwipe(target, direction);
   else settlePageSwipeBack();
 }
 
