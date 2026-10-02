@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.506';
+const APP_VERSION = '2.18.507';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9255,6 +9255,22 @@ function commitTicketWalletReorder(drag) {
   saveTicketWallet();
   saveTicketWalletDisplayOrder();
 }
+function settleTicketWalletReorderDom(drag) {
+  if (!drag?.stack?.isConnected || !drag.rows?.length) return;
+  const orderedRows = [...drag.rows];
+  const [movedRow] = orderedRows.splice(drag.startIndex, 1);
+  if (movedRow) orderedRows.splice(drag.currentIndex, 0, movedRow);
+  const fragment = document.createDocumentFragment();
+  orderedRows.forEach((row, index) => {
+    row.style.setProperty('--ticket-stack-index', String(index));
+    fragment.appendChild(row);
+  });
+  drag.stack.appendChild(fragment);
+  // The rows already reached these positions during the drop animation. Swap
+  // their stack indices and remove the temporary offsets in the same frame,
+  // so their ticket SVGs can be reused without rebuilding the whole wallet.
+  clearTicketWalletReorderStyles(drag);
+}
 function finishTicketWalletReorder(event) {
   const drag = ticketWalletReorder;
   if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return false;
@@ -9278,11 +9294,10 @@ function finishTicketWalletReorder(event) {
   drag.stack.classList.add('ticket-wallet-reorder-active');
   drag.row.classList.remove('ticket-wallet-reorder-dragging');
   applyTicketWalletReorderPositions(drag, true);
+  commitTicketWalletReorder(drag);
   window.setTimeout(() => {
-    clearTicketWalletReorderStyles(drag);
+    settleTicketWalletReorderDom(drag);
     clearTicketWalletReorderTarget(drag.row);
-    commitTicketWalletReorder(drag);
-    render();
     toast(state.language === 'en' ? 'Ticket order saved' : '票据顺序已保存');
   }, 190);
   return true;
