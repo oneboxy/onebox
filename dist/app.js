@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.509';
+const APP_VERSION = '2.18.510';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8982,12 +8982,14 @@ function returnTicketWalletToPack(animate = true) {
     render();
     return true;
   }
+  const shell = detail.querySelector('.ticket-wallet-detail-card-shell');
+  // Measure while the return stack is still hidden, before changing styles.
+  // This avoids a forced layout on the same frame that starts the motion.
+  const motion = ticketWalletDetailReturnMotion(shell, detail, selectedId);
   ticketWalletDetailClosingId = selectedId;
   detail.classList.add('is-closing');
   detail.setAttribute('aria-busy', 'true');
   window.clearTimeout(ticketWalletDetailClosingTimer);
-  const shell = detail.querySelector('.ticket-wallet-detail-card-shell');
-  const motion = ticketWalletDetailReturnMotion(shell, detail, selectedId);
   const finish = () => {
     if (ticketWalletDetailClosingId !== selectedId) return;
     ticketWalletDetailClosingCleanup?.();
@@ -9029,14 +9031,14 @@ function returnTicketWalletToPack(animate = true) {
   ticketWalletDetailClosingAnimation = shell?.animate?.([
     { transform: 'translate3d(0, 0, 0)' },
     { transform: 'translate3d(' + motion.x + 'px, ' + motion.y + 'px, 0)' },
-  ], { duration: motion.duration, easing: 'cubic-bezier(.22, .7, .2, 1)', fill: 'forwards' }) || null;
+  ], { duration: motion.duration, easing: 'cubic-bezier(.35, 0, .18, 1)', fill: 'forwards' }) || null;
   if (ticketWalletDetailClosingAnimation) ticketWalletDetailClosingAnimation.onfinish = finish;
   else if (shell) {
     const transform = 'translate3d(' + motion.x + 'px, ' + motion.y + 'px, 0)';
     shell.style.transition = 'none';
     shell.style.transform = 'translate3d(0, 0, 0)';
     void shell.offsetWidth;
-    shell.style.transition = 'transform ' + motion.duration + 'ms cubic-bezier(.22, .7, .2, 1)';
+    shell.style.transition = 'transform ' + motion.duration + 'ms cubic-bezier(.35, 0, .18, 1)';
     fallbackTransitionEnd = (event) => { if (event.target === shell && event.propertyName === 'transform') finish(); };
     shell.addEventListener('transitionend', fallbackTransitionEnd);
     fallbackFrame = window.requestAnimationFrame(() => { shell.style.transform = transform; });

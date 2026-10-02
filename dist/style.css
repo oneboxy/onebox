@@ -2469,6 +2469,8 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-
   position: relative;
   margin-bottom: 12px;
   transform: none;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 .ticket-wallet-detail-row {
   z-index: 2 !important;
@@ -14102,8 +14104,6 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
 .ticket-wallet-detail-view.is-closing {
   pointer-events: none;
   opacity: 1;
-  transform: none;
-  animation: none;
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-return-pack {
   visibility: visible;
