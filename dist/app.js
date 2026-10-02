@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.511';
+const APP_VERSION = '2.18.512';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9009,7 +9009,10 @@ function returnTicketWalletToPack(animate = true) {
     ticketWalletDetailClosingCleanup?.();
     ticketWalletDetailClosingTimer = 0;
     ticketWalletDetailClosingId = '';
-    if (state.ticketWalletSelectedId !== selectedId) return;
+    if (state.ticketWalletSelectedId !== selectedId) {
+      if (scrollElement) scrollElement.style.overflowAnchor = previousOverflowAnchor;
+      return;
+    }
     state.ticketWalletSelectedId = '';
     // The detail view already contains the complete return stack underneath
     // the moving card. Rebuilding the whole workspace here makes Safari
