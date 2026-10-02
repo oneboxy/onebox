@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.512';
+const APP_VERSION = '2.18.513';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8950,22 +8950,11 @@ function ticketWalletDetailReturnMotion(shell, detail, selectedId) {
   const step = parseFloat(stackStyle.getPropertyValue('--ticket-stack-step')) || ticketWalletStackPeek(visibleRecords.length);
   const paddingTop = parseFloat(stackStyle.paddingTop) || 0;
   const paddingLeft = parseFloat(stackStyle.paddingLeft) || 0;
-  const rows = Array.from(returnStack.children).map((row) => ({
-    row,
-    index: Number.parseInt(row.style.getPropertyValue('--ticket-stack-index'), 10) || 0,
-    rect: row.getBoundingClientRect(),
-  }));
-  const next = rows.filter((item) => item.index > selectedIndex).sort((a, b) => a.index - b.index)[0];
-  const previous = rows.filter((item) => item.index < selectedIndex).sort((a, b) => b.index - a.index)[0];
-  let targetLeft = stackRect.left + paddingLeft;
-  let targetTop = stackRect.top + paddingTop + selectedIndex * step;
-  if (next) {
-    targetLeft = next.rect.left;
-    targetTop = next.rect.top - (next.index - selectedIndex) * step;
-  } else if (previous) {
-    targetLeft = previous.rect.left;
-    targetTop = previous.rect.top + (selectedIndex - previous.index) * step;
-  }
+  // Every pack row shares the same grid origin and uses index * step for its
+  // visual offset. Derive the slot directly instead of measuring every hidden
+  // ticket row, which can force layout across a stack of detailed ticket SVGs.
+  const targetLeft = stackRect.left + paddingLeft;
+  const targetTop = stackRect.top + paddingTop + selectedIndex * step;
   const x = targetLeft - startRect.left;
   const y = targetTop - startRect.top;
   const distance = Math.hypot(x, y);
@@ -9002,8 +8991,9 @@ function returnTicketWalletToPack(animate = true) {
     if (scrollElement) scrollElement.style.overflowAnchor = 'none';
     const restoreWalletScroll = (restoreAnchor = false) => {
       if (!scrollElement?.isConnected) return;
-      const maxTop = Math.max(0, scrollElement.scrollHeight - scrollElement.clientHeight);
-      scrollAppTo(Math.min(scrollTopBeforeHandoff, maxTop), 'instant');
+      // Avoid reading scrollHeight/clientHeight here: those reads can force a
+      // full layout immediately after the animated row is reparented.
+      if (Math.abs(appScrollTop() - scrollTopBeforeHandoff) > 1) scrollAppTo(scrollTopBeforeHandoff, 'instant');
       if (restoreAnchor) scrollElement.style.overflowAnchor = previousOverflowAnchor;
     };
     ticketWalletDetailClosingCleanup?.();
