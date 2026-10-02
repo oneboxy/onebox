@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.502';
+const APP_VERSION = '2.18.503';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -695,6 +695,7 @@ function normalizeTicketRecord(value) {
     id: String(source.id || 'ticket-' + uid()), type,
     title: String(source.title || '').trim(), carrier: String(source.carrier || '').trim(),
     from: String(source.from || '').trim(), to: String(source.to || '').trim(),
+    fromLatin: String(source.fromLatin || '').trim(), toLatin: String(source.toLatin || '').trim(),
     departAt: legacyAutoDate ? '' : rawDepartAt, arriveAt: String(source.arriveAt || ''),
     ticketNo: /^(?:G0000|车次待补充)$/i.test(rawTicketNo) ? '' : rawTicketNo,
     ticketSerial: /^(?:A000000|票号待补充)$/i.test(rawTicketSerial) ? '' : rawTicketSerial,
@@ -3196,11 +3197,13 @@ function closeTicketWalletEditor() { state.ticketWalletEditorOpen = false; state
 function ticketWalletInlineFieldValue(record, field) {
   if (field === 'passengerName') return record.passengerName || ticketWalletPassengerParts(record.passenger).passengerName || '';
   if (field === 'passengerId') return record.passengerId || ticketWalletPassengerParts(record.passenger).passengerId || '';
+  if (field === 'fromLatin') return record.fromLatin || ticketWalletTrainStationLatin(record.from) || '';
+  if (field === 'toLatin') return record.toLatin || ticketWalletTrainStationLatin(record.to) || '';
   if (field === 'departAt') return record.departAt || '';
   return String(record[field] || '');
 }
 function ticketWalletInlineFieldLabel(field) {
-  const labels = { from: t('ticketWalletFrom'), to: t('ticketWalletTo'), ticketNo: t('ticketWalletTrainNo'), ticketSerial: t('ticketWalletSerial'), departAt: t('ticketWalletDepart'), price: t('ticketWalletPrice'), seat: t('ticketWalletSeat'), seatClass: t('ticketWalletSeatClass'), passengerName: t('ticketWalletPassengerName'), passengerId: t('ticketWalletPassengerId'), ticketCode: t('ticketWalletCode') };
+  const labels = { from: t('ticketWalletFrom'), to: t('ticketWalletTo'), ticketNo: t('ticketWalletTrainNo'), ticketSerial: t('ticketWalletSerial'), departAt: t('ticketWalletDepart'), price: t('ticketWalletPrice'), seat: t('ticketWalletSeat'), seatClass: t('ticketWalletSeatClass'), passengerName: t('ticketWalletPassengerName'), passengerId: t('ticketWalletPassengerId'), fromLatin: state.language === 'en' ? 'Origin pinyin' : '出发地拼音', toLatin: state.language === 'en' ? 'Destination pinyin' : '目的地拼音', ticketCode: t('ticketWalletCode') };
   return labels[field] || t('ticketWalletEdit');
 }
 function saveTicketWalletInlineField(id, field, value) {
@@ -3209,6 +3212,8 @@ function saveTicketWalletInlineField(id, field, value) {
   const record = { ...state.ticketWallet[index] };
   let nextValue = String(value || '').trim();
   if (field === 'departAt' && nextValue && !/^\d{4}-\d{2}-\d{2}T/.test(nextValue)) nextValue = ticketWalletDateFromText(nextValue, nextValue) || nextValue;
+  if (field === 'from' && nextValue !== record.from) record.fromLatin = '';
+  if (field === 'to' && nextValue !== record.to) record.toLatin = '';
   record[field] = nextValue;
   if (field === 'passengerName' || field === 'passengerId') record.passenger = [field === 'passengerId' ? nextValue : record.passengerId, field === 'passengerName' ? nextValue : record.passengerName].filter(Boolean).join(' ');
   if (field === 'from' || field === 'to') {
@@ -3492,7 +3497,7 @@ function ticketWalletTrainStationLatin(value) {
     西安: 'Xian', 成都: 'Chengdu', 武汉: 'Wuhan', 青岛: 'Qingdao', 厦门: 'Xiamen', 天津: 'Tianjin', 重庆: 'Chongqing', 郑州: 'Zhengzhou',
     济南: 'Jinan', 合肥: 'Hefei', 福州: 'Fuzhou', 昆明: 'Kunming', 长沙: 'Changsha', 南昌: 'Nanchang', 沈阳: 'Shenyang', 大连: 'Dalian',
     哈尔滨: 'Harbin', 石家庄: 'Shijiazhuang', 太原: 'Taiyuan', 兰州: 'Lanzhou', 乌鲁木齐: 'Wulumuqi', 贵阳: 'Guiyang', 桂林: 'Guilin',
-    宁波: 'Ningbo', 无锡: 'Wuxi', 常州: 'Changzhou', 嘉兴: 'Jiaxing', 温州: 'Wenzhou', 金华: 'Jinhua', 徐州: 'Xuzhou', 洛阳: 'Luoyang',
+    宁波: 'Ningbo', 绍兴: 'Shaoxing', 绍兴北: 'Shaoxingbei', 绍兴东: 'Shaoxingdong', 无锡: 'Wuxi', 常州: 'Changzhou', 嘉兴: 'Jiaxing', 温州: 'Wenzhou', 金华: 'Jinhua', 徐州: 'Xuzhou', 洛阳: 'Luoyang',
     珠海: 'Zhuhai', 惠州: 'Huizhou', 海口: 'Haikou', 三亚: 'Sanya', 拉萨: 'Lasa', 呼和浩特: 'Hohhot', 银川: 'Yinchuan', 西宁: 'Xining',
   };
   if (/^[A-Za-z][A-Za-z\s-]*$/.test(station)) return station.replace(/\s+/g, '');
@@ -3527,9 +3532,9 @@ function ticketWalletTrainTemplateData(record) {
     serial,
     trainNo: record.ticketNo || '车次待补充',
     from,
-    fromLatin: ticketWalletTrainStationLatin(record.from),
+    fromLatin: record.fromLatin || ticketWalletTrainStationLatin(record.from) || (state.language === 'en' ? 'Add pinyin' : '拼音待补充'),
     to,
-    toLatin: ticketWalletTrainStationLatin(record.to),
+    toLatin: record.toLatin || ticketWalletTrainStationLatin(record.to) || (state.language === 'en' ? 'Add pinyin' : '拼音待补充'),
     depart: date.time ? date.date + ' ' + date.time + ' 开' : date.date,
     price: ticketWalletTrainPriceDisplay(record.price),
     seat: ticketWalletTrainSeatDisplay(record.seat),
@@ -3578,9 +3583,9 @@ function ticketWalletTrainBlueTemplateMarkup(data, sourceHint = '', editable = t
   const toClass = data.to.length > 3 ? ' station-main is-long' : ' station-main';
   const editGroup = (field, label, content) => '<g ' + ticketWalletTrainEditAttrs(data, field, label, editable) + '>' + (editable ? '<title>' + escapeHtml((state.language === 'en' ? 'Edit ' : '点击编辑') + label) + '</title>' : '') + content + '</g>';
   const serial = editGroup('ticketSerial', t('ticketWalletSerial'), '<text class="ticket-serial" x="18" y="58">' + escapeHtml(data.serial) + '</text>');
-  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.from) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
+  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.from) + '</tspan><tspan class="station-suffix">站</tspan></text>') + editGroup('fromLatin', state.language === 'en' ? 'Origin pinyin' : '出发地拼音', '<text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
   const trainNo = editGroup('ticketNo', t('ticketWalletTrainNo'), '<text class="train-number" x="548" y="137" text-anchor="middle">' + escapeHtml(data.trainNo) + '</text><path class="train-number-arrow" d="M432 151H661M648 143L667 151L648 159"/>');
-  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.to) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
+  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.to) + '</tspan><tspan class="station-suffix">站</tspan></text>') + editGroup('toLatin', state.language === 'en' ? 'Destination pinyin' : '目的地拼音', '<text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
   const depart = editGroup('departAt', t('ticketWalletDepart'), '<text class="ticket-date" x="20" y="256">' + escapeHtml(data.depart) + '</text>');
   const price = editGroup('price', t('ticketWalletPrice'), '<text class="ticket-price" x="20" y="324">' + escapeHtml(data.price) + '</text>');
   const seat = editGroup('seat', t('ticketWalletSeat'), '<text class="ticket-seat" x="780" y="256">' + escapeHtml(data.seat) + '</text>');
@@ -3611,9 +3616,9 @@ function ticketWalletTrainTemplateMarkup(data, sourceHint = '', editable = true)
   const toClass = data.to.length > 3 ? ' station-main is-long' : ' station-main';
   const editGroup = (field, label, content) => '<g ' + ticketWalletTrainEditAttrs(data, field, label, editable) + '>' + (editable ? '<title>' + escapeHtml((state.language === 'en' ? 'Edit ' : '点击编辑') + label) + '</title>' : '') + content + '</g>';
   const serial = editGroup('ticketSerial', t('ticketWalletSerial'), '<text class="ticket-serial" x="18" y="58">' + escapeHtml(data.serial) + '</text>');
-  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.from) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
+  const fromStation = editGroup('from', t('ticketWalletFrom'), '<text class="' + fromClass + '" x="205" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.from) + '</tspan><tspan class="station-suffix">站</tspan></text>') + editGroup('fromLatin', state.language === 'en' ? 'Origin pinyin' : '出发地拼音', '<text class="station-latin" x="205" y="184" text-anchor="middle">' + escapeHtml(data.fromLatin) + '</text>');
   const trainNo = editGroup('ticketNo', t('ticketWalletTrainNo'), '<text class="train-number" x="548" y="137" text-anchor="middle">' + escapeHtml(data.trainNo) + '</text><path class="train-number-arrow" d="M432 151H661M648 143L667 151L648 159"/>');
-  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.to) + '</tspan><tspan class="station-suffix">站</tspan></text><text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
+  const toStation = editGroup('to', t('ticketWalletTo'), '<text class="' + toClass + '" x="866" y="139" text-anchor="middle"><tspan class="station-main-name">' + escapeHtml(data.to) + '</tspan><tspan class="station-suffix">站</tspan></text>') + editGroup('toLatin', state.language === 'en' ? 'Destination pinyin' : '目的地拼音', '<text class="station-latin" x="866" y="184" text-anchor="middle">' + escapeHtml(data.toLatin) + '</text>');
   const depart = editGroup('departAt', t('ticketWalletDepart'), '<text class="ticket-date" x="20" y="256">' + escapeHtml(data.depart) + '</text>');
   const price = editGroup('price', t('ticketWalletPrice'), '<text class="ticket-price" x="20" y="324">' + escapeHtml(data.price) + '</text>');
   const seat = editGroup('seat', t('ticketWalletSeat'), '<text class="ticket-seat" x="780" y="256">' + escapeHtml(data.seat) + '</text>');
