@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.499';
+const APP_VERSION = '2.18.500';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3473,7 +3473,9 @@ function renderTicketWalletEditor() {
   const hasImage = Boolean(draft.sourceImageId);
   const importLabel = hasImage ? '重新导入原始票据' : '导入原始票据';
   const imageIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="3"/><circle cx="9" cy="10" r="1.4"/><path d="m6 16 4-4 3 3 2-2 3 3"/></svg>';
-  return '<section class="ticket-wallet-editor ticket-wallet-add-page" aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><div class="ticket-wallet-editor-head"><div><h2>添加票据</h2></div><button class="icon-btn small" data-ticket-wallet-cancel aria-label="' + escapeHtml(t('ticketWalletCancel')) + '">×</button></div>' + recognitionMarkup + ticketWalletAddTemplateMarkup(draft) + '<div class="ticket-wallet-add-original-field"><span class="ticket-wallet-add-field-label">原始票据</span>' + originalMarkup + '</div><div class="ticket-wallet-create-options" role="group" aria-label="添加方式"><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-import-image><span class="ticket-wallet-create-option-icon" aria-hidden="true">' + imageIcon + '</span><span><strong>' + importLabel + '</strong><small>识别并填充票面字段</small></span></button><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-create-empty="blank"><span class="ticket-wallet-create-option-icon ticket-wallet-create-option-plus" aria-hidden="true">＋</span><span><strong>创建空白票面</strong><small>直接进入票面编辑</small></span></button></div></section>';
+  const closeLabel = state.language === 'en' ? 'Close ticket editor' : '关闭添加票据';
+  const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
+  return '<section class="ticket-wallet-editor ticket-wallet-add-page" aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><div class="ticket-wallet-editor-head"><div><h2>添加票据</h2></div><button type="button" class="ticket-wallet-detail-close ticket-wallet-add-close" data-ticket-wallet-cancel aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button></div>' + recognitionMarkup + ticketWalletAddTemplateMarkup(draft) + '<div class="ticket-wallet-add-original-field"><span class="ticket-wallet-add-field-label">原始票据</span>' + originalMarkup + '</div><div class="ticket-wallet-create-options" role="group" aria-label="添加方式"><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-import-image><span class="ticket-wallet-create-option-icon" aria-hidden="true">' + imageIcon + '</span><span><strong>' + importLabel + '</strong><small>识别并填充票面字段</small></span></button><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-create-empty="blank"><span class="ticket-wallet-create-option-icon ticket-wallet-create-option-plus" aria-hidden="true">＋</span><span><strong>创建空白票面</strong><small>直接进入票面编辑</small></span></button></div></section>';
 }
 function ticketWalletTrainDateParts(value) {
   const date = new Date(value); if (Number.isNaN(date.getTime())) return { date: '日期待补充', time: '' };
@@ -8686,19 +8688,23 @@ function pageSwipeItems() {
     return homeTabIds().map((id) => ({ kind: 'home', id }));
   }
   if (state.section === 'mine' && state.ticketWalletOpen && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft) {
-    return Object.keys(TICKET_TYPE_LABELS).map((id) => ({ kind: 'ticket-filter', id }));
+    return [{ kind: 'wallet-back', id: 'wallet-back' }, ...Object.keys(TICKET_TYPE_LABELS).map((id) => ({ kind: 'ticket-filter', id }))];
   }
   if (state.section === 'tools') return (state.navigationLocation === 'tools' ? state.toolOrder : state.toolOrder.filter((id) => id !== 'navigation')).map((id) => ({ kind: 'tool', id }));
   return [];
 }
 function pageSwipeIndex(items) {
   const currentId = state.section === 'home' ? state.homeFeed.active : state.section === 'mine' && state.ticketWalletOpen ? state.ticketWalletTypeFilter : state.section === 'navigation' ? 'navigation' : state.tool;
-  return items.findIndex((item) => item.id === currentId);
+  const index = items.findIndex((item) => item.id === currentId);
+  return state.section === 'mine' && state.ticketWalletOpen ? index + 1 : index;
 }
 function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
-  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], [data-swipe-row], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher')) return null;
+  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher')) return null;
+  const walletPage = state.section === 'mine' && state.ticketWalletOpen && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft;
+  const walletEdgeBack = walletPage && event.clientX <= 28;
+  if (event.target.closest('[data-swipe-row]') && !walletEdgeBack) return null;
   const items = pageSwipeItems();
   const index = pageSwipeIndex(items);
   if (index < 0 || items.length < 2) return null;
@@ -8708,6 +8714,7 @@ function beginPageSwipe(event) {
   pageSwipeGesture = pageSwipeTarget(event);
 }
 function pageSwipeMarkup(item) {
+  if (item.kind === 'wallet-back') return { tool: 'mine', markup: renderMine() };
   if (item.kind === 'home') {
     const previousSource = state.homeFeed.active;
     state.homeFeed.active = item.id;
@@ -8821,6 +8828,7 @@ function settlePageSwipeBack() {
   }, 300);
 }
 function selectPageSwipeItem(item) {
+  if (item.kind === 'wallet-back') return closeTicketWallet();
   if (item.kind === 'tool') return selectTool(item.id);
   if (item.kind === 'ticket-filter') return selectTicketWalletFilter(item.id);
   return selectHomeFeedSource(item.id);
