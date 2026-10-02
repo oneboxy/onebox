@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.508';
+const APP_VERSION = '2.18.509';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3769,14 +3769,7 @@ function ticketWalletDetailReturnPackMarkup(records, selectedId) {
 function ticketWalletDetailMarkup(record, records = [record]) {
   const closeLabel = state.language === 'en' ? 'Close ticket detail' : '关闭票据详情';
   const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
-  const selectedIndex = Math.max(0, records.findIndex((item) => item.id === record.id));
-  const returnPeek = ticketWalletStackPeek(records.length);
-  // The return stack no longer has an add slot above it. The selected detail
-  // card starts on the same row as the first pack card, so its target is only
-  // the original stack index offset; keeping the old top padding made the
-  // card overshoot and visibly snap back when the animation ended.
-  const returnOffset = selectedIndex * returnPeek;
-  return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '" style="--ticket-wallet-return-offset:' + returnOffset + 'px">' + ticketWalletDetailReturnPackMarkup(records, record.id) + '<div class="ticket-wallet-detail-card-shell"><button type="button" class="ticket-wallet-detail-close" data-ticket-wallet-clear-selection aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button>' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
+  return '<div class="ticket-wallet-detail-view" data-ticket-wallet-detail="' + escapeHtml(record.id) + '">' + ticketWalletDetailReturnPackMarkup(records, record.id) + '<div class="ticket-wallet-detail-card-shell"><button type="button" class="ticket-wallet-detail-close" data-ticket-wallet-clear-selection aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button>' + ticketWalletCardMarkup(record, 0, 'ticket-wallet-detail-row', '--ticket-stack-index:0;') + '</div>' + ticketWalletDetailInfoMarkup(record) + '</div>';
 }
 function ticketWalletStackMarkup(records) {
   const selectedRecord = records.find((record) => record.id === state.ticketWalletSelectedId);
@@ -8182,6 +8175,7 @@ let ticketWalletSyntheticClickPoint = null;
 let ticketWalletDetailClosingId = '';
 let ticketWalletDetailClosingTimer = 0;
 let ticketWalletDetailClosingCleanup = null;
+let ticketWalletDetailClosingAnimation = null;
 let tabSwipeGesture = null;
 let tabSwipeSuppressClickUntil = 0;
 let pageSwipeGesture = null;
@@ -8943,6 +8937,41 @@ workspace.addEventListener('pointerdown', (event) => {
   const ticketWalletId = ticketCard && (!ticketWalletEditTarget || state.ticketWalletSelectedId !== ticketCard.dataset.ticketWalletCard) ? ticketCard.dataset.ticketWalletCard : '';
   swipeGesture = { row, ticketWalletId, startX: event.clientX, startY: event.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
 });
+function ticketWalletDetailReturnMotion(shell, detail, selectedId) {
+  const selectedRow = shell?.querySelector('.ticket-wallet-detail-row');
+  const returnStack = detail?.querySelector('.ticket-wallet-return-pack-stack');
+  if (!selectedRow || !returnStack) return { x: 0, y: 0, duration: 260 };
+  const visibleRecords = ticketWalletFilteredRecords(ticketWalletDisplayRecords(state.ticketWallet));
+  const selectedIndex = visibleRecords.findIndex((record) => record.id === selectedId);
+  if (selectedIndex < 0) return { x: 0, y: 0, duration: 260 };
+  const startRect = shell.getBoundingClientRect();
+  const stackRect = returnStack.getBoundingClientRect();
+  const stackStyle = getComputedStyle(returnStack);
+  const step = parseFloat(stackStyle.getPropertyValue('--ticket-stack-step')) || ticketWalletStackPeek(visibleRecords.length);
+  const paddingTop = parseFloat(stackStyle.paddingTop) || 0;
+  const paddingLeft = parseFloat(stackStyle.paddingLeft) || 0;
+  const rows = Array.from(returnStack.children).map((row) => ({
+    row,
+    index: Number.parseInt(row.style.getPropertyValue('--ticket-stack-index'), 10) || 0,
+    rect: row.getBoundingClientRect(),
+  }));
+  const next = rows.filter((item) => item.index > selectedIndex).sort((a, b) => a.index - b.index)[0];
+  const previous = rows.filter((item) => item.index < selectedIndex).sort((a, b) => b.index - a.index)[0];
+  let targetLeft = stackRect.left + paddingLeft;
+  let targetTop = stackRect.top + paddingTop + selectedIndex * step;
+  if (next) {
+    targetLeft = next.rect.left;
+    targetTop = next.rect.top - (next.index - selectedIndex) * step;
+  } else if (previous) {
+    targetLeft = previous.rect.left;
+    targetTop = previous.rect.top + (selectedIndex - previous.index) * step;
+  }
+  const x = targetLeft - startRect.left;
+  const y = targetTop - startRect.top;
+  const distance = Math.hypot(x, y);
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  return { x, y, duration: reducedMotion ? 0 : Math.round(Math.max(220, Math.min(380, 210 + distance * .32))) };
+}
 function returnTicketWalletToPack(animate = true) {
   const selectedId = state.ticketWalletSelectedId;
   if (!selectedId) return false;
@@ -8958,6 +8987,7 @@ function returnTicketWalletToPack(animate = true) {
   detail.setAttribute('aria-busy', 'true');
   window.clearTimeout(ticketWalletDetailClosingTimer);
   const shell = detail.querySelector('.ticket-wallet-detail-card-shell');
+  const motion = ticketWalletDetailReturnMotion(shell, detail, selectedId);
   const finish = () => {
     if (ticketWalletDetailClosingId !== selectedId) return;
     ticketWalletDetailClosingCleanup?.();
@@ -8994,16 +9024,37 @@ function returnTicketWalletToPack(animate = true) {
     }
     render();
   };
-  const onAnimationEnd = (event) => {
-    if (event.target === shell && event.animationName === 'ticket-wallet-card-return-to-pack') finish();
-  };
-  shell?.addEventListener('animationend', onAnimationEnd);
+  let fallbackTransitionEnd = null;
+  let fallbackFrame = 0;
+  ticketWalletDetailClosingAnimation = shell?.animate?.([
+    { transform: 'translate3d(0, 0, 0)' },
+    { transform: 'translate3d(' + motion.x + 'px, ' + motion.y + 'px, 0)' },
+  ], { duration: motion.duration, easing: 'cubic-bezier(.22, .7, .2, 1)', fill: 'forwards' }) || null;
+  if (ticketWalletDetailClosingAnimation) ticketWalletDetailClosingAnimation.onfinish = finish;
+  else if (shell) {
+    const transform = 'translate3d(' + motion.x + 'px, ' + motion.y + 'px, 0)';
+    shell.style.transition = 'none';
+    shell.style.transform = 'translate3d(0, 0, 0)';
+    void shell.offsetWidth;
+    shell.style.transition = 'transform ' + motion.duration + 'ms cubic-bezier(.22, .7, .2, 1)';
+    fallbackTransitionEnd = (event) => { if (event.target === shell && event.propertyName === 'transform') finish(); };
+    shell.addEventListener('transitionend', fallbackTransitionEnd);
+    fallbackFrame = window.requestAnimationFrame(() => { shell.style.transform = transform; });
+  }
   ticketWalletDetailClosingCleanup = () => {
-    shell?.removeEventListener('animationend', onAnimationEnd);
+    if (ticketWalletDetailClosingAnimation) {
+      ticketWalletDetailClosingAnimation.onfinish = null;
+      ticketWalletDetailClosingAnimation.cancel();
+      ticketWalletDetailClosingAnimation = null;
+    }
+    if (fallbackFrame) window.cancelAnimationFrame(fallbackFrame);
+    if (fallbackTransitionEnd) shell?.removeEventListener('transitionend', fallbackTransitionEnd);
+    shell?.style.removeProperty('transition');
+    shell?.style.removeProperty('transform');
     window.clearTimeout(ticketWalletDetailClosingTimer);
     ticketWalletDetailClosingCleanup = null;
   };
-  ticketWalletDetailClosingTimer = window.setTimeout(finish, 560);
+  ticketWalletDetailClosingTimer = window.setTimeout(finish, motion.duration + 140);
   return true;
 }
 function finishTicketWalletVerticalGesture(gesture) {

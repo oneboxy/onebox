@@ -14094,6 +14094,7 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   pointer-events: none;
   opacity: 0;
   overflow: visible;
+  transition: opacity 140ms ease-out;
 }
 .ticket-wallet-return-pack .ticket-wallet-stack {
   padding-bottom: calc(52px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 136px));
@@ -14113,19 +14114,24 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   z-index: 4;
   will-change: transform;
   backface-visibility: hidden;
-  animation: ticket-wallet-card-return-to-pack .42s cubic-bezier(.22,.75,.18,1) both;
+}
+.ticket-wallet-detail-view.is-closing .ticket-wallet-detail-close {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 90ms ease-out;
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-info {
-  visibility: hidden;
   opacity: 0;
   transform: none;
-  transition: none;
+  pointer-events: none;
+  transition: opacity 140ms ease-out;
 }
-@keyframes ticket-wallet-card-return-to-pack {
-  0% { transform: translate3d(0, 0, 0); }
-  52% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .6), 0); }
-  86% { transform: translate3d(0, calc(var(--ticket-wallet-return-offset) * .94), 0); }
-  100% { transform: translate3d(0, var(--ticket-wallet-return-offset), 0); }
+@media (prefers-reduced-motion: reduce) {
+  .ticket-wallet-return-pack,
+  .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-close,
+  .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-info {
+    transition-duration: 0s;
+  }
 }
 
 /* Make the add action feel like the open slot at the top of the pack. */
@@ -14604,4 +14610,12 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* Keep the train pass a clean rounded rectangle. This clips stray edge
+   artwork/shadows so no small side tabs stick out beyond the ticket face. */
+.ticket-wallet-train-card .ticket-wallet-train-ticket,
+.ticket-wallet-train-card .ticket-wallet-train-template {
+  border-radius: 14px;
+  clip-path: inset(0 round 14px);
 }
