@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-/* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.513';
+/* Pages deployment retry marker: smooth ticket return and wallet icon. */
+const APP_VERSION = '2.18.514';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3158,7 +3158,7 @@ function renderMine() {
     reading: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h8l3 3v5M14 4v4h4M9 12h3M9 16h3"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M16.5 14.8v1.9l1.2.7"/></svg>',
     agreement: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4M9 12h6M9 15h3M14 16.5l1.5 1.5 2.5-3"/></svg>',
     pet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 1.5-4L12 7l4.5-2L18 9v5.2c0 3.4-2.7 5.8-6 5.8s-6-2.4-6-5.8Z"/><circle cx="9.2" cy="12.2" r=".8"/><circle cx="14.8" cy="12.2" r=".8"/><path d="M9.5 15.2c1.5 1.2 3.5 1.2 5 0"/></svg>',
-    ticket: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7.5h14v11H5z"/><path d="M7.5 5.5h12v2M8.5 11h6M8.5 14.5h4"/></svg>',
+    ticket: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.75h8.5A1.5 1.5 0 0 1 18 6.25v1"/><path d="M6 7.25h11.5A1.5 1.5 0 0 1 19 8.75v1.45a2.05 2.05 0 0 0 0 4.1v2.95a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V14.3a2.05 2.05 0 0 0 0-4.1V8.75A1.5 1.5 0 0 1 6 7.25Z"/><path d="M13.5 8.75v9.4" stroke-dasharray="1.3 1.6"/><path d="M7.5 10.5h3M7.5 13.7h3M7.5 16.5h3"/></svg>',
   })[name];
   const row = (action, glyph, title, description) => '<button class="mine-row" ' + action + '><span class="mine-row-icon">' + icon(glyph) + '</span><span class="mine-row-copy"><strong>' + title + '</strong><small class="mine-row-description">' + description + '</small></span><span>›</span></button>';
   const updateBusy = state.updateChecking || state.updateApplying;
@@ -8940,26 +8940,35 @@ workspace.addEventListener('pointerdown', (event) => {
 function ticketWalletDetailReturnMotion(shell, detail, selectedId) {
   const selectedRow = shell?.querySelector('.ticket-wallet-detail-row');
   const returnStack = detail?.querySelector('.ticket-wallet-return-pack-stack');
-  if (!selectedRow || !returnStack) return { x: 0, y: 0, duration: 260 };
+  if (!selectedRow || !returnStack) return null;
   const visibleRecords = ticketWalletFilteredRecords(ticketWalletDisplayRecords(state.ticketWallet));
   const selectedIndex = visibleRecords.findIndex((record) => record.id === selectedId);
-  if (selectedIndex < 0) return { x: 0, y: 0, duration: 260 };
-  const startRect = shell.getBoundingClientRect();
+  if (selectedIndex < 0) return null;
+  const startRect = selectedRow.getBoundingClientRect();
   const stackRect = returnStack.getBoundingClientRect();
   const stackStyle = getComputedStyle(returnStack);
   const step = parseFloat(stackStyle.getPropertyValue('--ticket-stack-step')) || ticketWalletStackPeek(visibleRecords.length);
   const paddingTop = parseFloat(stackStyle.paddingTop) || 0;
   const paddingLeft = parseFloat(stackStyle.paddingLeft) || 0;
-  // Every pack row shares the same grid origin and uses index * step for its
-  // visual offset. Derive the slot directly instead of measuring every hidden
-  // ticket row, which can force layout across a stack of detailed ticket SVGs.
-  const targetLeft = stackRect.left + paddingLeft;
-  const targetTop = stackRect.top + paddingTop + selectedIndex * step;
-  const x = targetLeft - startRect.left;
-  const y = targetTop - startRect.top;
-  const distance = Math.hypot(x, y);
+  // Every row shares the stack origin. Keep the moving row in that stack for
+  // the entire return, so the animation's final transform already is its CSS
+  // resting position and the handoff does not reparent or redraw the ticket.
+  const originLeft = stackRect.left + paddingLeft;
+  const originTop = stackRect.top + paddingTop;
+  const fromX = startRect.left - originLeft;
+  const fromY = startRect.top - originTop;
+  const toY = selectedIndex * step;
+  const distance = Math.hypot(fromX, toY - fromY);
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  return { x, y, duration: reducedMotion ? 0 : Math.round(Math.max(220, Math.min(380, 210 + distance * .32))) };
+  return {
+    index: selectedIndex,
+    count: visibleRecords.length,
+    height: startRect.height,
+    fromX,
+    fromY,
+    toY,
+    duration: reducedMotion ? 0 : Math.round(Math.max(200, Math.min(300, 180 + distance * .25))),
+  };
 }
 function returnTicketWalletToPack(animate = true) {
   const selectedId = state.ticketWalletSelectedId;
@@ -8972,19 +8981,32 @@ function returnTicketWalletToPack(animate = true) {
     return true;
   }
   const shell = detail.querySelector('.ticket-wallet-detail-card-shell');
+  const selectedRow = shell?.querySelector('.ticket-wallet-detail-row');
+  const returnStack = detail.querySelector('.ticket-wallet-return-pack-stack');
   // Measure while the return stack is still hidden, before changing styles.
-  // This avoids a forced layout on the same frame that starts the motion.
+  // The same card node will move into the stack before it is revealed. That
+  // lets the return end in its real pack slot without a last-frame reparent.
   const motion = ticketWalletDetailReturnMotion(shell, detail, selectedId);
+  if (!motion || !selectedRow || !returnStack) {
+    state.ticketWalletSelectedId = '';
+    render();
+    return true;
+  }
   ticketWalletDetailClosingId = selectedId;
+  convertTicketWalletDetailRowToPack(selectedRow);
+  selectedRow.classList.add('ticket-wallet-returning-row');
+  selectedRow.style.setProperty('--ticket-stack-index', String(motion.index));
+  shell.style.height = motion.height + 'px';
+  const insertBefore = Array.from(returnStack.children).find((row) => Number(row.style.getPropertyValue('--ticket-stack-index')) > motion.index);
+  returnStack.insertBefore(selectedRow, insertBefore || null);
+  returnStack.style.setProperty('--ticket-stack-count', String(motion.count));
   detail.classList.add('is-closing');
   detail.setAttribute('aria-busy', 'true');
   window.clearTimeout(ticketWalletDetailClosingTimer);
   const finish = () => {
     if (ticketWalletDetailClosingId !== selectedId) return;
-    // Reparenting the selected row changes its top edge by one stack step.
-    // Browsers with scroll anchoring can mistake that row for the page anchor
-    // and scroll the whole pack to keep it in place, which makes the first
-    // card visibly jump upward at the exact handoff frame.
+    // Exposing the prepared stack changes the detail section's content height.
+    // Hold the current scroll position through that single DOM handoff.
     const scrollElement = appScrollElement();
     const scrollTopBeforeHandoff = appScrollTop();
     const previousOverflowAnchor = scrollElement?.style.overflowAnchor || '';
@@ -8992,7 +9014,7 @@ function returnTicketWalletToPack(animate = true) {
     const restoreWalletScroll = (restoreAnchor = false) => {
       if (!scrollElement?.isConnected) return;
       // Avoid reading scrollHeight/clientHeight here: those reads can force a
-      // full layout immediately after the animated row is reparented.
+      // full layout during the final pack handoff.
       if (Math.abs(appScrollTop() - scrollTopBeforeHandoff) > 1) scrollAppTo(scrollTopBeforeHandoff, 'instant');
       if (restoreAnchor) scrollElement.style.overflowAnchor = previousOverflowAnchor;
     };
@@ -9014,17 +9036,10 @@ function returnTicketWalletToPack(animate = true) {
     const canReplaceInPlace = panel && detail.isConnected && state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets';
     if (canReplaceInPlace) {
       const visibleTickets = ticketWalletFilteredRecords(ticketWalletDisplayRecords(state.ticketWallet));
-      const selectedIndex = visibleTickets.findIndex((record) => record.id === selectedId);
       const returnStack = detail.querySelector('.ticket-wallet-return-pack-stack');
-      const selectedRow = detail.querySelector('.ticket-wallet-detail-card-shell > .ticket-wallet-detail-row');
-      if (visibleTickets.length && selectedIndex >= 0 && returnStack && selectedRow) {
-        // Reuse the nodes that were animated on screen. Parsing the large
-        // ticket SVGs again on the animation's last frame would simply move
-        // the hitch from workspace render to template parsing.
-        convertTicketWalletDetailRowToPack(selectedRow);
-        selectedRow.style.setProperty('--ticket-stack-index', String(selectedIndex));
-        const insertBefore = Array.from(returnStack.children).find((row) => Number(row.style.getPropertyValue('--ticket-stack-index')) > selectedIndex);
-        returnStack.insertBefore(selectedRow, insertBefore || null);
+      if (visibleTickets.length && returnStack && selectedRow.isConnected && selectedRow.parentElement === returnStack) {
+        // The moving card is already at its indexed stack position. Only
+        // expose that prepared stack; do not rebuild or move the card here.
         returnStack.classList.remove('ticket-wallet-return-pack-stack');
         returnStack.style.setProperty('--ticket-stack-count', String(visibleTickets.length));
         detail.replaceWith(returnStack);
@@ -9042,20 +9057,22 @@ function returnTicketWalletToPack(animate = true) {
   };
   let fallbackTransitionEnd = null;
   let fallbackFrame = 0;
-  ticketWalletDetailClosingAnimation = shell?.animate?.([
-    { transform: 'translate3d(0, 0, 0)' },
-    { transform: 'translate3d(' + motion.x + 'px, ' + motion.y + 'px, 0)' },
-  ], { duration: motion.duration, easing: 'cubic-bezier(.35, 0, .18, 1)', fill: 'forwards' }) || null;
+  const fromTransform = 'translate3d(' + motion.fromX + 'px, ' + motion.fromY + 'px, 0)';
+  const toTransform = 'translate3d(0, ' + motion.toY + 'px, 0)';
+  const easing = 'cubic-bezier(.22, .61, .36, 1)';
+  ticketWalletDetailClosingAnimation = selectedRow.animate?.([
+    { transform: fromTransform },
+    { transform: toTransform },
+  ], { duration: motion.duration, easing, fill: 'forwards' }) || null;
   if (ticketWalletDetailClosingAnimation) ticketWalletDetailClosingAnimation.onfinish = finish;
-  else if (shell) {
-    const transform = 'translate3d(' + motion.x + 'px, ' + motion.y + 'px, 0)';
-    shell.style.transition = 'none';
-    shell.style.transform = 'translate3d(0, 0, 0)';
-    void shell.offsetWidth;
-    shell.style.transition = 'transform ' + motion.duration + 'ms cubic-bezier(.35, 0, .18, 1)';
-    fallbackTransitionEnd = (event) => { if (event.target === shell && event.propertyName === 'transform') finish(); };
-    shell.addEventListener('transitionend', fallbackTransitionEnd);
-    fallbackFrame = window.requestAnimationFrame(() => { shell.style.transform = transform; });
+  else {
+    selectedRow.style.transition = 'none';
+    selectedRow.style.transform = fromTransform;
+    void selectedRow.offsetWidth;
+    selectedRow.style.transition = 'transform ' + motion.duration + 'ms ' + easing;
+    fallbackTransitionEnd = (event) => { if (event.target === selectedRow && event.propertyName === 'transform') finish(); };
+    selectedRow.addEventListener('transitionend', fallbackTransitionEnd);
+    fallbackFrame = window.requestAnimationFrame(() => { selectedRow.style.transform = toTransform; });
   }
   ticketWalletDetailClosingCleanup = () => {
     if (ticketWalletDetailClosingAnimation) {
@@ -9064,9 +9081,11 @@ function returnTicketWalletToPack(animate = true) {
       ticketWalletDetailClosingAnimation = null;
     }
     if (fallbackFrame) window.cancelAnimationFrame(fallbackFrame);
-    if (fallbackTransitionEnd) shell?.removeEventListener('transitionend', fallbackTransitionEnd);
-    shell?.style.removeProperty('transition');
-    shell?.style.removeProperty('transform');
+    if (fallbackTransitionEnd) selectedRow.removeEventListener('transitionend', fallbackTransitionEnd);
+    selectedRow.style.removeProperty('transition');
+    selectedRow.style.removeProperty('transform');
+    selectedRow.classList.remove('ticket-wallet-returning-row');
+    shell.style.removeProperty('height');
     window.clearTimeout(ticketWalletDetailClosingTimer);
     ticketWalletDetailClosingCleanup = null;
   };

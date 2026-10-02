@@ -2469,6 +2469,9 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-
   position: relative;
   margin-bottom: 12px;
   transform: none;
+}
+.ticket-wallet-returning-row {
+  z-index: 1200 !important;
   will-change: transform;
   backface-visibility: hidden;
 }
@@ -14094,12 +14097,15 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
   z-index: 1;
   visibility: hidden;
   pointer-events: none;
-  opacity: 0;
+  opacity: 1;
   overflow: visible;
-  transition: opacity 140ms ease-out;
 }
 .ticket-wallet-return-pack .ticket-wallet-stack {
   padding-bottom: calc(52px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 136px));
+}
+.ticket-wallet-return-pack-stack > .ticket-wallet-swipe-row:not(.ticket-wallet-returning-row) {
+  opacity: 0;
+  transition: opacity 100ms ease-out;
 }
 .ticket-wallet-detail-view.is-closing {
   pointer-events: none;
@@ -14107,13 +14113,13 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-return-pack {
   visibility: visible;
-  opacity: 1;
   transform: none;
+}
+.ticket-wallet-detail-view.is-closing .ticket-wallet-return-pack-stack > .ticket-wallet-swipe-row:not(.ticket-wallet-returning-row) {
+  opacity: 1;
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-card-shell {
   z-index: 4;
-  will-change: transform;
-  backface-visibility: hidden;
 }
 .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-close {
   opacity: 0;
@@ -14128,6 +14134,7 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-v
 }
 @media (prefers-reduced-motion: reduce) {
   .ticket-wallet-return-pack,
+  .ticket-wallet-return-pack-stack > .ticket-wallet-swipe-row,
   .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-close,
   .ticket-wallet-detail-view.is-closing .ticket-wallet-detail-info {
     transition-duration: 0s;
