@@ -2235,8 +2235,10 @@ button.ticket-wallet-add-original { cursor: pointer; }
 .ticket-wallet-template-swatch-ferry,
 .ticket-wallet-template-swatch-coach,
 .ticket-wallet-template-swatch-transit,
+.ticket-wallet-template-swatch-car,
 .ticket-wallet-template-swatch-movie,
 .ticket-wallet-template-swatch-concert,
+.ticket-wallet-template-swatch-admission,
 .ticket-wallet-template-swatch-dining,
 .ticket-wallet-template-swatch-other {
   background: linear-gradient(145deg, var(--panel), var(--soft));
@@ -2246,8 +2248,10 @@ button.ticket-wallet-add-original { cursor: pointer; }
 .ticket-wallet-template-swatch-ferry::before,
 .ticket-wallet-template-swatch-coach::before,
 .ticket-wallet-template-swatch-transit::before,
+.ticket-wallet-template-swatch-car::before,
 .ticket-wallet-template-swatch-movie::before,
 .ticket-wallet-template-swatch-concert::before,
+.ticket-wallet-template-swatch-admission::before,
 .ticket-wallet-template-swatch-dining::before,
 .ticket-wallet-template-swatch-other::before {
   position: absolute;
@@ -12126,14 +12130,18 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-physical-ticket-ferry { --ticket-accent: #098b9b; --physical-bg: linear-gradient(135deg, #cceff0, #fff 74%); --physical-ink: #123d4a; }
 .ticket-wallet-physical-ticket-coach { --ticket-accent: #d47732; --physical-bg: linear-gradient(135deg, #ffe1b9, #fff 74%); --physical-ink: #4c2c19; }
 .ticket-wallet-physical-ticket-transit { --ticket-accent: #2d78c9; --physical-bg: linear-gradient(135deg, #dceaff, #fff 74%); --physical-ink: #1b3555; }
+.ticket-wallet-physical-ticket-car { --ticket-accent: #d47732; --physical-bg: linear-gradient(135deg, #ffe1b9, #fff 74%); --physical-ink: #4c2c19; }
 .ticket-wallet-physical-ticket-movie { --ticket-accent: #9258cc; --physical-bg: linear-gradient(135deg, #eadbff, #fff 74%); --physical-ink: #35224c; }
 .ticket-wallet-physical-ticket-concert { --ticket-accent: #d34e86; --physical-bg: linear-gradient(135deg, #ffd9e8, #fff 74%); --physical-ink: #4d1d34; }
+.ticket-wallet-physical-ticket-admission { --ticket-accent: #d34e86; --physical-bg: linear-gradient(135deg, #ffd9e8, #fff 74%); --physical-ink: #4d1d34; }
 .ticket-wallet-physical-ticket-dining { --ticket-accent: #c78635; --physical-bg: linear-gradient(135deg, #fff0c9, #fffdf6 74%); --physical-ink: #49351a; }
 .ticket-wallet-physical-ticket-other { --ticket-accent: #7563c8; --physical-bg: linear-gradient(135deg, #e6e1ff, #fff 74%); --physical-ink: #2d2854; }
 .ticket-wallet-card-coach { --ticket-accent: #d47732; }
 .ticket-wallet-card-transit { --ticket-accent: #2d78c9; }
+.ticket-wallet-card-car { --ticket-accent: #d47732; }
 .ticket-wallet-card-movie { --ticket-accent: #9258cc; }
 .ticket-wallet-card-concert { --ticket-accent: #d34e86; }
+.ticket-wallet-card-admission { --ticket-accent: #d34e86; }
 .ticket-wallet-card-dining { --ticket-accent: #c78635; }
 .ticket-wallet-swipe-row {
   --ticket-wallet-actions-width: 112px;
