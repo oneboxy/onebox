@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.507';
+const APP_VERSION = '2.18.508';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8173,6 +8173,8 @@ let ticketWalletReorder = null;
 let ticketWalletReorderTargetRow = null;
 let ticketWalletReorderRevealTimer = 0;
 let ticketWalletReorderSuppressClickUntil = 0;
+let ticketWalletReorderFrame = 0;
+let ticketWalletReorderPoint = null;
 let swipeGesture = null;
 let swipeSuppressClickUntil = 0;
 let ticketWalletSuppressSyntheticClick = false;
@@ -9078,7 +9080,7 @@ function updateTicketWalletTouchGesture(event) {
   const reorderDrag = ticketWalletReorder;
   if (touch && reorderDrag?.longPressed) {
     if (event.cancelable) event.preventDefault();
-    updateTicketWalletReorderAtPoint(touch.clientX, touch.clientY, event);
+    queueTicketWalletReorderPosition(touch.clientX, touch.clientY);
     return;
   }
   if (!gesture?.ticketWalletId || !touch) return;
@@ -9125,7 +9127,7 @@ function clearTicketWalletReorderStyles(drag) {
   if (!drag?.stack) return;
   drag.stack.classList.remove('ticket-wallet-reorder-active');
   drag.rows.forEach((row) => {
-    row.classList.remove('ticket-wallet-reorder-dragging', 'ticket-wallet-reorder-shifted');
+    row.classList.remove('ticket-wallet-reorder-dragging', 'ticket-wallet-reorder-settling', 'ticket-wallet-reorder-shifted');
     row.style.removeProperty('--ticket-reorder-offset');
   });
 }
@@ -9168,13 +9170,13 @@ function armTicketWalletReorder(drag) {
   swipeGesture = null;
   try { navigator.vibrate?.(8); } catch {}
 }
-function activateTicketWalletReorder(drag, event) {
+function activateTicketWalletReorder(drag) {
   if (!drag || ticketWalletReorder !== drag || !ticketWalletReorderEnabled()) return;
   drag.active = true;
   drag.deltaY = 0;
   drag.stack.classList.add('ticket-wallet-reorder-active');
   drag.row.classList.add('ticket-wallet-reorder-dragging');
-  try { if (event?.pointerId != null) drag.row.setPointerCapture?.(event.pointerId); } catch {}
+  try { if (drag.pointerId != null) drag.row.setPointerCapture?.(drag.pointerId); } catch {}
   swipeGesture = null;
 }
 function beginTicketWalletReorder(event) {
@@ -9206,9 +9208,12 @@ function beginTicketWalletReorder(event) {
     active: false, moved: false, longPressed: alreadyArmed, timer: 0
   };
   ticketWalletReorder = drag;
+  if (alreadyArmed) {
+    try { if (drag.pointerId != null) row.setPointerCapture?.(drag.pointerId); } catch {}
+  }
   if (!alreadyArmed) drag.timer = window.setTimeout(() => armTicketWalletReorder(drag), TICKET_WALLET_REORDER_HOLD_MS);
 }
-function updateTicketWalletReorderAtPoint(clientX, clientY, event) {
+function updateTicketWalletReorderAtPoint(clientX, clientY) {
   const drag = ticketWalletReorder;
   if (!drag) return;
   const dx = clientX - drag.startX;
@@ -9221,23 +9226,52 @@ function updateTicketWalletReorderAtPoint(clientX, clientY, event) {
       }
       return;
     }
-    if (Math.hypot(dx, dy) < 5) {
-      if (event.cancelable) event.preventDefault();
-      return;
-    }
-    activateTicketWalletReorder(drag, event);
+    if (Math.hypot(dx, dy) < 5) return;
+    activateTicketWalletReorder(drag);
     if (!drag.active) return;
   }
-  if (event.cancelable) event.preventDefault();
   drag.deltaY = dy;
   drag.moved = drag.moved || Math.abs(dy) > 4;
   drag.currentIndex = ticketWalletReorderSlot(drag, drag.centers[drag.startIndex] + dy);
   applyTicketWalletReorderPositions(drag);
 }
+function queueTicketWalletReorderPosition(clientX, clientY) {
+  ticketWalletReorderPoint = { x: clientX, y: clientY };
+  if (ticketWalletReorderFrame) return;
+  ticketWalletReorderFrame = window.requestAnimationFrame(() => {
+    ticketWalletReorderFrame = 0;
+    const point = ticketWalletReorderPoint;
+    ticketWalletReorderPoint = null;
+    if (point) updateTicketWalletReorderAtPoint(point.x, point.y);
+  });
+}
+function flushTicketWalletReorderPosition(clientX, clientY) {
+  if (ticketWalletReorderFrame) window.cancelAnimationFrame(ticketWalletReorderFrame);
+  ticketWalletReorderFrame = 0;
+  const point = Number.isFinite(clientX) && Number.isFinite(clientY)
+    ? { x: clientX, y: clientY }
+    : ticketWalletReorderPoint;
+  ticketWalletReorderPoint = null;
+  if (point) updateTicketWalletReorderAtPoint(point.x, point.y);
+}
+function clearTicketWalletReorderPosition() {
+  if (ticketWalletReorderFrame) window.cancelAnimationFrame(ticketWalletReorderFrame);
+  ticketWalletReorderFrame = 0;
+  ticketWalletReorderPoint = null;
+}
 function updateTicketWalletReorder(event) {
   const drag = ticketWalletReorder;
   if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return;
-  updateTicketWalletReorderAtPoint(event.clientX, event.clientY, event);
+  if (!drag.active && !drag.longPressed) {
+    if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > TICKET_WALLET_REORDER_MOVE_TOLERANCE) {
+      clearTimeout(drag.timer);
+      ticketWalletReorder = null;
+      clearTicketWalletReorderPosition();
+    }
+    return;
+  }
+  if (event.cancelable) event.preventDefault();
+  queueTicketWalletReorderPosition(event.clientX, event.clientY);
 }
 function commitTicketWalletReorder(drag) {
   if (!drag?.rows?.length) return;
@@ -9275,6 +9309,8 @@ function finishTicketWalletReorder(event) {
   const drag = ticketWalletReorder;
   if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return false;
   clearTimeout(drag.timer);
+  if (drag.active || drag.longPressed) flushTicketWalletReorderPosition(event.clientX, event.clientY);
+  else clearTicketWalletReorderPosition();
   ticketWalletReorder = null;
   if (!drag.active) {
     if (!drag.longPressed) return false;
@@ -9293,6 +9329,7 @@ function finishTicketWalletReorder(event) {
   ticketWalletReorderSuppressClickUntil = Date.now() + 900;
   drag.stack.classList.add('ticket-wallet-reorder-active');
   drag.row.classList.remove('ticket-wallet-reorder-dragging');
+  drag.row.classList.add('ticket-wallet-reorder-settling');
   applyTicketWalletReorderPositions(drag, true);
   commitTicketWalletReorder(drag);
   window.setTimeout(() => {
@@ -9304,6 +9341,7 @@ function finishTicketWalletReorder(event) {
 }
 function cancelTicketWalletReorder() {
   const drag = ticketWalletReorder;
+  clearTicketWalletReorderPosition();
   if (!drag) return;
   clearTimeout(drag.timer);
   ticketWalletReorder = null;
