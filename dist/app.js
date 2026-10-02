@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.498';
+const APP_VERSION = '2.18.499';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3177,7 +3177,7 @@ function closeTicketWallet() {
   closeTicketWalletOriginal();
   history.replaceState(null, '', '#mine'); renderNav(); renderBottomNav(); render();
 }
-function ticketWalletDefaultTemplate(type) { return type === 'train' ? 'pink-physical-v1' : 'standard-v1'; }
+function ticketWalletDefaultTemplate(type) { return type === 'train' ? 'crh-blue-v1' : 'standard-v1'; }
 function openTicketWalletEditor(id = '') {
   if (id) {
     state.ticketWalletSelectedId = id;
@@ -3455,11 +3455,11 @@ function ticketWalletField(label, id, value, type = 'text', extra = '') {
 function ticketWalletAddTemplateMarkup(draft) {
   const isTrain = draft.type === 'train';
   const options = isTrain ? [
+    { id: 'crh-blue-v1', swatch: 'blue', title: '浅蓝票面', note: '默认票面 · 清爽样式' },
     { id: 'pink-physical-v1', swatch: 'pink', title: '经典纸票面', note: '传统纸质样式' },
-    { id: 'crh-blue-v1', swatch: 'blue', title: '浅蓝票面', note: '清爽票面样式' },
   ] : [{ id: 'standard-v1', swatch: draft.type, title: '标准票面', note: '适配当前分类' }];
   const layoutClass = options.length === 1 ? ' is-single' : ' is-multiple';
-  return '<fieldset class="ticket-wallet-template-picker"><legend>票面样式</legend><div class="ticket-wallet-template-options' + layoutClass + '">' + options.map((item) => '<button type="button" class="ticket-wallet-template-option ' + (draft.template === item.id ? 'active' : '') + '" data-ticket-wallet-template="' + item.id + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>').join('') + '</div></fieldset>';
+  return '<fieldset class="ticket-wallet-template-picker"><legend>票面样式</legend><div class="ticket-wallet-template-options' + layoutClass + '">' + options.map((item) => '<button type="button" class="ticket-wallet-template-option ' + (draft.template === item.id ? 'active' : '') + '" aria-pressed="' + (draft.template === item.id ? 'true' : 'false') + '" data-ticket-wallet-template="' + item.id + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>').join('') + '</div></fieldset>';
 }
 function renderTicketWalletEditor() {
   const draft = state.ticketWalletDraft || normalizeTicketRecord({ type: state.ticketWalletTypeFilter, template: ticketWalletDefaultTemplate(state.ticketWalletTypeFilter) });
@@ -9685,7 +9685,7 @@ workspace.addEventListener('click', async (event) => {
   const ticketWalletView = event.target.closest('[data-ticket-wallet-view]');
   if (ticketWalletView) { state.ticketWalletView = ticketWalletView.dataset.ticketWalletView === 'journeys' ? 'journeys' : 'tickets'; state.ticketWalletMemoryDraft = null; return render(); }
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
-  if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(state.ticketWalletDraft.type); document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => item.classList.toggle('active', item === ticketWalletTemplate)); return; }
+  if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(state.ticketWalletDraft.type); document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => { item.classList.toggle('active', item === ticketWalletTemplate); item.setAttribute('aria-pressed', item === ticketWalletTemplate ? 'true' : 'false'); }); return; }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');
   if (ticketWalletFilter) {
     selectTicketWalletFilter(ticketWalletFilter.dataset.ticketWalletFilter || 'train');

@@ -11570,9 +11570,11 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
 .ticket-wallet-template-picker { grid-column: 1 / -1; margin: 18px 0 0; padding: 0; border: 0; }
 .ticket-wallet-template-picker legend { margin-bottom: 9px; color: var(--muted); font-size: 11px; font-weight: 750; }
 .ticket-wallet-template-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.ticket-wallet-template-option { display: flex; align-items: center; gap: 11px; min-width: 0; padding: 11px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); color: var(--ink); text-align: left; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease; }
-.ticket-wallet-template-option:hover { border-color: color-mix(in srgb, var(--primary) 45%, var(--line)); }
-.ticket-wallet-template-option.active { border-color: color-mix(in srgb, var(--primary) 62%, var(--line)); background: color-mix(in srgb, var(--primary) 6%, var(--panel-2)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent); }
+.ticket-wallet-template-option { position: relative; display: flex; align-items: center; gap: 11px; min-width: 0; padding: 11px 38px 11px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); color: var(--ink); text-align: left; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease, transform .15s ease; }
+.ticket-wallet-template-option:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--line)); }
+.ticket-wallet-template-option.active { border: 2px solid var(--primary); padding: 10px 37px 10px 11px; background: color-mix(in srgb, var(--primary) 13%, var(--panel-2)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 23%, transparent), 0 5px 14px color-mix(in srgb, var(--primary) 14%, transparent); }
+.ticket-wallet-template-option.active::after { position: absolute; top: 50%; right: 10px; display: grid; width: 21px; height: 21px; place-items: center; transform: translateY(-50%); border-radius: 50%; background: var(--primary); color: #fff; content: '✓'; font-size: 13px; font-weight: 900; line-height: 1; }
+.ticket-wallet-template-option:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 .ticket-wallet-template-option > span:last-child { display: grid; gap: 3px; min-width: 0; }
 .ticket-wallet-template-option strong { font-size: 12px; }
 .ticket-wallet-template-option small { color: var(--muted); font-size: 10px; }
