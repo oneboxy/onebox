@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.504';
+const APP_VERSION = '2.18.505';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3699,31 +3699,26 @@ function ticketWalletSwipeActionButtons(record, detail = false) {
   const walletLabel = state.language === 'en' ? 'Wallet' : '钱包';
   return '<button class="ticket-wallet-swipe-action" data-ticket-wallet-notes="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg><span>' + escapeHtml(t('ticketWalletNotes')) + '</span></button><button class="ticket-wallet-swipe-action" data-ticket-wallet-apple="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(walletLabel) + '</span></button><button class="ticket-wallet-swipe-action danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l-.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
 }
-function ticketWalletSortControlsMarkup(index) {
-  if (!ticketWalletSortMode || ticketWalletSortCount < 2) return '';
+function ticketWalletReorderHandleMarkup(interactive = false) {
+  if (interactive) return '';
   const english = state.language === 'en';
-  const moveUp = english ? 'Move ticket up' : '上移票据';
-  const moveDown = english ? 'Move ticket down' : '下移票据';
-  const dragLabel = english ? 'Drag to reorder ticket' : '拖动调整票据顺序';
-  const dragTitle = english ? 'Drag handle' : '拖动手柄';
-  return '<div class="ticket-wallet-reorder-controls"><span class="ticket-wallet-reorder-position" aria-hidden="true">' + (index + 1) + '</span>' +
-    '<button type="button" class="ticket-wallet-reorder-button" data-ticket-wallet-order-move="up" aria-label="' + moveUp + '" title="' + moveUp + '"' + (index === 0 ? ' disabled' : '') + '>↑</button>' +
-    '<button type="button" class="ticket-wallet-reorder-button ticket-wallet-reorder-handle" data-ticket-wallet-drag-handle aria-label="' + dragLabel + '" title="' + dragTitle + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="6" r="1.5"></circle><circle cx="16" cy="6" r="1.5"></circle><circle cx="8" cy="12" r="1.5"></circle><circle cx="16" cy="12" r="1.5"></circle><circle cx="8" cy="18" r="1.5"></circle><circle cx="16" cy="18" r="1.5"></circle></svg></button>' +
-    '<button type="button" class="ticket-wallet-reorder-button" data-ticket-wallet-order-move="down" aria-label="' + moveDown + '" title="' + moveDown + '"' + (index === ticketWalletSortCount - 1 ? ' disabled' : '') + '>↓</button></div>';
+  const label = english ? 'Hold and drag to reorder' : '按住拖动排序';
+  const text = english ? 'Move' : '拖动';
+  return '<button type="button" class="ticket-wallet-reorder-handle" data-ticket-wallet-drag-handle aria-label="' + label + '" title="' + label + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="6" r="1.5"></circle><circle cx="16" cy="6" r="1.5"></circle><circle cx="8" cy="12" r="1.5"></circle><circle cx="16" cy="12" r="1.5"></circle><circle cx="8" cy="18" r="1.5"></circle><circle cx="16" cy="18" r="1.5"></circle></svg><span>' + text + '</span></button>';
 }
 function ticketWalletTrainCardMarkup(record, index, contextClass = '', contextStyle = '', interactive = false) {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
   const rowAttributes = interactive ? ' data-swipe-row' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '">' + ticketWalletSortControlsMarkup(index) + '<article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + ticketWalletReorderHandleMarkup(interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
 }
 function ticketWalletCardMarkup(record, index, contextClass = '', contextStyle = '') {
   const interactive = contextClass.includes('ticket-wallet-detail-row');
   if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index, contextClass, contextStyle, interactive);
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
   const rowAttributes = interactive ? ' data-swipe-row' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '">' + ticketWalletSortControlsMarkup(index) + '<article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record, interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record, interactive) + ticketWalletReorderHandleMarkup(interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
 }
 function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextStyle = '') {
   const from = record.from || (record.type === 'dining' ? record.carrier || '门店' : '出发地');
@@ -3796,7 +3791,7 @@ function ticketWalletStackMarkup(records) {
   return ticketWalletPackStackMarkup(records);
 }
 function ticketWalletPackStackMarkup(records) {
-  return '<div class="ticket-wallet-stack' + (ticketWalletSortMode ? ' ticket-wallet-reorder-mode' : '') + '" ' + ticketWalletStackAttrs(records.length) + ' style="' + ticketWalletStackStyle(records.length) + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
+  return '<div class="ticket-wallet-stack" ' + ticketWalletStackAttrs(records.length) + ' style="' + ticketWalletStackStyle(records.length) + '">' + records.map((record, index) => ticketWalletCardMarkup(record, index)).join('') + '</div>';
 }
 function syncTicketWalletFocusStack() {
   const stack = $('.ticket-wallet-focus-stack');
@@ -3972,12 +3967,8 @@ function renderTicketWalletJourneys() {
 }
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = ticketWalletDisplayRecords(state.ticketWallet); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
-  ticketWalletSortCount = visibleTickets.length;
-  const ticketWalletSortHint = state.language === 'en' ? 'Drag the grip or use arrows to move tickets' : '拖动手柄或点箭头调整顺序';
-  const ticketWalletSortLabel = ticketWalletSortMode ? (state.language === 'en' ? 'Done' : '完成') : (state.language === 'en' ? 'Reorder' : '调整顺序');
-  const ticketWalletSortToolbar = (ticketWalletSortMode || visibleTickets.length > 1) && !state.ticketWalletSelectedId && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft ? '<div class="ticket-wallet-sort-toolbar"><button type="button" class="ticket-wallet-sort-toggle' + (ticketWalletSortMode ? ' is-active' : '') + '" data-ticket-wallet-sort-toggle aria-pressed="' + (ticketWalletSortMode ? 'true' : 'false') + '"><span aria-hidden="true">↕</span>' + ticketWalletSortLabel + '</button>' + (ticketWalletSortMode ? '<span class="ticket-wallet-sort-hint">' + ticketWalletSortHint + '</span>' : '') + '</div>' : '';
   const ticketWalletFilterRow = state.ticketWalletEditorOpen ? '' : '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
-  const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + ticketWalletSortToolbar + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>') + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '">＋</button></div></div>';
+  const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>') + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '">＋</button></div></div>';
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
   const ticketWalletTopAdd = state.ticketWalletView === 'tickets' && !state.ticketWalletEditorOpen ? '<button class="ticket-wallet-header-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button>' : '';
   return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav><div class="ticket-wallet-head-actions">' + ticketWalletTopAdd + ticketWalletViewSwitcher + '</div></div>' + ticketWalletFilterRow + '<div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div>';
@@ -8137,8 +8128,8 @@ function setupServiceWorker() {
 // Rendering and interaction --------------------------------------------------
 function render() {
   if (state.section !== 'mine' || !state.ticketWalletOpen || state.ticketWalletView !== 'tickets' || state.ticketWalletSelectedId || state.ticketWalletEditorOpen || state.ticketWalletMemoryDraft) {
-    ticketWalletSortMode = false;
     cancelTicketWalletReorder();
+    clearTicketWalletReorderTarget();
   }
   // A page swipe preview is transient. Clear it before any route/content
   // render so iOS Safari/PWA cannot retain the old 200% stage and expose an
@@ -8186,8 +8177,9 @@ let reorderTarget = null;
 let reorderDrag = null;
 let reorderSuppressClickUntil = 0;
 let ticketWalletReorder = null;
-let ticketWalletSortMode = false;
-let ticketWalletSortCount = 0;
+let ticketWalletReorderTargetRow = null;
+let ticketWalletReorderRevealTimer = 0;
+let ticketWalletReorderSuppressClickUntil = 0;
 let swipeGesture = null;
 let swipeSuppressClickUntil = 0;
 let ticketWalletSuppressSyntheticClick = false;
@@ -9114,11 +9106,21 @@ function finishTicketWalletTouchGesture(event) {
   if (finishTicketWalletTapGesture(gesture)) return;
   finishTicketWalletHorizontalGesture(gesture);
 }
+const TICKET_WALLET_REORDER_HOLD_MS = 430;
+const TICKET_WALLET_REORDER_MOVE_TOLERANCE = 12;
 function ticketWalletReorderRows(stack) {
   return stack ? Array.from(stack.children).filter((row) => row.matches('[data-ticket-wallet-pack-row="true"]')) : [];
 }
 function ticketWalletReorderEnabled() {
-  return ticketWalletSortMode && state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets' && !state.ticketWalletSelectedId && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft;
+  return state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets' && !state.ticketWalletSelectedId && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft;
+}
+function clearTicketWalletReorderTarget(row) {
+  const target = ticketWalletReorderTargetRow;
+  if (!target || (row && target !== row)) return;
+  window.clearTimeout(ticketWalletReorderRevealTimer);
+  ticketWalletReorderRevealTimer = 0;
+  target.classList.remove('ticket-wallet-reorder-handle-visible');
+  ticketWalletReorderTargetRow = null;
 }
 function clearTicketWalletReorderStyles(drag) {
   if (!drag?.stack) return;
@@ -9129,28 +9131,43 @@ function clearTicketWalletReorderStyles(drag) {
   });
 }
 function ticketWalletReorderSlot(drag, projectedCenter) {
+  const otherRows = drag.rows.filter((row) => row !== drag.row);
   let slot = 0;
-  for (let index = 0; index < drag.rows.length; index += 1) {
-    if (index !== drag.startIndex && projectedCenter > drag.centers[index]) slot += 1;
+  for (const row of otherRows) {
+    const index = drag.rows.indexOf(row);
+    if (projectedCenter > drag.centers[index]) slot += 1;
   }
   return Math.max(0, Math.min(drag.rows.length - 1, slot));
 }
 function applyTicketWalletReorderPositions(drag, settling = false) {
   if (!drag?.rows?.length) return;
+  const step = drag.step;
   const start = drag.startIndex;
   const target = drag.currentIndex;
   drag.rows.forEach((row, index) => {
     let offset = 0;
     if (index === start) {
-      offset = settling ? drag.tops[target] - drag.tops[start] : drag.deltaY;
+      offset = settling ? (target - start) * step : drag.deltaY;
     } else if (target > start && index > start && index <= target) {
-      offset = drag.tops[index - 1] - drag.tops[index];
+      offset = -step;
     } else if (target < start && index >= target && index < start) {
-      offset = drag.tops[index + 1] - drag.tops[index];
+      offset = step;
     }
     row.style.setProperty('--ticket-reorder-offset', offset + 'px');
     row.classList.toggle('ticket-wallet-reorder-shifted', index !== start && offset !== 0);
   });
+}
+function revealTicketWalletReorderHandle(drag) {
+  if (!drag || ticketWalletReorder !== drag || !ticketWalletReorderEnabled()) return;
+  window.clearTimeout(drag.timer);
+  ticketWalletReorder = null;
+  clearTicketWalletReorderTarget();
+  ticketWalletReorderTargetRow = drag.row;
+  drag.row.classList.add('ticket-wallet-reorder-handle-visible');
+  ticketWalletReorderSuppressClickUntil = Date.now() + 800;
+  swipeGesture = null;
+  try { navigator.vibrate?.(8); } catch {}
+  ticketWalletReorderRevealTimer = window.setTimeout(() => clearTicketWalletReorderTarget(drag.row), 9000);
 }
 function activateTicketWalletReorder(drag) {
   if (!drag || ticketWalletReorder !== drag || !ticketWalletReorderEnabled()) return;
@@ -9159,36 +9176,56 @@ function activateTicketWalletReorder(drag) {
   drag.stack.classList.add('ticket-wallet-reorder-active');
   drag.row.classList.add('ticket-wallet-reorder-dragging');
   swipeGesture = null;
-  try { navigator.vibrate?.(8); } catch {}
 }
 function beginTicketWalletReorder(event) {
   if (!ticketWalletReorderEnabled() || !event.isPrimary || (event.button != null && event.button !== 0)) return;
   const handle = event.target.closest('[data-ticket-wallet-drag-handle]');
-  const row = handle?.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]');
-  if (!handle || !row) return;
+  const card = event.target.closest('[data-ticket-wallet-card]');
+  const handleRow = handle?.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]');
+  if (handle) {
+    if (!handleRow || ticketWalletReorderTargetRow !== handleRow) return;
+    window.clearTimeout(ticketWalletReorderRevealTimer);
+    ticketWalletReorderRevealTimer = 0;
+    const stack = handleRow.closest('.ticket-wallet-stack');
+    const rows = ticketWalletReorderRows(stack);
+    const startIndex = rows.indexOf(handleRow);
+    if (!stack || startIndex < 0 || rows.length < 2) return;
+    const rects = rows.map((item) => item.getBoundingClientRect());
+    const stepValue = parseFloat(getComputedStyle(stack).getPropertyValue('--ticket-stack-step')) || 20;
+    const drag = {
+      handle, stack, row: handleRow, rows, pointerId: event.pointerId,
+      startX: event.clientX, startY: event.clientY,
+      startIndex, currentIndex: startIndex,
+      centers: rects.map((rect) => rect.top + rect.height / 2),
+      step: Math.max(1, stepValue), deltaY: 0, active: false, moved: false,
+      fromHandle: true, timer: 0
+    };
+    ticketWalletReorder = drag;
+    try { handle.setPointerCapture?.(event.pointerId); } catch {}
+    return;
+  }
+  const row = card?.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]');
+  if (!card || !row) {
+    clearTicketWalletReorderTarget();
+    return;
+  }
   const stack = row.closest('.ticket-wallet-stack');
   const rows = ticketWalletReorderRows(stack);
+  if (!stack || rows.length < 2) return;
+  clearTicketWalletReorderTarget();
   const startIndex = rows.indexOf(row);
-  if (!stack || startIndex < 0 || rows.length < 2) return;
   const rects = rows.map((item) => item.getBoundingClientRect());
+  const stepValue = parseFloat(getComputedStyle(stack).getPropertyValue('--ticket-stack-step')) || 20;
   const drag = {
-    handle,
-    stack,
-    row,
-    rows,
-    pointerId: event.pointerId,
-    startX: event.clientX,
-    startY: event.clientY,
-    startIndex,
-    currentIndex: startIndex,
+    stack, row, rows, pointerId: event.pointerId,
+    startX: event.clientX, startY: event.clientY,
+    startIndex, currentIndex: startIndex,
     centers: rects.map((rect) => rect.top + rect.height / 2),
-    tops: rects.map((rect) => rect.top),
-    deltaY: 0,
-    active: false,
-    moved: false
+    step: Math.max(1, stepValue), deltaY: 0,
+    active: false, moved: false, fromHandle: false, timer: 0
   };
   ticketWalletReorder = drag;
-  try { handle.setPointerCapture?.(event.pointerId); } catch {}
+  drag.timer = window.setTimeout(() => revealTicketWalletReorderHandle(drag), TICKET_WALLET_REORDER_HOLD_MS);
 }
 function updateTicketWalletReorder(event) {
   const drag = ticketWalletReorder;
@@ -9196,6 +9233,13 @@ function updateTicketWalletReorder(event) {
   const dx = event.clientX - drag.startX;
   const dy = event.clientY - drag.startY;
   if (!drag.active) {
+    if (!drag.fromHandle) {
+      if (Math.hypot(dx, dy) > TICKET_WALLET_REORDER_MOVE_TOLERANCE) {
+        clearTimeout(drag.timer);
+        ticketWalletReorder = null;
+      }
+      return;
+    }
     if (Math.hypot(dx, dy) < 5) return;
     activateTicketWalletReorder(drag);
     if (!drag.active) return;
@@ -9222,20 +9266,10 @@ function commitTicketWalletReorder(drag) {
   saveTicketWallet();
   saveTicketWalletDisplayOrder();
 }
-function moveTicketWalletRecord(row, direction) {
-  const stack = row?.closest('.ticket-wallet-stack');
-  const rows = ticketWalletReorderRows(stack);
-  const startIndex = rows.indexOf(row);
-  const currentIndex = startIndex + (direction === 'up' ? -1 : 1);
-  if (startIndex < 0 || currentIndex < 0 || currentIndex >= rows.length) return false;
-  commitTicketWalletReorder({ rows, startIndex, currentIndex });
-  render();
-  toast(state.language === 'en' ? 'Ticket order saved' : '票据顺序已保存');
-  return true;
-}
 function finishTicketWalletReorder(event) {
   const drag = ticketWalletReorder;
   if (!drag || (drag.pointerId != null && event.pointerId !== drag.pointerId)) return false;
+  clearTimeout(drag.timer);
   ticketWalletReorder = null;
   if (!drag.active) return false;
   if (event.cancelable) event.preventDefault();
@@ -9243,9 +9277,12 @@ function finishTicketWalletReorder(event) {
     clearTicketWalletReorderStyles(drag);
     return true;
   }
+  drag.stack.classList.add('ticket-wallet-reorder-active');
+  drag.row.classList.remove('ticket-wallet-reorder-dragging');
   applyTicketWalletReorderPositions(drag, true);
   window.setTimeout(() => {
     clearTicketWalletReorderStyles(drag);
+    clearTicketWalletReorderTarget(drag.row);
     commitTicketWalletReorder(drag);
     render();
     toast(state.language === 'en' ? 'Ticket order saved' : '票据顺序已保存');
@@ -9260,8 +9297,11 @@ function cancelTicketWalletReorder() {
   clearTicketWalletReorderStyles(drag);
 }
 workspace.addEventListener('pointerdown', beginTicketWalletReorder, true);
+workspace.addEventListener('contextmenu', (event) => {
+  if (event.target.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]')) event.preventDefault();
+}, true);
 workspace.addEventListener('touchstart', (event) => {
-  if (ticketWalletSortMode || swipeGesture || event.target.closest('.swipe-delete, [data-ticket-wallet-drag-handle]')) return;
+  if (swipeGesture || event.target.closest('.swipe-delete, [data-ticket-wallet-drag-handle]')) return;
   const row = event.target.closest('[data-swipe-row]');
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   const ticketWalletEditTarget = event.target.closest('button, a, [data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]');
@@ -9658,10 +9698,10 @@ workspace.addEventListener('contextmenu', (event) => {
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
   if (event.target.closest('[data-ticket-wallet-drag-handle]')) { event.preventDefault(); event.stopPropagation(); return; }
-  const ticketWalletSortToggle = event.target.closest('[data-ticket-wallet-sort-toggle]');
-  if (ticketWalletSortToggle) { ticketWalletSortMode = !ticketWalletSortMode; cancelTicketWalletReorder(); return render(); }
-  const ticketWalletOrderMove = event.target.closest('[data-ticket-wallet-order-move]');
-  if (ticketWalletOrderMove) { event.preventDefault(); return moveTicketWalletRecord(ticketWalletOrderMove.closest('[data-ticket-wallet-pack-row="true"]'), ticketWalletOrderMove.dataset.ticketWalletOrderMove); }
+  const walletPage = event.target.closest('.ticket-wallet-page');
+  const blankWalletClick = walletPage && !event.target.closest('.ticket-wallet-swipe-row, button, a, input, textarea, select, [role="tab"]');
+  if (ticketWalletReorderTargetRow && blankWalletClick) clearTicketWalletReorderTarget();
+  if (Date.now() < ticketWalletReorderSuppressClickUntil && event.target.closest('.ticket-wallet-swipe-row')) { event.preventDefault(); event.stopPropagation(); return; }
   if (ticketWalletMatchesSyntheticClick(event) && event.target.closest('[data-ticket-wallet-edit-field]')) {
     event.preventDefault();
     return;
@@ -9690,18 +9730,19 @@ workspace.addEventListener('click', async (event) => {
   const section = event.target.closest('[data-section]');
   if (section) return selectSection(section.dataset.section);
   if (event.target.closest('[data-open-ticket-wallet]')) return openTicketWallet();
-  if (event.target.closest('[data-ticket-wallet-back]')) { ticketWalletSortMode = false; return closeTicketWallet(); }
+  if (event.target.closest('[data-ticket-wallet-back]')) { return closeTicketWallet(); }
   const ticketWalletView = event.target.closest('[data-ticket-wallet-view]');
-  if (ticketWalletView) { ticketWalletSortMode = false; state.ticketWalletView = ticketWalletView.dataset.ticketWalletView === 'journeys' ? 'journeys' : 'tickets'; state.ticketWalletMemoryDraft = null; return render(); }
+  if (ticketWalletView) { state.ticketWalletView = ticketWalletView.dataset.ticketWalletView === 'journeys' ? 'journeys' : 'tickets'; state.ticketWalletMemoryDraft = null; return render(); }
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
   if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(state.ticketWalletDraft.type); document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => { item.classList.toggle('active', item === ticketWalletTemplate); item.setAttribute('aria-pressed', item === ticketWalletTemplate ? 'true' : 'false'); }); return; }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');
   if (ticketWalletFilter) {
-    ticketWalletSortMode = false;
+    cancelTicketWalletReorder();
+    clearTicketWalletReorderTarget();
     selectTicketWalletFilter(ticketWalletFilter.dataset.ticketWalletFilter || 'train');
     return;
   }
-  if (event.target.closest('[data-ticket-wallet-add]')) { ticketWalletSortMode = false; return openTicketWalletEditor(); }
+  if (event.target.closest('[data-ticket-wallet-add]')) { return openTicketWalletEditor(); }
   if (event.target.closest('[data-ticket-wallet-import-image]')) { $('#ticketWalletFileInput')?.click(); return; }
   const ticketWalletCreateEmpty = event.target.closest('[data-ticket-wallet-create-empty]');
   if (ticketWalletCreateEmpty) return createTicketWalletFromDraft({ sourceImageId: '', sourceImageName: '', sourceMime: '' });
@@ -9720,7 +9761,6 @@ workspace.addEventListener('click', async (event) => {
   const ticketOriginalDraft = event.target.closest('[data-ticket-wallet-original-draft]');
   if (ticketOriginalDraft) return openTicketWalletOriginalSource(ticketOriginalDraft.dataset.ticketWalletOriginalDraft, state.ticketWalletDraft?.sourceImageName || t('ticketWalletOriginal'));
   if (event.target.closest('[data-ticket-wallet-clear-selection]')) { returnTicketWalletToPack(true); return; }
-  if (ticketWalletSortMode && event.target.closest('.ticket-wallet-stack')) return;
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   if (ticketCard && !event.target.closest('[data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]')) {
     // iOS may emit the synthetic click after the tap has already selected and
