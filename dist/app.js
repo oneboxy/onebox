@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment retry marker: focused ticket stack fix. */
-const APP_VERSION = '2.18.500';
+const APP_VERSION = '2.18.501';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8768,6 +8768,7 @@ function preparePageSwipeTrack(gesture, direction) {
   const target = gesture.items[nextIndex];
   if (pageSwipeTrackState?.target?.id === target.id && pageSwipeTrackState.direction === direction) return pageSwipeTrackState;
   clearPageSwipeTrack();
+  if (target.kind === 'wallet-back') return null;
   const rendered = pageSwipeMarkup(target);
   if (target.kind === 'ticket-filter') {
     const stage = workspace.querySelector('[data-ticket-wallet-swipe-stage]');
@@ -8892,7 +8893,11 @@ function finishPageSwipe(event) {
   const threshold = Math.max(56, Math.min(112, window.innerWidth * 0.18));
   const track = pageSwipeTrackState;
   const target = track?.direction === direction && distance >= threshold ? track.target : null;
-  if (target) settlePageSwipe(target, direction);
+  const walletBack = gesture.items[gesture.index + direction]?.kind === 'wallet-back' && distance >= threshold;
+  if (target?.kind === 'wallet-back' || (!target && walletBack)) {
+    clearPageSwipeTrack();
+    closeTicketWallet();
+  } else if (target) settlePageSwipe(target, direction);
   else settlePageSwipeBack();
 }
 
