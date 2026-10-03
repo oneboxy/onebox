@@ -11725,7 +11725,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-route-map-canvas { overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--line)); border-radius: 16px; background: color-mix(in srgb, var(--primary) 5%, var(--panel-2)); }
 .ticket-wallet-real-map { position: relative; z-index: 0; min-height: 300px; height: min(48vh, 440px); background: #e8eef5; }
 .ticket-wallet-real-map .leaflet-container { width: 100%; height: 100%; color: var(--ink); font: inherit; }
-.ticket-wallet-real-map .leaflet-control-zoom { margin: 0 12px 12px 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line)); border-radius: 12px; box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 15%, transparent); }
+.ticket-wallet-route-map .ticket-wallet-real-map .leaflet-control-zoom { margin: 12px 0 0 12px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line)); border-radius: 12px; box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 15%, transparent); }
 .ticket-wallet-real-map .leaflet-control-zoom a { width: 32px; height: 32px; line-height: 30px; border: 0; background: color-mix(in srgb, var(--panel) 92%, transparent); color: var(--ink); }
 .ticket-wallet-real-map .leaflet-control-zoom a + a { border-top: 1px solid var(--line); }
 .ticket-wallet-real-map .leaflet-control-attribution { padding: 2px 6px; border-radius: 5px 0 0; background: color-mix(in srgb, var(--panel) 82%, transparent); color: var(--muted); font-size: 9px; }
@@ -11739,8 +11739,8 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
 .ticket-wallet-fallback-map:active { cursor: grabbing; }
 .ticket-wallet-fallback-tiles, .ticket-wallet-fallback-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ticket-wallet-fallback-tile { position: absolute; display: block; width: 256px !important; height: 256px !important; max-width: none !important; pointer-events: none; }
-.ticket-wallet-fallback-overlay { pointer-events: none; }
-.ticket-wallet-fallback-controls { position: absolute; right: 12px; bottom: 30px; z-index: 3; display: grid; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--panel) 92%, transparent); box-shadow: 0 8px 18px rgb(15 23 42 / 15%); }
+.ticket-wallet-fallback-overlay { pointer-events: auto; }
+.ticket-wallet-fallback-controls { position: absolute; top: 12px; left: 12px; z-index: 3; display: grid; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 12%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--panel) 92%, transparent); box-shadow: 0 8px 18px rgb(15 23 42 / 15%); }
 .ticket-wallet-fallback-controls button { width: 32px; height: 32px; border: 0; background: transparent; color: var(--ink); font-size: 20px; line-height: 30px; cursor: pointer; }
 .ticket-wallet-fallback-controls button + button { border-top: 1px solid var(--line); }
 .ticket-wallet-fallback-attribution { position: absolute; right: 0; bottom: 0; z-index: 3; padding: 2px 6px; border-radius: 5px 0 0; background: rgb(255 255 255 / 78%); color: #64748b; font-size: 9px; }
@@ -11769,7 +11769,7 @@ main:has(.ticket-wallet-page) { padding-top: calc(var(--app-header-height) + 8px
   .ticket-wallet-route-map { padding: 14px; border-radius: 18px; }
   .ticket-wallet-real-map { min-height: 260px; height: 55vh; }
   .ticket-wallet-map-loading, .ticket-wallet-map-error { min-height: 260px; }
-  .ticket-wallet-real-map .leaflet-control-zoom { margin: 0 8px 8px 0; }
+  .ticket-wallet-route-map .ticket-wallet-real-map .leaflet-control-zoom { margin: 8px 0 0 8px; }
 }
 
 /* Reusable v1 template for the traditional pink physical train ticket. The
@@ -14609,6 +14609,97 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-add-close {
   #ticketWalletOriginalDialog:not([hidden]) { padding-right: 12px; padding-left: 12px; }
   #ticketWalletOriginalDialog .ticket-wallet-original-dialog-head { top: -52px; }
   #ticketWalletOriginalDialog .ticket-wallet-original-dialog-image { max-height: calc(100dvh - 144px); }
+}
+
+/* Broad wallet categories stay easy to scan while each ticket keeps its own
+   compact, project-style SVG label. Historical tickets collapse by month. */
+.ticket-wallet-date-groups { display: grid; gap: 12px; }
+.ticket-wallet-date-group { min-width: 0; }
+.ticket-wallet-date-group-title,
+.ticket-wallet-date-group > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  margin: 0 2px 5px;
+  color: var(--muted);
+}
+.ticket-wallet-date-group > summary { cursor: pointer; list-style: none; }
+.ticket-wallet-date-group > summary::-webkit-details-marker { display: none; }
+.ticket-wallet-date-group-heading { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.ticket-wallet-date-group-heading strong { color: var(--ink); font-size: 13px; font-weight: 800; }
+.ticket-wallet-date-group-heading small { color: var(--muted); font-size: 10px; font-weight: 650; }
+.ticket-wallet-date-group-chevron { display: grid; width: 24px; height: 24px; place-items: center; color: var(--muted); transition: transform .18s ease; }
+.ticket-wallet-date-group-chevron svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.ticket-wallet-date-group-archive[open] .ticket-wallet-date-group-chevron { transform: rotate(180deg); }
+.ticket-wallet-date-group .ticket-wallet-stack { padding-top: 0; }
+.ticket-wallet-type-label-badge {
+  display: inline-flex !important;
+  align-items: center;
+  width: fit-content;
+  margin: 0 0 3px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--ticket-accent) 30%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ticket-accent) 10%, #fff);
+  color: var(--ticket-accent) !important;
+  font-size: 9px !important;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.ticket-wallet-train-card { position: relative; }
+.ticket-wallet-train-type-badge {
+  position: absolute;
+  top: 4px;
+  right: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, #4863ee 26%, #fff);
+  border-radius: 999px;
+  background: color-mix(in srgb, #fff 88%, #dfe5ff);
+  color: #4058d8;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+  pointer-events: none;
+}
+.ticket-wallet-train-type-badge svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.ticket-wallet-map-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 11px 0 13px; }
+.ticket-wallet-map-legend-item { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--panel) 92%, var(--panel-2)); color: var(--muted); font-size: 10px; font-weight: 700; white-space: nowrap; }
+.ticket-wallet-map-legend-icon { display: grid; width: 15px; height: 15px; place-items: center; color: var(--route-color); }
+.ticket-wallet-map-legend-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.ticket-wallet-map-legend-item > i { display: block; width: 20px; height: 2px; border-radius: 2px; background: var(--route-pattern); }
+.ticket-wallet-map-legend-train { --route-color: #4863ee; --route-pattern: #4863ee; }
+.ticket-wallet-map-legend-flight { --route-color: #8b6adf; --route-pattern: repeating-linear-gradient(90deg, #8b6adf 0 3px, transparent 3px 7px); }
+.ticket-wallet-map-legend-car { --route-color: #d38333; --route-pattern: repeating-linear-gradient(90deg, #d38333 0 8px, transparent 8px 12px, #d38333 12px 14px, transparent 14px 18px); }
+.ticket-wallet-map-legend-ferry { --route-color: #0a9c91; --route-pattern: repeating-linear-gradient(90deg, #0a9c91 0 2px, transparent 2px 6px); }
+.ticket-wallet-map-legend-entertainment { --route-color: #9258cc; }
+.ticket-wallet-map-legend-dining { --route-color: #c78635; }
+.ticket-wallet-map-legend-item > b { display: block; width: 9px; height: 9px; flex: 0 0 9px; border: 2px solid var(--route-color); border-radius: 50% 50% 50% 2px; background: var(--panel); transform: rotate(-45deg); }
+.ticket-wallet-map-div-icon { border: 0 !important; background: transparent !important; }
+.ticket-wallet-map-marker { display: grid; width: 30px; height: 30px; box-sizing: border-box; place-items: center; border: 2px solid var(--map-point-color); border-radius: 50%; background: var(--panel); color: var(--map-point-color); box-shadow: 0 3px 10px rgba(0, 0, 0, .22); }
+.ticket-wallet-map-marker svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.ticket-wallet-map-marker b { font-size: 10px; line-height: 1; }
+.ticket-wallet-fallback-route,
+.ticket-wallet-fallback-marker { cursor: pointer; }
+.ticket-wallet-fallback-route:focus-visible polyline:last-child { filter: drop-shadow(0 0 3px var(--primary)); }
+.ticket-wallet-fallback-marker circle { vector-effect: non-scaling-stroke; }
+.ticket-wallet-fallback-marker text { fill: var(--ink); font-size: 10px; font-weight: 850; pointer-events: none; }
+.ticket-wallet-fallback-route:focus-visible,
+.ticket-wallet-fallback-marker:focus-visible { outline: none; filter: drop-shadow(0 0 3px var(--primary)); }
+.ticket-wallet-map-popup-ticket { display: block; width: 100%; margin-top: 6px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: inherit; font-size: 11px; line-height: 1.35; text-align: left; cursor: pointer; }
+.ticket-wallet-map-popup-ticket:hover { border-color: var(--primary); color: var(--primary); }
+@media (max-width: 760px) {
+  .ticket-wallet-date-groups { gap: 9px; }
+  .ticket-wallet-date-group-title,
+  .ticket-wallet-date-group > summary { min-height: 28px; }
+  .ticket-wallet-map-legend { gap: 5px; }
+  .ticket-wallet-map-legend-item { gap: 4px; min-height: 26px; padding: 3px 7px; font-size: 9px; }
+  .ticket-wallet-train-type-badge { top: 3px; right: 7px; padding: 2px 6px; font-size: 9px; }
 }
 
 
