@@ -2791,6 +2791,11 @@ html[data-theme="dark"][data-color="mono"] {
   background: var(--panel-2);
   border-color: var(--line);
 }
+.mine-page .mine-row-icon-wallet svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.7;
+}
 
 /* Keep the system-level Mine actions monochrome and keep the optional top
    display switches readable on narrow settings sheets. */

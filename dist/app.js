@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.516';
+const APP_VERSION = '2.18.517';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3182,15 +3182,15 @@ function renderMine() {
     reading: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h8l3 3v5M14 4v4h4M9 12h3M9 16h3"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M16.5 14.8v1.9l1.2.7"/></svg>',
     agreement: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4M9 12h6M9 15h3M14 16.5l1.5 1.5 2.5-3"/></svg>',
     pet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 1.5-4L12 7l4.5-2L18 9v5.2c0 3.4-2.7 5.8-6 5.8s-6-2.4-6-5.8Z"/><circle cx="9.2" cy="12.2" r=".8"/><circle cx="14.8" cy="12.2" r=".8"/><path d="M9.5 15.2c1.5 1.2 3.5 1.2 5 0"/></svg>',
-    ticket: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.75h8.5A1.5 1.5 0 0 1 18 6.25v1"/><path d="M6 7.25h11.5A1.5 1.5 0 0 1 19 8.75v1.45a2.05 2.05 0 0 0 0 4.1v2.95a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V14.3a2.05 2.05 0 0 0 0-4.1V8.75A1.5 1.5 0 0 1 6 7.25Z"/><path d="M13.5 8.75v9.4" stroke-dasharray="1.3 1.6"/><path d="M7.5 10.5h3M7.5 13.7h3M7.5 16.5h3"/></svg>',
+    wallet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.25 3.5h8a1.5 1.5 0 0 1 1.5 1.5v3.25H8.25A1.75 1.75 0 0 1 6.5 6.5v-1.25A1.75 1.75 0 0 1 8.25 3.5Z"/><path d="M11 5.4h3.5M14.5 3.7v4.3" stroke-dasharray="1.1 1.3"/><path d="M4.75 8.25h13.5A2.75 2.75 0 0 1 21 11v6.25A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25V10A1.75 1.75 0 0 1 4.75 8.25Z"/><path d="M3.25 11.25h12.5M15.5 12.5H21v4h-5.5a2 2 0 0 1 0-4Z"/><circle cx="17.1" cy="14.5" r=".55"/></svg>',
   })[name];
-  const row = (action, glyph, title, description) => '<button class="mine-row" ' + action + '><span class="mine-row-icon">' + icon(glyph) + '</span><span class="mine-row-copy"><strong>' + title + '</strong><small class="mine-row-description">' + description + '</small></span><span>›</span></button>';
+  const row = (action, glyph, title, description) => '<button class="mine-row" ' + action + '><span class="mine-row-icon' + (glyph === 'wallet' ? ' mine-row-icon-wallet' : '') + '">' + icon(glyph) + '</span><span class="mine-row-copy"><strong>' + title + '</strong><small class="mine-row-description">' + description + '</small></span><span>›</span></button>';
   const updateBusy = state.updateChecking || state.updateApplying;
   const updateStatus = state.updateApplying ? t('updateApplying') : state.updateChecking ? t('updating') : state.updateAvailable ? t('updateAvailable') : state.updateError ? t('updateCheckFailed') : t('upToDate');
   const updateProgress = updateBusy ? '<span class="update-progress" role="status" aria-label="' + escapeHtml(updateStatus) + '"><span class="update-progress-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>' : '<span class="update-status-label">' + escapeHtml(updateStatus) + '</span>';
   const updateButton = state.updateAvailable ? '<button class="primary mine-update-button" data-apply-update ' + (state.updateApplying ? 'disabled' : '') + '>' + (state.updateApplying ? t('updateApplying') : t('applyUpdate')) + '</button>' : '<button class="primary mine-update-button" data-check-update ' + (state.updateChecking || state.updateApplying ? 'disabled' : '') + '>' + t('checkUpdate') + '</button>';
   const updateRow = '<div class="mine-row mine-update-row"><span class="mine-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></span><span class="mine-row-copy mine-update-copy"><strong>' + t('appUpdate') + '</strong><small class="mine-row-description">v' + APP_VERSION + (updateBusy ? ' ' : ' · ') + updateProgress + '</small></span><span class="mine-row-action">' + updateButton + '</span></div>';
-  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'ticket', t('ticketWallet'), t('ticketWalletDescription')) + row('data-open-github-page', 'github', 'GitHub', escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
+  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-open-github-page', 'github', 'GitHub', escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
 }
 
 function openTicketWallet() {
