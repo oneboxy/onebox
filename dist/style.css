@@ -2792,8 +2792,8 @@ html[data-theme="dark"][data-color="mono"] {
   border-color: var(--line);
 }
 .mine-page .mine-row-icon-wallet svg {
-  width: 22px;
-  height: 22px;
+  width: 23px;
+  height: 23px;
   stroke-width: 1.7;
 }
 

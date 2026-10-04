@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.517';
+const APP_VERSION = '2.18.518';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3182,7 +3182,7 @@ function renderMine() {
     reading: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h8l3 3v5M14 4v4h4M9 12h3M9 16h3"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M16.5 14.8v1.9l1.2.7"/></svg>',
     agreement: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4M9 12h6M9 15h3M14 16.5l1.5 1.5 2.5-3"/></svg>',
     pet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 1.5-4L12 7l4.5-2L18 9v5.2c0 3.4-2.7 5.8-6 5.8s-6-2.4-6-5.8Z"/><circle cx="9.2" cy="12.2" r=".8"/><circle cx="14.8" cy="12.2" r=".8"/><path d="M9.5 15.2c1.5 1.2 3.5 1.2 5 0"/></svg>',
-    wallet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.25 3.5h8a1.5 1.5 0 0 1 1.5 1.5v3.25H8.25A1.75 1.75 0 0 1 6.5 6.5v-1.25A1.75 1.75 0 0 1 8.25 3.5Z"/><path d="M11 5.4h3.5M14.5 3.7v4.3" stroke-dasharray="1.1 1.3"/><path d="M4.75 8.25h13.5A2.75 2.75 0 0 1 21 11v6.25A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25V10A1.75 1.75 0 0 1 4.75 8.25Z"/><path d="M3.25 11.25h12.5M15.5 12.5H21v4h-5.5a2 2 0 0 1 0-4Z"/><circle cx="17.1" cy="14.5" r=".55"/></svg>',
+    wallet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.25 3.5h9.25A1.5 1.5 0 0 1 18 5v2.5"/><path d="M5.75 5.5H16a1.5 1.5 0 0 1 1.5 1.5v.5"/><path d="M5.4 7.5h13.2A2.4 2.4 0 0 1 21 9.9V11a1.7 1.7 0 0 0 0 3.4v1.2a2.4 2.4 0 0 1-2.4 2.4H5.4A2.4 2.4 0 0 1 3 15.6v-1.2a1.7 1.7 0 0 0 0-3.4V9.9a2.4 2.4 0 0 1 2.4-2.4Z"/><path d="M7 10.2h4.5M7 12.9h4.5M7 15.6h3.2"/><path d="M14.4 8.5v8" stroke-dasharray="1.2 1.5"/></svg>',
   })[name];
   const row = (action, glyph, title, description) => '<button class="mine-row" ' + action + '><span class="mine-row-icon' + (glyph === 'wallet' ? ' mine-row-icon-wallet' : '') + '">' + icon(glyph) + '</span><span class="mine-row-copy"><strong>' + title + '</strong><small class="mine-row-description">' + description + '</small></span><span>›</span></button>';
   const updateBusy = state.updateChecking || state.updateApplying;
