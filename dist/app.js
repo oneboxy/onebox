@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.560';
+const APP_VERSION = '2.18.561';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -45,6 +45,7 @@ const STORAGE = {
   github: 'onebox.github',
   githubAgreement: 'onebox.github-agreement',
   githubSyncSelection: 'onebox.github-sync-selection',
+  readerCloudAgreement: 'onebox.reader-cloud-agreement',
   navigation: 'onebox.navigation',
   navigationLocation: 'onebox.navigation-location',
   mascotPosition: 'onebox.mascot-position',
@@ -335,11 +336,11 @@ const DICT = {
     githubClientId: 'GitHub OAuth Client ID', githubClientHint: 'OneBox 已内置公开的授权标识，不需要手动配置。', githubDeveloperSettings: '打开 OAuth Apps 设置',
     githubBrowserFlowError: '无法打开 GitHub 授权页，请检查网络后重试。', githubNetworkError: '无法连接 GitHub API，请检查网络或稍后重试。', githubAccessToken: 'GitHub 访问令牌', githubTokenHint: '令牌只保存在当前设备，需要 gist 权限。', githubUseToken: '使用访问令牌连接', githubTokenMissing: '请先填写 GitHub 访问令牌。', githubTokenInvalid: '访问令牌无效或没有可用权限。', githubTokenConnected: 'GitHub 已连接', githubWaiting: '等待 GitHub 授权…', githubCancel: '取消授权',
     githubSyncScopeTitle: '同步内容', githubSyncScope: '设置、导航、阅读、书籍和卡包（含原件）。', githubSyncPrivacy: '令牌和首页网络缓存不会同步。', githubAuthHint: '授权后会自动返回 OneBox。', githubUploadHint: '保存本机最新数据', githubDownloadHint: '恢复最近备份', githubConnectHint: '授权后开启同步', githubLogoutHint: '仅断开本机连接', githubBackgroundHint: '关闭窗口也会继续。',
-    githubLogin: '连接 GitHub', githubLogout: '退出登录', githubBackup: '备份到云端', githubRestore: '恢复到本地', upload: '上传到 GitHub', download: '从 GitHub 恢复', githubAuthExpired: 'GitHub 授权已失效，请重新连接 GitHub。', githubSyncNotFound: '当前 GitHub 账号中没有找到 OneBox 同步数据，请先在另一台设备上传。', githubSyncReadFailed: 'GitHub 中的 OneBox 同步文件无法读取，请检查 Gist 权限或内容。', githubSyncMalformed: 'GitHub 中的 OneBox 同步文件不是有效的 JSON。', githubSyncInvalidData: 'GitHub 中的 OneBox 同步数据格式错误或已损坏。',
+    githubLogin: '连接 GitHub', githubLogout: '退出登录', githubBackup: '备份到云端', githubRestore: '恢复到本地', upload: '上传到 GitHub', download: '从 GitHub 恢复', githubAuthExpired: 'GitHub 授权已失效，请重新连接 GitHub。', githubSyncNotFound: '当前 GitHub 账号中没有找到 OneBox 同步数据，请先在另一台设备上传。', githubSyncReadFailed: 'GitHub 中的 OneBox 同步文件无法读取，请检查 Gist 权限或内容。', githubSyncMalformed: 'GitHub 中的 OneBox 同步文件不是有效的 JSON。', githubSyncInvalidData: 'GitHub 中的 OneBox 同步数据格式错误或已损坏。', readerCloudConsent: '书籍原文件和阅读进度会自动上传到 OneBox 配置的 Cloudflare 私有存储。服务地址未配置时不会上传。', readerCloudConsentLabel: '我同意自动同步书籍原文件和阅读进度',
     githubConnected: '已连接', githubNotConnected: '尚未连接', openDevice: '打开验证页面',
     appUpdate: '应用更新', checkUpdate: '更新', updateAvailable: '发现有新版本', upToDate: '已是最新版', updating: '检查中', updateApplying: '更新中', updateCheckFailed: '检查失败，可重试', applyUpdate: '更新',
     notificationsPermission: '消息通知', enableNotifications: '允许通知', disableNotifications: '不允许通知', notificationDescription: 'iPhone 需要先将 OneBox 添加到主屏幕并允许消息通知；应用关闭后的后台提醒仍需要 Push 服务端。',
-    userAgreement: '用户协议', viewAgreement: '查看协议', agreementTitle: 'OneBox 用户协议', agreementIntro: 'OneBox 是一款本地优先的日常工具应用，主要功能在当前设备上运行。', agreementLocal: '本地数据：计算历史、日程、天气卡片、翻译历史、通知记录、阅读书架、阅读进度和笔记等，默认保存在当前设备。你可以在应用内删除对应记录或文档。', agreementNetwork: '网络服务：首页订阅源、天气和翻译会请求对应的第三方或开源服务；首页文章来自公开订阅源，内容、时效和可用性由来源网站决定。点击文章会打开来源网站，OneBox 不控制第三方页面的登录、广告或隐私规则。', agreementGithub: 'GitHub 云同步：点击 GitHub 授权并完成登录后启用，无需填写 OAuth Client ID。同步内容写入你自己的私有 Gist，访问令牌保存在当前设备；你可以随时退出连接或删除该 Gist。', agreementPermissions: '权限说明：定位仅用于查找当前位置天气；通知仅用于提醒日程和消息；文件选择仅用于导入本地阅读文档。未授权时，相应功能不会正常工作，但不影响其他功能。', agreementDisclaimer: '使用提示：天气、翻译、订阅源和第三方网页可能因网络、服务策略或接口变化而暂时不可用。请不要在同步数据、日程或笔记中保存不适合上传到个人 GitHub Gist 的敏感信息。', agreementUpdated: '最后更新',
+    userAgreement: '用户协议', viewAgreement: '查看协议', agreementTitle: 'OneBox 用户协议', agreementIntro: 'OneBox 是一款本地优先的日常工具应用，主要功能在当前设备上运行。', agreementLocal: '本地数据：计算历史、日程、天气卡片、翻译历史、通知记录、阅读书架、阅读进度和笔记等，默认保存在当前设备。你可以在应用内删除对应记录或文档。', agreementNetwork: '网络服务：首页订阅源、天气和翻译会请求对应的第三方或开源服务；首页文章来自公开订阅源，内容、时效和可用性由来源网站决定。点击文章会打开来源网站，OneBox 不控制第三方页面的登录、广告或隐私规则。', agreementGithub: '云同步：GitHub 同步数据写入你自己的私有 Gist。若启用阅读自动同步，书籍原文件和阅读进度会保存到 OneBox 阅读同步服务所在 Cloudflare 账户的私有存储；文件不公开，访问令牌仅用于验证身份，不保存到服务端。你可以在 GitHub 设置中关闭阅读同步。', agreementPermissions: '权限说明：定位仅用于查找当前位置天气；通知仅用于提醒日程和消息；文件选择仅用于导入本地阅读文档。未授权时，相应功能不会正常工作，但不影响其他功能。', agreementDisclaimer: '使用提示：天气、翻译、订阅源和第三方网页可能因网络、服务策略或接口变化而暂时不可用。请勿将不适合上传到 GitHub Gist 或所配置 Cloudflare 私有存储的敏感文件用于同步。', agreementUpdated: '最后更新',
     addReminder: '添加提醒', reminderText: '提醒内容', remindAt: '提醒时间', noNotifications: '还没有提醒。', once: '指定时间', everyDay: '每天', workdays: '工作日', restdays: '非工作日', weekly: '每周', weekdays: '重复星期',
     markRead: '全部已读', close: '关闭', system: '跟随系统', light: '浅色', dark: '深色', darkGray: '黑灰',
     layout: '布局', classicLayout: '经典布局', simpleLayout: '简约布局', navigationLocation: '导航位置', navigationLocationMain: '主导航', navigationLocationTools: '工具 Tab', openMode: '打开方式', openCurrent: '当前页打开', openNewTab: '新标签页打开', language: '语言', theme: '主题', color: '颜色', blackWhite: '黑白配', noblePurple: '贵族紫', skyBlue: '天空蓝', notBananaGreen: '不蕉绿', meituanYellow: '美团黄', topDisplay: '顶部显示', footprint: '足迹', showFootprint: '在首页显示', hideFootprint: '不在首页显示', mascot: '宠物', petDescription: '显示方式、等级、服饰与互动', petSettings: '宠物设置', showMascot: '显示宠物', hideMascot: '隐藏宠物', mascotDisplay: '宠物显示', mascotFullBody: '显示全身', mascotHalfBody: '显示半身', petSocialTitle: '社交宠物', petLevel: 'Lv.{level} · {name}', petPoints: '{points} 积分', petNextLevel: '距离下一级还差 {points} 积分', petMaxLevel: '已达到最高等级', petOwner: '绑定：{owner}', petLocalOwner: '当前设备', petGithubOwner: 'GitHub · {owner}', petEarnHint: '阅读文章、读书和使用工具都能获得积分', petArticlePoints: '阅读文章 +3', petBookPoints: '打开书籍 +5', petToolPoints: '使用工具 +2', petOutfits: '服饰兑换', petOutfitLocked: '达到 Lv.{level} 解锁', petOutfitUse: '穿上', petOutfitWearing: '当前穿着', petUnlocked: '已解锁', petInteractions: '互动解锁', petInteractionLocked: 'Lv.{level} 解锁', petPointsEarned: '获得 {points} 积分', petLevelUp: '宠物升级到 Lv.{level}！', reorderHint: '长按工具标签可以调整顺序',
@@ -381,11 +382,11 @@ const DICT = {
     githubClientId: 'GitHub OAuth Client ID', githubClientHint: 'OneBox includes its public authorization identifier; no manual setup is required.', githubDeveloperSettings: 'Open OAuth Apps settings',
     githubBrowserFlowError: 'GitHub authorization could not be opened. Check your network and try again.', githubNetworkError: 'Could not connect to the GitHub API. Check your network and try again.', githubAccessToken: 'GitHub access token', githubTokenHint: 'Stored only on this device; gist permission is required.', githubUseToken: 'Connect with access token', githubTokenMissing: 'Enter a GitHub access token first.', githubTokenInvalid: 'The access token is invalid or lacks the required permission.', githubTokenConnected: 'GitHub connected', githubWaiting: 'Waiting for GitHub authorization…', githubCancel: 'Cancel authorization',
     githubSyncScopeTitle: 'Sync content', githubSyncScope: 'Settings, navigation, reading, books and wallet originals.', githubSyncPrivacy: 'Tokens and home network caches are not synced.', githubAuthHint: 'You will return to OneBox after authorization.', githubUploadHint: 'Save the latest device data', githubDownloadHint: 'Restore the latest backup', githubConnectHint: 'Authorize to enable sync', githubLogoutHint: 'Disconnect this device only', githubBackgroundHint: 'Closing the window will not stop it.',
-    githubLogin: 'Connect GitHub', githubLogout: 'Sign out', githubBackup: 'Back up to cloud', githubRestore: 'Restore to device', upload: 'Upload to GitHub', download: 'Restore from GitHub', githubAuthExpired: 'GitHub authorization expired. Please reconnect GitHub.', githubSyncNotFound: 'No OneBox sync data was found in this GitHub account. Upload from another device first.', githubSyncReadFailed: 'The OneBox sync file in GitHub could not be read. Check the Gist permission or content.', githubSyncMalformed: 'The OneBox sync file in GitHub is not valid JSON.', githubSyncInvalidData: 'The OneBox sync data in GitHub is malformed or damaged.',
+    githubLogin: 'Connect GitHub', githubLogout: 'Sign out', githubBackup: 'Back up to cloud', githubRestore: 'Restore to device', upload: 'Upload to GitHub', download: 'Restore from GitHub', githubAuthExpired: 'GitHub authorization expired. Please reconnect GitHub.', githubSyncNotFound: 'No OneBox sync data was found in this GitHub account. Upload from another device first.', githubSyncReadFailed: 'The OneBox sync file in GitHub could not be read. Check the Gist permission or content.', githubSyncMalformed: 'The OneBox sync file in GitHub is not valid JSON.', githubSyncInvalidData: 'The OneBox sync data in GitHub is malformed or damaged.', readerCloudConsent: 'Original book files and reading progress are automatically stored in the private Cloudflare storage configured for OneBox. Nothing uploads until the service URL is configured.', readerCloudConsentLabel: 'I agree to automatically sync book files and reading progress',
     githubConnected: 'Connected', githubNotConnected: 'Not connected', openDevice: 'Open verification page',
     appUpdate: 'App update', checkUpdate: 'Update', updateAvailable: 'A new version is available', upToDate: 'Latest version', updating: 'Checking', updateApplying: 'Updating', updateCheckFailed: 'Check failed. Try again.', applyUpdate: 'Update',
     notificationsPermission: 'Message notifications', enableNotifications: 'Allow notifications', disableNotifications: 'Do not allow notifications', notificationDescription: 'On iPhone, add OneBox to the Home Screen and allow notifications first; background alerts after the app is closed still require a Push server.',
-    userAgreement: 'User agreement', viewAgreement: 'View agreement', agreementTitle: 'OneBox user agreement', agreementIntro: 'OneBox is a local-first daily tools app. Most features run on this device.', agreementLocal: 'Local data: calculator history, events, weather cards, translation history, notifications, the reading shelf, reading progress and notes stay on this device by default. You can delete the related records or documents in the app.', agreementNetwork: 'Network services: Home subscriptions, weather and translation may request third-party or open-source services. Home articles come from public feeds; their freshness and availability depend on the source site. Opening an article takes you to that site, whose login, advertising and privacy rules are outside OneBox.', agreementGithub: 'GitHub cloud sync: click GitHub authorization and complete sign-in; no OAuth Client ID needs to be entered. Synced data is written to your own private Gist, while the access token stays on this device. You can disconnect at any time or delete the Gist.', agreementPermissions: 'Permissions: location is used only to find weather for your current place; notifications are used for event and message reminders; file access is used to import local reading documents. Other features remain available when these permissions are denied.', agreementDisclaimer: 'Use note: weather, translation, feeds and third-party pages may be temporarily unavailable because of network conditions, service policies or API changes. Do not put sensitive information that should not be uploaded to a personal GitHub Gist into synced settings, events or notes.', agreementUpdated: 'Last updated',
+    userAgreement: 'User agreement', viewAgreement: 'View agreement', agreementTitle: 'OneBox user agreement', agreementIntro: 'OneBox is a local-first daily tools app. Most features run on this device.', agreementLocal: 'Local data: calculator history, events, weather cards, translation history, notifications, the reading shelf, reading progress and notes stay on this device by default. You can delete the related records or documents in the app.', agreementNetwork: 'Network services: Home subscriptions, weather and translation may request third-party or open-source services. Home articles come from public feeds; their freshness and availability depend on the source site. Opening an article takes you to that site, whose login, advertising and privacy rules are outside OneBox.', agreementGithub: 'Cloud sync: GitHub sync data goes to your private Gist. If you enable automatic reading sync, original book files and reading progress are stored in private storage in the Cloudflare account hosting the OneBox reader sync service. Files are not public; the access token is only used to verify identity and is not stored by the service. You can turn off reading sync in GitHub settings.', agreementPermissions: 'Permissions: location is used only to find weather for your current place; notifications are used for event and message reminders; file access is used to import local reading documents. Other features remain available when these permissions are denied.', agreementDisclaimer: 'Use note: weather, translation, feeds and third-party pages may be temporarily unavailable because of network conditions, service policies or API changes. Do not sync sensitive files that should not be uploaded to GitHub Gist or the configured private Cloudflare storage.', agreementUpdated: 'Last updated',
     addReminder: 'Add reminder', reminderText: 'Reminder', remindAt: 'When', noNotifications: 'No reminders yet.', once: 'Once', everyDay: 'Every day', workdays: 'Workdays', restdays: 'Rest days', weekly: 'Weekly', weekdays: 'Weekdays',
     markRead: 'Mark all read', close: 'Close', system: 'System', light: 'Light', dark: 'Dark', darkGray: 'Black gray',
     layout: 'Layout', classicLayout: 'Classic layout', simpleLayout: 'Simple layout', openMode: 'Open links', openCurrent: 'Current page', openNewTab: 'New tab', theme: 'Theme', language: 'Language', color: 'Color', blackWhite: 'Black and white', noblePurple: 'Noble purple', skyBlue: 'Sky blue', notBananaGreen: 'WeChat green', meituanYellow: 'Meituan yellow', topDisplay: 'Show at top', footprint: 'Footprints', showFootprint: 'Show on Home', hideFootprint: 'Hide from Home', mascot: 'Pet', petDescription: 'Display, level, outfits and play', petSettings: 'Pet settings', showMascot: 'Show pet', hideMascot: 'Hide pet', mascotDisplay: 'Pet display', mascotFullBody: 'Full body', mascotHalfBody: 'Upper body', petSocialTitle: 'Social pet', petLevel: 'Lv.{level} · {name}', petPoints: '{points} points', petNextLevel: '{points} points to the next level', petMaxLevel: 'Highest level reached', petOwner: 'Bound to: {owner}', petLocalOwner: 'This device', petGithubOwner: 'GitHub · {owner}', petEarnHint: 'Read articles, books and use tools to earn points', petArticlePoints: 'Read an article +3', petBookPoints: 'Open a book +5', petToolPoints: 'Use a tool +2', petOutfits: 'Outfit exchange', petOutfitLocked: 'Unlocks at Lv.{level}', petOutfitUse: 'Wear', petOutfitWearing: 'Wearing', petUnlocked: 'Unlocked', petInteractions: 'Interaction unlocks', petInteractionLocked: 'Unlocks at Lv.{level}', petPointsEarned: 'Earned {points} points', petLevelUp: 'Your pet reached Lv.{level}!', homeSourceManage: 'Home sources', homeSourceManageHint: 'Choose sources to show in the home navigation', homeSourceAdd: 'Add', homeSourceRemove: 'Remove', homeSourceEmpty: 'No other sources available', reorderHint: 'Long-press a tool tab to reorder',
@@ -395,8 +396,8 @@ const DICT = {
   },
 };
 const t = (key) => DICT[state.language]?.[key] || DICT.zh[key] || key;
-DICT.zh.readerHint = '支持 md、txt、pdf、epub本地阅读';
-DICT.en.readerHint = 'Read md, txt, pdf and epub files locally.';
+DICT.zh.readerHint = '支持 md、txt、pdf、epub；同步状态见下方';
+DICT.en.readerHint = 'Read md, txt, pdf and epub; sync status below.';
 // Keep the cloud-sync summary short; the action labels explain upload versus restore.
 const toolName = (id) => t(TOOL_DEFS[id]?.key || id);
 const storedTheme = localStorage.getItem(STORAGE.theme);
@@ -1133,6 +1134,7 @@ const state = {
   petDialogOpen: false,
   swRegistration: null, updateAvailable: false, updateChecking: false, updateApplying: false, updateReloading: false, updateError: false,
   githubAgreementAccepted: localStorage.getItem(STORAGE.githubAgreement) === 'true',
+  readerCloudConsentAccepted: localStorage.getItem(STORAGE.readerCloudAgreement) === 'true',
   githubSyncSelection: readGithubSyncSelection(),
   github: (() => { const value = parseStored(STORAGE.github, {}) || {}; return { clientId: GITHUB_CLIENT_ID, token: value.token || '', user: value.user || null, gistId: value.gistId || '', deviceCode: '', userCode: '', verificationUri: '', verificationUriComplete: '', expiresAt: 0, interval: 5, manualTokenOpen: false }; })(),
   githubSync: { active: false, mode: '', progress: 0, message: '', error: '' },
@@ -4643,12 +4645,81 @@ function closeRecentReading() {
 }
 
 // Reader --------------------------------------------------------------------
-function saveLibrary() {
+let readerCloudReady = false;
+function readerCloudStatusLabel(status = {}) {
+  const message = String(status.message || '');
+  if (state.language !== 'en') return message || (state.github.token ? '自动同步已开启' : '登录 GitHub 后自动同步书籍');
+  const labels = { unconfigured: 'Cloud storage is not configured', idle: 'Sign in to GitHub to sync books', syncing: 'Syncing books and reading progress…', success: 'Books and reading progress are synced', offline: 'Offline · will sync when you reconnect' };
+  if (status.state === 'disabled') return state.language === 'en' ? 'Reading sync is turned off' : '阅读同步已关闭';
+  if (status.state === 'consent-required') return state.language === 'en' ? 'Allow reading sync in GitHub settings' : '请在 GitHub 设置中同意书籍自动同步';
+  return status.state === 'error' ? message : (labels[status.state] || 'Sign in to GitHub to sync books');
+}
+function updateReaderCloudStatus(status) {
+  const node = $('#readerCloudSyncStatus');
+  if (!node) return;
+  node.textContent = readerCloudStatusLabel(status);
+  node.dataset.state = status?.state || 'idle';
+  node.title = status?.state === 'error' ? String(status.message || '') : '';
+}
+function configureReaderCloudSync() {
+  if (!window.OneBoxReaderCloudSync) return;
+  window.OneBoxReaderCloudSync.configure({
+    isReady: () => readerCloudReady,
+    isEnabled: () => githubSyncCustomGroupEnabled('reading') && state.readerCloudConsentAccepted,
+    disabledStatus: () => state.readerCloudConsentAccepted ? 'disabled' : 'consent-required',
+    isBookOpen: (id) => state.readerMode === 'reading' && state.readerBookId === id,
+    getGithubToken: () => state.github.token,
+    getBooks: () => state.library,
+    deleteLocalBook: async (id) => { await oneBoxDbDelete('books', id); await oneBoxDbDelete('book-covers', id); },
+    readBookFile: async (book) => {
+      const stored = await oneBoxDbGet('books', book.id);
+      if (stored) return stored;
+      if (book.type === 'md' && typeof book.content === 'string') return new TextEncoder().encode(book.content);
+      return null;
+    },
+    writeBookFile: async (book, bytes) => {
+      if (book.type === 'md') {
+        book.content = new TextDecoder('utf-8').decode(bytes);
+        book.size = bytes.byteLength;
+      }
+      if (!await oneBoxDbPut('books', book.id, bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength))) throw Error('无法把云端书籍保存到本机');
+      delete book.syncFileMissing;
+    },
+    applyRemoteBooks: async (books) => {
+      state.library = normalizeReaderLibrary(books);
+      saveLibrary({ preserveUpdatedAt: true, skipCloudSync: true });
+      if (state.section === 'tools' && state.tool === 'reader' && state.readerMode !== 'reading') render();
+    },
+    onStatus: updateReaderCloudStatus,
+  });
+}
+function queueReaderCloudSync(delay = 1800) {
+  if (readerCloudReady) window.OneBoxReaderCloudSync?.queueSync(delay);
+}
+function readerBookSyncMetadata(book) {
+  const copy = { ...book };
+  ['content', 'progress', 'progressUpdatedAt', 'updatedAt', 'syncFileMissing'].forEach((key) => { delete copy[key]; });
+  Object.keys(copy).forEach((key) => { if (key.startsWith('_')) delete copy[key]; });
+  return JSON.stringify(copy);
+}
+function saveLibrary(options = {}) {
+  const previousBooks = parseStored(STORAGE.library, []) || [];
+  const previousById = new Map((Array.isArray(previousBooks) ? previousBooks : []).filter((book) => book?.id).map((book) => [book.id, book]));
   const books = state.library.slice(0, 80);
+  if (!options.preserveUpdatedAt) books.forEach((book) => {
+    const previous = previousById.get(book.id);
+    if (!book.updatedAt || !previous || readerBookSyncMetadata(previous) !== readerBookSyncMetadata(book)) book.updatedAt = Date.now();
+  });
+  const currentIds = new Set(books.map((book) => book.id));
+  const deletedIds = [...previousById.keys()].filter((id) => !currentIds.has(id));
   saveStored(STORAGE.library, books);
   void oneBoxDbPut('snapshot', 'reader-library', { value: JSON.stringify(books), savedAt: Date.now() });
   const checkpoints = localStorage.getItem(STORAGE.readerProgress);
   if (checkpoints) void oneBoxDbPut('snapshot', 'reader-progress', { value: checkpoints, savedAt: Date.now() });
+  if (!options.skipCloudSync) {
+    if (deletedIds.length) window.OneBoxReaderCloudSync?.markDeleted(deletedIds);
+    queueReaderCloudSync(2200);
+  }
 }
 function saveReaderCheckpoint(book) {
   const checkpoints = parseStored(STORAGE.readerProgress, {}) || {};
@@ -4984,7 +5055,9 @@ async function importReaderFiles(fileList) {
       delete book.syncFileMissing;
       let cover = '';
       if (book.type === 'md') {
-        book.content = await file.text();
+        const binary = await file.arrayBuffer();
+        if (!await oneBoxDbPut('books', id, binary)) throw Error('Markdown file could not be saved locally');
+        book.content = new TextDecoder('utf-8').decode(binary);
         cover = readerMarkdownCover(book.content);
       } else {
         const binary = await file.arrayBuffer();
@@ -6200,7 +6273,8 @@ function reader() {
   const layoutClass = state.readerLayout === 'list' ? 'reader-book-list' : 'reader-book-grid-cards';
   const libraryBody = '<div class="reader-book-grid ' + layoutClass + (!books.length ? ' reader-book-grid-empty' : '') + '">' + (books.length ? cards : '') + readerAddCardMarkup() + '</div>';
   const layoutIcon = state.readerLayout === 'list' ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/><path d="M5 6h.01M5 12h.01M5 18h.01"/></svg><span>宫格</span>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span>列表</span>';
-  return '<div class="reader-library-view"><section class="reader-library-panel"><div class="reader-library-head"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><div class="reader-library-actions"><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="切换书架布局">' + layoutIcon + '</button></div></div>' + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,text/markdown,text/plain,application/pdf,application/epub+zip"></div>';
+  const cloudStatus = window.OneBoxReaderCloudSync?.status?.() || { state: 'idle', message: '' };
+  return '<div class="reader-library-view"><section class="reader-library-panel"><div class="reader-library-head"><div class="reader-library-title-copy"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><small class="reader-cloud-sync-status" id="readerCloudSyncStatus" data-state="' + escapeHtml(cloudStatus.state || 'idle') + '">' + escapeHtml(readerCloudStatusLabel(cloudStatus)) + '</small></div><div class="reader-library-actions"><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="切换书架布局">' + layoutIcon + '</button></div></div>' + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,text/markdown,text/plain,application/pdf,application/epub+zip"></div>';
 }
 
 // Calendar data --------------------------------------------------------------
@@ -7652,7 +7726,7 @@ async function githubApiFetch(url, options = {}) {
   throw lastError || Error(state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败');
 }
 const GITHUB_SYNC_CHUNK_CHARS = 700000;
-const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.readerProgress, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive]);
+const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.readerCloudAgreement, STORAGE.readerProgress, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive]);
 function isSyncableStorageKey(key) {
   return String(key || '').startsWith('onebox.')
     && !GITHUB_SYNC_EXCLUDED_STORAGE_KEYS.has(key)
@@ -8000,6 +8074,7 @@ async function hydrateGithubUser() {
     const previousLogin = state.github.user?.login || '';
     state.github.user = { ...state.github.user, ...user };
     saveGithub();
+    queueReaderCloudSync(500);
     if (previousLogin !== user.login) {
       bindPetProfileToCurrentUser();
       render();
@@ -8618,7 +8693,7 @@ async function pollGithubLogin() {
         state.github.token = data.access_token; state.github.deviceCode = ''; state.github.verificationUriComplete = '';
         const userResponse = await githubApiFetch('https://api.github.com/user', { headers: githubHeaders() });
         if (!userResponse.ok) throw await githubApiError(userResponse, t('githubAuthExpired'));
-        state.github.user = await userResponse.json(); saveGithub(); renderGithubDialog();
+        state.github.user = await userResponse.json(); saveGithub(); renderGithubDialog(); queueReaderCloudSync(500);
         toast(state.language === 'en' ? 'GitHub connected' : 'GitHub 已连接'); return;
       }
       if (data.error === 'slow_down') state.github.interval = Math.max(state.github.interval + 5, Number(data.interval || 0));
@@ -8647,6 +8722,7 @@ async function githubUseAccessToken() {
     state.github.user = data;
     state.github.manualTokenOpen = false;
     saveGithub(); renderGithubDialog();
+    queueReaderCloudSync(500);
     toast(t('githubTokenConnected'));
   } catch (error) {
     state.github.token = previousToken;
@@ -9059,6 +9135,7 @@ async function githubDownloadTask() {
       : (state.language === 'en' ? 'Restore complete' : '恢复完成');
     finishGithubSync(mode, restoreSummary);
     toast(recoveryNotes.length ? restoreSummary : (state.language === 'en' ? 'OneBox data restored from GitHub' : '已从 GitHub 恢复 OneBox 数据'), 'info');
+    queueReaderCloudSync(500);
   } catch (error) {
     const message = githubBrowserError(error) || (state.language === 'en' ? 'GitHub restore failed' : 'GitHub 恢复失败');
     finishGithubSync(mode, state.language === 'en' ? 'Restore failed' : '恢复失败', message);
@@ -9067,6 +9144,7 @@ async function githubDownloadTask() {
 }
 function disconnectGithub() {
   state.github = { clientId: GITHUB_CLIENT_ID, token: '', user: null, gistId: '', deviceCode: '', userCode: '', verificationUri: '', verificationUriComplete: '', expiresAt: 0, interval: 5, manualTokenOpen: false };
+  window.OneBoxReaderCloudSync?.invalidateSession();
   saveGithub(); renderGithubDialog(); toast(state.language === 'en' ? 'GitHub disconnected' : '已退出 GitHub');
 }
 function renderAgreementDialog() {
@@ -9097,12 +9175,13 @@ function renderGithubDialog() {
   const uploadIcon = '<svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 20V10m0 0-3 3m3-3 3 3"/></svg>';
   const downloadIcon = '<svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 7v10m0 0-3-3m3 3 3-3"/></svg>';
   const logoutIcon = '<svg viewBox="0 0 24 24"><path d="M10 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20H10"/><path d="M13 8l4 4-4 4M8 12h9"/></svg>';
+  const readerCloudConsent = connected ? '<label class="github-agreement-check github-reader-cloud-consent"><input type="checkbox" data-reader-cloud-consent ' + (state.readerCloudConsentAccepted ? 'checked' : '') + '><span><strong>' + t('readerCloudConsentLabel') + '</strong><small>' + t('readerCloudConsent') + '</small></span></label>' : '';
   const customSync = connected ? '<section class="github-custom-sync"><div class="github-custom-sync-head"><strong>' + t('githubCustomSync') + '</strong></div><div class="github-sync-options">' + [['settings', 'githubOptionSettings'], ['navigation', 'githubOptionNavigation'], ['reading', 'githubOptionReading'], ['messages', 'githubOptionMessages'], ['calendar', 'githubOptionCalendar'], ['weather', 'githubOptionWeather'], ['translation', 'githubOptionTranslation'], ['calculator', 'githubOptionCalculator'], ['ticketWallet', 'githubOptionTicketWallet']].map(([key, label]) => '<label class="github-sync-option setting-toggle"><input type="checkbox" data-github-sync-option="' + key + '" ' + (selection[key] ? 'checked' : '') + '><span>' + t(label) + '</span></label>').join('') + '</div></section>' : '';
   const syncProgress = syncing ? githubSyncProgressMarkup(sync) : '';
   const actions = connected
     ? '<div class="github-action-grid">' + actionButton('upload', t('githubBackup'), uploadIcon, true) + actionButton('download', t('githubRestore'), downloadIcon) + actionButton('logout', t('githubLogout'), logoutIcon) + '</div>'
     : '';
-  dialog.innerHTML = '<div class="dialog-card github-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head github-dialog-head"><div class="github-dialog-title"><h2>GitHub</h2><small class="github-dialog-subtitle">' + t('githubDialogSubtitle') + '</small></div><button class="icon-btn small github-dialog-close" data-close-github aria-label="' + t('close') + '">×</button></div><div class="github-dialog-body"><section class="github-status-section">' + account + '</section>' + code + manualToken + customSync + syncProgress + '</div>' + (actions ? '<section class="github-actions">' + actions + '</section>' : '') + '</div>';
+  dialog.innerHTML = '<div class="dialog-card github-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head github-dialog-head"><div class="github-dialog-title"><h2>GitHub</h2><small class="github-dialog-subtitle">' + t('githubDialogSubtitle') + '</small></div><button class="icon-btn small github-dialog-close" data-close-github aria-label="' + t('close') + '">×</button></div><div class="github-dialog-body"><section class="github-status-section">' + account + '</section>' + readerCloudConsent + code + manualToken + customSync + syncProgress + '</div>' + (actions ? '<section class="github-actions">' + actions + '</section>' : '') + '</div>';
   dialog.hidden = false; state.githubDialogOpen = true;
 }
 function closeGithubDialog() { const dialog = $('#githubDialog'); if (dialog) dialog.hidden = true; state.githubDialogOpen = false; }
@@ -11955,10 +12034,16 @@ $('#githubDialog').addEventListener('change', (event) => {
     const login = $('#githubDialog [data-github-login]');
     if (login) login.disabled = !state.githubAgreementAccepted;
   }
+  if (event.target.matches('[data-reader-cloud-consent]')) {
+    state.readerCloudConsentAccepted = event.target.checked;
+    saveStored(STORAGE.readerCloudAgreement, state.readerCloudConsentAccepted);
+    queueReaderCloudSync(200);
+  }
   const option = event.target.closest('[data-github-sync-option]');
   if (option) {
     state.githubSyncSelection = normalizeGithubSyncSelection({ ...state.githubSyncSelection, [option.dataset.githubSyncOption]: option.checked });
     saveGithubSyncSelection();
+    if (option.dataset.githubSyncOption === 'reading') queueReaderCloudSync(200);
   }
 });
 $('#notificationPanel').addEventListener('click', (event) => {
@@ -12043,6 +12128,7 @@ function bootApp() {
   }
   try { history.scrollRestoration = 'manual'; } catch { /* unsupported */ }
   mountMascot();
+  configureReaderCloudSync();
   setInterval(checkNotifications, 30000);
   applyLanguage(); renderNav(); render(); if (state.ticketWalletOpen) scheduleTicketWalletFilterFocus(false); checkNotifications(); scheduleHomeFeedPolling(); loadHomeFeeds(); void hydrateTicketWalletImages();
   void hydrateGithubUser();
@@ -12073,7 +12159,9 @@ persistentRecovery.then((restored) => {
   }
   // A late snapshot must never reload the OAuth callback page. Also avoid
   // surprising a user with a reload after a very slow database response.
-  if (restored && !githubCallbackHandled && performance.now() < 5000) window.location.reload();
+  if (restored && !githubCallbackHandled && performance.now() < 5000) { window.location.reload(); return; }
+  readerCloudReady = true;
+  if (state.github.token) queueReaderCloudSync(500);
 }).catch(() => { /* local persistence is optional */ });
 
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') $$('.ticket-wallet-detail-more[open]').forEach((menu) => { menu.open = false; menu.querySelector('summary')?.focus(); }); });

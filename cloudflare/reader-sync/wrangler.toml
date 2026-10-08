@@ -1,0 +1,17 @@
+name = "onebox-reader-sync"
+main = "src/index.js"
+compatibility_date = "2026-10-08"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "onebox-reader-sync"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "BOOKS_BUCKET"
+bucket_name = "onebox-reader-books"
+
+[vars]
+ALLOWED_ORIGIN = "https://oneboxy.github.io"

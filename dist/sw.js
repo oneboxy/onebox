@@ -1,29 +1,31 @@
-const CACHE = 'onebox-v492';
+const CACHE = 'onebox-v493';
 const APP_SHELL = [
   './',
   'index.html',
-  'style.css?v=2.18.560',
-  'app.js?v=2.18.560',
-  'calendar-data.js?v=2.18.560',
+  'style.css?v=2.18.561',
+  'app.js?v=2.18.561',
+  'calendar-data.js?v=2.18.561',
+  'reader-sync-config.js?v=2.18.561',
+  'reader-cloud-sync.js?v=2.18.561',
   'manifest.webmanifest',
-  'manifest.webmanifest?v=2.18.560',
-  'favicon-v317.ico?v=2.18.560',
+  'manifest.webmanifest?v=2.18.561',
+  'favicon-v317.ico?v=2.18.561',
   'apple-touch-icon.png',
   'apple-touch-icon-precomposed.png',
-  'apple-touch-icon.png?v=2.18.560',
-  'icons/onebox-brand-v317-16.png?v=2.18.560',
-  'icons/onebox-brand-v317-32.png?v=2.18.560',
-  'icons/onebox-brand-v317-48.png?v=2.18.560',
-  'icons/onebox-brand-v317-64.png?v=2.18.560',
-  'icons/onebox-brand-v317-128.png?v=2.18.560',
-  'icons/onebox-brand-v317-120.png?v=2.18.560',
-  'icons/onebox-brand-v317-152.png?v=2.18.560',
-  'icons/onebox-brand-v317-167.png?v=2.18.560',
-  'icons/onebox-brand-v317-180.png?v=2.18.560',
-  'icons/onebox-brand-v317-192.png?v=2.18.560',
-  'icons/onebox-brand-v317-256.png?v=2.18.560',
-  'icons/onebox-brand-v317-512.png?v=2.18.560',
-  'icons/onebox-brand-v317-1024.png?v=2.18.560',
+  'apple-touch-icon.png?v=2.18.561',
+  'icons/onebox-brand-v317-16.png?v=2.18.561',
+  'icons/onebox-brand-v317-32.png?v=2.18.561',
+  'icons/onebox-brand-v317-48.png?v=2.18.561',
+  'icons/onebox-brand-v317-64.png?v=2.18.561',
+  'icons/onebox-brand-v317-128.png?v=2.18.561',
+  'icons/onebox-brand-v317-120.png?v=2.18.561',
+  'icons/onebox-brand-v317-152.png?v=2.18.561',
+  'icons/onebox-brand-v317-167.png?v=2.18.561',
+  'icons/onebox-brand-v317-180.png?v=2.18.561',
+  'icons/onebox-brand-v317-192.png?v=2.18.561',
+  'icons/onebox-brand-v317-256.png?v=2.18.561',
+  'icons/onebox-brand-v317-512.png?v=2.18.561',
+  'icons/onebox-brand-v317-1024.png?v=2.18.561',
   'icons/mascot-fox-full-reactions.png',
   'icons/mascot-fox-full-reactions.png?v=2.18.311',
   'icons/mascot-fox-full.png',
@@ -41,7 +43,7 @@ const APP_SHELL = [
   'icons/hupu.ico',
   'icons/hupu.ico?v=2.18.311',
 ];
-const CORE_APP_SHELL = APP_SHELL.slice(0, 7);
+const CORE_APP_SHELL = APP_SHELL.slice(0, 9);
 const OPTIONAL_APP_SHELL = APP_SHELL.slice(7);
 const OPEN_METEO = /(^|\.)open-meteo\.com$/;
 self.addEventListener('install', (event) => {
@@ -80,7 +82,9 @@ self.addEventListener('fetch', (event) => {
     || url.pathname.endsWith('/index.html')
     || url.pathname.endsWith('/app.js')
     || url.pathname.endsWith('/style.css')
-    || url.pathname.endsWith('/calendar-data.js');
+    || url.pathname.endsWith('/calendar-data.js')
+    || url.pathname.endsWith('/reader-sync-config.js')
+    || url.pathname.endsWith('/reader-cloud-sync.js');
   if (isAppShellRequest) {
     event.respondWith(fetch(event.request, { cache: 'no-store' })
       .then((response) => {
