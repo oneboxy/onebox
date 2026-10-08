@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.538';
+const APP_VERSION = '2.18.539';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6533,9 +6533,9 @@ function renderLunarDialog(key) {
   const lunar = meta.lunar;
   const isEnglish = state.language === 'en';
   const labels = isEnglish ? {
-    lunar: 'Lunar', yearPillar: 'Year pillar · zodiac', monthPillar: 'Month pillar', dayPillar: 'Day pillar', constellation: 'Constellation', highlights: 'Date markers', agenda: 'Agenda', offDay: 'Rest day', workday: 'Make-up workday', almanac: 'More calendar details', advice: 'Almanac advice', suitable: 'Good for', avoid: 'Avoid', dateOverview: 'Date overview',
+    lunar: 'Lunar', yearPillar: 'Year pillar · zodiac', monthPillar: 'Month pillar', dayPillar: 'Day pillar', constellation: 'Constellation', highlights: 'Date markers', agenda: 'Agenda', offDay: 'Rest day', workday: 'Make-up workday', almanac: 'More calendar details', advice: 'Almanac advice', suitable: 'Good for', avoid: 'Avoid',
   } : {
-    lunar: '农历', yearPillar: '年柱 · 生肖', monthPillar: '月柱', dayPillar: '日柱', constellation: '星座', highlights: '日期标记', agenda: '日程', offDay: '休息日', workday: '补班日', almanac: '更多历法信息', advice: '黄历宜忌', suitable: '宜', avoid: '忌', dateOverview: '日期概览',
+    lunar: '农历', yearPillar: '年柱 · 生肖', monthPillar: '月柱', dayPillar: '日柱', constellation: '星座', highlights: '日期标记', agenda: '日程', offDay: '休息日', workday: '补班日', almanac: '更多历法信息', advice: '黄历宜忌', suitable: '宜', avoid: '忌',
   };
   const lunarText = lunar ? lunar.monthText + lunar.dayText : (state.language === 'en' ? 'Lunar calendar unavailable' : '当前浏览器不支持农历格式');
   const almanac = almanacFor(key);
@@ -6564,12 +6564,12 @@ function renderLunarDialog(key) {
     ['年五行', almanac.yearElement], ['季节', almanac.season], ['月五行', almanac.monthElement], ['星宿', almanac.mansion], ['日五行', almanac.dayElement], ['儒略日', almanac.julian], ['佛历年', almanac.buddhist], ['伊斯兰历', almanac.islamic], ['冲', almanac.clash], ['煞', almanac.sha], ['六曜', almanac.sixStar], ['十二神', almanac.twelveGod], ['彭祖百忌', almanac.pengZu, true], ['胎神占方', almanac.fetalPalace, true],
   ];
   const almanacMarkup = '<details class="lunar-dialog-more"><summary>' + labels.almanac + '</summary><div class="lunar-dialog-almanac-grid">' + almanacFields.map((field) => almanacField(field[0], field[1], field[2])).join('') + '</div></details>';
-  const almanacList = (items, kind) => '<div class="lunar-dialog-suit-list ' + kind + '">' + items.map((item) => '<span>' + escapeHtml(item) + '</span>').join('') + '</div>';
-  const adviceMarkup = '<details class="lunar-dialog-more"><summary>' + labels.advice + '</summary><section class="lunar-dialog-advice"><div class="lunar-dialog-suit-avoid-grid"><div><span>' + labels.suitable + '</span>' + almanacList(almanac.suit, 'suit') + '</div><div><span>' + labels.avoid + '</span>' + almanacList(almanac.avoid, 'avoid') + '</div></div></section></details>';
+  const almanacList = (items) => escapeHtml(items.join(isEnglish ? ' · ' : '、'));
+  const adviceMarkup = '<details class="lunar-dialog-more"><summary>' + labels.advice + '</summary><section class="lunar-dialog-advice"><div class="lunar-dialog-suit-avoid-grid"><div><span>' + labels.suitable + '</span><p>' + almanacList(almanac.suit) + '</p></div><div><span>' + labels.avoid + '</span><p>' + almanacList(almanac.avoid) + '</p></div></div></section></details>';
   const selectedEvents = eventsForDate(key);
   const agendaMarkup = selectedEvents.length ? '<div class="lunar-dialog-agenda"><span>' + labels.agenda + '</span><strong>' + (isEnglish ? selectedEvents.length + (selectedEvents.length === 1 ? ' event' : ' events') : selectedEvents.length + ' 项') + '</strong></div>' : '';
-  const infoGrid = '<section class="lunar-dialog-overview"><div class="lunar-dialog-overview-head"><strong>' + labels.dateOverview + '</strong><span>' + labels.lunar + ' · ' + escapeHtml(lunarText) + '</span></div><div class="lunar-dialog-info-grid">' + overviewFields.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div></section>';
-  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true"><div class="lunar-dialog-head"><div><h2>' + escapeHtml(title) + '</h2><p>' + escapeHtml(weekday) + '</p></div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">×</button></div><div class="lunar-dialog-body">' + infoGrid + highlightMarkup + adviceMarkup + agendaMarkup + almanacMarkup + '</div></div>';
+  const infoGrid = '<section class="lunar-dialog-overview"><div class="lunar-dialog-overview-head"><span>' + labels.lunar + ' · ' + escapeHtml(lunarText) + '</span></div><div class="lunar-dialog-info-grid">' + overviewFields.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div></section>';
+  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true"><div class="lunar-dialog-head"><div class="lunar-dialog-title-line"><h2>' + escapeHtml(title) + '</h2><span>' + escapeHtml(weekday) + '</span></div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">×</button></div><div class="lunar-dialog-body">' + infoGrid + highlightMarkup + adviceMarkup + agendaMarkup + almanacMarkup + '</div></div>';
   dialog.hidden = false;
   state.lunarDialogDate = key;
 }
