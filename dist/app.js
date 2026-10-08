@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.529';
+const APP_VERSION = '2.18.530';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3791,8 +3791,7 @@ function ticketWalletDetailInfoMarkup(record) {
     + action(english ? 'Map' : '地图', 'data-ticket-wallet-map-locate', '<circle cx="12" cy="12" r="8.5"></circle><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"></path>', hasLocation)
     + action(english ? 'Apple Wallet' : '苹果钱包', 'data-ticket-wallet-apple', '<rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path>')
     + action(english ? 'Delete' : '删除', 'data-ticket-wallet-delete', '<path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l-.8-13M10 11v5M14 11v5"></path>', true, 'danger')
-    + action(english ? 'Notes' : '备注', 'data-ticket-wallet-notes', '<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path>')
-    + '</div>' + (notes ? '<section class="ticket-wallet-notes-panel" aria-label="' + (english ? 'Notes' : '备注') + '"><div class="ticket-wallet-notes-heading"><strong>' + (english ? 'Notes' : '备注') + '</strong><button type="button" data-ticket-wallet-notes="' + id + '" aria-label="' + (english ? 'Edit notes' : '编辑备注') + '">' + icon('<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path>') + '<span>' + (english ? 'Edit' : '编辑') + '</span></button></div><div class="ticket-wallet-notes-content">' + escapeHtml(notes) + '</div></section>' : '') + '</section>';
+    + '</div>' + '<section class="ticket-wallet-notes-panel" aria-label="' + (english ? 'Notes' : '备注') + '"><div class="ticket-wallet-notes-heading"><strong>' + (english ? 'Notes' : '备注') + '</strong><button type="button" data-ticket-wallet-notes="' + id + '" aria-label="' + (english ? 'Edit notes' : '编辑备注') + '">' + icon('<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path>') + '<span>' + (english ? (notes ? 'Edit' : 'Add') : (notes ? '编辑' : '添加')) + '</span></button></div><div class="ticket-wallet-notes-content">' + escapeHtml(notes || (english ? 'No notes yet' : '暂无备注')) + '</div></section>' + '</section>';
 }
 function ticketWalletStackDensity(count) {
   const size = Math.max(1, Number(count) || 1);

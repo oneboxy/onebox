@@ -14783,7 +14783,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
 .ticket-wallet-detail-note .has-content { color: var(--ink); }
 .ticket-wallet-detail-note:hover, .ticket-wallet-detail-note:focus-visible { color: var(--ink); }
 
-.ticket-wallet-detail-toolbar-all { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; border-bottom: 0; }
+.ticket-wallet-detail-toolbar-all { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; border-bottom: 0; }
 .ticket-wallet-detail-toolbar-all .ticket-wallet-detail-tool { flex-direction: column; gap: 5px; min-height: 58px; padding: 8px 1px; font-size: 11px; }
 .ticket-wallet-detail-toolbar-all .danger { color: var(--danger, #d95353); }
 .ticket-wallet-map-return { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; margin: 0 0 8px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
