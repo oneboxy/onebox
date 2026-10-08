@@ -14789,3 +14789,13 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
 .ticket-wallet-map-return { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; margin: 0 0 8px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
 .ticket-wallet-map-return svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .ticket-wallet-map-return:hover { background: var(--soft); }
+
+/* Notes belong to the detail, with natural height for the complete text. */
+.ticket-wallet-notes-panel { min-width: 0; margin: 8px 0 12px; padding: 10px 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--panel) 72%, transparent); color: var(--ink); }
+.ticket-wallet-notes-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 5px; }
+.ticket-wallet-notes-heading strong { color: var(--muted); font-size: 12px; font-weight: 600; }
+.ticket-wallet-notes-heading button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 36px; padding: 6px 0 6px 10px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font: inherit; font-size: 11px; cursor: pointer; }
+.ticket-wallet-notes-heading button:hover, .ticket-wallet-notes-heading button:focus-visible { color: var(--ink); }
+.ticket-wallet-notes-heading svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ticket-wallet-notes-content { display: block; min-width: 0; width: 100%; height: auto; max-height: none; overflow: visible; white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; text-overflow: clip; -webkit-line-clamp: unset; font-size: 13px; line-height: 1.85; }
+.ticket-wallet-detail-utilities { min-width: 0; }
