@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.552';
+const APP_VERSION = '2.18.553';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2253,9 +2253,9 @@ function mascotClearDockTimer() {
 }
 function mascotScheduleDock() {
   mascotClearDockTimer();
-  if (!mascotRuntime.root || !state.mascotVisible || !mascotRuntime.panel?.hidden || mascotRuntime.drag) return;
+  if (!mascotRuntime.root || !state.mascotVisible || state.githubSync?.active || state.githubSync?.error || !mascotRuntime.panel?.hidden || mascotRuntime.drag) return;
   mascotRuntime.dockTimer = window.setTimeout(() => {
-    if (!mascotRuntime.drag && mascotRuntime.panel?.hidden) {
+    if (!mascotRuntime.drag && mascotRuntime.panel?.hidden && !state.githubSync?.active && !state.githubSync?.error) {
       mascotRuntime.root.classList.add('is-docked');
       mascotRuntime.root.classList.remove('is-top-action');
       mascotSetReaction('sleepy', 1500);
@@ -2319,9 +2319,13 @@ function syncMascotVisibility() {
     mascotHideSpeech();
     if (mascotRuntime.panel) mascotRuntime.panel.hidden = true;
     root.classList.remove('has-briefing', 'is-top-action');
-    root.hidden = true;
+    const syncVisible = Boolean(state.githubSync?.active || state.githubSync?.error);
+    root.classList.toggle('is-sync-only', syncVisible);
+    root.classList.remove('is-docked');
+    root.hidden = !syncVisible;
     return;
   }
+  root.classList.remove('is-sync-only');
   root.hidden = false;
   syncMascotContext();
   mascotScheduleDock();
@@ -2559,7 +2563,8 @@ function syncMascotContext() {
   const root = mascotRuntime.root;
   const button = mascotRuntime.button;
   if (!root || !button) return;
-  const topAction = mascotTopActionActive();
+  const syncPinned = Boolean(state.githubSync?.active || state.githubSync?.error);
+  const topAction = mascotTopActionActive() && !syncPinned;
   const wasTopAction = root.classList.contains('is-top-action');
   root.classList.toggle('is-top-action', topAction);
   button.setAttribute('aria-label', topAction ? (state.language === 'en' ? 'Back to top' : '回到顶部') : (state.language === 'en' ? 'Open today overview' : '查看今日速览'));
@@ -2741,7 +2746,7 @@ function mountMascot() {
   if (mascotRuntime.root) return;
   const root = document.createElement('aside');
   root.id = 'oneboxMascotRoot'; root.className = 'onebox-mascot-root'; root.dataset.edge = 'right'; root.dataset.panelSide = 'right';
-  root.innerHTML = '<span class="onebox-mascot-propeller" aria-hidden="true"><i></i><i></i><b></b></span><span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
+  root.innerHTML = '<span class="onebox-mascot-propeller" aria-hidden="true"><i></i><i></i><b></b></span><span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><button type="button" class="onebox-mascot-sync-progress" data-mascot-sync-progress data-sync-place="above" aria-live="polite" hidden><span class="onebox-mascot-sync-head"><span class="onebox-mascot-sync-icon" aria-hidden="true">↻</span><strong data-mascot-sync-message></strong><em data-mascot-sync-percent>0%</em></span><span class="onebox-mascot-sync-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></span><small>点击查看同步详情</small></button><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
   document.body.appendChild(root);
   mascotRuntime.root = root; mascotRuntime.button = $('.onebox-mascot-button', root); mascotRuntime.panel = $('.onebox-mascot-panel', root); mascotRuntime.speech = $('.onebox-mascot-speech', root); mascotRuntime.directionLayer = $('.onebox-mascot-direction', root); mascotRuntime.reactionLayer = $('.onebox-mascot-reaction', root);
   mascotRuntime.directionLayer.style.backgroundImage = 'url("' + MASCOT_ASSETS.directions + '")';
@@ -2769,6 +2774,7 @@ function mountMascot() {
   mascotRuntime.button.addEventListener('pointerup', mascotFinishDrag, { passive: false });
   mascotRuntime.button.addEventListener('pointercancel', mascotFinishDrag, { passive: false });
   mascotRuntime.button.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); mascotHandleTap(); } });
+  $('.onebox-mascot-sync-progress', root)?.addEventListener('click', () => renderGithubDialog());
   mascotRuntime.panel.addEventListener('click', (event) => {
     if (event.target.closest('[data-mascot-poem-next]')) { event.preventDefault(); event.stopPropagation(); changeMascotPoem(); return; }
     if (event.target.closest('[data-close-mascot]')) { closeMascotBriefing(); return; }
@@ -2797,6 +2803,7 @@ function mountMascot() {
   if (window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) window.addEventListener('pointermove', (event) => mascotAim({ x: event.clientX, y: event.clientY }), { passive: true });
   window.addEventListener('resize', () => { if (mascotRuntime.position) mascotSetPosition(mascotRuntime.position.left, mascotRuntime.position.top, false); mascotSyncPanelSide(); }, { passive: true });
   syncMascotVisibility();
+  renderGithubSyncIndicator();
 }
 let pendingNavigationRestore = null;
 let navigationRestoreTimers = [];
@@ -7466,12 +7473,22 @@ function saveGithub() {
   void oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
 }
 const githubResponseTokens = new WeakMap();
+let githubRateLimitUntil = 0;
+function githubRateLimitError() {
+  const waitMinutes = Math.max(1, Math.ceil((githubRateLimitUntil - Date.now()) / 60000));
+  const error = Error(state.language === 'en'
+    ? 'GitHub temporarily limited sync requests. Please wait about ' + waitMinutes + ' minute(s) and retry.'
+    : 'GitHub 暂时限制了同步请求，请约 ' + waitMinutes + ' 分钟后再试。');
+  error.code = 'github-rate-limit';
+  return error;
+}
 function githubHeaders(withBody = false) {
   const headers = { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + state.github.token, 'X-GitHub-Api-Version': '2022-11-28' };
   if (withBody) headers['Content-Type'] = 'application/json';
   return headers;
 }
 async function githubApiFetch(url, options = {}) {
+  if (githubRateLimitUntil > Date.now()) throw githubRateLimitError();
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
@@ -7485,7 +7502,10 @@ async function githubApiFetch(url, options = {}) {
       finally { clearTimeout(deadline); options.signal?.removeEventListener('abort', abort); }
       const authorization = new Headers(options.headers).get('Authorization') || '';
       githubResponseTokens.set(response, authorization.replace(/^Bearer /i, ''));
-      const retryableStatus = [408, 425, 429, 500, 502, 503, 504].includes(response.status);
+      // Rate-limit responses are final for this request. Retrying them adds
+      // avoidable load and delays the useful reset-time message.
+      if (response.status === 429) return response;
+      const retryableStatus = [408, 425, 500, 502, 503, 504].includes(response.status);
       if (!retryableStatus || attempt === 2) return response;
       const retryAfter = Number(response.headers.get('Retry-After'));
       await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 900 * (attempt + 1));
@@ -8197,6 +8217,14 @@ async function githubApiError(response, fallback = '') {
     invalidateGithubToken(githubResponseTokens.get(response) ?? state.github.token);
     const error = Error(t('githubAuthExpired')); error.code = 'github-auth-expired'; return error;
   }
+  if ([403, 429].includes(response?.status) && /(?:api )?rate limit exceeded|secondary rate limit|abuse detection|temporarily blocked/i.test(message + ' ' + details)) {
+    const resetAt = Number(response.headers.get('X-RateLimit-Reset')) * 1000;
+    githubRateLimitUntil = Number.isFinite(resetAt) && resetAt > Date.now() ? resetAt : Date.now() + 60000;
+    const error = githubRateLimitError();
+    error.status = response.status;
+    error.code = 'github-rate-limit';
+    return error;
+  }
   const error = Error((message || fallback || (state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败')) + (details ? (state.language === 'en' ? ': ' : '：') + details : '') + suffix);
   error.status = response?.status || 0;
   error.githubErrors = Array.isArray(data?.errors) ? data.errors : [];
@@ -8211,21 +8239,43 @@ function githubSyncLabel(mode, key) {
   return labels[mode]?.[key]?.[english ? 0 : 1] || '';
 }
 function renderGithubSyncIndicator() {
-  const indicator = $('#githubSyncIndicator');
-  if (!indicator) return;
+  const root = mascotRuntime.root;
+  const indicator = root?.querySelector('[data-mascot-sync-progress]');
+  if (!root || !indicator) return;
   const sync = state.githubSync || { active: false, mode: '', progress: 0, message: '', error: '' };
   const visible = Boolean(sync.active || sync.error);
   indicator.hidden = !visible;
   indicator.classList.toggle('is-error', Boolean(sync.error));
   indicator.dataset.mode = sync.mode || '';
   const progress = Math.max(0, Math.min(100, Number(sync.progress) || 0));
-  indicator.style.setProperty('--sync-progress', progress + '%');
-  const label = indicator.querySelector('[data-github-sync-label]');
-  const detail = indicator.querySelector('[data-github-sync-detail]');
-  const labelText = sync.error ? (state.language === 'en' ? 'Sync failed' : '同步失败') : sync.mode === 'download' ? (state.language === 'en' ? 'Restoring' : '恢复中') : (state.language === 'en' ? 'Syncing' : '同步中');
-  if (label) label.textContent = labelText;
-  if (detail) detail.textContent = sync.error ? '!' : progress + '%';
-  indicator.setAttribute('aria-label', (sync.error ? (state.language === 'en' ? 'GitHub sync failed' : 'GitHub 同步失败') : (state.language === 'en' ? 'GitHub sync in progress' : 'GitHub 正在同步')) + ' · ' + progress + '%');
+  const message = indicator.querySelector('[data-mascot-sync-message]');
+  const percent = indicator.querySelector('[data-mascot-sync-percent]');
+  const track = indicator.querySelector('.onebox-mascot-sync-track');
+  const fill = track?.querySelector('i');
+  const icon = indicator.querySelector('.onebox-mascot-sync-icon');
+  const label = sync.error || sync.message || (sync.mode === 'download' ? (state.language === 'en' ? 'Restoring books and settings' : '正在恢复书籍和设置') : (state.language === 'en' ? 'Syncing with GitHub' : '正在同步到 GitHub'));
+  if (message) message.textContent = label;
+  if (percent) percent.textContent = sync.error ? '!' : progress + '%';
+  if (icon) icon.textContent = sync.error ? '!' : sync.mode === 'download' ? '↓' : '↻';
+  if (fill) fill.style.width = progress + '%';
+  if (track) track.setAttribute('aria-valuenow', String(progress));
+  indicator.setAttribute('aria-label', (sync.error ? (state.language === 'en' ? 'Sync failed. Open details' : '同步失败，点击查看详情') : sync.mode === 'download' ? (state.language === 'en' ? 'Restoring from GitHub' : '正在从 GitHub 恢复') : (state.language === 'en' ? 'Syncing with GitHub' : '正在同步到 GitHub')) + ' · ' + progress + '%');
+  const hint = indicator.querySelector('small');
+  if (hint) hint.textContent = sync.error ? (state.language === 'en' ? 'Tap to see details' : '点击查看错误详情') : (state.language === 'en' ? 'Tap for details · drag the pet to move' : '点击查看详情 · 拖动宠物可调整位置');
+  root.classList.toggle('is-syncing', Boolean(sync.active));
+  root.classList.toggle('has-sync-progress', visible);
+  root.classList.toggle('is-sync-only', visible && !state.mascotVisible);
+  if (visible) {
+    root.hidden = false;
+    root.classList.remove('is-docked');
+    mascotClearDockTimer();
+    if (indicator.dataset.syncPlace !== (root.getBoundingClientRect().top < 105 ? 'below' : 'above')) indicator.dataset.syncPlace = root.getBoundingClientRect().top < 105 ? 'below' : 'above';
+  } else {
+    root.hidden = !state.mascotVisible;
+    if (!visible) root.classList.remove('is-sync-only');
+    if (state.mascotVisible) mascotScheduleDock();
+  }
+  syncMascotContext();
 }
 function updateGithubSync(mode, progress, message, error = '') {
   state.githubSync = { active: !error && progress < 100, mode, progress: Math.max(0, Math.min(100, Math.round(progress))), message: message || '', error: error || '' };
@@ -8238,12 +8288,12 @@ function finishGithubSync(mode, message, error = '') {
   if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
 }
 function githubSyncProgressMarkup(sync) {
-  if (!sync?.active) return '';
+  if (!sync?.active && !sync?.error) return '';
   const progress = Math.max(0, Math.min(100, Number(sync.progress) || 0));
   const fallback = sync.mode === 'download'
     ? (state.language === 'en' ? 'Restoring from GitHub…' : '正在从 GitHub 恢复…')
     : (state.language === 'en' ? 'Backing up to GitHub…' : '正在备份到 GitHub…');
-  return '<section class="github-sync-progress is-active" role="status" aria-live="polite"><div class="github-sync-progress-head"><strong>' + escapeHtml(sync.message || fallback) + '</strong><span>' + progress + '%</span></div><div class="github-sync-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '"><span style="width:' + progress + '%"></span></div><small>' + escapeHtml(t('githubBackgroundHint')) + '</small></section>';
+  return '<section class="github-sync-progress' + (sync.active ? ' is-active' : '') + (sync.error ? ' is-error' : '') + '" role="status" aria-live="polite"><div class="github-sync-progress-head"><strong>' + escapeHtml(sync.error || sync.message || fallback) + '</strong><span>' + (sync.error ? '!' : progress + '%') + '</span></div><div class="github-sync-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '"><span style="width:' + progress + '%"></span></div><small>' + escapeHtml(t('githubBackgroundHint')) + '</small></section>';
 }
 function consumeGithubOAuthCallback() {
   const marker = '#github-callback?';
@@ -8323,7 +8373,7 @@ async function githubUseAccessToken() {
     toast(error.message || t('githubTokenInvalid'), 'error');
   }
 }
-async function findGithubGists() {
+async function findGithubGists(includeOtherBackups = false, initialCandidates = []) {
   const candidates = [];
   const seen = new Set();
   const listedOrder = new Map();
@@ -8333,7 +8383,8 @@ async function findGithubGists() {
     candidates.push(gist);
     listedOrder.set(gist.id, order);
   };
-  if (state.github.gistId) {
+  (Array.isArray(initialCandidates) ? initialCandidates : []).forEach((gist, index) => addCandidate(gist, index));
+  if (state.github.gistId && !seen.has(state.github.gistId)) {
     const known = await githubApiFetch('https://api.github.com/gists/' + encodeURIComponent(state.github.gistId), { headers: githubHeaders(), cache: 'no-store' });
     if (known.ok) addCandidate(await known.json());
     else if (![404, 410].includes(known.status)) {
@@ -8344,7 +8395,11 @@ async function findGithubGists() {
       saveGithub();
     }
   }
-  for (let page = 1; page <= 10; page += 1) {
+  // The saved Gist is the normal sync path. Search only one page when it is
+  // missing; older backups are scanned in a small, explicit recovery pass.
+  if (candidates.length && !includeOtherBackups) return candidates;
+  const maxPages = includeOtherBackups ? 2 : 1;
+  for (let page = 1; page <= maxPages; page += 1) {
     const response = await githubApiFetch('https://api.github.com/gists?per_page=100&page=' + page, { headers: githubHeaders(), cache: 'no-store' });
     if (!response.ok) throw await githubApiError(response);
     const gists = await response.json();
@@ -8360,7 +8415,12 @@ async function findGithubGists() {
   return candidates.sort((left, right) => updatedAt(right) - updatedAt(left) || (listedOrder.get(left.id) ?? Number.MAX_SAFE_INTEGER) - (listedOrder.get(right.id) ?? Number.MAX_SAFE_INTEGER));
 }
 async function findGithubGist() {
-  const [found] = await findGithubGists();
+  let candidates = await findGithubGists();
+  let found = candidates[0];
+  if (!found) {
+    candidates = await findGithubGists(true, candidates);
+    found = candidates[0];
+  }
   if (found?.id) {
     state.github.gistId = found.id;
     saveGithub();
@@ -8543,7 +8603,8 @@ async function githubDownload() {
   updateGithubSync(mode, 5, githubSyncLabel(mode, 'preparing'));
   try {
     updateGithubSync(mode, 24, githubSyncLabel(mode, 'gist'));
-    const candidates = await findGithubGists();
+    let candidates = await findGithubGists();
+    if (!candidates.length) candidates = await findGithubGists(true, candidates);
     if (!candidates.length) throw Error(t('githubSyncNotFound'));
     updateGithubSync(mode, 42, githubSyncLabel(mode, 'download'));
     const readingEnabled = githubSyncCustomGroupEnabled('reading');
@@ -8590,7 +8651,21 @@ async function githubDownload() {
         if (Object.prototype.hasOwnProperty.call(readingRemote, key)) remote[key] = readingRemote[key];
       });
     }
-    if (readingEnabled && readerSyncHasLibrary(remote)) remote = repairReaderSyncManifest(remote, gist).remote;
+    if (readingEnabled && readerSyncHasLibrary(remote)) {
+      let readerRepair = repairReaderSyncManifest(remote, gist);
+      if (!readerRepair.hasAllSources) {
+        updateGithubSync(mode, 50, state.language === 'en' ? 'Looking for book files in older backups…' : '正在旧备份中查找书籍原文件…');
+        const expandedCandidates = await findGithubGists(true, candidates);
+        expandedCandidates.forEach((candidate) => collectAssetFiles(candidate.files));
+        const expandedFiles = { ...(gist.files || {}) };
+        Object.entries(assetFiles).forEach(([name, file]) => {
+          if (!expandedFiles[name]) expandedFiles[name] = file;
+        });
+        gist = { ...gist, files: expandedFiles };
+        readerRepair = repairReaderSyncManifest(remote, gist);
+      }
+      remote = readerRepair.remote;
+    }
     const id = gist.id;
     updateGithubSync(mode, 67, githubSyncLabel(mode, 'restore'));
     const settingsEnabled = githubSyncCustomGroupEnabled('settings');
@@ -11368,7 +11443,6 @@ document.addEventListener('keydown', (event) => {
 $('#themeBtn').addEventListener('click', cycleTheme);
 $('#languageBtn').addEventListener('click', cycleLanguage);
 $('#settingsBtn').addEventListener('click', () => renderSettings());
-$('#githubSyncIndicator')?.addEventListener('click', () => renderGithubDialog());
 $('#notifyBtn').addEventListener('click', () => {
   state.notificationOpen = !state.notificationOpen;
   if (state.notificationOpen) { state.notifications.forEach((item) => { if (item.at <= Date.now()) item.read = true; }); saveNotifications(); renderNotifications(); }
