@@ -9661,15 +9661,23 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .lunar-dialog-suit-avoid-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .lunar-dialog-suit-avoid-grid > div { display: grid; align-content: start; gap: 6px; min-width: 0; min-height: 68px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
 .lunar-dialog-suit-avoid-grid > div > span { color: var(--primary); font-size: 11px; font-weight: 700; }
+.lunar-dialog-suit-avoid-grid > div > .lunar-dialog-avoid-label { justify-self: start; padding: 2px 7px; border: 1px solid color-mix(in srgb, var(--danger, #d9534f) 24%, var(--line)); border-radius: 6px; background: color-mix(in srgb, var(--danger, #d9534f) 8%, var(--panel)); color: var(--danger, #d9534f); }
 .lunar-dialog-suit-avoid-grid p { min-width: 0; margin: 0; color: var(--ink); font-size: 11px; line-height: 1.55; overflow-wrap: anywhere; }
 .lunar-dialog-agenda { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--primary) 4%, var(--panel-2)); color: var(--muted); font-size: 11px; }
 .lunar-dialog-agenda strong { color: var(--ink); font-size: 12px; }
 .lunar-dialog-more { padding: 0 12px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
-.lunar-dialog-more summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 1px 9px; color: var(--ink); font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; }
+.lunar-dialog-more summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 9px 5px; border-radius: 8px; color: var(--ink); font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; transition: color .16s ease, background-color .16s ease; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .lunar-dialog-more summary::-webkit-details-marker { display: none; }
-.lunar-dialog-more summary::after { content: '⌄'; display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--muted); font-size: 14px; font-weight: 500; transition: transform .18s ease; }
-.lunar-dialog-more[open] summary::after { transform: rotate(180deg); }
+.lunar-dialog-more summary::after { content: ''; flex: 0 0 8px; width: 8px; height: 8px; margin: -4px 4px 0 0; border-right: 1.7px solid currentColor; border-bottom: 1.7px solid currentColor; color: var(--muted); transform: rotate(45deg); transition: transform .18s ease, color .16s ease; }
+.lunar-dialog-more summary:active { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.lunar-dialog-more summary:focus-visible { outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent); outline-offset: 1px; }
+.lunar-dialog-more[open] summary { color: var(--primary); }
+.lunar-dialog-more[open] summary::after { color: var(--primary); transform: rotate(225deg); }
 .lunar-dialog-more[open] summary { margin-bottom: 5px; border-bottom: 1px solid var(--line); }
+.lunar-dialog-more[open] .lunar-dialog-almanac-grid, .lunar-dialog-more[open] .lunar-dialog-advice { animation: lunar-dialog-content-enter .16s ease both; }
+@keyframes lunar-dialog-content-enter { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+@media (hover: hover) { .lunar-dialog-more summary:hover { background: color-mix(in srgb, var(--primary) 5%, transparent); color: var(--primary); } }
+@media (prefers-reduced-motion: reduce) { .lunar-dialog-more summary, .lunar-dialog-more summary::after { transition: none; } .lunar-dialog-more[open] .lunar-dialog-almanac-grid, .lunar-dialog-more[open] .lunar-dialog-advice { animation: none; } }
 .lunar-dialog-almanac-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding-top: 5px; }
 .lunar-dialog-almanac-field { display: grid; align-content: center; gap: 5px; min-width: 0; min-height: 58px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--primary) 3%, var(--panel)); }
 .lunar-dialog-almanac-field.wide { grid-column: 1 / -1; }
