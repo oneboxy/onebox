@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.544';
+const APP_VERSION = '2.18.545';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6565,7 +6565,7 @@ function renderLunarDialog(key) {
   ];
   const almanacMarkup = '<details class="lunar-dialog-more" open><summary>' + labels.almanac + '</summary><div class="lunar-dialog-almanac-grid">' + almanacFields.map((field) => almanacField(field[0], field[1], field[2])).join('') + '</div></details>';
   const almanacList = (items) => escapeHtml(items.join(isEnglish ? ' · ' : '、'));
-  const adviceMarkup = '<details class="lunar-dialog-more" open><summary>' + labels.advice + '</summary><section class="lunar-dialog-advice"><div class="lunar-dialog-suit-avoid-grid"><div><span>' + labels.suitable + '</span><p>' + almanacList(almanac.suit) + '</p></div><div><span class="lunar-dialog-avoid-label">' + labels.avoid + '</span><p>' + almanacList(almanac.avoid) + '</p></div></div></section></details>';
+  const adviceMarkup = '<details class="lunar-dialog-more" open><summary>' + labels.advice + '</summary><section class="lunar-dialog-advice"><div class="lunar-dialog-suit-avoid-grid"><div><span class="lunar-dialog-suitable-label">' + labels.suitable + '</span><p>' + almanacList(almanac.suit) + '</p></div><div><span class="lunar-dialog-avoid-label">' + labels.avoid + '</span><p>' + almanacList(almanac.avoid) + '</p></div></div></section></details>';
   const selectedEvents = eventsForDate(key);
   const agendaMarkup = selectedEvents.length ? '<div class="lunar-dialog-agenda"><span>' + labels.agenda + '</span><strong>' + (isEnglish ? selectedEvents.length + (selectedEvents.length === 1 ? ' event' : ' events') : selectedEvents.length + ' 项') + '</strong></div>' : '';
   const infoGrid = '<section class="lunar-dialog-overview"><div class="lunar-dialog-info-grid">' + overviewFields.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div></section>';
