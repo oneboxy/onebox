@@ -9622,6 +9622,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .lunar-dialog-card {
   width: min(500px, 100%);
   max-height: min(86vh, 700px) !important;
+  max-height: min(86dvh, 700px) !important;
   padding: 0 !important;
   overflow: auto;
   text-align: left;
