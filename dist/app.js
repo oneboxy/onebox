@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.546';
+const APP_VERSION = '2.18.547';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6481,7 +6481,7 @@ function calendar() {
   if (!yearChoices.includes(year)) yearChoices.push(year);
   yearChoices.sort((a, b) => a - b);
   const yearOptions = yearChoices.map((value) => '<option value="' + value + '" ' + (value === year ? 'selected' : '') + '>' + value + '</option>').join('');
-  const monthNames = Array.from({ length: 12 }, (_, index) => new Intl.DateTimeFormat(isEnglish ? 'en-US' : 'zh-CN', { month: isEnglish ? 'long' : 'numeric' }).format(new Date(year, index, 1)));
+  const monthNames = Array.from({ length: 12 }, (_, index) => isEnglish ? new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, index, 1)) : String(index + 1));
   const monthOptions = monthNames.map((value, index) => '<option value="' + index + '" ' + (index === month ? 'selected' : '') + '>' + escapeHtml(value) + (isEnglish ? '' : '月') + '</option>').join('');
   const yearPicker = '<label class="calendar-picker calendar-year-picker"><select data-calendar-year aria-label="' + (isEnglish ? 'Choose year' : '选择年份') + '">' + yearOptions + '</select><span class="calendar-picker-value">' + year + '</span>' + (isEnglish ? '' : '<span class="calendar-picker-unit">年</span>') + '<i aria-hidden="true"></i></label>';
   const monthPicker = '<label class="calendar-picker calendar-month-picker"><select data-calendar-month aria-label="' + (isEnglish ? 'Choose month' : '选择月份') + '">' + monthOptions + '</select><span class="calendar-picker-value">' + escapeHtml(monthNames[month]) + '</span>' + (isEnglish ? '' : '<span class="calendar-picker-unit">月</span>') + '<i aria-hidden="true"></i></label>';
