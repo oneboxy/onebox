@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.541';
+const APP_VERSION = '2.18.542';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6556,7 +6556,7 @@ function renderLunarDialog(key) {
     meta.holiday ? { label: meta.holiday.name + ' · ' + (meta.holiday.isOffDay ? labels.offDay : labels.workday), kind: meta.holiday.isOffDay ? 'holiday' : 'workday' } : null,
     meta.term ? { label: meta.term, kind: 'term' } : null,
   ].filter(Boolean);
-  const highlightMarkup = highlights.length ? '<section class="lunar-dialog-highlights" aria-label="' + labels.highlights + '"><span class="lunar-dialog-overline">' + labels.highlights + '</span><div class="lunar-dialog-tags">' + highlights.map((item) => '<span class="lunar-dialog-tag ' + item.kind + '">' + escapeHtml(item.label) + '</span>').join('') + '</div></section>' : '';
+  const highlightMarkup = highlights.length ? '<div class="lunar-dialog-tags" aria-label="' + labels.highlights + '">' + highlights.map((item) => '<span class="lunar-dialog-tag ' + item.kind + '">' + escapeHtml(item.label) + '</span>').join('') + '</div>' : '';
   const almanacField = (label, value, wide = false) => '<div class="lunar-dialog-almanac-field' + (wide ? ' wide' : '') + '"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
   const almanacFields = isEnglish ? [
     ['Year element', almanac.yearElement], ['Season', almanac.season], ['Month element', almanac.monthElement], ['Mansion', almanac.mansion], ['Day element', almanac.dayElement], ['Julian day', almanac.julian], ['Buddhist year', almanac.buddhist], ['Islamic date', almanac.islamic], ['Clash', almanac.clash], ['Sha direction', almanac.sha], ['Six star', almanac.sixStar], ['Twelve duty', almanac.twelveGod], ['Peng Zu taboos', almanac.pengZu, true], ['Fetal deity', almanac.fetalPalace, true],
@@ -6568,8 +6568,8 @@ function renderLunarDialog(key) {
   const adviceMarkup = '<details class="lunar-dialog-more" open><summary>' + labels.advice + '</summary><section class="lunar-dialog-advice"><div class="lunar-dialog-suit-avoid-grid"><div><span>' + labels.suitable + '</span><p>' + almanacList(almanac.suit) + '</p></div><div><span>' + labels.avoid + '</span><p>' + almanacList(almanac.avoid) + '</p></div></div></section></details>';
   const selectedEvents = eventsForDate(key);
   const agendaMarkup = selectedEvents.length ? '<div class="lunar-dialog-agenda"><span>' + labels.agenda + '</span><strong>' + (isEnglish ? selectedEvents.length + (selectedEvents.length === 1 ? ' event' : ' events') : selectedEvents.length + ' 项') + '</strong></div>' : '';
-  const infoGrid = '<section class="lunar-dialog-overview"><div class="lunar-dialog-overview-head"><span>' + labels.lunar + ' · ' + escapeHtml(lunarText) + '</span></div><div class="lunar-dialog-info-grid">' + overviewFields.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div></section>';
-  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true"><div class="lunar-dialog-head"><div class="lunar-dialog-title-line"><h2>' + escapeHtml(title) + '</h2><span>' + escapeHtml(weekday) + '</span></div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">×</button></div><div class="lunar-dialog-body">' + infoGrid + highlightMarkup + adviceMarkup + agendaMarkup + almanacMarkup + '</div></div>';
+  const infoGrid = '<section class="lunar-dialog-overview"><div class="lunar-dialog-info-grid">' + overviewFields.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div></section>';
+  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true"><div class="lunar-dialog-head"><div class="lunar-dialog-title-line"><h2>' + escapeHtml(title) + '</h2><span class="lunar-dialog-weekday">' + escapeHtml(weekday) + '</span><span class="lunar-dialog-lunar">' + labels.lunar + ' · ' + escapeHtml(lunarText) + '</span>' + highlightMarkup + '</div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">×</button></div><div class="lunar-dialog-body">' + infoGrid + adviceMarkup + agendaMarkup + almanacMarkup + '</div></div>';
   dialog.hidden = false;
   state.lunarDialogDate = key;
 }
