@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.559';
+const APP_VERSION = '2.18.560';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9958,7 +9958,7 @@ function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
   if (state.section === 'mine' && state.ticketWalletOpen && (state.ticketWalletSelectedId || ticketWalletMapReturnContext)) return null;
-  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher')) return null;
+  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher, .ticket-wallet-template-options.is-airlines')) return null;
   if (event.target.closest('[data-swipe-row]')) return null;
   const items = pageSwipeItems();
   const index = pageSwipeIndex(items);

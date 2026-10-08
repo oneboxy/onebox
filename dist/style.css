@@ -14971,11 +14971,16 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
    same information layout and editable fields as other wallet tickets. */
 body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-airlines {
   display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   gap: 8px;
-  padding: 2px 2px 9px;
+  padding: 2px 10px 9px 2px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
   scrollbar-color: color-mix(in srgb, var(--muted) 35%, transparent) transparent;
   scrollbar-width: thin;
 }
