@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.554';
+const APP_VERSION = '2.18.555';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2746,7 +2746,7 @@ function mountMascot() {
   if (mascotRuntime.root) return;
   const root = document.createElement('aside');
   root.id = 'oneboxMascotRoot'; root.className = 'onebox-mascot-root'; root.dataset.edge = 'right'; root.dataset.panelSide = 'right';
-  root.innerHTML = '<span class="onebox-mascot-propeller" aria-hidden="true"><i></i><i></i><b></b></span><span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><button type="button" class="onebox-mascot-sync-progress" data-mascot-sync-progress data-sync-place="above" aria-live="polite" hidden><span class="onebox-mascot-sync-head"><strong data-mascot-sync-message></strong><em data-mascot-sync-percent>0%</em></span><span class="onebox-mascot-sync-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></span></button><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
+  root.innerHTML = '<span class="onebox-mascot-propeller" aria-hidden="true"><i></i><i></i><b></b></span><span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><div class="onebox-mascot-sync-progress" data-mascot-sync-progress data-sync-place="above" hidden><button type="button" class="onebox-mascot-sync-trigger" data-mascot-sync-trigger aria-live="polite"><span class="onebox-mascot-sync-dot" aria-hidden="true"></span><strong data-mascot-sync-message></strong><span class="onebox-mascot-sync-ring" data-mascot-sync-ring aria-hidden="true"><em data-mascot-sync-percent>0%</em></span></button><button type="button" class="onebox-mascot-sync-dismiss" data-mascot-sync-dismiss aria-label="关闭同步状态" title="关闭" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg></button></div><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
   document.body.appendChild(root);
   mascotRuntime.root = root; mascotRuntime.button = $('.onebox-mascot-button', root); mascotRuntime.panel = $('.onebox-mascot-panel', root); mascotRuntime.speech = $('.onebox-mascot-speech', root); mascotRuntime.directionLayer = $('.onebox-mascot-direction', root); mascotRuntime.reactionLayer = $('.onebox-mascot-reaction', root);
   mascotRuntime.directionLayer.style.backgroundImage = 'url("' + MASCOT_ASSETS.directions + '")';
@@ -2774,7 +2774,8 @@ function mountMascot() {
   mascotRuntime.button.addEventListener('pointerup', mascotFinishDrag, { passive: false });
   mascotRuntime.button.addEventListener('pointercancel', mascotFinishDrag, { passive: false });
   mascotRuntime.button.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); mascotHandleTap(); } });
-  $('.onebox-mascot-sync-progress', root)?.addEventListener('click', () => renderGithubDialog());
+  $('[data-mascot-sync-trigger]', root)?.addEventListener('click', () => renderGithubDialog());
+  $('[data-mascot-sync-dismiss]', root)?.addEventListener('click', dismissGithubSyncIndicator);
   mascotRuntime.panel.addEventListener('click', (event) => {
     if (event.target.closest('[data-mascot-poem-next]')) { event.preventDefault(); event.stopPropagation(); changeMascotPoem(); return; }
     if (event.target.closest('[data-close-mascot]')) { closeMascotBriefing(); return; }
@@ -7475,11 +7476,29 @@ function saveGithub() {
 const githubResponseTokens = new WeakMap();
 const githubDetailedGists = new WeakSet();
 let githubRateLimitUntil = 0;
-function githubRateLimitError() {
-  const waitMinutes = Math.max(1, Math.ceil((githubRateLimitUntil - Date.now()) / 60000));
+const GITHUB_RATE_LIMIT_STORAGE_KEY = 'onebox-github-rate-limit-until';
+let githubSyncDismissTimer = 0;
+function activeGithubRateLimitUntil() {
+  const now = Date.now();
+  let storedUntil = 0;
+  try { storedUntil = Number(localStorage.getItem(GITHUB_RATE_LIMIT_STORAGE_KEY)) || 0; } catch { /* storage can be unavailable in private mode */ }
+  githubRateLimitUntil = Math.max(githubRateLimitUntil, storedUntil);
+  if (githubRateLimitUntil <= now) {
+    githubRateLimitUntil = 0;
+    try { localStorage.removeItem(GITHUB_RATE_LIMIT_STORAGE_KEY); } catch { /* memory cooldown still works */ }
+  }
+  return githubRateLimitUntil;
+}
+function saveGithubRateLimitUntil(until) {
+  githubRateLimitUntil = until;
+  try { localStorage.setItem(GITHUB_RATE_LIMIT_STORAGE_KEY, String(until)); } catch { /* memory cooldown still works */ }
+}
+function githubRateLimitError(resource = '', remaining = '') {
+  const waitMinutes = Math.max(1, Math.ceil((activeGithubRateLimitUntil() - Date.now()) / 60000));
+  const coreExhausted = resource === 'core' && remaining === '0';
   const error = Error(state.language === 'en'
-    ? 'GitHub temporarily limited sync requests. Please wait about ' + waitMinutes + ' minute(s) and retry.'
-    : 'GitHub 暂时限制了同步请求，请约 ' + waitMinutes + ' 分钟后再试。');
+    ? (coreExhausted ? 'GitHub REST API core quota is exhausted (0 requests remaining). It resets in about ' : 'GitHub temporarily limited sync requests. Please retry in about ') + waitMinutes + ' minute(s). OneBox has paused further requests until then.'
+    : (coreExhausted ? 'GitHub REST API 主配额已用尽（剩余 0 次），约 ' : 'GitHub 暂时限制了同步请求，约 ') + waitMinutes + ' 分钟后重置。OneBox 已暂停后续请求，避免继续触发限流。');
   error.code = 'github-rate-limit';
   return error;
 }
@@ -7489,7 +7508,7 @@ function githubHeaders(withBody = false) {
   return headers;
 }
 async function githubApiFetch(url, options = {}) {
-  if (githubRateLimitUntil > Date.now()) throw githubRateLimitError();
+  if (activeGithubRateLimitUntil() > Date.now()) throw githubRateLimitError();
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
@@ -7684,7 +7703,20 @@ async function readTicketWalletSyncAsset(entry, gist) {
   const bytes = new Uint8Array(total);
   let offset = 0;
   byteChunks.forEach((chunk) => { bytes.set(chunk, offset); offset += chunk.length; });
-  if (!bytes.length || !Number.isFinite(entry.size) || bytes.length !== entry.size) throw Error(state.language === 'en' ? 'Wallet original size check failed' : '卡包原件大小校验失败');
+  const expectedSize = Number(entry.size);
+  if (!bytes.length || !Number.isFinite(expectedSize) || expectedSize <= 0) throw Error(state.language === 'en' ? 'Wallet original has invalid size metadata' : '卡包原件清单中的大小信息无效');
+  let actualDigest = '';
+  if (entry.sha256) {
+    actualDigest = await syncBytesDigest(bytes);
+    if (actualDigest && actualDigest.toLowerCase() !== String(entry.sha256).toLowerCase()) {
+      throw Error(state.language === 'en' ? 'Wallet original checksum does not match the backup' : '卡包原件校验值与备份不一致');
+    }
+  }
+  if (bytes.length !== expectedSize && (!entry.sha256 || !actualDigest)) {
+    throw Error(state.language === 'en'
+      ? 'Wallet original is incomplete: expected ' + expectedSize + ' bytes, received ' + bytes.length
+      : '卡包原件数据不完整：应为 ' + expectedSize + ' 字节，实际读取 ' + bytes.length + ' 字节');
+  }
   return bytes;
 }
 async function verifyTicketWalletSyncAssets(remote, gist) {
@@ -7694,22 +7726,35 @@ async function verifyTicketWalletSyncAssets(remote, gist) {
 }
 async function restoreTicketWalletSyncAssets(remote, gist, onProgress = null) {
   const images = remote?.ticketWalletFiles?.images;
-  if (!images) return;
   const imageIds = ticketWalletRemoteImageIds(remote);
+  if (!images) return { missingIds: imageIds };
   let completed = 0;
   const writes = await syncMapLimit(imageIds, 3, async (id) => {
-    const entry = images[id];
-    const bytes = await readTicketWalletSyncAsset(entry, gist);
-    completed += 1;
-    onProgress?.(completed, imageIds.length);
-    return { id, value: { blob: new Blob([bytes], { type: entry.type || 'application/octet-stream' }), name: entry.name || '', type: entry.type || 'application/octet-stream', savedAt: Date.now() } };
+    try {
+      const entry = images[id];
+      const bytes = await readTicketWalletSyncAsset(entry, gist);
+      return { id, value: { blob: new Blob([bytes], { type: entry.type || 'application/octet-stream' }), name: entry.name || '', type: entry.type || 'application/octet-stream', savedAt: Date.now() } };
+    } catch (error) {
+      if (error?.code === 'github-auth-expired') throw error;
+      return { id, error };
+    } finally {
+      completed += 1;
+      onProgress?.(completed, imageIds.length);
+    }
   });
-  await syncMapLimit(writes, 3, async ({ id, value }) => {
-    if (!await oneBoxDbPut('ticket-images', id, value)) throw Error(state.language === 'en' ? 'Could not save wallet original on this device' : '无法在本机保存卡包原件，请检查可用空间后重试');
-    const cached = ticketWalletImageCache.get(id);
-    if (cached?.src) URL.revokeObjectURL(cached.src);
-    ticketWalletImageCache.delete(id);
+  const missingIds = writes.filter((item) => item.error).map((item) => item.id);
+  await syncMapLimit(writes.filter((item) => !item.error), 3, async ({ id, value }) => {
+    try {
+      if (!await oneBoxDbPut('ticket-images', id, value)) throw Error(state.language === 'en' ? 'Could not save wallet original on this device' : '无法在本机保存卡包原件，请检查可用空间后重试');
+      const cached = ticketWalletImageCache.get(id);
+      if (cached?.src) URL.revokeObjectURL(cached.src);
+      ticketWalletImageCache.delete(id);
+    } catch (error) {
+      if (error?.code === 'github-auth-expired') throw error;
+      missingIds.push(id);
+    }
   });
+  return { missingIds: [...new Set(missingIds)] };
 }
 function mergeTicketWalletSyncStorage(first = {}, second = {}) {
   const merged = { ...first, ...second };
@@ -8310,11 +8355,17 @@ async function githubApiError(response, fallback = '') {
     const error = Error(t('githubAuthExpired')); error.code = 'github-auth-expired'; return error;
   }
   if ([403, 429].includes(response?.status) && /(?:api )?rate limit exceeded|secondary rate limit|abuse detection|temporarily blocked/i.test(message + ' ' + details)) {
+    const now = Date.now();
     const resetAt = Number(response.headers.get('X-RateLimit-Reset')) * 1000;
-    githubRateLimitUntil = Number.isFinite(resetAt) && resetAt > Date.now() ? resetAt : Date.now() + 60000;
-    const error = githubRateLimitError();
+    const retryAfter = Number(response.headers.get('Retry-After')) * 1000;
+    const resetCandidates = [resetAt, Number.isFinite(retryAfter) ? now + retryAfter : 0].filter((value) => Number.isFinite(value) && value > now);
+    saveGithubRateLimitUntil(resetCandidates.length ? Math.max(...resetCandidates) : now + 60000);
+    const resource = response.headers.get('X-RateLimit-Resource') || '';
+    const remaining = response.headers.get('X-RateLimit-Remaining') || '';
+    const error = githubRateLimitError(resource, remaining);
     error.status = response.status;
     error.code = 'github-rate-limit';
+    error.githubRateLimit = { resource, remaining, resetAt: githubRateLimitUntil };
     return error;
   }
   const error = Error((message || fallback || (state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败')) + (details ? (state.language === 'en' ? ': ' : '：') + details : '') + suffix);
@@ -8330,27 +8381,49 @@ function githubSyncLabel(mode, key) {
   };
   return labels[mode]?.[key]?.[english ? 0 : 1] || '';
 }
+async function withGithubSyncTabLock(task) {
+  if (!navigator.locks?.request) return task();
+  let acquired = false;
+  try {
+    await navigator.locks.request('onebox-github-sync', { mode: 'exclusive', ifAvailable: true }, async (lock) => {
+      if (!lock) return;
+      acquired = true;
+      return task();
+    });
+  } catch (error) {
+    if (acquired) throw error;
+    return task();
+  }
+  if (!acquired) toast(state.language === 'en' ? 'Another OneBox tab is already syncing. Please wait for it to finish.' : '另一个 OneBox 标签页正在同步，请等待当前同步完成。', 'info');
+}
 function renderGithubSyncIndicator() {
   const root = mascotRuntime.root;
   const indicator = root?.querySelector('[data-mascot-sync-progress]');
   if (!root || !indicator) return;
   const sync = state.githubSync || { active: false, mode: '', progress: 0, message: '', error: '' };
-  const visible = Boolean(sync.active || sync.error);
+  const visible = Boolean(sync.active || sync.error || sync.message);
+  const terminal = visible && !sync.active;
   indicator.hidden = !visible;
   indicator.classList.toggle('is-active', Boolean(sync.active));
   indicator.classList.toggle('is-error', Boolean(sync.error));
+  indicator.classList.toggle('is-complete', terminal && !sync.error);
   indicator.dataset.mode = sync.mode || '';
   const progress = Math.max(0, Math.min(100, Number(sync.progress) || 0));
   const message = indicator.querySelector('[data-mascot-sync-message]');
   const percent = indicator.querySelector('[data-mascot-sync-percent]');
-  const track = indicator.querySelector('.onebox-mascot-sync-track');
-  const fill = track?.querySelector('i');
+  const ring = indicator.querySelector('[data-mascot-sync-ring]');
+  const trigger = indicator.querySelector('[data-mascot-sync-trigger]');
+  const dismiss = indicator.querySelector('[data-mascot-sync-dismiss]');
   const label = sync.error || sync.message || (sync.mode === 'download' ? (state.language === 'en' ? 'Restoring books and settings' : '正在恢复书籍和设置') : (state.language === 'en' ? 'Syncing with GitHub' : '正在同步到 GitHub'));
   if (message) message.textContent = label;
   if (percent) percent.textContent = sync.error ? '!' : progress + '%';
-  if (fill) fill.style.width = progress + '%';
-  if (track) track.setAttribute('aria-valuenow', String(progress));
-  indicator.setAttribute('aria-label', (sync.error ? (state.language === 'en' ? 'Sync failed. Open details' : '同步失败，点击查看详情') : sync.mode === 'download' ? (state.language === 'en' ? 'Restoring from GitHub' : '正在从 GitHub 恢复') : (state.language === 'en' ? 'Syncing with GitHub' : '正在同步到 GitHub')) + ' · ' + progress + '%');
+  if (ring) ring.style.setProperty('--sync-progress', progress + '%');
+  if (trigger) trigger.setAttribute('aria-label', (sync.error ? (state.language === 'en' ? 'Sync failed. Open details' : '同步失败，点击查看详情') : terminal ? (state.language === 'en' ? 'Sync complete. Open details' : '同步完成，点击查看详情') : sync.mode === 'download' ? (state.language === 'en' ? 'Restoring from GitHub' : '正在从 GitHub 恢复') : (state.language === 'en' ? 'Syncing with GitHub' : '正在同步到 GitHub')) + ' · ' + (sync.error ? label : progress + '%'));
+  if (dismiss) {
+    dismiss.hidden = !terminal;
+    dismiss.setAttribute('aria-label', state.language === 'en' ? 'Dismiss sync status' : '关闭同步状态');
+    dismiss.title = state.language === 'en' ? 'Dismiss' : '关闭';
+  }
   root.classList.toggle('is-syncing', Boolean(sync.active));
   root.classList.toggle('has-sync-progress', visible);
   root.classList.toggle('is-sync-only', visible && !state.mascotVisible);
@@ -8367,12 +8440,23 @@ function renderGithubSyncIndicator() {
   syncMascotContext();
 }
 function updateGithubSync(mode, progress, message, error = '') {
+  clearTimeout(githubSyncDismissTimer);
+  githubSyncDismissTimer = 0;
   state.githubSync = { active: !error && progress < 100, mode, progress: Math.max(0, Math.min(100, Math.round(progress))), message: message || '', error: error || '' };
   renderGithubSyncIndicator();
   if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
 }
 function finishGithubSync(mode, message, error = '') {
   state.githubSync = { active: false, mode, progress: error ? state.githubSync.progress : 100, message: message || '', error: error || '' };
+  renderGithubSyncIndicator();
+  if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+  clearTimeout(githubSyncDismissTimer);
+  githubSyncDismissTimer = window.setTimeout(dismissGithubSyncIndicator, error ? 12000 : 5000);
+}
+function dismissGithubSyncIndicator() {
+  clearTimeout(githubSyncDismissTimer);
+  githubSyncDismissTimer = 0;
+  state.githubSync = { active: false, mode: '', progress: 0, message: '', error: '' };
   renderGithubSyncIndicator();
   if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
 }
@@ -8659,6 +8743,10 @@ function githubFilesMissingField(error) {
 async function githubUpload(allowFreshGistRetry = true, forceNewGist = false) {
   if (!state.github.token) return toast(state.language === 'en' ? 'Connect GitHub first' : '请先连接 GitHub', 'error');
   if (state.githubSync.active) return;
+  return withGithubSyncTabLock(() => githubUploadTask(allowFreshGistRetry, forceNewGist));
+}
+async function githubUploadTask(allowFreshGistRetry = true, forceNewGist = false) {
+  if (state.githubSync.active) return;
   const mode = 'upload';
   updateGithubSync(mode, 4, githubSyncLabel(mode, 'preparing'));
   try {
@@ -8694,25 +8782,30 @@ async function githubUpload(allowFreshGistRetry = true, forceNewGist = false) {
     updateGithubSync(mode, 94, githubSyncLabel(mode, 'finishing'));
     verifyGithubAssetMetadata(verifiedPayload, verified);
     finishGithubSync(mode, state.language === 'en' ? 'Upload complete' : '上传完成');
-    toast(state.language === 'en' ? 'OneBox data uploaded to GitHub' : 'OneBox 数据已上传到 GitHub', 'info', { persistent: true });
+    toast(state.language === 'en' ? 'OneBox data uploaded to GitHub' : 'OneBox 数据已上传到 GitHub', 'info');
   } catch (error) {
     if (allowFreshGistRetry && githubFilesMissingField(error)) {
       state.github.gistId = '';
       saveGithub();
       state.githubSync.active = false;
-      return githubUpload(false, true);
+      return githubUploadTask(false, true);
     }
     const detail = githubBrowserError(error) || (state.language === 'en' ? 'GitHub upload failed' : 'GitHub 上传失败，请重试');
     const stage = state.githubSync.message;
     const message = detail + (error.githubRequestMethod ? ' (' + error.githubRequestMethod + ' · ' + stage + ')' : '');
     finishGithubSync(mode, state.language === 'en' ? 'Upload failed' : '上传失败', message);
-    toast((state.language === 'en' ? 'GitHub upload failed: ' : 'GitHub 上传失败：') + message, 'error', { persistent: true });
+    toast((state.language === 'en' ? 'GitHub upload failed: ' : 'GitHub 上传失败：') + message, 'error');
   }
 }
 async function githubDownload() {
   if (!state.github.token) return toast(state.language === 'en' ? 'Connect GitHub first' : '请先连接 GitHub', 'error');
   if (state.githubSync.active) return;
+  return withGithubSyncTabLock(githubDownloadTask);
+}
+async function githubDownloadTask() {
+  if (state.githubSync.active) return;
   const mode = 'download';
+  let ticketRestore = { missingIds: [] };
   updateGithubSync(mode, 5, githubSyncLabel(mode, 'preparing'));
   try {
     updateGithubSync(mode, 24, githubSyncLabel(mode, 'gist'));
@@ -8789,7 +8882,7 @@ async function githubDownload() {
       : { library: null, missingBooks: [] };
     if (githubSyncCustomGroupEnabled('ticketWallet')) {
       updateGithubSync(mode, 84, state.language === 'en' ? 'Restoring wallet originals…' : '正在恢复卡包原件…');
-      await restoreTicketWalletSyncAssets(remote, gist, (completed, total) => updateGithubSync(mode, 84 + Math.round(completed / Math.max(1, total) * 10), state.language === 'en' ? 'Restoring wallet originals…' : '正在恢复卡包原件…'));
+      ticketRestore = await restoreTicketWalletSyncAssets(remote, gist, (completed, total) => updateGithubSync(mode, 84 + Math.round(completed / Math.max(1, total) * 10), state.language === 'en' ? 'Restoring wallet originals…' : '正在恢复卡包原件…'));
     }
     applyRemoteStorageSnapshot(remote.storage);
     if (settingsEnabled && ['light', 'dark', 'dark-gray', 'system'].includes(remote.theme)) { state.theme = remote.theme; localStorage.setItem(STORAGE.theme, state.theme); }
@@ -8844,17 +8937,23 @@ async function githubDownload() {
     hydrateGithubRuntimeState();
     state.github.gistId = id; saveGithub(); applyLanguage(); syncMascotDisplayMode(true); syncMascotVisibility(); renderNav(); render();
     const missingBooks = readerRestore.missingBooks || [];
-    const missingSummary = missingBooks.length
-      ? (state.language === 'en'
-        ? 'Restored settings and shelf; original files are missing for ' + missingBooks.length + ' book(s): ' + missingBooks.slice(0, 3).join(', ') + (missingBooks.length > 3 ? '…' : '') + '. Upload again from the device that still has the books.'
-        : '设置和书架已恢复，但 ' + missingBooks.length + ' 本书缺少原文件：' + missingBooks.slice(0, 3).join('、') + (missingBooks.length > 3 ? '…' : '') + '。请在仍保存原书的设备重新上传。')
+    const missingWalletImages = ticketRestore.missingIds || [];
+    const recoveryNotes = [];
+    if (missingBooks.length) recoveryNotes.push(state.language === 'en'
+      ? missingBooks.length + ' book(s) are missing source files. Upload again from the device that still has them.'
+      : missingBooks.length + ' 本书缺少原文件，请在仍保存原书的设备重新上传。');
+    if (missingWalletImages.length) recoveryNotes.push(state.language === 'en'
+      ? missingWalletImages.length + ' wallet original(s) could not be verified. Other data was restored; upload again from the device that still has the originals.'
+      : missingWalletImages.length + ' 张卡包原件未能通过校验，其他数据已恢复。请在仍保存原件的设备重新上传卡包。');
+    const restoreSummary = recoveryNotes.length
+      ? (state.language === 'en' ? 'Restore completed with missing files: ' : '恢复完成，但有文件缺失：') + recoveryNotes.join(' ')
       : (state.language === 'en' ? 'Restore complete' : '恢复完成');
-    finishGithubSync(mode, missingSummary);
-    toast(missingBooks.length ? missingSummary : (state.language === 'en' ? 'Settings and books restored from GitHub' : '已从 GitHub 恢复设置和书籍'), 'info', { persistent: true });
+    finishGithubSync(mode, restoreSummary);
+    toast(recoveryNotes.length ? restoreSummary : (state.language === 'en' ? 'OneBox data restored from GitHub' : '已从 GitHub 恢复 OneBox 数据'), 'info');
   } catch (error) {
     const message = githubBrowserError(error) || (state.language === 'en' ? 'GitHub restore failed' : 'GitHub 恢复失败');
     finishGithubSync(mode, state.language === 'en' ? 'Restore failed' : '恢复失败', message);
-    toast((state.language === 'en' ? 'GitHub restore failed: ' : 'GitHub 恢复失败：') + message, 'error', { persistent: true });
+    toast((state.language === 'en' ? 'GitHub restore failed: ' : 'GitHub 恢复失败：') + message, 'error');
   }
 }
 function disconnectGithub() {

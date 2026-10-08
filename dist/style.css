@@ -9247,21 +9247,19 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   z-index: 9;
   right: 0;
   bottom: calc(100% + 7px);
-  display: grid;
-  width: min(218px, calc(100vw - 18px));
+  display: flex;
+  width: max-content;
+  max-width: min(242px, calc(100vw - 18px));
+  align-items: center;
   gap: 4px;
-  padding: 7px 10px 6px;
-  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--line));
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--panel) 95%, transparent);
+  padding: 4px 5px 4px 11px;
+  border: 1px solid color-mix(in srgb, var(--primary) 19%, var(--line));
+  border-radius: 22px 23px 23px 10px;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
   color: var(--ink);
-  box-shadow: 0 5px 16px color-mix(in srgb, var(--ink) 13%, transparent);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-  touch-action: manipulation;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 10%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   transform-origin: 90% 100%;
   animation: mascot-sync-pop .18s ease-out both;
 }
@@ -9269,18 +9267,31 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 #oneboxMascotRoot[data-edge="left"] .onebox-mascot-sync-progress { right: auto; left: 0; transform-origin: 10% 100%; }
 .onebox-mascot-sync-progress[data-sync-place="below"] { top: calc(100% + 7px); bottom: auto; transform-origin: 10% 0; }
 #oneboxMascotRoot[data-edge="right"] .onebox-mascot-sync-progress[data-sync-place="below"] { transform-origin: 90% 0; }
-.onebox-mascot-sync-head { display: grid; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
-.onebox-mascot-sync-progress strong { overflow: hidden; color: var(--ink); font-size: 10px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-.onebox-mascot-sync-progress em { color: var(--primary); font-size: 10px; font-style: normal; font-variant-numeric: tabular-nums; font-weight: 700; }
-.onebox-mascot-sync-track { position: relative; display: block; height: 3px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--primary) 10%, var(--line)); }
-.onebox-mascot-sync-track i { display: block; width: 0; height: 100%; min-width: 2px; border-radius: inherit; background: var(--primary); transition: width .3s ease-out; }
-.onebox-mascot-sync-progress.is-active .onebox-mascot-sync-track::before { position: absolute; z-index: 1; top: 0; bottom: 0; left: -30%; width: 30%; background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 58%, transparent), transparent); content: ''; animation: github-progress-sheen 1.6s linear infinite; pointer-events: none; }
-.onebox-mascot-sync-progress.is-error { border-color: color-mix(in srgb, var(--danger, #d85b6a) 35%, var(--line)); background: color-mix(in srgb, var(--danger, #d85b6a) 6%, var(--panel)); }
-.onebox-mascot-sync-progress.is-error em { color: var(--danger, #d85b6a); }
-.onebox-mascot-sync-progress.is-error .onebox-mascot-sync-track i { background: var(--danger, #d85b6a); }
-.onebox-mascot-sync-progress:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.onebox-mascot-sync-progress::after { position: absolute; right: 17px; bottom: -4px; width: 7px; height: 7px; border-right: 1px solid color-mix(in srgb, var(--primary) 19%, var(--line)); border-bottom: 1px solid color-mix(in srgb, var(--primary) 19%, var(--line)); background: color-mix(in srgb, var(--panel) 94%, transparent); content: ''; transform: rotate(45deg); pointer-events: none; }
+#oneboxMascotRoot[data-edge="left"] .onebox-mascot-sync-progress::after { right: auto; left: 17px; }
+.onebox-mascot-sync-progress[data-sync-place="below"]::after { top: -4px; bottom: auto; border: 0; border-top: 1px solid color-mix(in srgb, var(--primary) 19%, var(--line)); border-left: 1px solid color-mix(in srgb, var(--primary) 19%, var(--line)); transform: rotate(45deg); }
+.onebox-mascot-sync-trigger { display: flex; min-width: 0; align-items: center; gap: 8px; padding: 2px 1px; border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; text-align: left; touch-action: manipulation; }
+.onebox-mascot-sync-trigger:focus-visible, .onebox-mascot-sync-dismiss:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.onebox-mascot-sync-dot { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: var(--primary); }
+.onebox-mascot-sync-progress.is-active .onebox-mascot-sync-dot { animation: mascot-sync-pulse 1.2s ease-in-out infinite; }
+.onebox-mascot-sync-trigger strong { min-width: 0; overflow: hidden; color: var(--ink); font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.onebox-mascot-sync-ring { position: relative; display: grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; border-radius: 50%; background: conic-gradient(var(--primary) var(--sync-progress, 0%), color-mix(in srgb, var(--primary) 13%, var(--line)) 0); }
+.onebox-mascot-sync-ring::before { position: absolute; inset: 2px; border-radius: inherit; background: color-mix(in srgb, var(--panel) 96%, transparent); content: ''; }
+.onebox-mascot-sync-ring em { position: relative; color: var(--primary); font-size: 7px; font-style: normal; font-variant-numeric: tabular-nums; font-weight: 750; }
+.onebox-mascot-sync-dismiss { display: grid; width: 22px; height: 22px; flex: 0 0 22px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
+.onebox-mascot-sync-dismiss:hover { background: color-mix(in srgb, var(--primary) 9%, transparent); color: var(--ink); }
+.onebox-mascot-sync-dismiss[hidden] { display: none !important; }
+.onebox-mascot-sync-dismiss svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 1.5; }
+.onebox-mascot-sync-progress.is-error { border-color: color-mix(in srgb, var(--danger, #d85b6a) 32%, var(--line)); }
+.onebox-mascot-sync-progress.is-error .onebox-mascot-sync-dot { background: var(--danger, #d85b6a); }
+.onebox-mascot-sync-progress.is-error .onebox-mascot-sync-ring { background: conic-gradient(var(--danger, #d85b6a) 100%, color-mix(in srgb, var(--danger, #d85b6a) 12%, var(--line)) 0); }
+.onebox-mascot-sync-progress.is-error .onebox-mascot-sync-ring em { color: var(--danger, #d85b6a); }
+.onebox-mascot-sync-progress.is-complete .onebox-mascot-sync-dot { background: #3eaa78; }
+.onebox-mascot-sync-progress.is-complete .onebox-mascot-sync-ring { background: conic-gradient(#3eaa78 100%, color-mix(in srgb, #3eaa78 12%, var(--line)) 0); }
+.onebox-mascot-sync-progress.is-complete .onebox-mascot-sync-ring em { color: #3eaa78; }
 #oneboxMascotRoot.is-sync-only .onebox-mascot-button { visibility: hidden; }
 @keyframes mascot-sync-pop { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mascot-sync-pulse { 50% { opacity: .45; transform: scale(.75); } }
 .onebox-mascot-visual { position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 78%; animation: mascot-breathe 5.4s ease-in-out infinite; will-change: transform; }
 .onebox-mascot-fullbody { display: none; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; overflow: visible; pointer-events: none; user-select: none; filter: drop-shadow(0 5px 6px color-mix(in srgb, var(--ink) 18%, transparent)); transform: scale(1.12); transform-origin: 50% 100%; opacity: 1; transition: opacity .1s ease; will-change: transform, opacity; }
 #oneboxMascotRoot[data-mascot-display="full"] { height: 108px; top: calc(75vh - 54px); }
