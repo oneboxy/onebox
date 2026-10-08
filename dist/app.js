@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.543';
+const APP_VERSION = '2.18.544';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6569,7 +6569,7 @@ function renderLunarDialog(key) {
   const selectedEvents = eventsForDate(key);
   const agendaMarkup = selectedEvents.length ? '<div class="lunar-dialog-agenda"><span>' + labels.agenda + '</span><strong>' + (isEnglish ? selectedEvents.length + (selectedEvents.length === 1 ? ' event' : ' events') : selectedEvents.length + ' 项') + '</strong></div>' : '';
   const infoGrid = '<section class="lunar-dialog-overview"><div class="lunar-dialog-info-grid">' + overviewFields.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div></section>';
-  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true"><div class="lunar-dialog-head"><div class="lunar-dialog-title-line"><h2>' + escapeHtml(title) + '</h2><span class="lunar-dialog-weekday">' + escapeHtml(weekday) + '</span><span class="lunar-dialog-lunar">' + labels.lunar + ' · ' + escapeHtml(lunarText) + '</span>' + highlightMarkup + '</div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">×</button></div><div class="lunar-dialog-body">' + infoGrid + adviceMarkup + agendaMarkup + almanacMarkup + '</div></div>';
+  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true"><div class="lunar-dialog-head"><div class="lunar-dialog-title-line"><h2>' + escapeHtml(title) + '</h2><div class="lunar-dialog-date-meta"><span class="lunar-dialog-weekday">' + escapeHtml(weekday) + '</span><span class="lunar-dialog-lunar">' + labels.lunar + ' · ' + escapeHtml(lunarText) + '</span>' + highlightMarkup + '</div></div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">×</button></div><div class="lunar-dialog-body">' + infoGrid + adviceMarkup + agendaMarkup + almanacMarkup + '</div></div>';
   dialog.hidden = false;
   state.lunarDialogDate = key;
 }
