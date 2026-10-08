@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.534';
+const APP_VERSION = '2.18.535';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7869,7 +7869,7 @@ async function restoreReaderSyncAssets(remote, gist) {
     }
     return book;
   }) : null;
-  return { library: restoredLibrary, missingBooks: requiredBooks.filter((book) => missingIds.has(book.id)).map((book) => book.name) };
+  return { library: restoredLibrary, missingBooks: requiredBooks.filter((book) => missingIds.has(book.id)).map((book) => book.name), restoredIds: [...restoredIds] };
 }
 async function verifyReaderSyncAssets(readerFiles, gist) {
   const manifest = readerFiles?.books;
@@ -8476,7 +8476,15 @@ async function githubDownload() {
     if (githubSyncCustomGroupEnabled('weather') && Array.isArray(remote.weatherCards)) { state.weatherCards = mergeGithubValue(state.weatherCards, remote.weatherCards); state.activeWeatherId = state.weatherCards[0]?.id || null; saveWeatherCards(); }
     if (githubSyncCustomGroupEnabled('translation') && Array.isArray(remote.translationHistory)) { state.translationHistory = mergeGithubValue(state.translationHistory, remote.translationHistory); saveTranslationHistory(); }
     if (messagesEnabled && Array.isArray(remote.notifications)) { state.notifications = mergeGithubValue(state.notifications, remote.notifications); saveNotifications(); }
-    if (readingEnabled && Array.isArray(readerRestore.library)) { state.library = mergeGithubValue(state.library, readerRestore.library); saveLibrary(); }
+    if (readingEnabled && Array.isArray(readerRestore.library)) {
+      const restoredIds = new Set(readerRestore.restoredIds || []);
+      state.library = mergeGithubValue(state.library, readerRestore.library).map((book) => {
+        if (!book || !restoredIds.has(book.id) || !book.syncFileMissing) return book;
+        const { syncFileMissing, ...available } = book;
+        return available;
+      });
+      saveLibrary();
+    }
     if (readingEnabled && remote.readerPreferences && typeof remote.readerPreferences === 'object') { state.readerPreferences = { ...state.readerPreferences, ...remote.readerPreferences }; saveReaderPreferences(); }
     if (readingEnabled && (remote.readerLayout === 'list' || remote.readerLayout === 'grid')) { state.readerLayout = remote.readerLayout; saveReaderLayout(); }
     if (githubSyncCustomGroupEnabled('translation') && typeof remote.translationHistoryOpen === 'boolean') { state.translationHistoryOpen = remote.translationHistoryOpen; saveStored(STORAGE.translationHistoryOpen, state.translationHistoryOpen); }
