@@ -9243,14 +9243,15 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .onebox-mascot-button:active { cursor: grabbing; }
 .onebox-mascot-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 .onebox-mascot-visual { position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 78%; animation: mascot-breathe 5.4s ease-in-out infinite; will-change: transform; }
-.onebox-mascot-fullbody { display: none; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; overflow: visible; pointer-events: none; user-select: none; filter: drop-shadow(0 5px 6px color-mix(in srgb, var(--ink) 18%, transparent)); transform: scale(1.12); transform-origin: 50% 100%; will-change: transform; }
+.onebox-mascot-fullbody { display: none; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; overflow: visible; pointer-events: none; user-select: none; filter: drop-shadow(0 5px 6px color-mix(in srgb, var(--ink) 18%, transparent)); transform: scale(1.12); transform-origin: 50% 100%; opacity: 1; transition: opacity .1s ease; will-change: transform, opacity; }
 #oneboxMascotRoot[data-mascot-display="full"] { height: 108px; top: calc(75vh - 54px); }
 #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-button,
 #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-visual { height: 108px; }
 #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-layer,
 #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-fallback { display: none; }
 #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-fullbody { display: block; }
-#oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-reaction { inset: auto 0 0; display: block; width: 100%; height: 82px; }
+#oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-reaction { inset: 0; display: block; width: 100%; height: 100%; }
+#oneboxMascotRoot[data-mascot-display="full"][data-reaction]:not([data-reaction=""]) .onebox-mascot-fullbody { opacity: 0; }
 #oneboxMascotRoot[data-mascot-display="full"][data-action="tap"] .onebox-mascot-fullbody { animation: mascot-fullbody-tap .52s cubic-bezier(.2,.9,.28,1); }
 #oneboxMascotRoot[data-mascot-display="full"][data-action="happy"] .onebox-mascot-fullbody { animation: mascot-fullbody-happy .82s cubic-bezier(.2,.86,.3,1); }
 #oneboxMascotRoot[data-mascot-display="full"][data-action="hop"] .onebox-mascot-fullbody { animation: mascot-fullbody-hop .72s cubic-bezier(.2,.86,.3,1); }
@@ -9259,7 +9260,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .onebox-mascot-layer { background-repeat: no-repeat; background-size: 300% 300%; pointer-events: none; }
 .onebox-mascot-direction { background-position: 50% 50%; }
 .onebox-mascot-reaction { opacity: 0; background-position: 0% 0%; transition: opacity .08s ease; }
-#oneboxMascotRoot[data-reaction] .onebox-mascot-reaction { opacity: 1; }
+#oneboxMascotRoot[data-reaction]:not([data-reaction=""]) .onebox-mascot-reaction { opacity: 1; }
 .onebox-mascot-fallback { position: absolute; inset: 0; display: none; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; filter: drop-shadow(0 5px 6px color-mix(in srgb, var(--ink) 18%, transparent)); transform: scale(1.12); transform-origin: 50% 100%; }
 #oneboxMascotRoot[data-action="tap"] .onebox-mascot-visual { animation: mascot-tap .52s cubic-bezier(.2,.9,.28,1); }
 #oneboxMascotRoot[data-action="grab"] .onebox-mascot-visual { animation: mascot-grab .5s ease-in-out infinite; }
@@ -9405,8 +9406,9 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 #oneboxMascotRoot.has-speech .onebox-mascot-speech { animation: mascot-speech-in .24s cubic-bezier(.2,.85,.25,1) both; }
 .onebox-mascot-panel {
   position: absolute;
+  z-index: 2;
   right: -5px;
-  bottom: calc(100% + 11px);
+  bottom: calc(100% + 27px);
   box-sizing: border-box;
   width: min(294px, calc(100vw - 28px));
   max-height: min(440px, calc(100vh - 34px));
@@ -9635,7 +9637,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   #oneboxMascotRoot[data-mascot-display="full"] { height: 96px; top: calc(75vh - 48px); }
   #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-button,
   #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-visual { height: 96px; }
-  .onebox-mascot-panel { bottom: calc(100% + 9px); width: min(278px, calc(100vw - 20px)); }
+  .onebox-mascot-panel { bottom: calc(100% + 27px); width: min(278px, calc(100vw - 20px)); }
   .onebox-mascot-cloud { padding: 15px 14px 13px; }
   .onebox-mascot-cloud-actions button { gap: 2px; padding: 6px 2px; font-size: 9px; }
   .onebox-mascot-action-row-interactions { gap: 3px; }
@@ -14807,9 +14809,10 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
 .onebox-mascot-poem figcaption { margin-top: 5px; color: var(--muted); font-size: 10px; text-align: right; }
 
 .onebox-mascot-poem-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -3px 0 5px; color: var(--muted); font-size: 10px; }
-.onebox-mascot-poem-head button { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer; }
-.onebox-mascot-poem-head button:hover, .onebox-mascot-poem-head button:focus-visible { background: color-mix(in srgb, var(--primary) 10%, var(--panel)); color: var(--primary); }
-.onebox-mascot-poem-head svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.onebox-mascot-poem-head button { display: grid; width: 30px; height: 30px; flex: 0 0 30px; place-items: center; border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--line)); border-radius: 50%; background: color-mix(in srgb, var(--panel) 68%, transparent); color: var(--muted); cursor: pointer; transition: color .16s ease, background-color .16s ease, border-color .16s ease, transform .16s ease; }
+.onebox-mascot-poem-head button:hover, .onebox-mascot-poem-head button:focus-visible { border-color: color-mix(in srgb, var(--primary) 42%, var(--line)); background: color-mix(in srgb, var(--primary) 8%, var(--panel)); color: var(--primary); outline: none; }
+.onebox-mascot-poem-head button:active { transform: scale(.92); }
+.onebox-mascot-poem-head svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Calendar month and year form one compact title; choose values in a light picker. */
 #workspace[data-tool="calendar"] .calendar-month-pickers { display: flex; align-items: center; gap: 0; white-space: nowrap; }
