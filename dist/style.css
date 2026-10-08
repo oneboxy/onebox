@@ -14804,3 +14804,8 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
 .onebox-mascot-poem > span { position: absolute; top: 7px; left: 7px; color: var(--primary); opacity: .52; font-family: Georgia, serif; font-size: 23px; line-height: 1; }
 .onebox-mascot-poem blockquote { margin: 0; color: var(--ink); font-family: var(--font-serif, Georgia, serif); font-size: 13px; line-height: 1.7; }
 .onebox-mascot-poem figcaption { margin-top: 5px; color: var(--muted); font-size: 10px; text-align: right; }
+
+.onebox-mascot-poem-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -3px 0 5px; color: var(--muted); font-size: 10px; }
+.onebox-mascot-poem-head button { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer; }
+.onebox-mascot-poem-head button:hover, .onebox-mascot-poem-head button:focus-visible { background: color-mix(in srgb, var(--primary) 10%, var(--panel)); color: var(--primary); }
+.onebox-mascot-poem-head svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }

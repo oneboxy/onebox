@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.532';
+const APP_VERSION = '2.18.533';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2405,7 +2405,46 @@ function mascotDailyIndex(length, date = new Date()) {
   const [year, month, day] = dateKey(date).split('-').map(Number);
   return Math.floor(Date.UTC(year, month - 1, day) / 86400000) % length;
 }
-function mascotDailyPoem() { return MASCOT_CLASSIC_POEMS[mascotDailyIndex(MASCOT_CLASSIC_POEMS.length)]; }
+let mascotPoemOverride = { hourKey: '', offset: 0 };
+let mascotPoemTimer = null;
+function mascotPoemHourKey(date = new Date()) { return dateKey(date) + '-' + date.getHours(); }
+function mascotDailyPoem() {
+  const now = new Date();
+  const [year, month, day] = dateKey(now).split('-').map(Number);
+  const hourSlot = Math.floor(Date.UTC(year, month - 1, day) / 86400000) * 24 + now.getHours();
+  const key = mascotPoemHourKey(now);
+  const offset = mascotPoemOverride.hourKey === key ? mascotPoemOverride.offset : 0;
+  return MASCOT_CLASSIC_POEMS[((hourSlot + offset) % MASCOT_CLASSIC_POEMS.length + MASCOT_CLASSIC_POEMS.length) % MASCOT_CLASSIC_POEMS.length];
+}
+function mascotPoemMarkup() {
+  const english = state.language === 'en';
+  const poem = mascotDailyPoem();
+  const changeLabel = english ? 'Change poem' : '更换诗词';
+  return '<figure class="onebox-mascot-poem"><div class="onebox-mascot-poem-head"><span>' + (english ? 'Poem of the hour' : '每小时一诗') + '</span><button type="button" data-mascot-poem-next aria-label="' + changeLabel + '" title="' + changeLabel + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"></path><path d="M5.5 9a7 7 0 0 1 11.6-2L20 12M4 12l2.9 5a7 7 0 0 0 11.6-2"></path></svg></button></div><blockquote>' + escapeHtml(english ? poem.en : poem.text) + '</blockquote><figcaption>' + escapeHtml(english ? poem.authorEn : '——' + poem.author + ' · ' + poem.title) + '</figcaption></figure>';
+}
+function refreshMascotPoem() {
+  const current = mascotRuntime.panel?.querySelector('.onebox-mascot-poem');
+  if (!current || mascotRuntime.panel.hidden) return;
+  const template = document.createElement('template');
+  template.innerHTML = mascotPoemMarkup();
+  current.replaceWith(template.content.firstElementChild);
+}
+function scheduleMascotPoemChange() {
+  clearTimeout(mascotPoemTimer);
+  if (!mascotRuntime.panel || mascotRuntime.panel.hidden) return;
+  const now = new Date();
+  const nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1);
+  mascotPoemTimer = setTimeout(() => {
+    mascotPoemOverride = { hourKey: '', offset: 0 };
+    refreshMascotPoem();
+    scheduleMascotPoemChange();
+  }, Math.max(1000, nextHour.getTime() - now.getTime() + 30));
+}
+function changeMascotPoem() {
+  const hourKey = mascotPoemHourKey();
+  mascotPoemOverride = { hourKey, offset: mascotPoemOverride.hourKey === hourKey ? mascotPoemOverride.offset + 1 : 1 };
+  refreshMascotPoem();
+}
 async function refreshMascotWeatherForCurrentPlace() {
   const current = state.weatherCards.find((item) => item.isCurrentLocation);
   const card = current || state.weatherCards.find((item) => item.id === state.activeWeatherId) || state.weatherCards[0];
@@ -2475,11 +2514,10 @@ function mascotBriefingMarkup() {
   const language = state.language === 'en';
   const hello = MASCOT_DAILY_GREETINGS[mascotDailyIndex(MASCOT_DAILY_GREETINGS.length)][language ? 1 : 0];
   const hint = language ? 'Tap a little button, or double-tap me to see a surprise' : '点一点下面的小按钮，或者双击我看看惊喜';
-  const poem = mascotDailyPoem();
   const label = (zh, en) => language ? en : zh;
   const icon = (id) => TOOL_DEFS[id]?.icon || SECTION_DEFS[id]?.icon || '';
   const actionRows = '<div class="onebox-mascot-action-row onebox-mascot-action-row-interactions">' + mascotActionButton('pat', label('摸摸头', 'Pat me'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"/></svg>') + mascotActionButton('ball', label('玩玩球', 'Play ball'), '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 5.1 1.1 4.2-3.4 2.5M15.5 5.1l-1.1 4.2 3.4 2.5M7.3 15.3h4.1l2.5 3.5M16.7 15.3h-4.1l-2.5 3.5"/></svg>') + mascotActionButton('snack', label('喂零食', 'Treat'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14l-1.3 10H6.3L5 8.5Z"/><path d="M8 8.5a4 4 0 0 1 8 0M9 12h.01M12 14h.01M15 12h.01"/></svg>') + mascotActionButton('highfive', label('击个掌', 'High five'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.2V5.6a1.4 1.4 0 0 1 2.8 0v4.2-5.6a1.4 1.4 0 0 1 2.8 0v5.3-4.3a1.4 1.4 0 0 1 2.8 0v5.2-2.1a1.4 1.4 0 0 1 2.8 0v5.3c0 3.3-2.7 6-6 6h-1.1c-2.3 0-4.3-1.3-5.3-3.3L5.6 13a1.6 1.6 0 0 1 2.9-.8Z"/></svg>') + mascotActionButton('nap', label('打个盹', 'Nap'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5h16M6 16.5V12a6 6 0 0 1 12 0v4.5M9 8V5M12 7V3M15 8V5"/></svg>') + '</div><div class="onebox-mascot-action-row onebox-mascot-action-row-tools">' + mascotActionButton('weather', label('天气', 'Weather'), icon('weather')) + mascotActionButton('calendar', label('日历', 'Calendar'), icon('calendar')) + mascotActionButton('reader', label('阅读', 'Reading'), icon('reader')) + mascotActionButton('navigation', label('导航', 'Navigation'), icon('navigation')) + mascotActionButton('calculator', label('计算', 'Calculator'), icon('calculator')) + '</div><div class="onebox-mascot-action-row onebox-mascot-action-row-sections">' + mascotActionButton('home', label('首页', 'Home'), icon('home')) + mascotActionButton('messages', label('消息', 'Messages'), icon('messages')) + mascotActionButton('mine', label('我的', 'Me'), icon('mine')) + '</div>';
-  return '<div class="onebox-mascot-cloud"><div class="onebox-mascot-cloud-head"><div class="onebox-mascot-date"><div><strong>' + escapeHtml(hello) + '</strong><small>' + escapeHtml(todayLabel) + '</small></div></div><button type="button" class="onebox-mascot-cloud-close" data-close-mascot aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="onebox-mascot-cloud-story">' + mascotWeatherMarkup() + '<figure class="onebox-mascot-poem"><span aria-hidden="true">‘</span><blockquote>' + escapeHtml(language ? poem.en : poem.text) + '</blockquote><figcaption>' + escapeHtml(language ? poem.authorEn : '——' + poem.author + ' · ' + poem.title) + '</figcaption></figure>' + mascotReadingMarkup() + '</div><div class="onebox-mascot-cloud-actions">' + actionRows + '</div><p class="onebox-mascot-cloud-hint">' + escapeHtml(hint) + '</p></div>';
+  return '<div class="onebox-mascot-cloud"><div class="onebox-mascot-cloud-head"><div class="onebox-mascot-date"><div><strong>' + escapeHtml(hello) + '</strong><small>' + escapeHtml(todayLabel) + '</small></div></div><button type="button" class="onebox-mascot-cloud-close" data-close-mascot aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="onebox-mascot-cloud-story">' + mascotWeatherMarkup() + mascotPoemMarkup() + mascotReadingMarkup() + '</div><div class="onebox-mascot-cloud-actions">' + actionRows + '</div><p class="onebox-mascot-cloud-hint">' + escapeHtml(hint) + '</p></div>';
 }
 function refreshMascotBriefing() {
   if (mascotRuntime.panel && !mascotRuntime.panel.hidden) mascotRuntime.panel.innerHTML = mascotBriefingMarkup();
@@ -2491,6 +2529,7 @@ function closeMascotBriefing() {
   mascotRuntime.root?.classList.remove('has-briefing');
   mascotHideSpeech();
   if (wasOpen) mascotSetAction('peek', 480);
+  clearTimeout(mascotPoemTimer);
   mascotScheduleDock();
 }
 function openMascotBriefing() {
@@ -2502,6 +2541,7 @@ function openMascotBriefing() {
   mascotRuntime.root.classList.add('has-briefing');
   mascotPlayReaction('delighted');
   void refreshMascotWeatherForCurrentPlace();
+  scheduleMascotPoemChange();
   const year = new Date().getFullYear();
   Promise.resolve(ensureHolidayYear(year)).then(() => { if (!mascotRuntime.panel?.hidden) refreshMascotBriefing(); }).catch(() => {});
 }
@@ -2730,6 +2770,7 @@ function mountMascot() {
   mascotRuntime.button.addEventListener('pointercancel', mascotFinishDrag, { passive: false });
   mascotRuntime.button.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); mascotHandleTap(); } });
   mascotRuntime.panel.addEventListener('click', (event) => {
+    if (event.target.closest('[data-mascot-poem-next]')) { event.preventDefault(); event.stopPropagation(); changeMascotPoem(); return; }
     if (event.target.closest('[data-close-mascot]')) { closeMascotBriefing(); return; }
     const action = event.target.closest('[data-mascot-action]')?.dataset.mascotAction;
     if (action && !petInteractionUnlocked(action)) return;
