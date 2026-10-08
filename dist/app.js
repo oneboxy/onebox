@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.526';
+const APP_VERSION = '2.18.527';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3738,22 +3738,22 @@ function ticketWalletCardActionButtons(record) {
 }
 function ticketWalletSwipeActionButtons(record, detail = false) {
   if (!detail) return '';
-  const walletLabel = state.language === 'en' ? 'Wallet' : '钱包';
-  return '<button class="ticket-wallet-swipe-action" data-ticket-wallet-notes="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg><span>' + escapeHtml(t('ticketWalletNotes')) + '</span></button><button class="ticket-wallet-swipe-action" data-ticket-wallet-apple="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(walletLabel) + '</span></button><button class="ticket-wallet-swipe-action danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l-.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
+  const id = escapeHtml(record.id);
+  return '<button type="button" data-ticket-wallet-apple="' + id + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path></svg><span>' + escapeHtml(t('ticketWalletApple')) + '</span></button><button type="button" class="danger" data-ticket-wallet-delete="' + id + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l-.8-13M10 11v5M14 11v5"></path></svg><span>' + escapeHtml(t('ticketWalletDelete')) + '</span></button>';
 }
 function ticketWalletTrainCardMarkup(record, index, contextClass = '', contextStyle = '', interactive = false) {
   const source = record.sourceImageId ? ticketWalletImageCache.get(record.sourceImageId) : null;
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
-  const rowAttributes = interactive ? ' data-swipe-row' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><span class="ticket-wallet-train-type-badge">' + TICKET_TYPES.train.icon + '<span>' + escapeHtml(ticketTypeLabel(record.type)) + '</span></span>' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
+  const rowAttributes = interactive ? '' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><span class="ticket-wallet-train-type-badge">' + TICKET_TYPES.train.icon + '<span>' + escapeHtml(ticketTypeLabel(record.type)) + '</span></span>' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + '</div>';
 }
 function ticketWalletCardMarkup(record, index, contextClass = '', contextStyle = '') {
   const interactive = contextClass.includes('ticket-wallet-detail-row');
   if (record.type === 'train') return ticketWalletTrainCardMarkup(record, index, contextClass, contextStyle, interactive);
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
-  const rowAttributes = interactive ? ' data-swipe-row' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record, interactive) + '</article>' + (interactive ? '<div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + swipeButtons + '</div>' : '') + '</div>';
+  const rowAttributes = interactive ? '' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
+  return '<div class="swipe-row ticket-wallet-swipe-row' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-' + record.type + ' ticket-wallet-card-physical swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletPhysicalTicketMarkup(record, interactive) + '</article>' + '</div>';
 }
 function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextStyle = '') {
   const from = record.from || (record.type === 'dining' ? record.carrier || '门店' : '出发地');
@@ -3766,18 +3766,14 @@ function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextSt
   return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-focus-peek-row ' + contextClass + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-focus-peek ticket-wallet-focus-peek-' + kind + ' ticket-wallet-focus-peek-' + template + ' swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><small>' + escapeHtml(serial) + '</small><div><strong>' + escapeHtml(from) + '</strong><span>' + escapeHtml(number) + ' <i aria-hidden="true">→</i></span><strong>' + escapeHtml(to) + '</strong></div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
 }
 function ticketWalletDetailInfoMarkup(record) {
-  const originalTitle = state.language === 'en' ? 'Original attachment' : '原附件';
-  const originalHint = record.sourceImageId ? (record.sourceImageName || (state.language === 'en' ? 'Tap to view the original' : '点击查看原始图片')) : (state.language === 'en' ? 'No original attachment' : '暂无原附件');
-  const originalThumb = record.sourceImageId ? '<span class="ticket-wallet-detail-info-icon ticket-wallet-detail-info-icon-image" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path></svg></span>' : '<span class="ticket-wallet-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8 12h8"></path></svg></span>';
-  const originalRow = record.sourceImageId ? '<button type="button" class="ticket-wallet-detail-info-row" data-ticket-wallet-original="' + escapeHtml(record.id) + '">' + originalThumb + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(originalTitle) + '</strong><small>' + escapeHtml(originalHint) + '</small></span><span class="ticket-wallet-detail-info-arrow" aria-hidden="true">›</span></button>' : '<div class="ticket-wallet-detail-info-row is-unavailable">' + originalThumb + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(originalTitle) + '</strong><small>' + escapeHtml(originalHint) + '</small></span></div>';
+  const english = state.language === 'en';
+  const id = escapeHtml(record.id);
+  const originalIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path></svg>';
+  const mapIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"></path></svg>';
+  const hasLocation = Boolean((TICKET_WALLET_TRAVEL_TYPES.includes(record.type) && record.from && record.to) || ticketWalletMapPlaceEntry(record));
   const notes = String(record.notes || '').trim();
-  const notesTitle = state.language === 'en' ? 'Notes' : '备注';
-  const notesValue = notes || (state.language === 'en' ? 'No notes' : '暂无备注');
-  const notesIcon = '<span class="ticket-wallet-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span>';
-  const hasRoute = TICKET_WALLET_TRAVEL_TYPES.includes(record.type) && record.from && record.to;
-  const placeEntry = ticketWalletMapPlaceEntry(record);
-  const locateRow = hasRoute || placeEntry ? '<button type="button" class="ticket-wallet-detail-info-row" data-ticket-wallet-map-locate="' + escapeHtml(record.id) + '"><span class="ticket-wallet-detail-info-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"></path></svg></span><span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(state.language === 'en' ? (hasRoute ? 'Show on map' : 'Show venue on map') : (hasRoute ? '在地图上查看' : '在地图上查看地点')) + '</strong><small>' + escapeHtml(state.language === 'en' ? (hasRoute ? 'Locate this route' : placeEntry.location) : (hasRoute ? '定位这段行程' : placeEntry.location)) + '</small></span><span class="ticket-wallet-detail-info-arrow" aria-hidden="true">›</span></button>' : '';
-  return '<div class="ticket-wallet-detail-info" aria-label="' + escapeHtml(state.language === 'en' ? 'Ticket information' : '票据信息') + '">' + locateRow + originalRow + '<div class="ticket-wallet-detail-info-row ticket-wallet-detail-notes">' + notesIcon + '<span class="ticket-wallet-detail-info-copy"><strong>' + escapeHtml(notesTitle) + '</strong><small' + (notes ? ' class="has-content"' : '') + '>' + escapeHtml(notesValue) + '</small></span></div></div>';
+  const notesLabel = english ? (notes ? 'Edit notes' : 'Add notes') : (notes ? '编辑备注' : '添加备注');
+  return '<section class="ticket-wallet-detail-info ticket-wallet-detail-utilities" aria-label="' + (english ? 'Ticket actions' : '票据操作') + '"><div class="ticket-wallet-detail-toolbar"><button type="button" class="ticket-wallet-detail-tool" ' + (record.sourceImageId ? 'data-ticket-wallet-original="' + id + '"' : 'disabled') + ' title="' + escapeHtml(record.sourceImageId ? (record.sourceImageName || '') : (english ? 'No original attachment' : '暂无原件')) + '">' + originalIcon + '<span>' + (english ? 'Original' : '查看原件') + '</span></button>' + (hasLocation ? '<button type="button" class="ticket-wallet-detail-tool" data-ticket-wallet-map-locate="' + id + '">' + mapIcon + '<span>' + (english ? 'Map' : '查看地图') + '</span></button>' : '') + '<details class="ticket-wallet-detail-more"><summary class="ticket-wallet-detail-tool" aria-label="' + (english ? 'More actions' : '更多操作') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></summary><div class="ticket-wallet-detail-more-menu">' + ticketWalletSwipeActionButtons(record, true) + '</div></details></div><button type="button" class="ticket-wallet-detail-note" data-ticket-wallet-notes="' + id + '" aria-label="' + notesLabel + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path></svg><span class="' + (notes ? 'has-content' : '') + '">' + escapeHtml(notes || notesLabel) + '</span></button></section>';
 }
 function ticketWalletStackDensity(count) {
   const size = Math.max(1, Number(count) || 1);
@@ -11250,6 +11246,7 @@ $('#notificationPanel').addEventListener('click', (event) => {
   if (event.target.closest('[data-mark-notifications-read]')) { state.notifications.forEach((item) => { item.read = true; }); saveNotifications(); renderNotifications(); updateNotificationBadge(); }
 });
 document.addEventListener('click', (event) => {
+  $$('.ticket-wallet-detail-more[open]').forEach((menu) => { if (!menu.contains(event.target) || event.target.closest('button')) menu.open = false; });
   if (state.notificationOpen && !event.target.closest('#notificationPanel, #notifyBtn')) closeNotifications();
 });
 document.addEventListener('pointerdown', unlockAlertAudio, { once: true, passive: true });
@@ -11356,3 +11353,5 @@ persistentRecovery.then((restored) => {
   // surprising a user with a reload after a very slow database response.
   if (restored && !githubCallbackHandled && performance.now() < 5000) window.location.reload();
 }).catch(() => { /* local persistence is optional */ });
+
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape') $$('.ticket-wallet-detail-more[open]').forEach((menu) => { menu.open = false; menu.querySelector('summary')?.focus(); }); });

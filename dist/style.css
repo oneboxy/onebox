@@ -14762,3 +14762,23 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
     width: 100%;
   }
 }
+
+/* Ticket detail: a quiet action row, editable notes and an anchored menu. */
+.ticket-wallet-detail-utilities { gap: 0; }
+.ticket-wallet-detail-toolbar { display: flex; align-items: center; gap: 12px; min-width: 0; border-bottom: 1px solid var(--line); }
+.ticket-wallet-detail-tool { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 4px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 550; cursor: pointer; white-space: nowrap; }
+.ticket-wallet-detail-tool svg, .ticket-wallet-detail-note svg, .ticket-wallet-detail-more-menu svg { width: 17px; height: 17px; flex: 0 0 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.ticket-wallet-detail-tool:hover, .ticket-wallet-detail-tool:focus-visible { color: var(--ink); background: var(--soft); }
+.ticket-wallet-detail-tool:disabled { opacity: .45; cursor: default; background: transparent; }
+.ticket-wallet-detail-more { position: relative; margin-left: auto; flex: 0 0 44px; }
+.ticket-wallet-detail-more summary { width: 44px; box-sizing: border-box; list-style: none; }
+.ticket-wallet-detail-more summary::-webkit-details-marker { display: none; }
+.ticket-wallet-detail-more-menu { position: absolute; bottom: calc(100% + 4px); right: 0; z-index: 10; width: max-content; max-width: 260px; padding: 5px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 14%, transparent); }
+.ticket-wallet-detail-more-menu button { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); text-align: left; font: inherit; font-size: 13px; cursor: pointer; }
+.ticket-wallet-detail-more-menu button:hover, .ticket-wallet-detail-more-menu button:focus-visible { background: var(--soft); }
+.ticket-wallet-detail-more-menu button.danger { color: var(--danger, #d95353); border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; }
+.ticket-wallet-detail-note { display: flex; align-items: flex-start; gap: 8px; width: 100%; min-height: 44px; padding: 14px 4px; border: 0; border-radius: 0; background: transparent; color: var(--muted); text-align: left; font: inherit; font-size: 12px; line-height: 1.6; cursor: pointer; }
+.ticket-wallet-detail-note svg { margin-top: 2px; }
+.ticket-wallet-detail-note span { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ticket-wallet-detail-note .has-content { color: var(--ink); }
+.ticket-wallet-detail-note:hover, .ticket-wallet-detail-note:focus-visible { color: var(--ink); }
