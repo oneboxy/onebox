@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.533';
+const APP_VERSION = '2.18.534';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -319,7 +319,7 @@ const DICT = {
     noteOptional: '备注（可选）', weatherSearch: '搜索', currentLocation: '当前位置',
     refresh: '刷新', searchPlace: '搜索城市或区县',
     noWeather: '天气需要联网，搜索一个城市或区县开始。', weatherLoading: '正在获取天气…', weatherLoadFailed: '天气获取失败，点击卡片重试。',
-    weatherData: '数据来自 Open-Meteo，最近更新 {time}，离线可查看。',
+    weatherData: '数据来自 Open-Meteo，最近更新 {time}，离线可查看。', weatherHourlyRepairing: '逐小时预报数据不完整，正在重新获取…',
     sortWeather: '', hourly: '36 小时', daily: '前 3 天 · 今天 · 未来 15 天', advice: '天气建议',
     commute: '出行', sport: '运动', clothing: '穿衣', sunscreen: '防晒', hiking: '爬山', windAdvice: '风力建议', windLevel: '风力', elevation: '海拔',
     addCard: '添加', noResults: '没有找到匹配地点，请换个关键词。',
@@ -365,7 +365,7 @@ const DICT = {
     noteOptional: 'Note (optional)', weatherSearch: 'Search', currentLocation: 'Current location',
     refresh: 'Refresh', searchPlace: 'Search city or district',
     noWeather: 'Search a city or district to get weather.', weatherLoading: 'Loading weather…', weatherLoadFailed: 'Weather failed to load. Click the card to retry.',
-    weatherData: 'Weather data from Open-Meteo · updated {time} · saved locally for offline viewing.',
+    weatherData: 'Weather data from Open-Meteo · updated {time} · saved locally for offline viewing.', weatherHourlyRepairing: 'Hourly forecast is incomplete. Refreshing…',
     sortWeather: '', hourly: '36 hours', daily: '3 days before · today · next 15 days', advice: 'Advice',
     commute: 'Travel', sport: 'Sport', clothing: 'Clothing', sunscreen: 'Sun care', hiking: 'Hiking', windAdvice: 'Wind advice', windLevel: 'Wind', elevation: 'Elevation',
     addCard: 'Add', noResults: 'No matching place. Try another query.',
@@ -6782,7 +6782,8 @@ function weather() {
     const failure = active.loadError ? '<div class="inline-alert">' + escapeHtml(t('weatherLoadFailed')) + '</div>' : '';
     return heading(t('weather'), escapeHtml(title)) + search + results + failure + '<div class="weather-card-list">' + cards + '</div>';
   }
-  const hourlyTimes = active.hourly?.time || [];
+  const hourlyTimes = Array.isArray(active.hourly?.time) ? active.hourly.time : [];
+  const hourlyTemperatures = Array.isArray(active.hourly?.temperature_2m) ? active.hourly.temperature_2m : [];
   const selectedHour = currentHourIndex(active);
   const currentHour = selectedHour >= 0 ? selectedHour : 0;
   const hourlyPastHours = 12;
@@ -6790,10 +6791,27 @@ function weather() {
   const hourlyWindowSize = hourlyPastHours + hourlyFutureHours;
   const hourlyStart = Math.min(Math.max(0, currentHour - hourlyPastHours), Math.max(0, hourlyTimes.length - hourlyWindowSize));
   const hourlyEnd = Math.min(hourlyTimes.length, hourlyStart + hourlyWindowSize);
+  const hasTemperature = (value) => value != null && value !== '' && Number.isFinite(Number(value));
+  const needsHourlyRepair = hourlyTimes.slice(hourlyStart, hourlyEnd).some((_, offset) => {
+    const index = hourlyStart + offset;
+    const temperature = hourlyTemperatures[index] ?? (index === currentHour ? active.current?.temperature_2m : null);
+    return !hasTemperature(temperature);
+  });
+  if (needsHourlyRepair && Date.now() - Number(active.hourlyRepairAttemptAt || 0) > 5 * 60 * 1000) {
+    active.hourlyRepairAttemptAt = Date.now();
+    setTimeout(() => { if (state.activeWeatherId === active.id && !state.weatherLoading) void refreshWeatherCard(active); }, 0);
+  }
   const hourly = hourlyTimes.slice(hourlyStart, hourlyEnd).map((time, offset) => {
-    const index = hourlyStart + offset; const item = weatherCode(active.hourly.weather_code[index]); const date = new Date(time); const isCurrent = index === currentHour;
+    const index = hourlyStart + offset;
+    const code = active.hourly?.weather_code?.[index] ?? active.current?.weather_code;
+    const item = weatherCode(Number(code));
+    const date = new Date(time);
+    const isCurrent = index === currentHour;
     const label = isCurrent ? (state.language === 'en' ? 'Now' : '现在') : new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(date);
-    return '<div class="hour-card ' + (isCurrent ? 'current' : '') + '" ' + (isCurrent ? 'data-current-hour' : '') + '><small>' + label + '</small><strong>' + item[0] + '</strong><span>' + Math.round(active.hourly.temperature_2m[index]) + '°</span><small>' + (active.hourly.precipitation_probability?.[index] ?? 0) + '%</small></div>';
+    const temperature = hourlyTemperatures[index] ?? (isCurrent ? active.current?.temperature_2m : null);
+    const temperatureLabel = hasTemperature(temperature) ? Math.round(Number(temperature)) + '°' : '—';
+    const rainChance = active.hourly?.precipitation_probability?.[index];
+    return '<div class="hour-card ' + (isCurrent ? 'current' : '') + '" ' + (isCurrent ? 'data-current-hour' : '') + '><small>' + label + '</small><strong>' + item[0] + '</strong><span>' + temperatureLabel + '</span><small>' + (Number.isFinite(Number(rainChance)) ? Number(rainChance) : 0) + '%</small></div>';
   }).join('');
   const dailyTimes = (active.daily?.time || []).slice(0, 19);
   const currentDay = String(active.current?.time || '').slice(0, 10) || dateKey(today);
@@ -6820,7 +6838,7 @@ function weather() {
   return heading(t('weather'), escapeHtml(title) + ' · ' + (state.language === 'en' ? 'updated' : '更新于') + ' ' + (active.updatedAt ? new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(active.updatedAt) : (state.language === 'en' ? 'cached' : '本机缓存'))) +
     search + results + (state.weatherError ? '<div class="inline-alert">' + escapeHtml(state.weatherError) + '，' + (state.language === 'en' ? 'showing the last successful result' : '当前显示上次成功结果') + '。</div>' : '') +
     '<div class="weather-card-list">' + cards + '</div>' +
-    '<div class="weather-section-heading"><h3 class="weather-section-title">' + t('hourly') + '</h3><p class="weather-data-note">' + escapeHtml(weatherDataNote) + '</p></div><div class="hourly-strip">' + hourly + '</div><h3 class="weather-section-title">' + t('advice') + '</h3><div class="advice-strip">' + advice + '</div><h3 class="weather-section-title">' + t('daily') + '</h3><div class="weather-days">' + days + '</div>';
+    '<div class="weather-section-heading"><h3 class="weather-section-title">' + t('hourly') + '</h3><p class="weather-data-note">' + (needsHourlyRepair ? '<span class="inline-alert">' + escapeHtml(t('weatherHourlyRepairing')) + '</span> ' : '') + escapeHtml(weatherDataNote) + '</p></div><div class="hourly-strip">' + hourly + '</div><h3 class="weather-section-title">' + t('advice') + '</h3><div class="advice-strip">' + advice + '</div><h3 class="weather-section-title">' + t('daily') + '</h3><div class="weather-days">' + days + '</div>';
 }
 
 // Developer tools ------------------------------------------------------------
