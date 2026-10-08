@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.527';
+const APP_VERSION = '2.18.528';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3212,6 +3212,7 @@ function openTicketWallet() {
   history.replaceState(null, '', '#ticket-wallet'); window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages();
 }
 function closeTicketWallet() {
+  ticketWalletMapReturnContext = null;
   state.ticketWalletOpen = false; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
   ticketWalletMapFocusId = '';
   closeTicketWalletOriginal();
@@ -3765,15 +3766,33 @@ function ticketWalletFocusPeekMarkup(record, index, contextClass = '', contextSt
   const template = record.template === 'crh-blue-v1' ? 'blue' : 'pink';
   return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-focus-peek-row ' + contextClass + '" data-swipe-row style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-focus-peek ticket-wallet-focus-peek-' + kind + ' ticket-wallet-focus-peek-' + template + ' swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><small>' + escapeHtml(serial) + '</small><div><strong>' + escapeHtml(from) + '</strong><span>' + escapeHtml(number) + ' <i aria-hidden="true">→</i></span><strong>' + escapeHtml(to) + '</strong></div></article><div class="ticket-wallet-swipe-actions" aria-label="票据操作">' + buttons + '</div></div>';
 }
+let ticketWalletMapReturnContext = null;
+function returnFromTicketWalletMap() {
+  const context = ticketWalletMapReturnContext;
+  if (!context) return false;
+  ticketWalletMapReturnContext = null;
+  ticketWalletMapFocusId = '';
+  state.ticketWalletView = 'tickets';
+  state.ticketWalletTypeFilter = context.filter;
+  state.ticketWalletSelectedId = state.ticketWallet.find((record) => record.id === context.id) ? context.id : '';
+  saveTicketWalletTypeFilter();
+  render();
+  return true;
+}
 function ticketWalletDetailInfoMarkup(record) {
   const english = state.language === 'en';
   const id = escapeHtml(record.id);
-  const originalIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path></svg>';
-  const mapIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"></path></svg>';
   const hasLocation = Boolean((TICKET_WALLET_TRAVEL_TYPES.includes(record.type) && record.from && record.to) || ticketWalletMapPlaceEntry(record));
+  const icon = (paths) => '<svg viewBox="0 0 24 24" aria-hidden="true">' + paths + '</svg>';
+  const action = (label, attr, paths, enabled = true, extra = '') => '<button type="button" class="ticket-wallet-detail-tool ' + extra + '" ' + (enabled ? attr + '="' + id + '"' : 'disabled') + '>' + icon(paths) + '<span>' + label + '</span></button>';
   const notes = String(record.notes || '').trim();
-  const notesLabel = english ? (notes ? 'Edit notes' : 'Add notes') : (notes ? '编辑备注' : '添加备注');
-  return '<section class="ticket-wallet-detail-info ticket-wallet-detail-utilities" aria-label="' + (english ? 'Ticket actions' : '票据操作') + '"><div class="ticket-wallet-detail-toolbar"><button type="button" class="ticket-wallet-detail-tool" ' + (record.sourceImageId ? 'data-ticket-wallet-original="' + id + '"' : 'disabled') + ' title="' + escapeHtml(record.sourceImageId ? (record.sourceImageName || '') : (english ? 'No original attachment' : '暂无原件')) + '">' + originalIcon + '<span>' + (english ? 'Original' : '查看原件') + '</span></button>' + (hasLocation ? '<button type="button" class="ticket-wallet-detail-tool" data-ticket-wallet-map-locate="' + id + '">' + mapIcon + '<span>' + (english ? 'Map' : '查看地图') + '</span></button>' : '') + '<details class="ticket-wallet-detail-more"><summary class="ticket-wallet-detail-tool" aria-label="' + (english ? 'More actions' : '更多操作') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></summary><div class="ticket-wallet-detail-more-menu">' + ticketWalletSwipeActionButtons(record, true) + '</div></details></div><button type="button" class="ticket-wallet-detail-note" data-ticket-wallet-notes="' + id + '" aria-label="' + notesLabel + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path></svg><span class="' + (notes ? 'has-content' : '') + '">' + escapeHtml(notes || notesLabel) + '</span></button></section>';
+  return '<section class="ticket-wallet-detail-info ticket-wallet-detail-utilities" aria-label="' + (english ? 'Ticket actions' : '票据操作') + '"><div class="ticket-wallet-detail-toolbar ticket-wallet-detail-toolbar-all">'
+    + action(english ? 'Attachment' : '附件', 'data-ticket-wallet-original', '<rect x="3.5" y="4" width="17" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path>', Boolean(record.sourceImageId))
+    + action(english ? 'Map' : '地图', 'data-ticket-wallet-map-locate', '<circle cx="12" cy="12" r="8.5"></circle><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"></path>', hasLocation)
+    + action(english ? 'Apple Wallet' : '苹果钱包', 'data-ticket-wallet-apple', '<rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path>')
+    + action(english ? 'Delete' : '删除', 'data-ticket-wallet-delete', '<path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l-.8-13M10 11v5M14 11v5"></path>', true, 'danger')
+    + action(english ? 'Notes' : '备注', 'data-ticket-wallet-notes', '<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path>')
+    + '</div>' + (notes ? '<button type="button" class="ticket-wallet-detail-note" data-ticket-wallet-notes="' + id + '"><span class="has-content">' + escapeHtml(notes) + '</span></button>' : '') + '</section>';
 }
 function ticketWalletStackDensity(count) {
   const size = Math.max(1, Number(count) || 1);
@@ -4078,16 +4097,19 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
     const center = ticketWalletMapProject(controller.center, controller.zoom);
     const topLeft = { x: center.x - width / 2, y: center.y - height / 2 };
     const tiles = [];
-    const firstX = Math.floor(topLeft.x / TICKET_WALLET_MAP_TILE_SIZE) - 1;
-    const lastX = Math.floor((topLeft.x + width) / TICKET_WALLET_MAP_TILE_SIZE) + 1;
-    const firstY = Math.floor(topLeft.y / TICKET_WALLET_MAP_TILE_SIZE) - 1;
-    const lastY = Math.floor((topLeft.y + height) / TICKET_WALLET_MAP_TILE_SIZE) + 1;
-    const tileCount = 2 ** controller.zoom;
+    const retina = window.devicePixelRatio > 1 && controller.zoom < 19;
+    const tileZoom = controller.zoom + (retina ? 1 : 0);
+    const tileSize = TICKET_WALLET_MAP_TILE_SIZE / (retina ? 2 : 1);
+    const firstX = Math.floor(topLeft.x / tileSize) - 1;
+    const lastX = Math.floor((topLeft.x + width) / tileSize) + 1;
+    const firstY = Math.floor(topLeft.y / tileSize) - 1;
+    const lastY = Math.floor((topLeft.y + height) / tileSize) + 1;
+    const tileCount = 2 ** tileZoom;
     for (let tileX = firstX; tileX <= lastX; tileX += 1) {
       for (let tileY = firstY; tileY <= lastY; tileY += 1) {
         if (tileY < 0 || tileY >= tileCount) continue;
         const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
-        tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="https://tile.openstreetmap.org/' + controller.zoom + '/' + wrappedX + '/' + tileY + '.png" style="left:' + (tileX * TICKET_WALLET_MAP_TILE_SIZE - topLeft.x).toFixed(1) + 'px;top:' + (tileY * TICKET_WALLET_MAP_TILE_SIZE - topLeft.y).toFixed(1) + 'px">');
+        tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="https://tile.openstreetmap.org/' + tileZoom + '/' + wrappedX + '/' + tileY + '.png" style="width:' + tileSize + 'px!important;height:' + tileSize + 'px!important;left:' + (tileX * tileSize - topLeft.x).toFixed(1) + 'px;top:' + (tileY * tileSize - topLeft.y).toFixed(1) + 'px">');
       }
     }
     const projectOnScreen = (point) => {
@@ -4246,7 +4268,7 @@ async function hydrateTicketWalletMap() {
     element.innerHTML = '';
     const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true });
     L.control.zoom({ position: 'topleft' }).addTo(map);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, detectRetina: true, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' }).addTo(map);
 
     const bounds = [];
     const duplicateRoutes = new Map();
@@ -4371,7 +4393,7 @@ function renderTicketWallet() {
   const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>') + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '">＋</button></div></div>';
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
   const ticketWalletTopAdd = state.ticketWalletView === 'tickets' && !state.ticketWalletEditorOpen ? '<button class="ticket-wallet-header-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button>' : '';
-  return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav><div class="ticket-wallet-head-actions">' + ticketWalletTopAdd + ticketWalletViewSwitcher + '</div></div>' + ticketWalletFilterRow + '<div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div>';
+  return '<div class="section-page ticket-wallet-page"><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button></nav><div class="ticket-wallet-head-actions">' + ticketWalletTopAdd + ticketWalletViewSwitcher + '</div></div>' + ticketWalletFilterRow + '<div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletView === 'journeys' && ticketWalletMapReturnContext ? '<button type="button" class="ticket-wallet-map-return" data-ticket-wallet-map-return><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg>' + (state.language === 'en' ? 'Back to ticket' : '返回当前票据') + '</button>' : '') + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div>';
 }
 
 function renderPetDialog() {
@@ -9295,6 +9317,7 @@ function pageSwipeIndex(items) {
 function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
+  if (state.section === 'mine' && state.ticketWalletOpen && (state.ticketWalletSelectedId || ticketWalletMapReturnContext)) return null;
   if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher')) return null;
   if (event.target.closest('[data-swipe-row]')) return null;
   const items = pageSwipeItems();
@@ -10458,11 +10481,13 @@ workspace.addEventListener('click', async (event) => {
   const section = event.target.closest('[data-section]');
   if (section) return selectSection(section.dataset.section);
   if (event.target.closest('[data-open-ticket-wallet]')) return openTicketWallet();
-  if (event.target.closest('[data-ticket-wallet-back]')) { return closeTicketWallet(); }
+  if (event.target.closest('[data-ticket-wallet-map-return]')) return returnFromTicketWalletMap();
+  if (event.target.closest('[data-ticket-wallet-back]')) { if (returnFromTicketWalletMap()) return; return closeTicketWallet(); }
   const mapTicket = event.target.closest('[data-ticket-wallet-map-ticket]');
   if (mapTicket) {
     const record = state.ticketWallet.find((item) => item.id === mapTicket.dataset.ticketWalletMapTicket);
     if (record) {
+      ticketWalletMapReturnContext = null;
       state.ticketWalletTypeFilter = ticketWalletCategoryForType(record.type); saveTicketWalletTypeFilter(); state.ticketWalletView = 'tickets'; state.ticketWalletSelectedId = record.id; state.ticketWalletEditorOpen = false;
       event.preventDefault(); return render();
     }
@@ -10471,11 +10496,13 @@ workspace.addEventListener('click', async (event) => {
   if (mapLocate) {
     const record = state.ticketWallet.find((item) => item.id === mapLocate.dataset.ticketWalletMapLocate);
     if (record && ((TICKET_WALLET_TRAVEL_TYPES.includes(record.type) && record.from && record.to) || ticketWalletMapPlaceEntry(record))) {
+      ticketWalletMapReturnContext = { id: record.id, filter: state.ticketWalletTypeFilter };
       ticketWalletMapFocusId = record.id; state.ticketWalletTypeFilter = ticketWalletCategoryForType(record.type); saveTicketWalletTypeFilter(); state.ticketWalletView = 'journeys'; state.ticketWalletSelectedId = '';
       event.preventDefault(); return render();
     }
   }
   const ticketWalletView = event.target.closest('[data-ticket-wallet-view]');
+  if (ticketWalletView?.dataset.ticketWalletView === 'tickets' && ticketWalletMapReturnContext) return returnFromTicketWalletMap();
   if (ticketWalletView) { state.ticketWalletView = ticketWalletView.dataset.ticketWalletView === 'journeys' ? 'journeys' : 'tickets'; if (state.ticketWalletView !== 'journeys') ticketWalletMapFocusId = ''; state.ticketWalletMemoryDraft = null; return render(); }
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
   if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(state.ticketWalletDraft.type); document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => { item.classList.toggle('active', item === ticketWalletTemplate); item.setAttribute('aria-pressed', item === ticketWalletTemplate ? 'true' : 'false'); }); return; }
