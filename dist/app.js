@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.553';
+const APP_VERSION = '2.18.554';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2746,7 +2746,7 @@ function mountMascot() {
   if (mascotRuntime.root) return;
   const root = document.createElement('aside');
   root.id = 'oneboxMascotRoot'; root.className = 'onebox-mascot-root'; root.dataset.edge = 'right'; root.dataset.panelSide = 'right';
-  root.innerHTML = '<span class="onebox-mascot-propeller" aria-hidden="true"><i></i><i></i><b></b></span><span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><button type="button" class="onebox-mascot-sync-progress" data-mascot-sync-progress data-sync-place="above" aria-live="polite" hidden><span class="onebox-mascot-sync-head"><span class="onebox-mascot-sync-icon" aria-hidden="true">↻</span><strong data-mascot-sync-message></strong><em data-mascot-sync-percent>0%</em></span><span class="onebox-mascot-sync-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></span><small>点击查看同步详情</small></button><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
+  root.innerHTML = '<span class="onebox-mascot-propeller" aria-hidden="true"><i></i><i></i><b></b></span><span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><button type="button" class="onebox-mascot-sync-progress" data-mascot-sync-progress data-sync-place="above" aria-live="polite" hidden><span class="onebox-mascot-sync-head"><strong data-mascot-sync-message></strong><em data-mascot-sync-percent>0%</em></span><span class="onebox-mascot-sync-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></span></button><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
   document.body.appendChild(root);
   mascotRuntime.root = root; mascotRuntime.button = $('.onebox-mascot-button', root); mascotRuntime.panel = $('.onebox-mascot-panel', root); mascotRuntime.speech = $('.onebox-mascot-speech', root); mascotRuntime.directionLayer = $('.onebox-mascot-direction', root); mascotRuntime.reactionLayer = $('.onebox-mascot-reaction', root);
   mascotRuntime.directionLayer.style.backgroundImage = 'url("' + MASCOT_ASSETS.directions + '")';
@@ -7473,6 +7473,7 @@ function saveGithub() {
   void oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
 }
 const githubResponseTokens = new WeakMap();
+const githubDetailedGists = new WeakSet();
 let githubRateLimitUntil = 0;
 function githubRateLimitError() {
   const waitMinutes = Math.max(1, Math.ceil((githubRateLimitUntil - Date.now()) / 60000));
@@ -7523,7 +7524,7 @@ async function githubApiFetch(url, options = {}) {
   }
   throw lastError || Error(state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败');
 }
-const GITHUB_SYNC_CHUNK_CHARS = 250000;
+const GITHUB_SYNC_CHUNK_CHARS = 700000;
 const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.readerProgress, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive]);
 function isSyncableStorageKey(key) {
   return String(key || '').startsWith('onebox.')
@@ -7550,17 +7551,49 @@ async function syncBytes(value) {
   if (ArrayBuffer.isView(value)) return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
   return null;
 }
-function syncChunkBase64(value) {
+async function syncChunkBase64(bytes) {
   const chunks = [];
-  for (let offset = 0; offset < value.length; offset += GITHUB_SYNC_CHUNK_CHARS) chunks.push(value.slice(offset, offset + GITHUB_SYNC_CHUNK_CHARS));
+  const byteChunkSize = Math.floor(GITHUB_SYNC_CHUNK_CHARS / 4) * 3;
+  for (let offset = 0; offset < bytes.length; offset += byteChunkSize) {
+    chunks.push(readerBytesToBase64(bytes.subarray(offset, Math.min(bytes.length, offset + byteChunkSize))));
+    if (chunks.length % 3 === 0) await new Promise((resolve) => setTimeout(resolve, 0));
+  }
   return chunks;
 }
-async function buildReaderSyncAssets() {
+async function syncMapLimit(items, limit, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(items.length, Math.max(1, Number(limit) || 1));
+  await Promise.all(Array.from({ length: workerCount }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex++;
+      results[index] = await worker(items[index], index);
+    }
+  }));
+  return results;
+}
+async function syncBytesDigest(bytes) {
+  if (!globalThis.crypto?.subtle || !bytes?.byteLength) return '';
+  try {
+    const digest = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', bytes));
+    return Array.from(digest, (value) => value.toString(16).padStart(2, '0')).join('');
+  } catch { return ''; }
+}
+async function syncTextDigest(value) {
+  return syncBytesDigest(new TextEncoder().encode(String(value || '')));
+}
+function syncCanReuseAsset(entry, digest, size, type, gist) {
+  return Boolean(digest && entry?.sha256 === digest && Number(entry.size) === Number(size)
+    && (!type || entry.type === type) && Array.isArray(entry.files) && entry.files.length
+    && entry.files.every((name) => typeof name === 'string' && Boolean(gist?.files?.[name])));
+}
+async function buildReaderSyncAssets(existingRemote = null, existingGist = null, onProgress = null) {
   const files = {};
   const books = {};
   let libraryChanged = false;
-  for (const book of state.library) {
-    if (!book?.id) continue;
+  const sourceBooks = state.library.filter((book) => book?.id);
+  let completed = 0;
+  await syncMapLimit(sourceBooks, 2, async (book) => {
     const key = syncAssetKey(book.id);
     let binary = null;
     if (book.type === 'md') {
@@ -7572,22 +7605,39 @@ async function buildReaderSyncAssets() {
       if (!binary?.length) throw Error((state.language === 'en' ? 'Book file is missing on this device: ' : '本机缺少书籍文件：') + book.name);
     }
     if (book.syncFileMissing) { delete book.syncFileMissing; libraryChanged = true; }
-    const chunks = syncChunkBase64(readerBytesToBase64(binary));
-    const names = chunks.map((content, index) => {
-      const name = 'onebox-book-' + key + '-' + index + '.b64'; files[name] = content; return name;
-    });
-    books[book.id] = { type: book.type, size: binary.byteLength, files: names };
+    const digest = await syncBytesDigest(binary);
+    const existingEntry = existingRemote?.readerFiles?.books?.[book.id];
+    if (syncCanReuseAsset(existingEntry, digest, binary.byteLength, book.type, existingGist)) books[book.id] = existingEntry;
+    else {
+      const chunks = await syncChunkBase64(binary);
+      const names = chunks.map((content, index) => {
+        const name = 'onebox-book-' + key + '-' + index + '.b64'; files[name] = content; return name;
+      });
+      books[book.id] = { type: book.type, size: binary.byteLength, files: names, ...(digest ? { sha256: digest } : {}) };
+    }
     let cover = await oneBoxDbGet('book-covers', book.id);
     if (!cover && book.type === 'md') cover = readerMarkdownCover(book.content);
     if (!cover && book.type === 'epub' && binary) cover = await epubCoverData(binary);
     if (typeof cover === 'string' && cover) {
-      const name = 'onebox-book-' + key + '.cover'; files[name] = cover;
-      books[book.id] ||= {}; books[book.id].cover = name;
+      const coverDigest = await syncTextDigest(cover);
+      const existingBook = existingEntry;
+      const reuseCover = Boolean(coverDigest && existingBook?.coverSha256 === coverDigest && existingGist?.files?.[existingBook.cover]);
+      const name = reuseCover ? existingBook.cover : 'onebox-book-' + key + '.cover';
+      if (!reuseCover) files[name] = cover;
+      books[book.id] ||= {};
+      books[book.id].cover = name;
+      if (coverDigest) books[book.id].coverSha256 = coverDigest;
       if (await oneBoxDbPut('book-covers', book.id, cover) && book.hasCover !== true) { book.hasCover = true; libraryChanged = true; }
-    } else if (book.hasCover === true) {
-      book.hasCover = false; libraryChanged = true;
+    } else {
+      if (book.hasCover === true) { book.hasCover = false; libraryChanged = true; }
+      if (books[book.id]?.cover) {
+        const { cover: _cover, coverSha256: _coverSha256, ...bookEntry } = books[book.id];
+        books[book.id] = bookEntry;
+      }
     }
-  }
+    completed += 1;
+    onProgress?.(completed, sourceBooks.length, 'reading');
+  });
   if (libraryChanged) saveLibrary();
   return { files, manifest: { version: 1, books } };
 }
@@ -7600,25 +7650,40 @@ function ticketWalletSyncStorageValue(storage, key, fallback) {
 function ticketWalletRemoteImageIds(remote) {
   return ticketWalletSyncImageIds(ticketWalletSyncStorageValue(remote?.storage, STORAGE.ticketWallet, []), ticketWalletSyncStorageValue(remote?.storage, STORAGE.ticketWalletMemories, {}));
 }
-async function buildTicketWalletSyncAssets() {
+async function buildTicketWalletSyncAssets(existingRemote = null, existingGist = null, onProgress = null) {
   const files = {}, images = {};
-  for (const id of ticketWalletSyncImageIds()) {
+  const imageIds = ticketWalletSyncImageIds();
+  let completed = 0;
+  await syncMapLimit(imageIds, 3, async (id) => {
     const stored = await oneBoxDbGet('ticket-images', id);
     const bytes = await syncBytes(stored?.blob);
     if (!bytes?.length) throw Error(state.language === 'en' ? 'A wallet original is missing on this device. Restore it before uploading.' : '本机缺少卡包原件，请先从保存原件的设备上传并恢复后再同步。');
-    const names = syncChunkBase64(readerBytesToBase64(bytes)).map((content, index) => {
-      const name = 'onebox-ticket-' + syncAssetKey(id) + '-' + index + '.b64';
-      files[name] = content; return name;
-    });
-    images[id] = { name: stored.name || '', type: stored.type || stored.blob.type || 'application/octet-stream', size: bytes.byteLength, files: names };
-  }
+    const type = stored.type || stored.blob.type || 'application/octet-stream';
+    const digest = await syncBytesDigest(bytes);
+    const existingEntry = existingRemote?.ticketWalletFiles?.images?.[id];
+    if (syncCanReuseAsset(existingEntry, digest, bytes.byteLength, type, existingGist)) images[id] = existingEntry;
+    else {
+      const chunks = await syncChunkBase64(bytes);
+      const names = chunks.map((content, index) => {
+        const name = 'onebox-ticket-' + syncAssetKey(id) + '-' + index + '.b64';
+        files[name] = content; return name;
+      });
+      images[id] = { name: stored.name || '', type, size: bytes.byteLength, files: names, ...(digest ? { sha256: digest } : {}) };
+    }
+    completed += 1;
+    onProgress?.(completed, imageIds.length, 'wallet');
+  });
   return { files, manifest: { version: 1, images } };
 }
 async function readTicketWalletSyncAsset(entry, gist) {
   if (!Array.isArray(entry?.files) || !entry.files.length || entry.files.some((name) => !gist?.files?.[name])) throw Error(state.language === 'en' ? 'GitHub wallet original is incomplete' : 'GitHub 卡包原件文件不完整');
   const chunks = await Promise.all(entry.files.map((name) => githubFileContent(gist.files[name])));
   if (chunks.some((chunk) => typeof chunk !== 'string' || !chunk)) throw Error(state.language === 'en' ? 'Could not read wallet original' : '卡包原件读取失败');
-  const bytes = syncBase64Bytes(chunks.join(''));
+  const byteChunks = await syncDecodeBase64Chunks(chunks);
+  const total = byteChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  byteChunks.forEach((chunk) => { bytes.set(chunk, offset); offset += chunk.length; });
   if (!bytes.length || !Number.isFinite(entry.size) || bytes.length !== entry.size) throw Error(state.language === 'en' ? 'Wallet original size check failed' : '卡包原件大小校验失败');
   return bytes;
 }
@@ -7627,22 +7692,24 @@ async function verifyTicketWalletSyncAssets(remote, gist) {
   if (!images) return; // Older backups contain ticket metadata only.
   for (const id of ticketWalletRemoteImageIds(remote)) await readTicketWalletSyncAsset(images[id], gist);
 }
-async function restoreTicketWalletSyncAssets(remote, gist) {
+async function restoreTicketWalletSyncAssets(remote, gist, onProgress = null) {
   const images = remote?.ticketWalletFiles?.images;
   if (!images) return;
-  const writes = [];
-  // Validate every referenced file before changing ticket metadata on this device.
-  for (const id of ticketWalletRemoteImageIds(remote)) {
+  const imageIds = ticketWalletRemoteImageIds(remote);
+  let completed = 0;
+  const writes = await syncMapLimit(imageIds, 3, async (id) => {
     const entry = images[id];
     const bytes = await readTicketWalletSyncAsset(entry, gist);
-    writes.push({ id, value: { blob: new Blob([bytes], { type: entry.type || 'application/octet-stream' }), name: entry.name || '', type: entry.type || 'application/octet-stream', savedAt: Date.now() } });
-  }
-  for (const { id, value } of writes) {
+    completed += 1;
+    onProgress?.(completed, imageIds.length);
+    return { id, value: { blob: new Blob([bytes], { type: entry.type || 'application/octet-stream' }), name: entry.name || '', type: entry.type || 'application/octet-stream', savedAt: Date.now() } };
+  });
+  await syncMapLimit(writes, 3, async ({ id, value }) => {
     if (!await oneBoxDbPut('ticket-images', id, value)) throw Error(state.language === 'en' ? 'Could not save wallet original on this device' : '无法在本机保存卡包原件，请检查可用空间后重试');
     const cached = ticketWalletImageCache.get(id);
     if (cached?.src) URL.revokeObjectURL(cached.src);
     ticketWalletImageCache.delete(id);
-  }
+  });
 }
 function mergeTicketWalletSyncStorage(first = {}, second = {}) {
   const merged = { ...first, ...second };
@@ -7707,23 +7774,28 @@ function preserveDisabledGithubPayloadGroups(payload, remote, selection) {
   });
   return payload;
 }
-async function buildGithubSyncBundle() {
+async function buildGithubSyncBundle(existingRemote = null, existingGist = null, onProgress = null) {
   const readingEnabled = githubSyncCustomGroupEnabled('reading');
-  const assets = readingEnabled ? await buildReaderSyncAssets() : { manifest: null, files: {} };
-  const walletAssets = githubSyncCustomGroupEnabled('ticketWallet') ? await buildTicketWalletSyncAssets() : { manifest: null, files: {} };
+  const walletEnabled = githubSyncCustomGroupEnabled('ticketWallet');
+  const readerCount = readingEnabled ? state.library.filter((book) => book?.id).length : 0;
+  const walletCount = walletEnabled ? ticketWalletSyncImageIds().length : 0;
+  const total = Math.max(1, readerCount + walletCount);
+  let completed = 0;
+  const reportProgress = (count, _total, phase) => {
+    completed += 1;
+    const label = phase === 'wallet'
+      ? (state.language === 'en' ? 'Preparing wallet originals…' : '正在准备卡包原件…')
+      : (state.language === 'en' ? 'Checking book files…' : '正在检查书籍文件…');
+    onProgress?.(Math.min(100, Math.round(completed / total * 100)), label);
+  };
+  const assets = readingEnabled ? await buildReaderSyncAssets(existingRemote, existingGist, reportProgress) : { manifest: null, files: {} };
+  const walletAssets = walletEnabled ? await buildTicketWalletSyncAssets(existingRemote, existingGist, reportProgress) : { manifest: null, files: {} };
   const payload = syncPayload(assets.manifest, readingEnabled ? syncLibraryMetadata() : [], walletAssets.manifest);
+  onProgress?.(100, state.language === 'en' ? 'Preparing sync data…' : '正在整理同步数据…');
   return { payload, files: { 'onebox-settings.json': JSON.stringify(payload, null, 2), ...assets.files, ...walletAssets.files }, bookCount: Object.keys(assets.manifest?.books || {}).length };
 }
-async function mergeGithubUploadBundle(bundle, id) {
-  if (!bundle?.payload || !id) return bundle;
-  let remote = null;
-  try {
-    const gist = await githubGistDetails({ id });
-    remote = parseGithubSyncPayload(await githubFileContent(gist?.files?.['onebox-settings.json']));
-  } catch {
-    // A damaged or legacy settings file is replaced by the current valid one.
-  }
-  if (!remote || typeof remote !== 'object') return bundle;
+function mergeGithubUploadBundle(bundle, remote = null) {
+  if (!bundle?.payload || !remote || typeof remote !== 'object') return bundle;
   const payload = { ...bundle.payload };
   const selection = normalizeGithubSyncSelection(state.githubSyncSelection);
   const mergeField = (key) => {
@@ -7808,7 +7880,8 @@ async function githubGistDetails(gist, version = '') {
   const response = await githubApiFetch('https://api.github.com/gists/' + encodeURIComponent(gist.id) + suffix, { headers: githubHeaders(), cache: 'no-store' });
   if (!response.ok) throw await githubApiError(response, state.language === 'en' ? 'Could not read the OneBox Gist' : '无法读取 OneBox Gist');
   const details = await response.json();
-  return details?.id ? details : gist;
+  if (details?.id) { githubDetailedGists.add(details); return details; }
+  return gist;
 }
 async function githubGistHistory(gist) {
   if (!gist?.id) return [];
@@ -7818,7 +7891,7 @@ async function githubGistHistory(gist) {
   return Array.isArray(history) ? history : [];
 }
 async function readGithubGistPayload(candidate) {
-  const latest = await githubGistDetails(candidate);
+  const latest = githubDetailedGists.has(candidate) ? candidate : await githubGistDetails(candidate);
   let lastError = null;
   try {
     const content = await githubFileContent(latest?.files?.['onebox-settings.json']);
@@ -7852,6 +7925,14 @@ function syncBase64Bytes(value) {
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   return bytes;
+}
+async function syncDecodeBase64Chunks(chunks) {
+  const decoded = [];
+  for (let index = 0; index < chunks.length; index += 1) {
+    decoded.push(syncBase64Bytes(chunks[index]));
+    if ((index + 1) % 3 === 0 && index + 1 < chunks.length) await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  return decoded;
 }
 function parseGithubSyncPayload(content) {
   if (typeof content !== 'string' || !content.trim()) throw Error(t('githubSyncReadFailed'));
@@ -7909,12 +7990,22 @@ function readerSyncBookEntry(book, remote, gist) {
   const size = Number(book.size);
   if (!Number.isFinite(size) || size <= 0) return null;
   const encodedLength = Math.ceil(size / 3) * 4;
-  const chunkCount = Math.ceil(encodedLength / GITHUB_SYNC_CHUNK_CHARS);
   const prefix = 'onebox-book-' + syncAssetKey(book.id) + '-';
   const indexes = new Set(Object.keys(gist?.files || {}).flatMap((name) => {
     const match = name.match(new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d+)\\.b64$'));
     return match ? [Number(match[1])] : [];
   }));
+  const chunkCount = [GITHUB_SYNC_CHUNK_CHARS, 250000]
+    .map((chunkSize) => Math.ceil(encodedLength / chunkSize))
+    .find((count) => {
+      if (!count || indexes.size < count || !Array.from({ length: count }, (_, index) => indexes.has(index)).every(Boolean)) return false;
+      const sizes = Array.from({ length: count }, (_, index) => {
+        const file = gist?.files?.[prefix + index + '.b64'];
+        return Number.isFinite(Number(file?.size)) ? Number(file.size) : typeof file?.content === 'string' ? file.content.length : null;
+      });
+      return sizes.every((size) => Number.isFinite(size)) ? sizes.reduce((sum, size) => sum + size, 0) === encodedLength : count === indexes.size;
+    });
+  if (!chunkCount) return null;
   const files = Array.from({ length: chunkCount }, (_, index) => prefix + index + '.b64');
   if (files.some((name, index) => !indexes.has(index) || !gist?.files?.[name])) return null;
   return { type: book.type, size, files };
@@ -7935,7 +8026,7 @@ function repairReaderSyncManifest(remote, gist) {
   const hasAllSources = requiredBooks.every((book) => book.type === 'md' && typeof book.content === 'string' || Boolean(readerSyncBookEntry(book, repaired, gist)));
   return { remote: repaired, hasAllSources };
 }
-async function restoreReaderSyncAssets(remote, gist) {
+async function restoreReaderSyncAssets(remote, gist, onProgress = null) {
   const repaired = repairReaderSyncManifest(remote, gist);
   remote = repaired.remote;
   const library = readerSyncLibrary(remote);
@@ -7946,38 +8037,39 @@ async function restoreReaderSyncAssets(remote, gist) {
   const sourceWrites = [];
   const coverWrites = [];
   const validManifest = manifest && typeof manifest === 'object' && !Array.isArray(manifest);
-  for (const book of requiredBooks) {
-    const entry = readerSyncBookEntry(book, remote, gist);
-    if (!entry?.files?.length) {
-      if (book.type === 'md' && typeof book.content === 'string') continue;
-      missingIds.add(book.id);
-      continue;
-    }
-    const chunks = await Promise.all(entry.files.map((name) => githubFileContent(gist.files[name])));
-    if (chunks.some((chunk) => typeof chunk !== 'string' || !chunk)) {
-      missingIds.add(book.id);
-      continue;
-    }
+  let completedBooks = 0;
+  await syncMapLimit(requiredBooks, 3, async (book) => {
     try {
-      const byteChunks = chunks.map(syncBase64Bytes);
+      const entry = readerSyncBookEntry(book, remote, gist);
+      if (!entry?.files?.length) {
+        if (!(book.type === 'md' && typeof book.content === 'string')) missingIds.add(book.id);
+        return;
+      }
+      const chunks = await Promise.all(entry.files.map((name) => githubFileContent(gist.files[name])));
+      if (chunks.some((chunk) => typeof chunk !== 'string' || !chunk)) { missingIds.add(book.id); return; }
+      const byteChunks = await syncDecodeBase64Chunks(chunks);
       const total = byteChunks.reduce((sum, chunk) => sum + chunk.length, 0);
       if (!total || Number.isFinite(Number(entry.size)) && total !== Number(entry.size) || Number.isFinite(Number(book.size)) && total !== Number(book.size)) throw Error('book file size mismatch');
       const bytes = new Uint8Array(total); let offset = 0;
       byteChunks.forEach((chunk) => { bytes.set(chunk, offset); offset += chunk.length; });
       sourceWrites.push({ id: book.id, value: bytes.buffer, content: book.type === 'md' ? new TextDecoder().decode(bytes) : '' });
-    } catch {
+    } catch (error) {
+      if (error?.code === 'github-auth-expired') throw error;
       missingIds.add(book.id);
+    } finally {
+      completedBooks += 1;
+      onProgress?.(completedBooks, requiredBooks.length);
     }
-  }
-  for (const [id, entry] of Object.entries(validManifest ? manifest : {})) {
-    if (!entry?.cover) continue;
+  });
+  const coverEntries = Object.entries(validManifest ? manifest : {}).filter(([, entry]) => entry?.cover);
+  await syncMapLimit(coverEntries, 4, async ([id, entry]) => {
     const cover = await githubFileContent(gist.files?.[entry.cover]);
     if (typeof cover === 'string' && /^data:image\//i.test(cover)) coverWrites.push({ id, value: cover });
-  }
-  for (const item of sourceWrites) {
+  });
+  await syncMapLimit(sourceWrites, 3, async (item) => {
     if (!await oneBoxDbPut('books', item.id, item.value)) missingIds.add(item.id);
-  }
-  for (const item of coverWrites) await oneBoxDbPut('book-covers', item.id, item.value);
+  });
+  await syncMapLimit(coverWrites, 3, async (item) => { await oneBoxDbPut('book-covers', item.id, item.value); });
   const restoredIds = new Set(sourceWrites.filter((item) => !missingIds.has(item.id)).map((item) => item.id));
   const restoredSources = new Map(sourceWrites.filter((item) => !missingIds.has(item.id)).map((item) => [item.id, item]));
   const restoredLibrary = hasLibrary ? library.map((book) => {
@@ -8245,6 +8337,7 @@ function renderGithubSyncIndicator() {
   const sync = state.githubSync || { active: false, mode: '', progress: 0, message: '', error: '' };
   const visible = Boolean(sync.active || sync.error);
   indicator.hidden = !visible;
+  indicator.classList.toggle('is-active', Boolean(sync.active));
   indicator.classList.toggle('is-error', Boolean(sync.error));
   indicator.dataset.mode = sync.mode || '';
   const progress = Math.max(0, Math.min(100, Number(sync.progress) || 0));
@@ -8252,16 +8345,12 @@ function renderGithubSyncIndicator() {
   const percent = indicator.querySelector('[data-mascot-sync-percent]');
   const track = indicator.querySelector('.onebox-mascot-sync-track');
   const fill = track?.querySelector('i');
-  const icon = indicator.querySelector('.onebox-mascot-sync-icon');
   const label = sync.error || sync.message || (sync.mode === 'download' ? (state.language === 'en' ? 'Restoring books and settings' : '正在恢复书籍和设置') : (state.language === 'en' ? 'Syncing with GitHub' : '正在同步到 GitHub'));
   if (message) message.textContent = label;
   if (percent) percent.textContent = sync.error ? '!' : progress + '%';
-  if (icon) icon.textContent = sync.error ? '!' : sync.mode === 'download' ? '↓' : '↻';
   if (fill) fill.style.width = progress + '%';
   if (track) track.setAttribute('aria-valuenow', String(progress));
   indicator.setAttribute('aria-label', (sync.error ? (state.language === 'en' ? 'Sync failed. Open details' : '同步失败，点击查看详情') : sync.mode === 'download' ? (state.language === 'en' ? 'Restoring from GitHub' : '正在从 GitHub 恢复') : (state.language === 'en' ? 'Syncing with GitHub' : '正在同步到 GitHub')) + ' · ' + progress + '%');
-  const hint = indicator.querySelector('small');
-  if (hint) hint.textContent = sync.error ? (state.language === 'en' ? 'Tap to see details' : '点击查看错误详情') : (state.language === 'en' ? 'Tap for details · drag the pet to move' : '点击查看详情 · 拖动宠物可调整位置');
   root.classList.toggle('is-syncing', Boolean(sync.active));
   root.classList.toggle('has-sync-progress', visible);
   root.classList.toggle('is-sync-only', visible && !state.mascotVisible);
@@ -8386,7 +8475,11 @@ async function findGithubGists(includeOtherBackups = false, initialCandidates = 
   (Array.isArray(initialCandidates) ? initialCandidates : []).forEach((gist, index) => addCandidate(gist, index));
   if (state.github.gistId && !seen.has(state.github.gistId)) {
     const known = await githubApiFetch('https://api.github.com/gists/' + encodeURIComponent(state.github.gistId), { headers: githubHeaders(), cache: 'no-store' });
-    if (known.ok) addCandidate(await known.json());
+    if (known.ok) {
+      const gist = await known.json();
+      if (gist?.id) githubDetailedGists.add(gist);
+      addCandidate(gist);
+    }
     else if (![404, 410].includes(known.status)) {
       throw await githubApiError(known, state.language === 'en' ? 'Could not access the saved OneBox Gist' : '无法访问已保存的 OneBox Gist');
     }
@@ -8427,7 +8520,7 @@ async function findGithubGist() {
   }
   return found || null;
 }
-const GITHUB_SYNC_UPLOAD_BATCH_CHARS = 300000;
+const GITHUB_SYNC_UPLOAD_BATCH_CHARS = 2100000;
 function githubSyncUploadBatches(entries) {
   const batches = [];
   let current = {};
@@ -8477,6 +8570,24 @@ async function githubPatchGistFiles(id, files) {
   }
   throw lastError || Error(state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败');
 }
+function verifyGithubAssetMetadata(payload, gist) {
+  const manifests = [payload?.readerFiles?.books, payload?.ticketWalletFiles?.images].filter((value) => value && typeof value === 'object');
+  for (const manifest of manifests) {
+    for (const entry of Object.values(manifest)) {
+      if (!Array.isArray(entry?.files) || !entry.files.length || !Number.isFinite(Number(entry.size))) continue;
+      let encodedSize = 0;
+      let allSizesKnown = true;
+      for (const name of entry.files) {
+        const file = gist?.files?.[name];
+        if (!file) throw Error((state.language === 'en' ? 'GitHub response is missing an original file: ' : 'GitHub 响应中缺少原文件：') + name);
+        if (Number.isFinite(Number(file.size))) encodedSize += Number(file.size);
+        else allSizesKnown = false;
+      }
+      const expectedSize = Math.ceil(Number(entry.size) / 3) * 4;
+      if (allSizesKnown && encodedSize !== expectedSize) throw Error(state.language === 'en' ? 'GitHub original file size check failed' : 'GitHub 原文件大小校验失败');
+    }
+  }
+}
 async function verifyGithubSettingsPayload(bundle, id, initialGist) {
   const expectedContent = String(bundle.files?.['onebox-settings.json'] || '');
   const expectedSize = new TextEncoder().encode(expectedContent).length;
@@ -8511,35 +8622,35 @@ async function verifyGithubSettingsPayload(bundle, id, initialGist) {
   }
   throw lastError || Error(state.language === 'en' ? 'GitHub sync settings could not be verified' : 'GitHub 同步设置无法校验');
 }
-async function findOrCreateGist(bundle = null, onProgress = null, forceNew = false) {
-  onProgress?.(42, githubSyncLabel('upload', 'gist'));
-  if (!forceNew) {
-    const found = await findGithubGist();
-    if (found?.id) {
-      try {
-        const content = await githubFileContent(found.files?.['onebox-settings.json']);
-        parseGithubSyncPayload(content);
-        return found.id;
-      } catch (error) {
-        if (error?.code === 'github-auth-expired') throw error;
-        // Do not keep retrying a damaged legacy Gist. A fresh private Gist
-        // gives the current device a valid backup without touching its data.
-        state.github.gistId = '';
-        saveGithub();
-      }
-    }
+async function findExistingGithubSyncTarget(onProgress = null, forceNew = false) {
+  if (forceNew) return null;
+  onProgress?.(14, githubSyncLabel('upload', 'gist'));
+  const found = await findGithubGist();
+  if (!found?.id) return null;
+  const gist = githubDetailedGists.has(found) ? found : await githubGistDetails(found);
+  try {
+    const remote = parseGithubSyncPayload(await githubFileContent(gist.files?.['onebox-settings.json']));
+    return { id: gist.id, gist, remote, created: false };
+  } catch (error) {
+    if (error?.code === 'github-auth-expired') throw error;
+    // Replace a damaged or legacy settings file after a complete local bundle
+    // has been prepared, so a failed local read never creates an empty backup.
+    if (state.github.gistId === gist.id) { state.github.gistId = ''; saveGithub(); }
+    return null;
   }
-  const initialBundle = bundle || await buildGithubSyncBundle();
-  onProgress?.(57, githubSyncLabel('upload', 'gist'));
-  const settingsContent = initialBundle.files?.['onebox-settings.json'];
+}
+async function createGithubSyncTarget(bundle, onProgress = null) {
+  onProgress?.(55, githubSyncLabel('upload', 'gist'));
+  const settingsContent = bundle?.files?.['onebox-settings.json'];
   if (typeof settingsContent !== 'string') throw Error(state.language === 'en' ? 'OneBox settings file is missing' : 'OneBox 设置文件缺失');
   const created = await githubApiFetch('https://api.github.com/gists', { method: 'POST', headers: githubHeaders(true), body: JSON.stringify({ description: 'OneBox settings sync', public: false, files: { 'onebox-settings.json': { content: settingsContent } } }) });
   if (!created.ok) throw await githubApiError(created);
   const gist = await created.json();
   if (!gist.id) throw Error(state.language === 'en' ? 'GitHub did not return a Gist id' : 'GitHub 未返回 Gist 标识');
+  githubDetailedGists.add(gist);
   state.github.gistId = gist.id;
   saveGithub();
-  return gist.id;
+  return { id: gist.id, gist, remote: null, created: true };
 }
 function githubFilesMissingField(error) {
   return error?.status === 422 && Array.isArray(error.githubErrors)
@@ -8551,35 +8662,37 @@ async function githubUpload(allowFreshGistRetry = true, forceNewGist = false) {
   const mode = 'upload';
   updateGithubSync(mode, 4, githubSyncLabel(mode, 'preparing'));
   try {
-    updateGithubSync(mode, 12, githubSyncLabel(mode, 'bundle'));
-    const bundle = await buildGithubSyncBundle();
-    updateGithubSync(mode, 32, githubSyncLabel(mode, 'gist'));
-    const id = await findOrCreateGist(bundle, (progress, message) => updateGithubSync(mode, progress, message), forceNewGist);
-    const mergedBundle = await mergeGithubUploadBundle(bundle, id);
-    updateGithubSync(mode, 62, githubSyncLabel(mode, 'upload'));
+    const target = await findExistingGithubSyncTarget((progress, message) => updateGithubSync(mode, progress, message), forceNewGist);
+    updateGithubSync(mode, 18, githubSyncLabel(mode, 'bundle'));
+    const bundle = await buildGithubSyncBundle(target?.remote || null, target?.gist || null, (progress, message) => updateGithubSync(mode, 18 + Math.round(progress * .3), message));
+    const mergedBundle = mergeGithubUploadBundle(bundle, target?.remote || null);
+    const syncTarget = target || await createGithubSyncTarget(mergedBundle, (progress, message) => updateGithubSync(mode, progress, message));
+    const id = syncTarget.id;
+    updateGithubSync(mode, 58, githubSyncLabel(mode, 'upload'));
     // Upload real content only. Old book chunks are intentionally retained as
     // unreachable Gist files: deleting them via PATCH is a known source of
     // GitHub's ambiguous `files missing_field` 422 response, and the manifest
     // below is the authoritative list used during restore.
     const entries = Object.entries(mergedBundle.files).filter(([name]) => name !== 'onebox-settings.json');
     const batches = githubSyncUploadBatches(entries);
+    let verified = syncTarget.gist;
     for (let index = 0; index < batches.length; index += 1) {
-      updateGithubSync(mode, 64 + Math.round((index / Math.max(1, batches.length + 1)) * 16), githubSyncLabel(mode, 'upload'));
-      await githubPatchGistFiles(id, batches[index]);
-      if (index < batches.length - 1) await sleep(350);
+      updateGithubSync(mode, 60 + Math.round((index / Math.max(1, batches.length)) * 23), githubSyncLabel(mode, 'upload'));
+      verified = await githubPatchGistFiles(id, batches[index]);
     }
-    updateGithubSync(mode, 80, githubSyncLabel(mode, 'upload'));
-    // Commit the manifest last so it only points at book files after those files
-    // have been uploaded. Each request stays small enough for mobile Safari.
-    let verified = await githubPatchGistFiles(id, { 'onebox-settings.json': { content: mergedBundle.files['onebox-settings.json'] } });
+    // A newly created Gist already contains this manifest. Existing Gists get
+    // the manifest last, after changed source files have been uploaded.
+    if (!syncTarget.created) {
+      updateGithubSync(mode, 84, githubSyncLabel(mode, 'finishing'));
+      verified = await githubPatchGistFiles(id, { 'onebox-settings.json': { content: mergedBundle.files['onebox-settings.json'] } });
+    }
     const settingsVerification = await verifyGithubSettingsPayload(mergedBundle, id, verified);
     verified = settingsVerification.gist || verified;
     const missingFiles = Object.keys(mergedBundle.files).filter((name) => !verified?.files?.[name]);
     if (missingFiles.length) throw Error((state.language === 'en' ? 'GitHub response is missing OneBox files: ' : 'GitHub 响应中缺少 OneBox 文件：') + missingFiles.slice(0, 3).join(', '));
     const verifiedPayload = settingsVerification.payload;
-    updateGithubSync(mode, 84, githubSyncLabel(mode, 'finishing'));
-    if (githubSyncCustomGroupEnabled('reading')) await verifyReaderSyncAssets(verifiedPayload.readerFiles, verified, verifiedPayload.library);
-    if (githubSyncCustomGroupEnabled('ticketWallet')) await verifyTicketWalletSyncAssets(verifiedPayload, verified);
+    updateGithubSync(mode, 94, githubSyncLabel(mode, 'finishing'));
+    verifyGithubAssetMetadata(verifiedPayload, verified);
     finishGithubSync(mode, state.language === 'en' ? 'Upload complete' : '上传完成');
     toast(state.language === 'en' ? 'OneBox data uploaded to GitHub' : 'OneBox 数据已上传到 GitHub', 'info', { persistent: true });
   } catch (error) {
@@ -8671,8 +8784,13 @@ async function githubDownload() {
     const settingsEnabled = githubSyncCustomGroupEnabled('settings');
     const navigationEnabled = githubSyncCustomGroupEnabled('navigation');
     const messagesEnabled = githubSyncCustomGroupEnabled('messages');
-    const readerRestore = readingEnabled ? await restoreReaderSyncAssets(remote, gist) : { library: null, missingBooks: [] };
-    if (githubSyncCustomGroupEnabled('ticketWallet')) await restoreTicketWalletSyncAssets(remote, gist);
+    const readerRestore = readingEnabled
+      ? await restoreReaderSyncAssets(remote, gist, (completed, total) => updateGithubSync(mode, 67 + Math.round(completed / Math.max(1, total) * 16), state.language === 'en' ? 'Restoring books…' : '正在恢复书籍…'))
+      : { library: null, missingBooks: [] };
+    if (githubSyncCustomGroupEnabled('ticketWallet')) {
+      updateGithubSync(mode, 84, state.language === 'en' ? 'Restoring wallet originals…' : '正在恢复卡包原件…');
+      await restoreTicketWalletSyncAssets(remote, gist, (completed, total) => updateGithubSync(mode, 84 + Math.round(completed / Math.max(1, total) * 10), state.language === 'en' ? 'Restoring wallet originals…' : '正在恢复卡包原件…'));
+    }
     applyRemoteStorageSnapshot(remote.storage);
     if (settingsEnabled && ['light', 'dark', 'dark-gray', 'system'].includes(remote.theme)) { state.theme = remote.theme; localStorage.setItem(STORAGE.theme, state.theme); }
     if (settingsEnabled && ['mono', 'purple', 'blue', 'green', 'yellow'].includes(remote.color)) { state.color = remote.color; saveColorPreference(); }

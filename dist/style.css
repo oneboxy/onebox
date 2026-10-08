@@ -9246,49 +9246,41 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   position: absolute;
   z-index: 9;
   right: 0;
-  bottom: calc(100% + 9px);
+  bottom: calc(100% + 7px);
   display: grid;
-  width: min(278px, calc(100vw - 24px));
-  gap: 7px;
-  padding: 10px 12px 9px;
-  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line));
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--panel) 93%, transparent);
+  width: min(218px, calc(100vw - 18px));
+  gap: 4px;
+  padding: 7px 10px 6px;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--line));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 95%, transparent);
   color: var(--ink);
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--ink) 24%, transparent);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  box-shadow: 0 5px 16px color-mix(in srgb, var(--ink) 13%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   cursor: pointer;
   font: inherit;
   text-align: left;
   touch-action: manipulation;
   transform-origin: 90% 100%;
-  animation: mascot-sync-pop .22s cubic-bezier(.2,.85,.25,1) both;
+  animation: mascot-sync-pop .18s ease-out both;
 }
 .onebox-mascot-sync-progress[hidden] { display: none !important; }
-.onebox-mascot-sync-progress::after { position: absolute; right: 34px; bottom: -5px; width: 9px; height: 9px; border-right: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line)); border-bottom: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line)); background: color-mix(in srgb, var(--panel) 93%, transparent); content: ''; transform: rotate(45deg); }
 #oneboxMascotRoot[data-edge="left"] .onebox-mascot-sync-progress { right: auto; left: 0; transform-origin: 10% 100%; }
-#oneboxMascotRoot[data-edge="left"] .onebox-mascot-sync-progress::after { right: auto; left: 34px; }
-.onebox-mascot-sync-progress[data-sync-place="below"] { top: calc(100% + 9px); bottom: auto; transform-origin: 10% 0; }
-.onebox-mascot-sync-progress[data-sync-place="below"]::after { top: -5px; bottom: auto; border: 0; border-top: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line)); border-left: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line)); transform: rotate(45deg); }
+.onebox-mascot-sync-progress[data-sync-place="below"] { top: calc(100% + 7px); bottom: auto; transform-origin: 10% 0; }
 #oneboxMascotRoot[data-edge="right"] .onebox-mascot-sync-progress[data-sync-place="below"] { transform-origin: 90% 0; }
-.onebox-mascot-sync-head { display: grid; min-width: 0; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 7px; }
-.onebox-mascot-sync-icon { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 8px; background: color-mix(in srgb, var(--primary) 11%, transparent); color: var(--primary); font-size: 17px; font-weight: 800; line-height: 1; }
-.onebox-mascot-sync-progress.is-active .onebox-mascot-sync-icon { animation: mascot-sync-rotate 1.2s linear infinite; }
-.onebox-mascot-sync-progress strong { overflow: hidden; color: var(--ink); font-size: 11px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
-.onebox-mascot-sync-progress em { color: var(--primary); font-size: 11px; font-style: normal; font-variant-numeric: tabular-nums; font-weight: 800; }
-.onebox-mascot-sync-track { position: relative; display: block; height: 7px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--primary) 13%, var(--line)); }
-.onebox-mascot-sync-track i { display: block; width: 0; height: 100%; min-width: 3px; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 72%, #83aaff), var(--primary)); transition: width .42s cubic-bezier(.2,.75,.2,1); }
-.onebox-mascot-sync-progress.is-active .onebox-mascot-sync-track::before { position: absolute; z-index: 1; top: 0; bottom: 0; left: -34%; width: 34%; background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 78%, transparent), transparent); content: ''; animation: github-progress-sheen 1.3s linear infinite; pointer-events: none; }
-.onebox-mascot-sync-progress small { color: var(--muted); font-size: 9px; line-height: 1; text-align: right; }
-.onebox-mascot-sync-progress.is-error { border-color: color-mix(in srgb, var(--danger, #d85b6a) 46%, var(--line)); background: color-mix(in srgb, var(--danger, #d85b6a) 9%, var(--panel)); }
-.onebox-mascot-sync-progress.is-error .onebox-mascot-sync-icon,
-.onebox-mascot-sync-progress.is-error em { background: color-mix(in srgb, var(--danger, #d85b6a) 12%, transparent); color: var(--danger, #d85b6a); }
+.onebox-mascot-sync-head { display: grid; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.onebox-mascot-sync-progress strong { overflow: hidden; color: var(--ink); font-size: 10px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.onebox-mascot-sync-progress em { color: var(--primary); font-size: 10px; font-style: normal; font-variant-numeric: tabular-nums; font-weight: 700; }
+.onebox-mascot-sync-track { position: relative; display: block; height: 3px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--primary) 10%, var(--line)); }
+.onebox-mascot-sync-track i { display: block; width: 0; height: 100%; min-width: 2px; border-radius: inherit; background: var(--primary); transition: width .3s ease-out; }
+.onebox-mascot-sync-progress.is-active .onebox-mascot-sync-track::before { position: absolute; z-index: 1; top: 0; bottom: 0; left: -30%; width: 30%; background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 58%, transparent), transparent); content: ''; animation: github-progress-sheen 1.6s linear infinite; pointer-events: none; }
+.onebox-mascot-sync-progress.is-error { border-color: color-mix(in srgb, var(--danger, #d85b6a) 35%, var(--line)); background: color-mix(in srgb, var(--danger, #d85b6a) 6%, var(--panel)); }
+.onebox-mascot-sync-progress.is-error em { color: var(--danger, #d85b6a); }
 .onebox-mascot-sync-progress.is-error .onebox-mascot-sync-track i { background: var(--danger, #d85b6a); }
 .onebox-mascot-sync-progress:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 #oneboxMascotRoot.is-sync-only .onebox-mascot-button { visibility: hidden; }
-@keyframes mascot-sync-pop { from { opacity: 0; transform: translateY(5px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes mascot-sync-rotate { to { transform: rotate(360deg); } }
+@keyframes mascot-sync-pop { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 .onebox-mascot-visual { position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 78%; animation: mascot-breathe 5.4s ease-in-out infinite; will-change: transform; }
 .onebox-mascot-fullbody { display: none; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; overflow: visible; pointer-events: none; user-select: none; filter: drop-shadow(0 5px 6px color-mix(in srgb, var(--ink) 18%, transparent)); transform: scale(1.12); transform-origin: 50% 100%; opacity: 1; transition: opacity .1s ease; will-change: transform, opacity; }
 #oneboxMascotRoot[data-mascot-display="full"] { height: 108px; top: calc(75vh - 54px); }
