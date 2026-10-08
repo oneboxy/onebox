@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.545';
+const APP_VERSION = '2.18.546';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6438,6 +6438,13 @@ function calculatorKey(key) {
 }
 
 // Calendar -------------------------------------------------------------------
+function setCalendarMonth(year, month) {
+  const selectedDay = Number(String(state.selectedDate || '').slice(-2)) || 1;
+  const day = Math.min(selectedDay, new Date(year, month + 1, 0).getDate());
+  state.month = new Date(year, month, 1);
+  state.selectedDate = dateKey(new Date(year, month, day));
+  render();
+}
 function calendar() {
   const year = state.month.getFullYear();
   const month = state.month.getMonth();
@@ -6469,10 +6476,19 @@ function calendar() {
   const eventList = selectedEvents.length
     ? selectedEvents.map((item) => '<div class="swipe-row event-swipe-row" data-swipe-row><div class="event-item swipe-content"><div><strong>' + escapeHtml(item.title) + '</strong><small>' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div></div><button class="swipe-delete" data-delete-event="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>').join('')
     : '<p class="empty compact">' + t('noAgenda') + '</p>';
-  const monthLabel = state.language === 'en' ? new Intl.DateTimeFormat('en-US', { month: 'long' }).format(first) + ' ' + year : year + ' 年 ' + (month + 1) + ' 月';
+  const isEnglish = state.language === 'en';
+  const yearChoices = Array.from({ length: 201 }, (_, index) => 1900 + index);
+  if (!yearChoices.includes(year)) yearChoices.push(year);
+  yearChoices.sort((a, b) => a - b);
+  const yearOptions = yearChoices.map((value) => '<option value="' + value + '" ' + (value === year ? 'selected' : '') + '>' + value + '</option>').join('');
+  const monthNames = Array.from({ length: 12 }, (_, index) => new Intl.DateTimeFormat(isEnglish ? 'en-US' : 'zh-CN', { month: isEnglish ? 'long' : 'numeric' }).format(new Date(year, index, 1)));
+  const monthOptions = monthNames.map((value, index) => '<option value="' + index + '" ' + (index === month ? 'selected' : '') + '>' + escapeHtml(value) + (isEnglish ? '' : '月') + '</option>').join('');
+  const yearPicker = '<label class="calendar-picker calendar-year-picker"><select data-calendar-year aria-label="' + (isEnglish ? 'Choose year' : '选择年份') + '">' + yearOptions + '</select><span class="calendar-picker-value">' + year + '</span>' + (isEnglish ? '' : '<span class="calendar-picker-unit">年</span>') + '<i aria-hidden="true"></i></label>';
+  const monthPicker = '<label class="calendar-picker calendar-month-picker"><select data-calendar-month aria-label="' + (isEnglish ? 'Choose month' : '选择月份') + '">' + monthOptions + '</select><span class="calendar-picker-value">' + escapeHtml(monthNames[month]) + '</span>' + (isEnglish ? '' : '<span class="calendar-picker-unit">月</span>') + '<i aria-hidden="true"></i></label>';
+  const monthPickers = isEnglish ? monthPicker + yearPicker : yearPicker + monthPicker;
   const weekdays = state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   return heading(t('calendar'), t('calendarDesc')) +
-    '<div class="calendar-layout"><div class="calendar-card"><div class="calendar-top"><button class="icon-btn" data-month="-1" aria-label="Previous month">←</button><div class="calendar-month"><strong>' + monthLabel + '</strong><button class="text-btn calendar-today" data-today>' + t('today') + '</button></div><button class="icon-btn" data-month="1" aria-label="Next month">→</button></div>' +
+    '<div class="calendar-layout"><div class="calendar-card"><div class="calendar-top"><button class="calendar-nav-btn" data-month="-1" aria-label="' + (isEnglish ? 'Previous month' : '上个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div class="calendar-month"><div class="calendar-month-pickers">' + monthPickers + '</div><button class="text-btn calendar-today" data-today>' + t('today') + '</button></div><button class="calendar-nav-btn" data-month="1" aria-label="' + (isEnglish ? 'Next month' : '下个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>' +
     '<div class="calendar-legend"><span><i class="dot off"></i>' + t('legalHoliday') + '</span><span><i class="dot work"></i>' + t('makeUpWorkday') + '</span><span><i class="dot term"></i>' + t('solarTerm') + '</span></div><div class="calendar-grid">' + weekdays.map((day) => '<div class="dow">' + day + '</div>').join('') + cells + '</div></div>' +
    '<aside class="agenda-panel"><div class="subhead"><h3>' + t('agenda') + '</h3></div><div class="event-list">' + eventList + '</div><button class="calendar-add-event" data-open-event-dialog><span aria-hidden="true">＋</span>' + t('addAgenda') + '</button></aside></div>';
 }
@@ -10899,7 +10915,7 @@ workspace.addEventListener('click', async (event) => {
   if (event.target.closest('[data-clear-calc-history]')) { state.calcHistory = []; saveCalculator(); return render(); }
   if (event.target.closest('[data-open-event-dialog]')) return renderEventDialog();
   const month = event.target.closest('[data-month]');
-  if (month) { state.month = new Date(state.month.getFullYear(), state.month.getMonth() + Number(month.dataset.month), 1); return render(); }
+  if (month) return setCalendarMonth(state.month.getFullYear(), state.month.getMonth() + Number(month.dataset.month));
   if (event.target.closest('[data-today]')) { state.month = new Date(today.getFullYear(), today.getMonth(), 1); state.selectedDate = dateKey(today); return render(); }
   const day = event.target.closest('[data-date]');
   if (day) {
@@ -10982,6 +10998,8 @@ workspace.addEventListener('input', (event) => {
   if (event.target.id === 'translationInput') state.translation.input = event.target.value;
 });
 workspace.addEventListener('change', (event) => {
+  if (event.target.matches('[data-calendar-year]')) return setCalendarMonth(Number(event.target.value), state.month.getMonth());
+  if (event.target.matches('[data-calendar-month]')) return setCalendarMonth(state.month.getFullYear(), Number(event.target.value));
   if (event.target.dataset.devField === 'timestampUnit') { state.devTools.timestampUnit = event.target.value; updateDeveloperLiveState('timestampUnit'); }
   if (event.target.id === 'readerFileInput') { importReaderFiles(event.target.files); return; }
   if (event.target.id === 'ticketWalletFileInput') { importTicketWalletImage(event.target.files?.[0]); event.target.value = ''; return; }
