@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.558';
+const APP_VERSION = '2.18.559';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -670,6 +670,15 @@ const TICKET_TYPE_LABELS = Object.freeze({ train: ['火车票', 'Train ticket'],
 const TICKET_TYPE_ALIASES = Object.freeze({ coach: 'car', transit: 'car', concert: 'admission' });
 const TICKET_WALLET_TYPE_CATEGORIES = Object.freeze({ train: 'travel', flight: 'travel', car: 'travel', ferry: 'travel', movie: 'entertainment', admission: 'entertainment', dining: 'dining', other: 'other' });
 const TICKET_WALLET_TRAVEL_TYPES = Object.freeze(['train', 'flight', 'car', 'ferry']);
+const TICKET_WALLET_FLIGHT_TEMPLATES = Object.freeze({
+  'standard-v1': { id: 'standard-v1', title: '通用机票', note: '简洁蓝白', carrier: '', shortBrand: '' },
+  'air-china-v1': { id: 'air-china-v1', title: '中国国航', note: '国航 · 红白配色', carrier: '中国国际航空', shortBrand: '国航' },
+  'china-eastern-v1': { id: 'china-eastern-v1', title: '东方航空', note: '东航 · 靛蓝红线', carrier: '中国东方航空', shortBrand: '东航' },
+  'china-southern-v1': { id: 'china-southern-v1', title: '南方航空', note: '南航 · 天空蓝', carrier: '中国南方航空', shortBrand: '南航' },
+  'hainan-airlines-v1': { id: 'hainan-airlines-v1', title: '海南航空', note: '海航 · 绛红金调', carrier: '海南航空', shortBrand: '海航' },
+  'xiamen-airlines-v1': { id: 'xiamen-airlines-v1', title: '厦门航空', note: '厦航 · 海蓝青色', carrier: '厦门航空', shortBrand: '厦航' },
+  'shenzhen-airlines-v1': { id: 'shenzhen-airlines-v1', title: '深圳航空', note: '深航 · 蓝红配色', carrier: '深圳航空', shortBrand: '深航' },
+});
 const TICKET_WALLET_CATEGORIES = Object.freeze({
   all: { label: ['全部', 'All'], icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5h9A2.5 2.5 0 0 1 19.5 8v10A2.5 2.5 0 0 1 17 20.5H7A2.5 2.5 0 0 1 4.5 18V8A2.5 2.5 0 0 1 7 5.5h1"/><path d="M8 3.5h9A2.5 2.5 0 0 1 19.5 6M8 10h8M8 13.5h8M8 17h5"/></svg>' },
   travel: { label: ['出行', 'Travel'], icon: TICKET_TYPES.train.icon },
@@ -692,6 +701,23 @@ function normalizeTicketWalletFilter(value) {
 }
 function ticketWalletDefaultTypeForFilter(value) {
   return ({ all: 'train', travel: 'train', entertainment: 'movie', dining: 'dining', other: 'other' })[normalizeTicketWalletFilter(value)] || 'train';
+}
+function ticketWalletFlightTemplateForCarrier(value) {
+  const carrier = String(value || '').trim().toLowerCase().replace(/[\s·•_-]+/g, '');
+  const matches = [
+    [/中国国际航空|中国国航|国航|airchina|^ca(?:\d{1,4})?$/i, 'air-china-v1'],
+    [/中国东方航空|东方航空|东航|chinaeastern|^mu(?:\d{1,4})?$/i, 'china-eastern-v1'],
+    [/中国南方航空|南方航空|南航|chinasouthern|^cz(?:\d{1,4})?$/i, 'china-southern-v1'],
+    [/海南航空|海航|hainanairlines|^hu(?:\d{1,4})?$/i, 'hainan-airlines-v1'],
+    [/厦门航空|厦航|xiamenairlines|^mf(?:\d{1,4})?$/i, 'xiamen-airlines-v1'],
+    [/深圳航空|深航|shenzhenairlines|^zh(?:\d{1,4})?$/i, 'shenzhen-airlines-v1'],
+  ];
+  return matches.find(([pattern]) => pattern.test(carrier))?.[1] || '';
+}
+function ticketWalletNormalizeTemplate(type, value) {
+  if (type === 'train') return value === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1';
+  if (type === 'flight' && Object.prototype.hasOwnProperty.call(TICKET_WALLET_FLIGHT_TEMPLATES, value)) return value;
+  return 'standard-v1';
 }
 function ticketWalletPassengerParts(value = '', explicitName = '', explicitId = '') {
   const legacy = String(value || '').trim();
@@ -743,7 +769,9 @@ function normalizeTicketRecord(value) {
     journey: String(source.journey || '').trim(),
     notes: String(source.notes || '').trim(), sourceImageId: String(source.sourceImageId || ''),
     sourceImageName: String(source.sourceImageName || '').trim(), sourceMime: String(source.sourceMime || '').trim(),
-    template: source.template === 'crh-blue-v1' ? 'crh-blue-v1' : source.template === 'standard-v1' ? 'standard-v1' : 'pink-physical-v1',
+    template: type === 'flight'
+      ? ticketWalletFlightTemplateForCarrier(source.carrier) || ticketWalletNormalizeTemplate(type, source.template)
+      : ticketWalletNormalizeTemplate(type, source.template),
     createdAt, updatedAt: Number(source.updatedAt) || now,
   };
 }
@@ -3655,12 +3683,14 @@ function ticketWalletField(label, id, value, type = 'text', extra = '') {
 }
 function ticketWalletAddTemplateMarkup(draft) {
   const isTrain = draft.type === 'train';
+  const isFlight = draft.type === 'flight';
   const options = isTrain ? [
     { id: 'crh-blue-v1', swatch: 'blue', title: '浅蓝票面', note: '默认票面 · 清爽样式' },
     { id: 'pink-physical-v1', swatch: 'pink', title: '经典纸票面', note: '传统纸质样式' },
-  ] : [{ id: 'standard-v1', swatch: draft.type, title: '标准票面', note: '适配当前分类' }];
-  const layoutClass = options.length === 1 ? ' is-single' : ' is-multiple';
-  return '<fieldset class="ticket-wallet-template-picker"><legend>票面样式</legend><div class="ticket-wallet-template-options' + layoutClass + '">' + options.map((item) => '<button type="button" class="ticket-wallet-template-option ' + (draft.template === item.id ? 'active' : '') + '" aria-pressed="' + (draft.template === item.id ? 'true' : 'false') + '" data-ticket-wallet-template="' + item.id + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>').join('') + '</div></fieldset>';
+  ] : isFlight ? Object.values(TICKET_WALLET_FLIGHT_TEMPLATES).map((item) => ({ ...item, swatch: item.id.replace(/-v1$/, '') })) : [{ id: 'standard-v1', swatch: draft.type, title: '标准票面', note: '适配当前分类' }];
+  const layoutClass = isFlight ? ' is-airlines' : options.length === 1 ? ' is-single' : ' is-multiple';
+  const legend = isFlight ? (state.language === 'en' ? 'Airline ticket style' : '航空公司票面') : (state.language === 'en' ? 'Ticket style' : '票面样式');
+  return '<fieldset class="ticket-wallet-template-picker"><legend>' + escapeHtml(legend) + '</legend><div class="ticket-wallet-template-options' + layoutClass + '">' + options.map((item) => '<button type="button" class="ticket-wallet-template-option ' + (draft.template === item.id ? 'active' : '') + '" aria-pressed="' + (draft.template === item.id ? 'true' : 'false') + '" data-ticket-wallet-template="' + item.id + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>').join('') + '</div></fieldset>';
 }
 function ticketWalletAddTypeSelectorMarkup(draft) {
   const category = ticketWalletCategoryForType(draft.type);
@@ -3888,13 +3918,17 @@ function ticketWalletPhysicalEditAttrs(record, field, label, editable = true) {
 }
 function ticketWalletPhysicalTicketMarkup(record, editable = true) {
   const meta = TICKET_TYPES[record.type] || TICKET_TYPES.other;
+  const flightTemplate = record.type === 'flight' ? TICKET_WALLET_FLIGHT_TEMPLATES[record.template] : null;
+  const flightClass = flightTemplate && flightTemplate.id !== 'standard-v1' ? ' ticket-wallet-flight-template-' + flightTemplate.id : '';
+  const flightMark = flightTemplate?.shortBrand ? '<span class="ticket-wallet-physical-icon ticket-wallet-airline-mark" aria-hidden="true">' + escapeHtml(flightTemplate.shortBrand) + '</span>' : '<span class="ticket-wallet-physical-icon">' + meta.icon + '</span>';
+  const displayCarrier = record.carrier || flightTemplate?.carrier || record.title || ticketTypeLabel(record.type);
   const watermark = { flight: 'BOARDING PASS', car: 'ROAD TICKET', ferry: 'FERRY PASS', movie: 'CINEMA TICKET', admission: 'ADMISSION', dining: 'DINING ORDER', other: 'ONEBOX TICKET' }[record.type] || 'ONEBOX TICKET';
   const from = record.from || (record.type === 'dining' ? record.carrier || '门店' : '出发地');
   const to = record.to || (record.type === 'dining' ? '订单' : '目的地');
   const detailField = record.ticketNo ? 'ticketNo' : 'seat';
   const detail = record.seat || record.ticketNo || record.passenger || '待补充';
   const code = record.ticketCode || record.ticketNo || record.id;
-  return '<div class="ticket-wallet-physical-ticket ticket-wallet-physical-ticket-' + record.type + '"><span class="ticket-wallet-physical-watermark">' + watermark + '</span><div class="ticket-wallet-physical-head"><span class="ticket-wallet-physical-icon">' + meta.icon + '</span><div><small class="ticket-wallet-type-label-badge">' + escapeHtml(ticketTypeLabel(record.type)) + '</small><strong>' + escapeHtml(record.carrier || record.title || ticketTypeLabel(record.type)) + '</strong></div><span class="ticket-wallet-source">' + (record.sourceImageId ? escapeHtml(t('ticketWalletSourceReady')) : '电子票证') + '</span></div><div class="ticket-wallet-physical-route"><div><small>' + escapeHtml(record.type === 'movie' || record.type === 'admission' ? '项目' : '出发') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'from', t('ticketWalletFrom'), editable) + '>' + escapeHtml(from) + '</strong></div><span class="ticket-wallet-physical-arrow">→</span><div class="ticket-wallet-physical-route-end"><small>' + escapeHtml(record.type === 'movie' || record.type === 'admission' ? '场次' : '到达') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'to', t('ticketWalletTo'), editable) + '>' + escapeHtml(to) + '</strong></div></div><div class="ticket-wallet-physical-meta"><span><small>时间</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'departAt', t('ticketWalletDepart'), editable) + '>' + escapeHtml(ticketWalletDateLabel(record.departAt)) + '</strong></span><span><small>' + escapeHtml(record.type === 'dining' ? '订单信息' : '座位 / 票号') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, detailField, detailField === 'ticketNo' ? t('ticketWalletTicketNo') : t('ticketWalletSeat'), editable) + '>' + escapeHtml(detail) + '</strong></span></div><div class="ticket-wallet-physical-footer"><span ' + ticketWalletPhysicalEditAttrs(record, 'ticketCode', t('ticketWalletCode'), editable) + '>' + escapeHtml(code) + '</span><i aria-hidden="true"></i></div></div>';
+  return '<div class="ticket-wallet-physical-ticket ticket-wallet-physical-ticket-' + record.type + flightClass + '"><span class="ticket-wallet-physical-watermark">' + watermark + '</span><div class="ticket-wallet-physical-head">' + flightMark + '<div><small class="ticket-wallet-type-label-badge">' + escapeHtml(ticketTypeLabel(record.type)) + '</small><strong>' + escapeHtml(displayCarrier) + '</strong></div><span class="ticket-wallet-source">' + (record.sourceImageId ? escapeHtml(t('ticketWalletSourceReady')) : '电子票证') + '</span></div><div class="ticket-wallet-physical-route"><div><small>' + escapeHtml(record.type === 'movie' || record.type === 'admission' ? '项目' : '出发') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'from', t('ticketWalletFrom'), editable) + '>' + escapeHtml(from) + '</strong></div><span class="ticket-wallet-physical-arrow">→</span><div class="ticket-wallet-physical-route-end"><small>' + escapeHtml(record.type === 'movie' || record.type === 'admission' ? '场次' : '到达') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'to', t('ticketWalletTo'), editable) + '>' + escapeHtml(to) + '</strong></div></div><div class="ticket-wallet-physical-meta"><span><small>时间</small><strong ' + ticketWalletPhysicalEditAttrs(record, 'departAt', t('ticketWalletDepart'), editable) + '>' + escapeHtml(ticketWalletDateLabel(record.departAt)) + '</strong></span><span><small>' + escapeHtml(record.type === 'dining' ? '订单信息' : '座位 / 票号') + '</small><strong ' + ticketWalletPhysicalEditAttrs(record, detailField, detailField === 'ticketNo' ? t('ticketWalletTicketNo') : t('ticketWalletSeat'), editable) + '>' + escapeHtml(detail) + '</strong></span></div><div class="ticket-wallet-physical-footer"><span ' + ticketWalletPhysicalEditAttrs(record, 'ticketCode', t('ticketWalletCode'), editable) + '>' + escapeHtml(code) + '</span><i aria-hidden="true"></i></div></div>';
 }
 function ticketWalletCardActionButtons(record) {
   return '<button class="ghost" data-ticket-wallet-edit="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletEdit')) + '</button><button class="ghost" disabled aria-disabled="true" title="' + escapeHtml(t('ticketWalletAppleHint')) + '">' + escapeHtml(t('ticketWalletApple')) + '</button><button class="ghost danger" data-ticket-wallet-delete="' + escapeHtml(record.id) + '">' + escapeHtml(t('ticketWalletDelete')) + '</button>';
@@ -11118,19 +11152,36 @@ workspace.addEventListener('click', async (event) => {
       state.ticketWalletDraft.type = nextType;
       state.ticketWalletDraft.template = ticketWalletDefaultTemplate(nextType);
       state.ticketWalletDraft.title = ticketTypeLabel(nextType);
+      state.ticketWalletDraft.carrier = '';
     }
     return render();
   }
   const ticketWalletAddType = event.target.closest('[data-ticket-wallet-add-type]');
   if (ticketWalletAddType && state.ticketWalletEditorOpen && state.ticketWalletDraft) {
     const nextType = normalizeTicketType(ticketWalletAddType.dataset.ticketWalletAddType);
-    state.ticketWalletDraft.type = nextType;
-    state.ticketWalletDraft.template = ticketWalletDefaultTemplate(nextType);
-    state.ticketWalletDraft.title = ticketTypeLabel(nextType);
+    if (state.ticketWalletDraft.type !== nextType) {
+      state.ticketWalletDraft.type = nextType;
+      state.ticketWalletDraft.template = ticketWalletDefaultTemplate(nextType);
+      state.ticketWalletDraft.title = ticketTypeLabel(nextType);
+      state.ticketWalletDraft.carrier = '';
+    }
     return render();
   }
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
-  if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(state.ticketWalletDraft.type); document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => { item.classList.toggle('active', item === ticketWalletTemplate); item.setAttribute('aria-pressed', item === ticketWalletTemplate ? 'true' : 'false'); }); return; }
+  if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) {
+    const draft = state.ticketWalletDraft;
+    const previousTemplate = TICKET_WALLET_FLIGHT_TEMPLATES[draft.template];
+    const nextTemplateId = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(draft.type);
+    const nextTemplate = TICKET_WALLET_FLIGHT_TEMPLATES[nextTemplateId];
+    if (draft.type === 'flight' && (!draft.carrier || previousTemplate?.carrier && draft.carrier === previousTemplate.carrier)) draft.carrier = nextTemplate?.carrier || '';
+    draft.template = ticketWalletNormalizeTemplate(draft.type, nextTemplateId);
+    document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => {
+      const selected = item === ticketWalletTemplate;
+      item.classList.toggle('active', selected);
+      item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    return;
+  }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');
   if (ticketWalletFilter) {
     cancelTicketWalletReorder();

@@ -14966,3 +14966,93 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
   #calendarPickerDialog .calendar-picker-dialog-card { width: min(420px, 100%); max-height: calc(72dvh - env(safe-area-inset-bottom)); margin: 0 auto; padding: 15px; border-radius: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { #calendarPickerDialog, #calendarPickerDialog .calendar-picker-dialog-card { animation: none; } }
+
+/* Flight tickets can use a restrained airline color system while keeping the
+   same information layout and editable fields as other wallet tickets. */
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-airlines {
+  display: flex;
+  gap: 8px;
+  padding: 2px 2px 9px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-color: color-mix(in srgb, var(--muted) 35%, transparent) transparent;
+  scrollbar-width: thin;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-airlines .ticket-wallet-template-option {
+  min-height: 62px;
+  flex: 0 0 146px;
+  gap: 8px;
+  padding: 8px 30px 8px 8px;
+  scroll-snap-align: start;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-airlines .ticket-wallet-template-option.active {
+  padding: 7px 29px 7px 7px;
+  border-color: var(--ticket-airline-accent, var(--primary)) !important;
+  background: color-mix(in srgb, var(--ticket-airline-accent, var(--primary)) 7%, var(--panel));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ticket-airline-accent, var(--primary)) 22%, transparent);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-airlines .ticket-wallet-template-swatch {
+  width: 44px;
+  height: 34px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-airlines .ticket-wallet-template-option strong {
+  font-size: 11px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-options.is-airlines .ticket-wallet-template-option small {
+  font-size: 9px;
+}
+.ticket-wallet-template-option[data-ticket-wallet-template="standard-v1"] { --ticket-airline-accent: #3e83d5; }
+.ticket-wallet-template-option[data-ticket-wallet-template="air-china-v1"] { --ticket-airline-accent: #b32236; }
+.ticket-wallet-template-option[data-ticket-wallet-template="china-eastern-v1"] { --ticket-airline-accent: #234276; }
+.ticket-wallet-template-option[data-ticket-wallet-template="china-southern-v1"] { --ticket-airline-accent: #1686c8; }
+.ticket-wallet-template-option[data-ticket-wallet-template="hainan-airlines-v1"] { --ticket-airline-accent: #9b3157; }
+.ticket-wallet-template-option[data-ticket-wallet-template="xiamen-airlines-v1"] { --ticket-airline-accent: #118c8e; }
+.ticket-wallet-template-option[data-ticket-wallet-template="shenzhen-airlines-v1"] { --ticket-airline-accent: #d23c4c; }
+.ticket-wallet-template-swatch-standard { background: linear-gradient(145deg, #e7f2fc, #fff 75%); }
+.ticket-wallet-template-swatch-air-china { background: linear-gradient(145deg, #fff1ed, #f7dfe0); }
+.ticket-wallet-template-swatch-china-eastern { background: linear-gradient(145deg, #e8efff, #f8e5e7); }
+.ticket-wallet-template-swatch-china-southern { background: linear-gradient(145deg, #dff4ff, #f5fbff); }
+.ticket-wallet-template-swatch-hainan-airlines { background: linear-gradient(145deg, #f9e7ee, #fff8e8); }
+.ticket-wallet-template-swatch-xiamen-airlines { background: linear-gradient(145deg, #dff5f0, #f5fbf7); }
+.ticket-wallet-template-swatch-shenzhen-airlines { background: linear-gradient(145deg, #e6efff, #ffe9e8); }
+.ticket-wallet-template-swatch-air-china::before,
+.ticket-wallet-template-swatch-china-eastern::before,
+.ticket-wallet-template-swatch-china-southern::before,
+.ticket-wallet-template-swatch-hainan-airlines::before,
+.ticket-wallet-template-swatch-xiamen-airlines::before,
+.ticket-wallet-template-swatch-shenzhen-airlines::before,
+.ticket-wallet-template-swatch-standard::before {
+  top: 7px;
+  right: 5px;
+  bottom: 7px;
+  left: auto;
+  width: 4px;
+  height: auto;
+  border-radius: 4px;
+  background: var(--ticket-airline-accent, #3e83d5);
+  box-shadow: none;
+  opacity: .9;
+}
+.ticket-wallet-physical-ticket-flight.ticket-wallet-flight-template-air-china-v1 { --ticket-accent: #b32236; --physical-bg: linear-gradient(135deg, #fff0ec 0%, #fff 67%, #f7e1e2 100%); --physical-ink: #48242a; }
+.ticket-wallet-physical-ticket-flight.ticket-wallet-flight-template-china-eastern-v1 { --ticket-accent: #234276; --physical-bg: linear-gradient(135deg, #e9efff 0%, #fff 65%, #f8e3e6 100%); --physical-ink: #202c45; }
+.ticket-wallet-physical-ticket-flight.ticket-wallet-flight-template-china-southern-v1 { --ticket-accent: #1686c8; --physical-bg: linear-gradient(135deg, #dff3ff 0%, #fff 70%, #edf8ff 100%); --physical-ink: #17364c; }
+.ticket-wallet-physical-ticket-flight.ticket-wallet-flight-template-hainan-airlines-v1 { --ticket-accent: #9b3157; --physical-bg: linear-gradient(135deg, #f8e7ed 0%, #fff 65%, #fff6e4 100%); --physical-ink: #482734; }
+.ticket-wallet-physical-ticket-flight.ticket-wallet-flight-template-xiamen-airlines-v1 { --ticket-accent: #118c8e; --physical-bg: linear-gradient(135deg, #def4ef 0%, #fff 68%, #eef9f4 100%); --physical-ink: #1c3d3c; }
+.ticket-wallet-physical-ticket-flight.ticket-wallet-flight-template-shenzhen-airlines-v1 { --ticket-accent: #d23c4c; --physical-bg: linear-gradient(135deg, #e7efff 0%, #fff 65%, #ffeded 100%); --physical-ink: #352b3a; }
+.ticket-wallet-physical-ticket-flight[class*="ticket-wallet-flight-template-"]::after {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--ticket-accent);
+  content: '';
+  pointer-events: none;
+}
+.ticket-wallet-airline-mark {
+  border: 1px solid color-mix(in srgb, var(--ticket-accent) 26%, transparent);
+  background: color-mix(in srgb, var(--ticket-accent) 12%, #fff);
+  color: var(--ticket-accent);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .04em;
+}
