@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.522';
+const APP_VERSION = '2.18.523';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7276,7 +7276,7 @@ async function githubApiFetch(url, options = {}) {
       else options.signal?.addEventListener('abort', abort, { once: true });
       const deadline = setTimeout(() => controller.abort(), 45000);
       let response;
-      try { response = await fetch(url, { ...options, signal: controller.signal }); }
+      try { response = await fetch(url, { cache: 'no-store', ...options, signal: controller.signal }); }
       finally { clearTimeout(deadline); options.signal?.removeEventListener('abort', abort); }
       const authorization = new Headers(options.headers).get('Authorization') || '';
       githubResponseTokens.set(response, authorization.replace(/^Bearer /i, ''));
@@ -7289,14 +7289,16 @@ async function githubApiFetch(url, options = {}) {
       if (options.signal?.aborted) throw error;
       if (attempt === 2) {
         if (error?.name === 'AbortError') throw Error(state.language === 'en' ? 'GitHub API timed out. Please check your connection and retry.' : 'GitHub API 请求超时，请检查网络后重试。');
-        throw error;
+        const failed = Error(githubBrowserError(error));
+        failed.githubRequestMethod = options.method || 'GET';
+        throw failed;
       }
       await sleep(900 * (attempt + 1));
     }
   }
   throw lastError || Error(state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败');
 }
-const GITHUB_SYNC_CHUNK_CHARS = 700000;
+const GITHUB_SYNC_CHUNK_CHARS = 250000;
 const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive]);
 function isSyncableStorageKey(key) {
   return String(key || '').startsWith('onebox.')
@@ -8102,7 +8104,7 @@ async function findGithubGist() {
   }
   return found || null;
 }
-const GITHUB_SYNC_UPLOAD_BATCH_CHARS = 900000;
+const GITHUB_SYNC_UPLOAD_BATCH_CHARS = 300000;
 function githubSyncUploadBatches(entries) {
   const batches = [];
   let current = {};
@@ -8264,7 +8266,9 @@ async function githubUpload(allowFreshGistRetry = true, forceNewGist = false) {
       state.githubSync.active = false;
       return githubUpload(false, true);
     }
-    const message = githubBrowserError(error) || (state.language === 'en' ? 'GitHub upload failed' : 'GitHub 上传失败，请重试');
+    const detail = githubBrowserError(error) || (state.language === 'en' ? 'GitHub upload failed' : 'GitHub 上传失败，请重试');
+    const stage = state.githubSync.message;
+    const message = detail + (error.githubRequestMethod ? ' (' + error.githubRequestMethod + ' · ' + stage + ')' : '');
     finishGithubSync(mode, state.language === 'en' ? 'Upload failed' : '上传失败', message);
     toast((state.language === 'en' ? 'GitHub upload failed: ' : 'GitHub 上传失败：') + message, 'error', { persistent: true });
   }
