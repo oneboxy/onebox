@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.520';
+const APP_VERSION = '2.18.521';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -55,6 +55,7 @@ const STORAGE = {
   ticketWalletTypeFilter: 'onebox.ticket-wallet-type-filter',
   ticketWalletMemories: 'onebox.ticket-wallet-memories',
   ticketWalletMapCache: 'onebox.ticket-wallet-map-cache',
+  ticketWalletDeleted: 'onebox.ticket-wallet-deleted',
 };
 const TOOL_DEFS = {
   calculator: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18h8"/></svg>', key: 'calculator' },
@@ -119,7 +120,7 @@ pageSwipeStage.parentNode.insertBefore(homeSourceNav, pageSwipeStage);
 const parseStored = (key, fallback) => {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 };
-const GITHUB_CUSTOM_SYNC_DEFAULTS = Object.freeze({ settings: true, navigation: true, reading: true, messages: true, calendar: true, weather: true, translation: true, calculator: true });
+const GITHUB_CUSTOM_SYNC_DEFAULTS = Object.freeze({ settings: true, navigation: true, reading: true, messages: true, calendar: true, weather: true, translation: true, calculator: true, ticketWallet: true });
 function normalizeGithubSyncSelection(value) {
   const source = value && typeof value === 'object' ? value : {};
   return Object.fromEntries(Object.keys(GITHUB_CUSTOM_SYNC_DEFAULTS).map((key) => [key, source[key] !== false]));
@@ -135,6 +136,7 @@ const GITHUB_CUSTOM_SYNC_STORAGE_KEYS = Object.freeze({
   weather: new Set([STORAGE.weatherCards, STORAGE.legacyWeather]),
   translation: new Set([STORAGE.translationHistory, STORAGE.translationHistoryOpen]),
   calculator: new Set([STORAGE.calculator]),
+  ticketWallet: new Set([STORAGE.ticketWallet, STORAGE.ticketWalletDisplayOrder, STORAGE.ticketWalletTypeFilter, STORAGE.ticketWalletMemories, STORAGE.ticketWalletMapCache, STORAGE.ticketWalletDeleted]),
 });
 const GITHUB_SYNC_GROUP_FIELDS = Object.freeze({
   settings: ['theme', 'color', 'languageMode', 'language', 'layoutMode', 'topDisplay', 'footprint', 'mascotVisible', 'mascotDisplayMode', 'mascotPosition', 'petProfile'],
@@ -145,6 +147,7 @@ const GITHUB_SYNC_GROUP_FIELDS = Object.freeze({
   weather: ['weatherCards'],
   translation: ['translationHistory', 'translationHistoryOpen'],
   calculator: ['calculator'],
+  ticketWallet: ['ticketWalletFiles'],
 });
 function githubSyncCustomGroupForStorageKey(key) {
   return Object.entries(GITHUB_CUSTOM_SYNC_STORAGE_KEYS).find(([, keys]) => keys.has(key))?.[0] || '';
@@ -318,10 +321,10 @@ const DICT = {
     copied: '已复制', translationInput: '输入待翻译内容', translateNow: '开始翻译', saveTranslation: '保存到本机',
     source: '源语言', target: '目标语言', translationResult: '翻译结果', translationHistory: '最近翻译',
     noTranslation: '翻译结果会显示在这里。', noHistory: '还没有保存翻译。',
-    githubSync: 'GitHub 云同步', githubDialogSubtitle: '跨设备同步', githubDescription: '将本机设置、阅读数据和书籍保存到你的私有 Gist。', githubNotConnectedHint: '连接私有 Gist，同步设置、导航、阅读和消息数据。', githubConnectedHint: '同步设置、导航、阅读、消息等数据', githubCustomSync: '自定义同步内容', githubCustomSyncHint: '勾选可同步，不勾选不同步', githubOptionSettings: '设置', githubOptionNavigation: '导航', githubOptionReading: '阅读', githubOptionMessages: '消息', githubOptionCalendar: '日程', githubOptionWeather: '天气', githubOptionTranslation: '翻译', githubOptionCalculator: '计算器', githubAgreementCheck: '我已阅读并同意', githubAgreementRequired: '请先阅读并同意用户协议后再登录 GitHub。',
+    githubSync: 'GitHub 云同步', githubDialogSubtitle: '跨设备同步', githubDescription: '将本机设置、阅读数据、书籍和卡包保存到你的私有 Gist。', githubNotConnectedHint: '连接私有 Gist，同步设置、导航、阅读、消息和卡包。', githubConnectedHint: '同步设置、导航、阅读、消息和卡包等数据', githubCustomSync: '自定义同步内容', githubCustomSyncHint: '勾选可同步，不勾选不同步', githubOptionSettings: '设置', githubOptionNavigation: '导航', githubOptionReading: '阅读', githubOptionMessages: '消息', githubOptionCalendar: '日程', githubOptionWeather: '天气', githubOptionTranslation: '翻译', githubOptionCalculator: '计算器', githubOptionTicketWallet: '卡包', githubAgreementCheck: '我已阅读并同意', githubAgreementRequired: '请先阅读并同意用户协议后再登录 GitHub。',
     githubClientId: 'GitHub OAuth Client ID', githubClientHint: 'OneBox 已内置公开的授权标识，不需要手动配置。', githubDeveloperSettings: '打开 OAuth Apps 设置',
     githubBrowserFlowError: '无法打开 GitHub 授权页，请检查网络后重试。', githubNetworkError: '无法连接 GitHub API，请检查网络或稍后重试。', githubAccessToken: 'GitHub 访问令牌', githubTokenHint: '令牌只保存在当前设备，需要 gist 权限。', githubUseToken: '使用访问令牌连接', githubTokenMissing: '请先填写 GitHub 访问令牌。', githubTokenInvalid: '访问令牌无效或没有可用权限。', githubTokenConnected: 'GitHub 已连接', githubWaiting: '等待 GitHub 授权…', githubCancel: '取消授权',
-    githubSyncScopeTitle: '同步内容', githubSyncScope: '设置、导航、阅读数据和本地书籍。', githubSyncPrivacy: '令牌和首页网络缓存不会同步。', githubAuthHint: '授权后会自动返回 OneBox。', githubUploadHint: '保存本机最新数据', githubDownloadHint: '恢复最近备份', githubConnectHint: '授权后开启同步', githubLogoutHint: '仅断开本机连接', githubBackgroundHint: '关闭窗口也会继续。',
+    githubSyncScopeTitle: '同步内容', githubSyncScope: '设置、导航、阅读、书籍和卡包（含原件）。', githubSyncPrivacy: '令牌和首页网络缓存不会同步。', githubAuthHint: '授权后会自动返回 OneBox。', githubUploadHint: '保存本机最新数据', githubDownloadHint: '恢复最近备份', githubConnectHint: '授权后开启同步', githubLogoutHint: '仅断开本机连接', githubBackgroundHint: '关闭窗口也会继续。',
     githubLogin: '连接 GitHub', githubLogout: '退出登录', githubBackup: '备份到云端', githubRestore: '恢复到本地', upload: '上传到 GitHub', download: '从 GitHub 恢复', githubAuthExpired: 'GitHub 授权已失效，请重新连接 GitHub。', githubSyncNotFound: '当前 GitHub 账号中没有找到 OneBox 同步数据，请先在另一台设备上传。', githubSyncReadFailed: 'GitHub 中的 OneBox 同步文件无法读取，请检查 Gist 权限或内容。', githubSyncMalformed: 'GitHub 中的 OneBox 同步文件不是有效的 JSON。', githubSyncInvalidData: 'GitHub 中的 OneBox 同步数据格式错误或已损坏。',
     githubConnected: '已连接', githubNotConnected: '尚未连接', openDevice: '打开验证页面',
     appUpdate: '应用更新', checkUpdate: '更新', updateAvailable: '发现有新版本', upToDate: '已是最新版', updating: '检查中', updateApplying: '更新中', updateCheckFailed: '检查失败，可重试', applyUpdate: '更新',
@@ -364,10 +367,10 @@ const DICT = {
     copied: 'Copied', translationInput: 'Text to translate', translateNow: 'Translate', saveTranslation: 'Save locally',
     source: 'Source', target: 'Target', translationResult: 'Translation', translationHistory: 'Recent translations',
     noTranslation: 'Your translation will appear here.', noHistory: 'No saved translations yet.',
-    githubSync: 'GitHub cloud sync', githubDialogSubtitle: 'Cross-device sync', githubDescription: 'Save this device’s settings, reading data and books to your private Gist.', githubNotConnectedHint: 'Connect a private Gist to sync settings, navigation, reading and messages.', githubConnectedHint: 'Sync settings, navigation, reading and message data', githubCustomSync: 'Custom sync content', githubCustomSyncHint: 'Checked items sync; unchecked items stay local', githubOptionSettings: 'Settings', githubOptionNavigation: 'Navigation', githubOptionReading: 'Reading', githubOptionMessages: 'Messages', githubOptionCalendar: 'Calendar', githubOptionWeather: 'Weather', githubOptionTranslation: 'Translation', githubOptionCalculator: 'Calculator', githubAgreementCheck: 'I have read and agree', githubAgreementRequired: 'Please read and agree to the User Agreement before signing in to GitHub.',
+    githubSync: 'GitHub cloud sync', githubDialogSubtitle: 'Cross-device sync', githubDescription: 'Save settings, reading data, books and your wallet to your private Gist.', githubNotConnectedHint: 'Connect a private Gist to sync settings, navigation, reading, messages and your wallet.', githubConnectedHint: 'Sync settings, navigation, reading, messages and your wallet', githubCustomSync: 'Custom sync content', githubCustomSyncHint: 'Checked items sync; unchecked items stay local', githubOptionSettings: 'Settings', githubOptionNavigation: 'Navigation', githubOptionReading: 'Reading', githubOptionMessages: 'Messages', githubOptionCalendar: 'Calendar', githubOptionWeather: 'Weather', githubOptionTranslation: 'Translation', githubOptionCalculator: 'Calculator', githubOptionTicketWallet: 'Wallet', githubAgreementCheck: 'I have read and agree', githubAgreementRequired: 'Please read and agree to the User Agreement before signing in to GitHub.',
     githubClientId: 'GitHub OAuth Client ID', githubClientHint: 'OneBox includes its public authorization identifier; no manual setup is required.', githubDeveloperSettings: 'Open OAuth Apps settings',
     githubBrowserFlowError: 'GitHub authorization could not be opened. Check your network and try again.', githubNetworkError: 'Could not connect to the GitHub API. Check your network and try again.', githubAccessToken: 'GitHub access token', githubTokenHint: 'Stored only on this device; gist permission is required.', githubUseToken: 'Connect with access token', githubTokenMissing: 'Enter a GitHub access token first.', githubTokenInvalid: 'The access token is invalid or lacks the required permission.', githubTokenConnected: 'GitHub connected', githubWaiting: 'Waiting for GitHub authorization…', githubCancel: 'Cancel authorization',
-    githubSyncScopeTitle: 'Sync content', githubSyncScope: 'Settings, navigation, reading data and local books.', githubSyncPrivacy: 'Tokens and home network caches are not synced.', githubAuthHint: 'You will return to OneBox after authorization.', githubUploadHint: 'Save the latest device data', githubDownloadHint: 'Restore the latest backup', githubConnectHint: 'Authorize to enable sync', githubLogoutHint: 'Disconnect this device only', githubBackgroundHint: 'Closing the window will not stop it.',
+    githubSyncScopeTitle: 'Sync content', githubSyncScope: 'Settings, navigation, reading, books and wallet originals.', githubSyncPrivacy: 'Tokens and home network caches are not synced.', githubAuthHint: 'You will return to OneBox after authorization.', githubUploadHint: 'Save the latest device data', githubDownloadHint: 'Restore the latest backup', githubConnectHint: 'Authorize to enable sync', githubLogoutHint: 'Disconnect this device only', githubBackgroundHint: 'Closing the window will not stop it.',
     githubLogin: 'Connect GitHub', githubLogout: 'Sign out', githubBackup: 'Back up to cloud', githubRestore: 'Restore to device', upload: 'Upload to GitHub', download: 'Restore from GitHub', githubAuthExpired: 'GitHub authorization expired. Please reconnect GitHub.', githubSyncNotFound: 'No OneBox sync data was found in this GitHub account. Upload from another device first.', githubSyncReadFailed: 'The OneBox sync file in GitHub could not be read. Check the Gist permission or content.', githubSyncMalformed: 'The OneBox sync file in GitHub is not valid JSON.', githubSyncInvalidData: 'The OneBox sync data in GitHub is malformed or damaged.',
     githubConnected: 'Connected', githubNotConnected: 'Not connected', openDevice: 'Open verification page',
     appUpdate: 'App update', checkUpdate: 'Update', updateAvailable: 'A new version is available', upToDate: 'Latest version', updating: 'Checking', updateApplying: 'Updating', updateCheckFailed: 'Check failed. Try again.', applyUpdate: 'Update',
@@ -3435,8 +3438,10 @@ async function importTicketWalletJson(file) {
 function deleteTicketWalletRecord(id) {
   const record = state.ticketWallet.find((item) => item.id === id);
   if (!record || !window.confirm(t('ticketWalletDeleteConfirm'))) return;
+  const deleted = parseStored(STORAGE.ticketWalletDeleted, {}) || {};
+  deleted[id] = Date.now(); saveStored(STORAGE.ticketWalletDeleted, deleted);
   state.ticketWallet = state.ticketWallet.filter((item) => item.id !== id); if (state.ticketWalletSelectedId === id) state.ticketWalletSelectedId = ''; saveTicketWallet();
-  if (record.sourceImageId) void ticketWalletImageDelete(record.sourceImageId);
+  if (record.sourceImageId && !ticketWalletSyncImageIds().includes(record.sourceImageId)) void ticketWalletImageDelete(record.sourceImageId);
   render(); toast(t('ticketWalletDeleted'));
 }
 function openTicketWalletMemoryEditor(key) {
@@ -7336,6 +7341,90 @@ async function buildReaderSyncAssets() {
   if (libraryChanged) saveLibrary();
   return { files, manifest: { version: 1, books } };
 }
+function ticketWalletSyncImageIds(tickets = state.ticketWallet, memories = state.ticketWalletMemories) {
+  return [...new Set([...(Array.isArray(tickets) ? tickets : []).map((item) => item?.sourceImageId), ...Object.values(memories || {}).map((item) => item?.imageId)].filter((id) => typeof id === 'string' && id))];
+}
+function ticketWalletSyncStorageValue(storage, key, fallback) {
+  try { return JSON.parse(storage?.[key]) ?? fallback; } catch { return fallback; }
+}
+function ticketWalletRemoteImageIds(remote) {
+  return ticketWalletSyncImageIds(ticketWalletSyncStorageValue(remote?.storage, STORAGE.ticketWallet, []), ticketWalletSyncStorageValue(remote?.storage, STORAGE.ticketWalletMemories, {}));
+}
+async function buildTicketWalletSyncAssets() {
+  const files = {}, images = {};
+  for (const id of ticketWalletSyncImageIds()) {
+    const stored = await oneBoxDbGet('ticket-images', id);
+    const bytes = await syncBytes(stored?.blob);
+    if (!bytes?.length) throw Error(state.language === 'en' ? 'A wallet original is missing on this device. Restore it before uploading.' : '本机缺少卡包原件，请先从保存原件的设备上传并恢复后再同步。');
+    const names = syncChunkBase64(readerBytesToBase64(bytes)).map((content, index) => {
+      const name = 'onebox-ticket-' + syncAssetKey(id) + '-' + index + '.b64';
+      files[name] = content; return name;
+    });
+    images[id] = { name: stored.name || '', type: stored.type || stored.blob.type || 'application/octet-stream', size: bytes.byteLength, files: names };
+  }
+  return { files, manifest: { version: 1, images } };
+}
+async function readTicketWalletSyncAsset(entry, gist) {
+  if (!Array.isArray(entry?.files) || !entry.files.length || entry.files.some((name) => !gist?.files?.[name])) throw Error(state.language === 'en' ? 'GitHub wallet original is incomplete' : 'GitHub 卡包原件文件不完整');
+  const chunks = await Promise.all(entry.files.map((name) => githubFileContent(gist.files[name])));
+  if (chunks.some((chunk) => typeof chunk !== 'string' || !chunk)) throw Error(state.language === 'en' ? 'Could not read wallet original' : '卡包原件读取失败');
+  const bytes = syncBase64Bytes(chunks.join(''));
+  if (!bytes.length || !Number.isFinite(entry.size) || bytes.length !== entry.size) throw Error(state.language === 'en' ? 'Wallet original size check failed' : '卡包原件大小校验失败');
+  return bytes;
+}
+async function verifyTicketWalletSyncAssets(remote, gist) {
+  const images = remote?.ticketWalletFiles?.images;
+  if (!images) return; // Older backups contain ticket metadata only.
+  for (const id of ticketWalletRemoteImageIds(remote)) await readTicketWalletSyncAsset(images[id], gist);
+}
+async function restoreTicketWalletSyncAssets(remote, gist) {
+  const images = remote?.ticketWalletFiles?.images;
+  if (!images) return;
+  const writes = [];
+  // Validate every referenced file before changing ticket metadata on this device.
+  for (const id of ticketWalletRemoteImageIds(remote)) {
+    const entry = images[id];
+    const bytes = await readTicketWalletSyncAsset(entry, gist);
+    writes.push({ id, value: { blob: new Blob([bytes], { type: entry.type || 'application/octet-stream' }), name: entry.name || '', type: entry.type || 'application/octet-stream', savedAt: Date.now() } });
+  }
+  for (const { id, value } of writes) {
+    if (!await oneBoxDbPut('ticket-images', id, value)) throw Error(state.language === 'en' ? 'Could not save wallet original on this device' : '无法在本机保存卡包原件，请检查可用空间后重试');
+    const cached = ticketWalletImageCache.get(id);
+    if (cached?.src) URL.revokeObjectURL(cached.src);
+    ticketWalletImageCache.delete(id);
+  }
+}
+function mergeTicketWalletSyncStorage(first = {}, second = {}) {
+  const merged = { ...first, ...second };
+  const has = (key) => typeof first?.[key] === 'string' || typeof second?.[key] === 'string';
+  const read = (storage, key, fallback) => ticketWalletSyncStorageValue(storage, key, fallback);
+  const deleted = { ...read(first, STORAGE.ticketWalletDeleted, {}) };
+  Object.entries(read(second, STORAGE.ticketWalletDeleted, {})).forEach(([id, at]) => { deleted[id] = Math.max(Number(deleted[id]) || 0, Number(at) || 0); });
+  if (has(STORAGE.ticketWalletDeleted)) merged[STORAGE.ticketWalletDeleted] = JSON.stringify(deleted);
+  if (has(STORAGE.ticketWallet)) {
+    const records = new Map();
+    for (const storage of [first, second]) {
+      const tickets = read(storage, STORAGE.ticketWallet, []);
+      for (const ticket of Array.isArray(tickets) ? tickets : []) {
+        if (!ticket?.id) continue;
+        const existing = records.get(ticket.id);
+        if (!existing || Number(ticket.updatedAt || ticket.createdAt || 0) >= Number(existing.updatedAt || existing.createdAt || 0)) records.set(ticket.id, ticket);
+      }
+    }
+    merged[STORAGE.ticketWallet] = JSON.stringify([...records.values()].filter((record) => !deleted[record.id] || Number(record.updatedAt || record.createdAt || 0) > deleted[record.id]));
+  }
+  if (has(STORAGE.ticketWalletMemories)) {
+    const memories = { ...read(first, STORAGE.ticketWalletMemories, {}) };
+    Object.entries(read(second, STORAGE.ticketWalletMemories, {})).forEach(([key, memory]) => { if (!memories[key] || Number(memory?.updatedAt || 0) >= Number(memories[key]?.updatedAt || 0)) memories[key] = memory; });
+    merged[STORAGE.ticketWalletMemories] = JSON.stringify(memories);
+  }
+  if (has(STORAGE.ticketWalletDisplayOrder)) {
+    const order = [read(second, STORAGE.ticketWalletDisplayOrder, []), read(first, STORAGE.ticketWalletDisplayOrder, [])].flatMap((value) => Array.isArray(value) ? value : []);
+    merged[STORAGE.ticketWalletDisplayOrder] = JSON.stringify([...new Set(order)].filter((id) => !deleted[id]));
+  }
+  if (has(STORAGE.ticketWalletMapCache)) merged[STORAGE.ticketWalletMapCache] = JSON.stringify({ ...read(first, STORAGE.ticketWalletMapCache, {}), ...read(second, STORAGE.ticketWalletMapCache, {}) });
+  return merged;
+}
 function syncLibraryMetadata() {
   return state.library.map((book) => {
     if (!book || typeof book !== 'object') return book;
@@ -7343,7 +7432,7 @@ function syncLibraryMetadata() {
     return metadata;
   });
 }
-function syncPayload(readerFiles = null, library = syncLibraryMetadata()) {
+function syncPayload(readerFiles = null, library = syncLibraryMetadata(), ticketWalletFiles = null) {
   const selection = normalizeGithubSyncSelection(state.githubSyncSelection);
   const enabled = (group) => selection[group] === true;
   return {
@@ -7356,6 +7445,7 @@ function syncPayload(readerFiles = null, library = syncLibraryMetadata()) {
     ...(selection.weather ? { weatherCards: state.weatherCards } : {}),
     ...(selection.translation ? { translationHistory: state.translationHistory, translationHistoryOpen: state.translationHistoryOpen } : {}),
     ...(selection.calculator ? { calculator: parseStored(STORAGE.calculator, {}) } : {}),
+    ...(enabled('ticketWallet') ? { ticketWalletFiles } : {}),
   };
 }
 function preserveDisabledGithubPayloadGroups(payload, remote, selection) {
@@ -7370,8 +7460,9 @@ function preserveDisabledGithubPayloadGroups(payload, remote, selection) {
 async function buildGithubSyncBundle() {
   const readingEnabled = githubSyncCustomGroupEnabled('reading');
   const assets = readingEnabled ? await buildReaderSyncAssets() : { manifest: null, files: {} };
-  const payload = syncPayload(assets.manifest, readingEnabled ? syncLibraryMetadata() : []);
-  return { payload, files: { 'onebox-settings.json': JSON.stringify(payload, null, 2), ...assets.files }, bookCount: Object.keys(assets.manifest?.books || {}).length };
+  const walletAssets = githubSyncCustomGroupEnabled('ticketWallet') ? await buildTicketWalletSyncAssets() : { manifest: null, files: {} };
+  const payload = syncPayload(assets.manifest, readingEnabled ? syncLibraryMetadata() : [], walletAssets.manifest);
+  return { payload, files: { 'onebox-settings.json': JSON.stringify(payload, null, 2), ...assets.files, ...walletAssets.files }, bookCount: Object.keys(assets.manifest?.books || {}).length };
 }
 async function mergeGithubUploadBundle(bundle, id) {
   if (!bundle?.payload || !id) return bundle;
@@ -7401,7 +7492,11 @@ async function mergeGithubUploadBundle(bundle, id) {
       if (typeof remote.storage[key] === 'string' && typeof payload.storage[key] === 'string') payload.storage[key] = mergeGithubStorageValue(key, remote.storage[key], payload.storage[key]);
     });
   }
+  if (selection.ticketWallet) payload.storage = mergeTicketWalletSyncStorage(remote.storage, payload.storage);
   preserveDisabledGithubPayloadGroups(payload, remote, selection);
+  if (selection.ticketWallet && remote.ticketWalletFiles?.images && payload.ticketWalletFiles?.images) {
+    payload.ticketWalletFiles = { ...payload.ticketWalletFiles, images: { ...remote.ticketWalletFiles.images, ...payload.ticketWalletFiles.images } };
+  }
   if (remote.readerFiles?.books && payload.readerFiles?.books) payload.readerFiles = { ...payload.readerFiles, books: { ...remote.readerFiles.books, ...payload.readerFiles.books } };
   const files = { ...bundle.files, 'onebox-settings.json': JSON.stringify(payload, null, 2) };
   return { ...bundle, payload, files, bookCount: Object.keys(payload.readerFiles?.books || {}).length };
@@ -7713,6 +7808,10 @@ function mergeGithubStorageValue(key, localValue, remoteValue) {
 }
 function applyRemoteStorageSnapshot(remoteStorage) {
   if (!remoteStorage || typeof remoteStorage !== 'object') return;
+  if (githubSyncCustomGroupEnabled('ticketWallet')) {
+    const localWallet = Object.fromEntries([...GITHUB_CUSTOM_SYNC_STORAGE_KEYS.ticketWallet].map((key) => [key, localStorage.getItem(key)]).filter(([, value]) => value !== null));
+    remoteStorage = mergeTicketWalletSyncStorage(localWallet, remoteStorage);
+  }
   Object.entries(remoteStorage).forEach(([key, value]) => {
     if (isSyncableStorageKey(key) && githubSyncStorageKeyEnabled(key) && typeof value === 'string') {
       try {
@@ -7731,6 +7830,12 @@ function hydrateCalculatorFromStorage() {
 }
 function hydrateGithubRuntimeState() {
   hydrateCalculatorFromStorage();
+  state.ticketWallet = normalizeTicketWallet(parseStored(STORAGE.ticketWallet, []));
+  state.ticketWalletDisplayOrder = parseStored(STORAGE.ticketWalletDisplayOrder, []);
+  state.ticketWalletMemories = normalizeTicketMemories(parseStored(STORAGE.ticketWalletMemories, {}));
+  state.ticketWalletTypeFilter = normalizeTicketWalletFilter(localStorage.getItem(STORAGE.ticketWalletTypeFilter));
+  if (!state.ticketWallet.some((record) => record.id === state.ticketWalletSelectedId)) state.ticketWalletSelectedId = '';
+  void hydrateTicketWalletImages();
   state.devTools = normalizeDevTools(parseStored(STORAGE.devTools, {}));
   state.events = parseStored(STORAGE.events, {}) || {};
   const storedWeather = parseStored(STORAGE.weatherCards, []);
@@ -8123,6 +8228,7 @@ async function githubUpload(allowFreshGistRetry = true, forceNewGist = false) {
     const verifiedPayload = settingsVerification.payload;
     updateGithubSync(mode, 84, githubSyncLabel(mode, 'finishing'));
     if (githubSyncCustomGroupEnabled('reading')) await verifyReaderSyncAssets(verifiedPayload.readerFiles, verified);
+    if (githubSyncCustomGroupEnabled('ticketWallet')) await verifyTicketWalletSyncAssets(verifiedPayload, verified);
     finishGithubSync(mode, state.language === 'en' ? 'Upload complete' : '上传完成');
     toast(state.language === 'en' ? 'OneBox data uploaded to GitHub' : 'OneBox 数据已上传到 GitHub', 'info', { persistent: true });
   } catch (error) {
@@ -8169,6 +8275,7 @@ async function githubDownload() {
     const readingEnabled = githubSyncCustomGroupEnabled('reading');
     const messagesEnabled = githubSyncCustomGroupEnabled('messages');
     const readerRestore = readingEnabled ? await restoreReaderSyncAssets(remote, gist) : { library: null, missingBooks: [] };
+    if (githubSyncCustomGroupEnabled('ticketWallet')) await restoreTicketWalletSyncAssets(remote, gist);
     applyRemoteStorageSnapshot(remote.storage);
     if (settingsEnabled && ['light', 'dark', 'dark-gray', 'system'].includes(remote.theme)) { state.theme = remote.theme; localStorage.setItem(STORAGE.theme, state.theme); }
     if (settingsEnabled && ['mono', 'purple', 'blue', 'green', 'yellow'].includes(remote.color)) { state.color = remote.color; saveColorPreference(); }
@@ -8259,7 +8366,7 @@ function renderGithubDialog() {
   const uploadIcon = '<svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 20V10m0 0-3 3m3-3 3 3"/></svg>';
   const downloadIcon = '<svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 7v10m0 0-3-3m3 3 3-3"/></svg>';
   const logoutIcon = '<svg viewBox="0 0 24 24"><path d="M10 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20H10"/><path d="M13 8l4 4-4 4M8 12h9"/></svg>';
-  const customSync = connected ? '<section class="github-custom-sync"><div class="github-custom-sync-head"><strong>' + t('githubCustomSync') + '</strong></div><div class="github-sync-options">' + [['settings', 'githubOptionSettings'], ['navigation', 'githubOptionNavigation'], ['reading', 'githubOptionReading'], ['messages', 'githubOptionMessages'], ['calendar', 'githubOptionCalendar'], ['weather', 'githubOptionWeather'], ['translation', 'githubOptionTranslation'], ['calculator', 'githubOptionCalculator']].map(([key, label]) => '<label class="github-sync-option setting-toggle"><input type="checkbox" data-github-sync-option="' + key + '" ' + (selection[key] ? 'checked' : '') + '><span>' + t(label) + '</span></label>').join('') + '</div></section>' : '';
+  const customSync = connected ? '<section class="github-custom-sync"><div class="github-custom-sync-head"><strong>' + t('githubCustomSync') + '</strong></div><div class="github-sync-options">' + [['settings', 'githubOptionSettings'], ['navigation', 'githubOptionNavigation'], ['reading', 'githubOptionReading'], ['messages', 'githubOptionMessages'], ['calendar', 'githubOptionCalendar'], ['weather', 'githubOptionWeather'], ['translation', 'githubOptionTranslation'], ['calculator', 'githubOptionCalculator'], ['ticketWallet', 'githubOptionTicketWallet']].map(([key, label]) => '<label class="github-sync-option setting-toggle"><input type="checkbox" data-github-sync-option="' + key + '" ' + (selection[key] ? 'checked' : '') + '><span>' + t(label) + '</span></label>').join('') + '</div></section>' : '';
   const syncProgress = syncing ? githubSyncProgressMarkup(sync) : '';
   const actions = connected
     ? '<div class="github-action-grid">' + actionButton('upload', t('githubBackup'), uploadIcon, true) + actionButton('download', t('githubRestore'), downloadIcon) + actionButton('logout', t('githubLogout'), logoutIcon) + '</div>'

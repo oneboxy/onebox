@@ -14725,3 +14725,21 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
   border-radius: 14px;
   clip-path: inset(0 round 14px);
 }
+
+/* Desktop tickets retain a readable physical size instead of stretching
+   across the whole page. Pack and detail use the same frame for return motion. */
+@media (min-width: 761px) {
+  .ticket-wallet-page {
+    --ticket-desktop-width: min(100%, 680px, max(360px, calc((100dvh - 260px) * 1.58)));
+  }
+  .ticket-wallet-page [data-ticket-wallet-swipe-panel] > .ticket-wallet-stack-section,
+  .ticket-wallet-page .ticket-wallet-memory-editor {
+    width: var(--ticket-desktop-width);
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-page .ticket-wallet-swipe-row-train,
+  body:has(.ticket-wallet-page) .ticket-wallet-page .ticket-wallet-train-card {
+    width: 100%;
+  }
+}

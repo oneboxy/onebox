@@ -1,29 +1,29 @@
-const CACHE = 'onebox-v452';
+const CACHE = 'onebox-v453';
 const APP_SHELL = [
   './',
   'index.html',
-  'style.css?v=2.18.520',
-  'app.js?v=2.18.520',
-  'calendar-data.js?v=2.18.520',
+  'style.css?v=2.18.521',
+  'app.js?v=2.18.521',
+  'calendar-data.js?v=2.18.521',
   'manifest.webmanifest',
-  'manifest.webmanifest?v=2.18.520',
-  'favicon-v317.ico?v=2.18.520',
+  'manifest.webmanifest?v=2.18.521',
+  'favicon-v317.ico?v=2.18.521',
   'apple-touch-icon.png',
   'apple-touch-icon-precomposed.png',
-  'apple-touch-icon.png?v=2.18.520',
-  'icons/onebox-brand-v317-16.png?v=2.18.520',
-  'icons/onebox-brand-v317-32.png?v=2.18.520',
-  'icons/onebox-brand-v317-48.png?v=2.18.520',
-  'icons/onebox-brand-v317-64.png?v=2.18.520',
-  'icons/onebox-brand-v317-128.png?v=2.18.520',
-  'icons/onebox-brand-v317-120.png?v=2.18.520',
-  'icons/onebox-brand-v317-152.png?v=2.18.520',
-  'icons/onebox-brand-v317-167.png?v=2.18.520',
-  'icons/onebox-brand-v317-180.png?v=2.18.520',
-  'icons/onebox-brand-v317-192.png?v=2.18.520',
-  'icons/onebox-brand-v317-256.png?v=2.18.520',
-  'icons/onebox-brand-v317-512.png?v=2.18.520',
-  'icons/onebox-brand-v317-1024.png?v=2.18.520',
+  'apple-touch-icon.png?v=2.18.521',
+  'icons/onebox-brand-v317-16.png?v=2.18.521',
+  'icons/onebox-brand-v317-32.png?v=2.18.521',
+  'icons/onebox-brand-v317-48.png?v=2.18.521',
+  'icons/onebox-brand-v317-64.png?v=2.18.521',
+  'icons/onebox-brand-v317-128.png?v=2.18.521',
+  'icons/onebox-brand-v317-120.png?v=2.18.521',
+  'icons/onebox-brand-v317-152.png?v=2.18.521',
+  'icons/onebox-brand-v317-167.png?v=2.18.521',
+  'icons/onebox-brand-v317-180.png?v=2.18.521',
+  'icons/onebox-brand-v317-192.png?v=2.18.521',
+  'icons/onebox-brand-v317-256.png?v=2.18.521',
+  'icons/onebox-brand-v317-512.png?v=2.18.521',
+  'icons/onebox-brand-v317-1024.png?v=2.18.521',
   'icons/mascot-fox-full-reactions.png',
   'icons/mascot-fox-full-reactions.png?v=2.18.311',
   'icons/mascot-fox-full.png',
@@ -73,6 +73,9 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.pathname.endsWith('/sw.js')) return;
+  // Sync requests must read the current Gist, including changes from another
+  // device. Never serve private GitHub responses from the PWA asset cache.
+  if (url.hostname === 'api.github.com' || url.hostname === 'gist.githubusercontent.com' || event.request.headers.has('Authorization')) return;
   const isAppShellRequest = event.request.mode === 'navigate'
     || url.pathname.endsWith('/index.html')
     || url.pathname.endsWith('/app.js')
