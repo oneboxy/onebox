@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.557';
+const APP_VERSION = '2.18.558';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3662,6 +3662,14 @@ function ticketWalletAddTemplateMarkup(draft) {
   const layoutClass = options.length === 1 ? ' is-single' : ' is-multiple';
   return '<fieldset class="ticket-wallet-template-picker"><legend>票面样式</legend><div class="ticket-wallet-template-options' + layoutClass + '">' + options.map((item) => '<button type="button" class="ticket-wallet-template-option ' + (draft.template === item.id ? 'active' : '') + '" aria-pressed="' + (draft.template === item.id ? 'true' : 'false') + '" data-ticket-wallet-template="' + item.id + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>').join('') + '</div></fieldset>';
 }
+function ticketWalletAddTypeSelectorMarkup(draft) {
+  const category = ticketWalletCategoryForType(draft.type);
+  const categories = Object.entries(TICKET_WALLET_CATEGORIES).filter(([key]) => key !== 'all');
+  const types = Object.entries(TICKET_TYPE_LABELS).filter(([type]) => ticketWalletCategoryForType(type) === category);
+  const categoryMarkup = categories.map(([key, item]) => '<button type="button" class="ticket-wallet-add-category ' + (key === category ? 'active' : '') + '" data-ticket-wallet-add-category="' + key + '" aria-pressed="' + (key === category ? 'true' : 'false') + '"><span class="ticket-wallet-add-category-icon" aria-hidden="true">' + item.icon + '</span><span>' + escapeHtml(item.label[state.language === 'en' ? 1 : 0]) + '</span></button>').join('');
+  const typeMarkup = types.map(([type, labels]) => '<button type="button" class="ticket-wallet-add-type-option ' + (type === draft.type ? 'active' : '') + '" data-ticket-wallet-add-type="' + type + '" aria-pressed="' + (type === draft.type ? 'true' : 'false') + '"><span class="ticket-wallet-add-type-icon" aria-hidden="true">' + TICKET_TYPES[type].icon + '</span><span>' + escapeHtml(labels[state.language === 'en' ? 1 : 0]) + '</span></button>').join('');
+  return '<div class="ticket-wallet-add-classification"><fieldset class="ticket-wallet-add-category-picker"><legend>' + (state.language === 'en' ? 'Category' : '票据大类') + '</legend><div class="ticket-wallet-add-categories">' + categoryMarkup + '</div></fieldset><fieldset class="ticket-wallet-add-type-picker"><legend>' + (state.language === 'en' ? 'Ticket type' : '票据类型') + '</legend><div class="ticket-wallet-add-types">' + typeMarkup + '</div></fieldset></div>';
+}
 function renderTicketWalletEditor() {
   const draft = state.ticketWalletDraft || normalizeTicketRecord({ type: ticketWalletDefaultTypeForFilter(state.ticketWalletTypeFilter), template: ticketWalletDefaultTemplate(ticketWalletDefaultTypeForFilter(state.ticketWalletTypeFilter)) });
   const image = draft.sourceImageId ? ticketWalletImageCache.get(draft.sourceImageId) : null;
@@ -3676,7 +3684,7 @@ function renderTicketWalletEditor() {
   const imageIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="3"/><circle cx="9" cy="10" r="1.4"/><path d="m6 16 4-4 3 3 2-2 3 3"/></svg>';
   const closeLabel = state.language === 'en' ? 'Close ticket editor' : '关闭添加票据';
   const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
-  return '<section class="ticket-wallet-editor ticket-wallet-add-page" aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><div class="ticket-wallet-editor-head"><div><h2>添加票据</h2></div><button type="button" class="ticket-wallet-detail-close ticket-wallet-add-close" data-ticket-wallet-cancel aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button></div>' + recognitionMarkup + ticketWalletAddTemplateMarkup(draft) + '<div class="ticket-wallet-add-original-field"><span class="ticket-wallet-add-field-label">原始票据</span>' + originalMarkup + '</div><div class="ticket-wallet-create-options" role="group" aria-label="添加方式"><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-import-image><span class="ticket-wallet-create-option-icon" aria-hidden="true">' + imageIcon + '</span><span><strong>' + importLabel + '</strong><small>识别并填充票面字段</small></span></button><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-create-empty="blank"><span class="ticket-wallet-create-option-icon ticket-wallet-create-option-plus" aria-hidden="true">＋</span><span><strong>创建空白票面</strong><small>直接进入票面编辑</small></span></button></div></section>';
+  return '<section class="ticket-wallet-editor ticket-wallet-add-page" aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><div class="ticket-wallet-editor-head"><div><h2>添加票据</h2></div><button type="button" class="ticket-wallet-detail-close ticket-wallet-add-close" data-ticket-wallet-cancel aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button></div>' + recognitionMarkup + ticketWalletAddTypeSelectorMarkup(draft) + ticketWalletAddTemplateMarkup(draft) + '<div class="ticket-wallet-add-original-field"><span class="ticket-wallet-add-field-label">原始票据</span>' + originalMarkup + '</div><div class="ticket-wallet-create-options" role="group" aria-label="添加方式"><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-import-image><span class="ticket-wallet-create-option-icon" aria-hidden="true">' + imageIcon + '</span><span><strong>' + importLabel + '</strong><small>识别并填充票面字段</small></span></button><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-create-empty="blank"><span class="ticket-wallet-create-option-icon ticket-wallet-create-option-plus" aria-hidden="true">＋</span><span><strong>创建空白票面</strong><small>直接进入票面编辑</small></span></button></div></section>';
 }
 function ticketWalletTrainDateParts(value) {
   const date = new Date(value); if (Number.isNaN(date.getTime())) return { date: '日期待补充', time: '' };
@@ -11102,6 +11110,25 @@ workspace.addEventListener('click', async (event) => {
   const ticketWalletView = event.target.closest('[data-ticket-wallet-view]');
   if (ticketWalletView?.dataset.ticketWalletView === 'tickets' && ticketWalletMapReturnContext) return returnFromTicketWalletMap();
   if (ticketWalletView) { state.ticketWalletView = ticketWalletView.dataset.ticketWalletView === 'journeys' ? 'journeys' : 'tickets'; if (state.ticketWalletView !== 'journeys') ticketWalletMapFocusId = ''; state.ticketWalletMemoryDraft = null; return render(); }
+  const ticketWalletAddCategory = event.target.closest('[data-ticket-wallet-add-category]');
+  if (ticketWalletAddCategory && state.ticketWalletEditorOpen && state.ticketWalletDraft) {
+    const category = ticketWalletAddCategory.dataset.ticketWalletAddCategory;
+    const nextType = ticketWalletDefaultTypeForFilter(category);
+    if (ticketWalletCategoryForType(state.ticketWalletDraft.type) !== category) {
+      state.ticketWalletDraft.type = nextType;
+      state.ticketWalletDraft.template = ticketWalletDefaultTemplate(nextType);
+      state.ticketWalletDraft.title = ticketTypeLabel(nextType);
+    }
+    return render();
+  }
+  const ticketWalletAddType = event.target.closest('[data-ticket-wallet-add-type]');
+  if (ticketWalletAddType && state.ticketWalletEditorOpen && state.ticketWalletDraft) {
+    const nextType = normalizeTicketType(ticketWalletAddType.dataset.ticketWalletAddType);
+    state.ticketWalletDraft.type = nextType;
+    state.ticketWalletDraft.template = ticketWalletDefaultTemplate(nextType);
+    state.ticketWalletDraft.title = ticketTypeLabel(nextType);
+    return render();
+  }
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
   if (ticketWalletTemplate && state.ticketWalletEditorOpen && state.ticketWalletDraft) { state.ticketWalletDraft.template = ticketWalletTemplate.dataset.ticketWalletTemplate || ticketWalletDefaultTemplate(state.ticketWalletDraft.type); document.querySelectorAll('[data-ticket-wallet-template]').forEach((item) => { item.classList.toggle('active', item === ticketWalletTemplate); item.setAttribute('aria-pressed', item === ticketWalletTemplate ? 'true' : 'false'); }); return; }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');

@@ -2176,6 +2176,123 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page {
 body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head {
   margin-bottom: 18px;
 }
+body:has(.ticket-wallet-page) .ticket-wallet-add-classification {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 2px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-category-picker,
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-picker {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-category-picker legend,
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-picker legend {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-categories {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-category {
+  display: flex;
+  min-width: 0;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-category.active {
+  border-color: color-mix(in srgb, var(--primary) 62%, var(--line));
+  background: color-mix(in srgb, var(--primary) 9%, var(--panel));
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-category-icon,
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-icon {
+  display: grid;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  place-items: center;
+  color: var(--muted);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-category-icon svg,
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-category.active .ticket-wallet-add-category-icon,
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-option.active .ticket-wallet-add-type-icon {
+  color: var(--primary);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-option {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-option.active {
+  border-color: color-mix(in srgb, var(--primary) 62%, var(--line));
+  background: color-mix(in srgb, var(--primary) 9%, var(--panel));
+  color: var(--ink);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-type-option:focus-visible,
+body:has(.ticket-wallet-page) .ticket-wallet-add-category:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+@media (max-width: 500px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-add-category {
+    min-height: 52px;
+    flex-direction: column;
+    gap: 3px;
+    padding: 5px 3px;
+    font-size: 10px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-add-category > span:last-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 .ticket-wallet-add-type {
   display: flex;
   align-items: center;
@@ -14360,9 +14477,8 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack > .ticket-wallet-swipe-row {
   transform: translateY(calc(var(--ticket-stack-index) * var(--ticket-stack-step, 20px)));
 }
 
-/* Ticket add flow: keep the page focused on the two creation choices. The
-   category is already represented by the selected wallet tab, so it should
-   not be repeated in the dialog. */
+/* Ticket add flow: expose the same wallet categories and the ticket types
+   that belong to each category before choosing a template or import method. */
 body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head {
   margin-bottom: 14px;
 }
