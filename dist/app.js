@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.551';
+const APP_VERSION = '2.18.552';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7858,23 +7858,78 @@ function parseGithubSyncPayload(content) {
   if (!hasRecognizableData || (remote.app !== undefined && remote.app !== 'OneBox') || !hasValidStorage) throw Error(t('githubSyncInvalidData'));
   return remote;
 }
-async function restoreReaderSyncAssets(remote, gist) {
+function readerSyncLibrary(remote) {
   const storedLibrary = remote?.storage?.[STORAGE.library];
   let library = Array.isArray(remote?.library) ? remote.library : [];
-  let hasLibrary = Array.isArray(remote?.library);
   if (!library.length && typeof storedLibrary === 'string') {
-    try { const parsed = JSON.parse(storedLibrary); if (Array.isArray(parsed)) { library = parsed; hasLibrary = true; } } catch { /* legacy payload without readable library metadata */ }
+    try { const parsed = JSON.parse(storedLibrary); if (Array.isArray(parsed)) library = parsed; } catch { /* legacy backup without readable library metadata */ }
   }
+  return library;
+}
+function readerSyncHasLibrary(remote) {
+  if (Array.isArray(remote?.library)) return true;
+  const storedLibrary = remote?.storage?.[STORAGE.library];
+  if (Array.isArray(storedLibrary)) return true;
+  if (typeof storedLibrary === 'string') {
+    try { return Array.isArray(JSON.parse(storedLibrary)); } catch { /* legacy backup without readable library metadata */ }
+  }
+  return false;
+}
+function readerSyncRequiredBooks(remote) {
+  return readerSyncLibrary(remote).filter((book) => book?.id && ['md', 'txt', 'pdf', 'epub'].includes(book.type));
+}
+function readerSyncBookEntry(book, remote, gist) {
   const manifest = remote?.readerFiles?.books;
-  const requiredBooks = library.filter((book) => book?.id && ['md', 'txt', 'pdf', 'epub'].includes(book.type));
+  const existing = manifest && typeof manifest === 'object' && !Array.isArray(manifest) ? manifest[book.id] : null;
+  const entryHasFiles = (entry) => Array.isArray(entry?.files) && entry.files.length > 0
+    && entry.files.every((name) => typeof name === 'string' && Boolean(gist?.files?.[name]))
+    && (!Number.isFinite(Number(entry.size)) || !Number.isFinite(Number(book.size)) || Number(entry.size) === Number(book.size));
+  if (entryHasFiles(existing)) return existing;
+  if (book.type === 'md' && typeof book.content === 'string') return null;
+  const size = Number(book.size);
+  if (!Number.isFinite(size) || size <= 0) return null;
+  const encodedLength = Math.ceil(size / 3) * 4;
+  const chunkCount = Math.ceil(encodedLength / GITHUB_SYNC_CHUNK_CHARS);
+  const prefix = 'onebox-book-' + syncAssetKey(book.id) + '-';
+  const indexes = new Set(Object.keys(gist?.files || {}).flatMap((name) => {
+    const match = name.match(new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d+)\\.b64$'));
+    return match ? [Number(match[1])] : [];
+  }));
+  const files = Array.from({ length: chunkCount }, (_, index) => prefix + index + '.b64');
+  if (files.some((name, index) => !indexes.has(index) || !gist?.files?.[name])) return null;
+  return { type: book.type, size, files };
+}
+function repairReaderSyncManifest(remote, gist) {
+  const requiredBooks = readerSyncRequiredBooks(remote);
+  if (!requiredBooks.length) return { remote, hasAllSources: true };
+  let books = remote?.readerFiles?.books && typeof remote.readerFiles.books === 'object' && !Array.isArray(remote.readerFiles.books)
+    ? { ...remote.readerFiles.books }
+    : {};
+  let changed = false;
+  for (const book of requiredBooks) {
+    if (readerSyncBookEntry(book, { ...remote, readerFiles: { ...remote?.readerFiles, books } }, gist)) continue;
+    const inferred = readerSyncBookEntry(book, { ...remote, readerFiles: null }, gist);
+    if (inferred) { books[book.id] = inferred; changed = true; }
+  }
+  const repaired = changed ? { ...remote, readerFiles: { ...remote?.readerFiles, version: remote?.readerFiles?.version || 1, books } } : remote;
+  const hasAllSources = requiredBooks.every((book) => book.type === 'md' && typeof book.content === 'string' || Boolean(readerSyncBookEntry(book, repaired, gist)));
+  return { remote: repaired, hasAllSources };
+}
+async function restoreReaderSyncAssets(remote, gist) {
+  const repaired = repairReaderSyncManifest(remote, gist);
+  remote = repaired.remote;
+  const library = readerSyncLibrary(remote);
+  const hasLibrary = readerSyncHasLibrary(remote);
+  const manifest = remote?.readerFiles?.books;
+  const requiredBooks = readerSyncRequiredBooks(remote);
   const missingIds = new Set();
   const sourceWrites = [];
   const coverWrites = [];
   const validManifest = manifest && typeof manifest === 'object' && !Array.isArray(manifest);
   for (const book of requiredBooks) {
-    const entry = validManifest ? manifest[book.id] : null;
-    if (!validManifest && book.type === 'md' && typeof book.content === 'string') continue;
-    if (!Array.isArray(entry?.files) || !entry.files.length || entry.files.some((name) => !gist.files?.[name])) {
+    const entry = readerSyncBookEntry(book, remote, gist);
+    if (!entry?.files?.length) {
+      if (book.type === 'md' && typeof book.content === 'string') continue;
       missingIds.add(book.id);
       continue;
     }
@@ -7886,8 +7941,7 @@ async function restoreReaderSyncAssets(remote, gist) {
     try {
       const byteChunks = chunks.map(syncBase64Bytes);
       const total = byteChunks.reduce((sum, chunk) => sum + chunk.length, 0);
-      if (!total) throw Error('empty book file');
-      if (Number.isFinite(Number(entry.size)) && total !== Number(entry.size)) throw Error('book file size mismatch');
+      if (!total || Number.isFinite(Number(entry.size)) && total !== Number(entry.size) || Number.isFinite(Number(book.size)) && total !== Number(book.size)) throw Error('book file size mismatch');
       const bytes = new Uint8Array(total); let offset = 0;
       byteChunks.forEach((chunk) => { bytes.set(chunk, offset); offset += chunk.length; });
       sourceWrites.push({ id: book.id, value: bytes.buffer, content: book.type === 'md' ? new TextDecoder().decode(bytes) : '' });
@@ -7918,15 +7972,19 @@ async function restoreReaderSyncAssets(remote, gist) {
   }) : null;
   return { library: restoredLibrary, missingBooks: requiredBooks.filter((book) => missingIds.has(book.id)).map((book) => book.name), restoredIds: [...restoredIds] };
 }
-async function verifyReaderSyncAssets(readerFiles, gist) {
+async function verifyReaderSyncAssets(readerFiles, gist, library = []) {
   const manifest = readerFiles?.books;
-  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) return;
-  for (const entry of Object.values(manifest)) {
-    if (!Array.isArray(entry?.files) || !entry.files.length) throw Error(state.language === 'en' ? 'GitHub book manifest is incomplete' : 'GitHub 书籍清单不完整');
+  const requiredBooks = (Array.isArray(library) ? library : []).filter((book) => book?.id && ['md', 'txt', 'pdf', 'epub'].includes(book.type));
+  const needsManifest = requiredBooks.some((book) => !(book.type === 'md' && typeof book.content === 'string'));
+  if (needsManifest && (!manifest || typeof manifest !== 'object' || Array.isArray(manifest))) throw Error(state.language === 'en' ? 'GitHub book source manifest is missing' : 'GitHub 书籍原文件清单缺失');
+  for (const book of requiredBooks) {
+    const entry = manifest?.[book.id];
+    if ((!Array.isArray(entry?.files) || !entry.files.length) && book.type === 'md' && typeof book.content === 'string') continue;
+    if (!Array.isArray(entry?.files) || !entry.files.length) throw Error((state.language === 'en' ? 'GitHub book source is missing: ' : 'GitHub 书籍原文件缺失：') + book.name);
     const chunks = await Promise.all(entry.files.map((name) => githubFileContent(gist?.files?.[name])));
-    if (chunks.some((chunk) => typeof chunk !== 'string' || !chunk)) throw Error(state.language === 'en' ? 'GitHub book file is incomplete' : 'GitHub 书籍文件不完整');
+    if (chunks.some((chunk) => typeof chunk !== 'string' || !chunk)) throw Error((state.language === 'en' ? 'GitHub book source is incomplete: ' : 'GitHub 书籍原文件不完整：') + book.name);
     const total = chunks.reduce((sum, chunk) => sum + syncBase64Bytes(chunk).length, 0);
-    if (!total || (Number.isFinite(Number(entry.size)) && total !== Number(entry.size))) throw Error(state.language === 'en' ? 'GitHub book file size is invalid' : 'GitHub 书籍文件大小校验失败');
+    if (!total || Number.isFinite(Number(entry.size)) && total !== Number(entry.size) || Number.isFinite(Number(book.size)) && total !== Number(book.size)) throw Error((state.language === 'en' ? 'GitHub book source size check failed: ' : 'GitHub 书籍原文件大小校验失败：') + book.name);
   }
 }
 function mergeGithubValue(localValue, remoteValue) {
@@ -8460,7 +8518,7 @@ async function githubUpload(allowFreshGistRetry = true, forceNewGist = false) {
     if (missingFiles.length) throw Error((state.language === 'en' ? 'GitHub response is missing OneBox files: ' : 'GitHub 响应中缺少 OneBox 文件：') + missingFiles.slice(0, 3).join(', '));
     const verifiedPayload = settingsVerification.payload;
     updateGithubSync(mode, 84, githubSyncLabel(mode, 'finishing'));
-    if (githubSyncCustomGroupEnabled('reading')) await verifyReaderSyncAssets(verifiedPayload.readerFiles, verified);
+    if (githubSyncCustomGroupEnabled('reading')) await verifyReaderSyncAssets(verifiedPayload.readerFiles, verified, verifiedPayload.library);
     if (githubSyncCustomGroupEnabled('ticketWallet')) await verifyTicketWalletSyncAssets(verifiedPayload, verified);
     finishGithubSync(mode, state.language === 'en' ? 'Upload complete' : '上传完成');
     toast(state.language === 'en' ? 'OneBox data uploaded to GitHub' : 'OneBox 数据已上传到 GitHub', 'info', { persistent: true });
@@ -8488,26 +8546,55 @@ async function githubDownload() {
     const candidates = await findGithubGists();
     if (!candidates.length) throw Error(t('githubSyncNotFound'));
     updateGithubSync(mode, 42, githubSyncLabel(mode, 'download'));
+    const readingEnabled = githubSyncCustomGroupEnabled('reading');
     let gist = null;
     let remote = null;
+    let newestReadableBackup = null;
+    let newestReadingBackup = null;
+    const assetFiles = {};
     let lastError = null;
+    const collectAssetFiles = (files) => {
+      Object.entries(files || {}).forEach(([name, file]) => {
+        if ((name.startsWith('onebox-book-') || name.startsWith('onebox-ticket-')) && !assetFiles[name]) assetFiles[name] = file;
+      });
+    };
     for (const candidate of candidates) {
+      collectAssetFiles(candidate.files);
+      const needsPayload = !newestReadableBackup || readingEnabled && !newestReadingBackup;
+      if (!needsPayload) continue;
       try {
         const restored = await readGithubGistPayload(candidate);
-        remote = restored.remote;
-        gist = restored.gist;
-        break;
+        if (!newestReadableBackup) newestReadableBackup = restored;
+        collectAssetFiles(restored.gist?.files);
+        if (readingEnabled && !newestReadingBackup && readerSyncHasLibrary(restored.remote)) newestReadingBackup = restored;
       } catch (error) {
         lastError = error;
         if (error?.code === 'github-auth-expired') throw error;
       }
     }
+    const selectedBackup = newestReadableBackup || newestReadingBackup;
+    if (selectedBackup) { remote = selectedBackup.remote; gist = selectedBackup.gist; }
     if (!gist?.id || !remote) throw lastError || Error(t('githubSyncInvalidData'));
+    const mergedAssetFiles = { ...(gist.files || {}) };
+    Object.entries(assetFiles).forEach(([name, file]) => {
+      const current = mergedAssetFiles[name];
+      mergedAssetFiles[name] = current
+        ? { ...file, ...current, content: typeof current.content === 'string' && current.content ? current.content : file.content }
+        : file;
+    });
+    gist = { ...gist, files: mergedAssetFiles };
+    if (readingEnabled && newestReadingBackup && newestReadingBackup !== selectedBackup) {
+      const readingRemote = newestReadingBackup.remote;
+      remote = { ...remote, library: readerSyncLibrary(readingRemote) };
+      ['readerFiles', 'readerPreferences', 'readerLayout', 'homeFeedRead'].forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(readingRemote, key)) remote[key] = readingRemote[key];
+      });
+    }
+    if (readingEnabled && readerSyncHasLibrary(remote)) remote = repairReaderSyncManifest(remote, gist).remote;
     const id = gist.id;
     updateGithubSync(mode, 67, githubSyncLabel(mode, 'restore'));
     const settingsEnabled = githubSyncCustomGroupEnabled('settings');
     const navigationEnabled = githubSyncCustomGroupEnabled('navigation');
-    const readingEnabled = githubSyncCustomGroupEnabled('reading');
     const messagesEnabled = githubSyncCustomGroupEnabled('messages');
     const readerRestore = readingEnabled ? await restoreReaderSyncAssets(remote, gist) : { library: null, missingBooks: [] };
     if (githubSyncCustomGroupEnabled('ticketWallet')) await restoreTicketWalletSyncAssets(remote, gist);
