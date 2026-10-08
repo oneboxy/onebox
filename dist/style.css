@@ -14800,16 +14800,17 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack:not(.ticket-wallet-reorder-ac
 .ticket-wallet-notes-content { display: block; min-width: 0; width: 100%; height: auto; max-height: none; overflow: visible; white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; text-overflow: clip; -webkit-line-clamp: unset; font-size: 13px; line-height: 1.85; }
 .ticket-wallet-detail-utilities { min-width: 0; }
 
-.onebox-mascot-poem { position: relative; margin: 9px 0 0; padding: 7px 0 0; border: 0; border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent); border-radius: 0; background: transparent; }
-.onebox-mascot-poem blockquote { margin: 0; color: var(--ink); font-family: var(--font-serif, Georgia, serif); font-size: 12px; line-height: 1.5; }
-.onebox-mascot-poem figcaption { margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.35; text-align: right; }
+.onebox-mascot-poem { position: relative; margin: 5px 0 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.onebox-mascot-poem blockquote { margin: 0; color: var(--ink); font-family: var(--font-serif, Georgia, serif); font-size: 11px; line-height: 1.35; }
+.onebox-mascot-poem figcaption { margin-top: 1px; color: var(--muted); font-size: 8px; line-height: 1.25; text-align: right; }
 
-.onebox-mascot-poem-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 2px; color: var(--muted); font-size: 10px; line-height: 1.2; }
-.onebox-mascot-poem-head button { display: grid; width: 26px; height: 26px; flex: 0 0 26px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; transition: color .16s ease, background-color .16s ease, transform .16s ease; -webkit-tap-highlight-color: transparent; }
-.onebox-mascot-poem-head button:hover, .onebox-mascot-poem-head button:focus-visible { background: color-mix(in srgb, var(--primary) 8%, transparent); color: var(--primary); outline: none; }
-.onebox-mascot-poem-head button:active { transform: scale(.9); }
+.onebox-mascot-poem-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 0 0 1px; color: var(--muted); font-size: 9px; line-height: 1.15; }
+.onebox-mascot-poem-head button { display: grid; width: 24px; height: 24px; flex: 0 0 24px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; transition: transform .16s ease; -webkit-tap-highlight-color: transparent; }
+.onebox-mascot-poem-head button:hover, .onebox-mascot-poem-head button:focus-visible, .onebox-mascot-poem-head button:active { background: transparent; color: var(--muted); }
+.onebox-mascot-poem-head button:focus-visible { outline: 1px dotted currentColor; outline-offset: 1px; }
+.onebox-mascot-poem-head button:active { transform: scale(.92); }
 .onebox-mascot-poem-head button.is-refreshing svg { animation: mascot-poem-refresh .42s cubic-bezier(.22,.72,.3,1); }
-.onebox-mascot-poem-head svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.onebox-mascot-poem-head svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
 @keyframes mascot-poem-refresh { to { transform: rotate(360deg); } }
 
 /* Calendar month and year form one compact title; choose values in a light picker. */

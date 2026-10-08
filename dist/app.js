@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.556';
+const APP_VERSION = '2.18.557';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2476,7 +2476,7 @@ function mascotPoemMarkup() {
   const english = state.language === 'en';
   const poem = mascotDailyPoem();
   const changeLabel = english ? 'Change poem' : '更换诗词';
-  return '<figure class="onebox-mascot-poem"><div class="onebox-mascot-poem-head"><span>' + (english ? 'Poem of the hour' : '每小时一诗') + '</span><button type="button" data-mascot-poem-next aria-label="' + changeLabel + '" title="' + changeLabel + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"></path><path d="M5.2 10a7 7 0 0 1 11.6-2L20 12M18.8 14a7 7 0 0 1-11.6 2L4 12"></path></svg></button></div><blockquote>' + escapeHtml(english ? poem.en : poem.text) + '</blockquote><figcaption>' + escapeHtml(english ? poem.authorEn : '——' + poem.author + ' · ' + poem.title) + '</figcaption></figure>';
+  return '<figure class="onebox-mascot-poem"><div class="onebox-mascot-poem-head"><span>' + (english ? 'Poem of the hour' : '每小时一诗') + '</span><button type="button" data-mascot-poem-next aria-label="' + changeLabel + '" title="' + changeLabel + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 1-2.35-5.66L20 8"></path><path d="M20 3v5h-5"></path></svg></button></div><blockquote>' + escapeHtml(english ? poem.en : poem.text) + '</blockquote><figcaption>' + escapeHtml(english ? poem.authorEn : '——' + poem.author + ' · ' + poem.title) + '</figcaption></figure>';
 }
 function refreshMascotPoem() {
   const current = mascotRuntime.panel?.querySelector('.onebox-mascot-poem');
