@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.555';
+const APP_VERSION = '2.18.556';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2247,6 +2247,54 @@ function mascotSyncPanelSide() {
   const rect = root.getBoundingClientRect();
   root.dataset.panelSide = rect.left + rect.width / 2 < window.innerWidth / 2 ? 'left' : 'right';
 }
+function mascotTopSafeInset(root = mascotRuntime.root) {
+  const safeArea = Number.parseFloat(getComputedStyle(root || document.documentElement).getPropertyValue('--mascot-safe-top')) || 0;
+  return Math.max(12, window.visualViewport?.offsetTop || 0, safeArea) + 8;
+}
+function mascotUpdateOverlayLayout() {
+  const root = mascotRuntime.root;
+  const indicator = root?.querySelector('[data-mascot-sync-progress]');
+  if (!root || !indicator) return;
+  const anchors = [mascotRuntime.panel, mascotRuntime.speech]
+    .filter((node) => node && !node.hidden)
+    .map((node) => node.getBoundingClientRect());
+  const rootRect = root.getBoundingClientRect();
+  const indicatorHeight = indicator.offsetHeight || 38;
+  const topLimit = mascotTopSafeInset(root);
+  const topAnchor = anchors.length ? Math.min(...anchors.map((rect) => rect.top)) : null;
+  const roomAbove = topAnchor == null ? rootRect.top - topLimit : topAnchor - topLimit;
+  const roomBelow = window.innerHeight - rootRect.bottom - 8;
+
+  if (roomAbove < indicatorHeight + 10 && roomBelow >= indicatorHeight + 10) {
+    indicator.dataset.syncPlace = 'below';
+    indicator.style.removeProperty('--mascot-sync-stack-offset');
+    return;
+  }
+
+  indicator.dataset.syncPlace = 'above';
+  const stackOffset = topAnchor == null ? 7 : Math.max(7, rootRect.top - topAnchor + 12);
+  indicator.style.setProperty('--mascot-sync-stack-offset', Math.ceil(stackOffset) + 'px');
+}
+function mascotKeepBriefingVisible() {
+  const root = mascotRuntime.root;
+  const panel = mascotRuntime.panel;
+  if (!root || !panel || panel.hidden) return;
+  mascotSyncPanelSide();
+  const rootRect = root.getBoundingClientRect();
+  const topLimit = mascotTopSafeInset(root);
+  const panelGap = 20;
+  const maxRootTop = Math.max(8, window.innerHeight - rootRect.height - 8);
+  const maxPanelHeight = Math.max(80, Math.min(520, maxRootTop - topLimit - panelGap));
+  panel.style.maxHeight = Math.floor(maxPanelHeight) + 'px';
+  const contentHeight = Math.max(panel.scrollHeight, panel.offsetHeight);
+  panel.style.overflowY = contentHeight > maxPanelHeight ? 'auto' : 'visible';
+  const desiredTop = Math.min(maxRootTop, topLimit + Math.min(contentHeight, maxPanelHeight) + panelGap);
+  if (rootRect.top < desiredTop - 1) {
+    mascotSetPosition(rootRect.left, desiredTop, true);
+    mascotSyncPanelSide();
+  }
+  mascotUpdateOverlayLayout();
+}
 function mascotClearDockTimer() {
   clearTimeout(mascotRuntime.dockTimer);
   mascotRuntime.dockTimer = 0;
@@ -2304,10 +2352,12 @@ function mascotShowSpeech(message, duration = 2200, mood = '') {
   root.dataset.speechMood = mood;
   speech.hidden = false;
   root.classList.add('has-speech');
+  mascotUpdateOverlayLayout();
   mascotRuntime.speechTimer = window.setTimeout(() => {
     speech.hidden = true;
     root.classList.remove('has-speech');
     delete root.dataset.speechMood;
+    mascotUpdateOverlayLayout();
   }, duration);
 }
 function syncMascotVisibility() {
@@ -2319,6 +2369,7 @@ function syncMascotVisibility() {
     mascotHideSpeech();
     if (mascotRuntime.panel) mascotRuntime.panel.hidden = true;
     root.classList.remove('has-briefing', 'is-top-action');
+    mascotUpdateOverlayLayout();
     const syncVisible = Boolean(state.githubSync?.active || state.githubSync?.error);
     root.classList.toggle('is-sync-only', syncVisible);
     root.classList.remove('is-docked');
@@ -2336,6 +2387,7 @@ function mascotHideSpeech() {
   if (mascotRuntime.speech) mascotRuntime.speech.hidden = true;
   mascotRuntime.root?.classList.remove('has-speech');
   if (mascotRuntime.root) delete mascotRuntime.root.dataset.speechMood;
+  mascotUpdateOverlayLayout();
 }
 function mascotPlayReaction(preferred = null) {
   const now = Date.now();
@@ -2424,7 +2476,7 @@ function mascotPoemMarkup() {
   const english = state.language === 'en';
   const poem = mascotDailyPoem();
   const changeLabel = english ? 'Change poem' : '更换诗词';
-  return '<figure class="onebox-mascot-poem"><div class="onebox-mascot-poem-head"><span>' + (english ? 'Poem of the hour' : '每小时一诗') + '</span><button type="button" data-mascot-poem-next aria-label="' + changeLabel + '" title="' + changeLabel + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 3v7h-7"></path></svg></button></div><blockquote>' + escapeHtml(english ? poem.en : poem.text) + '</blockquote><figcaption>' + escapeHtml(english ? poem.authorEn : '——' + poem.author + ' · ' + poem.title) + '</figcaption></figure>';
+  return '<figure class="onebox-mascot-poem"><div class="onebox-mascot-poem-head"><span>' + (english ? 'Poem of the hour' : '每小时一诗') + '</span><button type="button" data-mascot-poem-next aria-label="' + changeLabel + '" title="' + changeLabel + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"></path><path d="M5.2 10a7 7 0 0 1 11.6-2L20 12M18.8 14a7 7 0 0 1-11.6 2L4 12"></path></svg></button></div><blockquote>' + escapeHtml(english ? poem.en : poem.text) + '</blockquote><figcaption>' + escapeHtml(english ? poem.authorEn : '——' + poem.author + ' · ' + poem.title) + '</figcaption></figure>';
 }
 function refreshMascotPoem() {
   const current = mascotRuntime.panel?.querySelector('.onebox-mascot-poem');
@@ -2448,6 +2500,9 @@ function changeMascotPoem() {
   const hourKey = mascotPoemHourKey();
   mascotPoemOverride = { hourKey, offset: mascotPoemOverride.hourKey === hourKey ? mascotPoemOverride.offset + 1 : 1 };
   refreshMascotPoem();
+  const button = mascotRuntime.panel?.querySelector('[data-mascot-poem-next]');
+  button?.classList.add('is-refreshing');
+  window.setTimeout(() => button?.classList.remove('is-refreshing'), 480);
 }
 async function refreshMascotWeatherForCurrentPlace() {
   const current = state.weatherCards.find((item) => item.isCurrentLocation);
@@ -2524,7 +2579,10 @@ function mascotBriefingMarkup() {
   return '<div class="onebox-mascot-cloud"><div class="onebox-mascot-cloud-head"><div class="onebox-mascot-date"><div><strong>' + escapeHtml(hello) + '</strong><small>' + escapeHtml(todayLabel) + '</small></div></div><button type="button" class="onebox-mascot-cloud-close" data-close-mascot aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="onebox-mascot-cloud-story">' + mascotWeatherMarkup() + mascotPoemMarkup() + mascotReadingMarkup() + '</div><div class="onebox-mascot-cloud-actions">' + actionRows + '</div><p class="onebox-mascot-cloud-hint">' + escapeHtml(hint) + '</p></div>';
 }
 function refreshMascotBriefing() {
-  if (mascotRuntime.panel && !mascotRuntime.panel.hidden) mascotRuntime.panel.innerHTML = mascotBriefingMarkup();
+  if (mascotRuntime.panel && !mascotRuntime.panel.hidden) {
+    mascotRuntime.panel.innerHTML = mascotBriefingMarkup();
+    requestAnimationFrame(mascotKeepBriefingVisible);
+  }
 }
 function closeMascotBriefing() {
   if (!mascotRuntime.panel) return;
@@ -2543,6 +2601,7 @@ function openMascotBriefing() {
   mascotRuntime.panel.innerHTML = mascotBriefingMarkup();
   mascotRuntime.panel.hidden = false;
   mascotRuntime.root.classList.add('has-briefing');
+  requestAnimationFrame(mascotKeepBriefingVisible);
   mascotPlayReaction('delighted');
   void refreshMascotWeatherForCurrentPlace();
   scheduleMascotPoemChange();
@@ -2802,7 +2861,14 @@ function mountMascot() {
   });
   document.addEventListener('pointerdown', (event) => { if (mascotRuntime.panel && mascotRuntime.root && !mascotRuntime.root.contains(event.target)) closeMascotBriefing(); }, true);
   if (window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) window.addEventListener('pointermove', (event) => mascotAim({ x: event.clientX, y: event.clientY }), { passive: true });
-  window.addEventListener('resize', () => { if (mascotRuntime.position) mascotSetPosition(mascotRuntime.position.left, mascotRuntime.position.top, false); mascotSyncPanelSide(); }, { passive: true });
+  const syncMascotViewport = () => {
+    if (mascotRuntime.position) mascotSetPosition(mascotRuntime.position.left, mascotRuntime.position.top, false);
+    mascotSyncPanelSide();
+    if (mascotRuntime.panel && !mascotRuntime.panel.hidden) mascotKeepBriefingVisible();
+    else mascotUpdateOverlayLayout();
+  };
+  window.addEventListener('resize', syncMascotViewport, { passive: true });
+  window.visualViewport?.addEventListener('resize', syncMascotViewport, { passive: true });
   syncMascotVisibility();
   renderGithubSyncIndicator();
 }
@@ -8437,6 +8503,7 @@ function renderGithubSyncIndicator() {
     if (!visible) root.classList.remove('is-sync-only');
     if (state.mascotVisible) mascotScheduleDock();
   }
+  mascotUpdateOverlayLayout();
   syncMascotContext();
 }
 function updateGithubSync(mode, progress, message, error = '') {
