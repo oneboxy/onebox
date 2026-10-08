@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.521';
+const APP_VERSION = '2.18.522';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -157,6 +157,7 @@ function githubSyncStorageKeyEnabled(key, selection = state.githubSyncSelection)
   return githubSyncCustomGroupEnabled(githubSyncCustomGroupForStorageKey(key), selection);
 }
 let persistenceTimer = null;
+let persistentRecovery = null;
 let oneBoxDbPromise = null;
 function openOneBoxDb() {
   if (oneBoxDbPromise || !window.indexedDB) return oneBoxDbPromise;
@@ -240,6 +241,7 @@ async function ticketWalletImageDelete(id) {
   await oneBoxDbDelete('ticket-images', id);
 }
 async function writePersistentSnapshot() {
+  if (persistentRecovery) await persistentRecovery;
   const values = {};
   Object.values(STORAGE).forEach((key) => {
     const value = localStorage.getItem(key);
@@ -256,9 +258,12 @@ const saveStored = (key, value) => {
 };
 async function restorePersistentSnapshot() {
   const snapshot = await oneBoxDbGet('snapshot', 'app');
-  if (!snapshot?.values) return false;
+  const auth = await oneBoxDbGet('snapshot', 'github-auth');
+  const values = { ...(snapshot?.values || {}) };
+  // An explicit signed-out record also overrides an older full snapshot.
+  if (auth?.value) values[STORAGE.github] = auth.value;
   let restored = false;
-  Object.entries(snapshot.values).forEach(([key, value]) => {
+  Object.entries(values).forEach(([key, value]) => {
     if (localStorage.getItem(key) === null) {
       try { localStorage.setItem(key, value); restored = true; } catch { /* private mode can deny storage */ }
     }
@@ -7250,7 +7255,12 @@ function notificationPermissionText() {
 }
 
 // GitHub Device Flow and private Gist sync ----------------------------------
-function saveGithub() { saveStored(STORAGE.github, state.github); }
+function saveGithub() {
+  saveStored(STORAGE.github, state.github);
+  // Keep authorization independent of delayed full snapshots and asset caches.
+  void oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
+}
+const githubResponseTokens = new WeakMap();
 function githubHeaders(withBody = false) {
   const headers = { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + state.github.token, 'X-GitHub-Api-Version': '2022-11-28' };
   if (withBody) headers['Content-Type'] = 'application/json';
@@ -7260,14 +7270,27 @@ async function githubApiFetch(url, options = {}) {
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const response = await fetch(url, options);
+      const controller = new AbortController();
+      const abort = () => controller.abort(options.signal?.reason);
+      if (options.signal?.aborted) abort();
+      else options.signal?.addEventListener('abort', abort, { once: true });
+      const deadline = setTimeout(() => controller.abort(), 45000);
+      let response;
+      try { response = await fetch(url, { ...options, signal: controller.signal }); }
+      finally { clearTimeout(deadline); options.signal?.removeEventListener('abort', abort); }
+      const authorization = new Headers(options.headers).get('Authorization') || '';
+      githubResponseTokens.set(response, authorization.replace(/^Bearer /i, ''));
       const retryableStatus = [408, 425, 429, 500, 502, 503, 504].includes(response.status);
       if (!retryableStatus || attempt === 2) return response;
       const retryAfter = Number(response.headers.get('Retry-After'));
       await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 900 * (attempt + 1));
     } catch (error) {
       lastError = error;
-      if (attempt === 2) throw error;
+      if (options.signal?.aborted) throw error;
+      if (attempt === 2) {
+        if (error?.name === 'AbortError') throw Error(state.language === 'en' ? 'GitHub API timed out. Please check your connection and retry.' : 'GitHub API 请求超时，请检查网络后重试。');
+        throw error;
+      }
       await sleep(900 * (attempt + 1));
     }
   }
@@ -7513,14 +7536,15 @@ function githubAvatarMarkup(user) {
 }
 async function hydrateGithubUser() {
   if (!state.github.token) return;
+  const requestedToken = state.github.token;
   try {
     const response = await githubApiFetch('https://api.github.com/user', { headers: githubHeaders(), cache: 'no-store' });
     if (!response.ok) {
-      if (response.status === 401) invalidateGithubToken();
+      if (response.status === 401) invalidateGithubToken(requestedToken);
       return;
     }
     const user = await response.json();
-    if (!user?.login) return;
+    if (!user?.login || state.github.token !== requestedToken) return;
     const previousLogin = state.github.user?.login || '';
     state.github.user = { ...state.github.user, ...user };
     saveGithub();
@@ -7870,11 +7894,13 @@ function hydrateGithubRuntimeState() {
 function githubBrowserError(error) {
   const message = String(error?.message || '');
   if (/Failed to fetch|NetworkError|Load failed/i.test(message)) {
+    if (navigator.onLine === false) return state.language === 'en' ? 'Your device is offline. Reconnect and retry.' : '设备当前已离线，请联网后重试。';
     return t('githubNetworkError');
   }
   return message;
 }
-function invalidateGithubToken() {
+function invalidateGithubToken(requestedToken = state.github.token) {
+  if (requestedToken !== state.github.token) return;
   if (!state.github.token && !state.github.user) return;
   state.github.token = '';
   state.github.user = null;
@@ -7903,7 +7929,7 @@ async function githubApiError(response, fallback = '') {
   } catch { /* GitHub may return an empty or non-JSON error body. */ }
   const suffix = response?.status ? ' (' + response.status + ')' : '';
   if (response?.status === 401) {
-    invalidateGithubToken();
+    invalidateGithubToken(githubResponseTokens.get(response) ?? state.github.token);
     const error = Error(t('githubAuthExpired')); error.code = 'github-auth-expired'; return error;
   }
   const error = Error((message || fallback || (state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败')) + (details ? (state.language === 'en' ? ': ' : '：') + details : '') + suffix);
@@ -8564,9 +8590,12 @@ function waitForServiceWorkerActivation(registration, worker, timeoutMs = 15000)
   timeout = setTimeout(() => finish(worker.state === 'activated' || registration.active === worker), timeoutMs);
 });
 }
-function requestAppReload() {
+async function requestAppReload() {
   if (state.updateReloading) return;
   state.updateReloading = true;
+  clearTimeout(persistenceTimer);
+  await writePersistentSnapshot();
+  await oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
   window.location.reload();
 }
 async function applyUpdate() {
@@ -11253,7 +11282,18 @@ function bootApp() {
 // background task; blocking boot here leaves Safari showing an empty shell while
 // an OAuth callback or a slow private-mode database request is being processed.
 const githubCallbackHandled = bootApp();
-restorePersistentSnapshot().then((restored) => {
+persistentRecovery = restorePersistentSnapshot();
+persistentRecovery.then((restored) => {
+  // Recover auth in place even when IndexedDB takes longer than the reload limit.
+  if (!githubCallbackHandled && !state.github.token) {
+    const account = parseStored(STORAGE.github, {});
+    if (account?.token) {
+      Object.assign(state.github, { token: account.token, user: account.user || null, gistId: account.gistId || '' });
+      renderNav(); render();
+      if (state.githubDialogOpen) renderGithubDialog();
+      void hydrateGithubUser();
+    }
+  }
   // A late snapshot must never reload the OAuth callback page. Also avoid
   // surprising a user with a reload after a very slow database response.
   if (restored && !githubCallbackHandled && performance.now() < 5000) window.location.reload();
