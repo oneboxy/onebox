@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.549';
+const APP_VERSION = '2.18.550';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6445,7 +6445,17 @@ function setCalendarMonth(year, month) {
   state.selectedDate = dateKey(new Date(year, month, day));
   render();
 }
-let calendarPickerYearStart = Math.floor(new Date().getFullYear() / 10) * 10;
+function calendarPickerYearPages() {
+  const pages = [];
+  for (let year = 1900; year <= 2080; year += 12) pages.push(year);
+  pages.push(2089);
+  return pages;
+}
+function calendarPickerYearPageFor(year) {
+  const boundedYear = Math.max(1900, Math.min(2100, year));
+  return boundedYear >= 2089 ? 2089 : 1900 + Math.floor((boundedYear - 1900) / 12) * 12;
+}
+let calendarPickerYearStart = calendarPickerYearPageFor(new Date().getFullYear());
 function closeCalendarPickerDialog() {
   const dialog = $('#calendarPickerDialog');
   if (dialog) dialog.hidden = true;
@@ -6456,14 +6466,14 @@ function renderCalendarPickerDialog(mode, keepYearWindow = false) {
   const isEnglish = state.language === 'en';
   const currentYear = state.month.getFullYear();
   const currentMonth = state.month.getMonth();
-  if (mode === 'year' && !keepYearWindow) calendarPickerYearStart = Math.floor(currentYear / 10) * 10;
+  if (mode === 'year' && !keepYearWindow) calendarPickerYearStart = calendarPickerYearPageFor(currentYear);
   const title = mode === 'year' ? (isEnglish ? 'Choose year' : '选择年份') : (isEnglish ? 'Choose month' : '选择月份');
   const closeLabel = isEnglish ? 'Close' : '关闭';
   let options = '';
   if (mode === 'year') {
-    const end = Math.min(calendarPickerYearStart + 9, 2100);
+    const end = Math.min(calendarPickerYearStart + 11, 2100);
     const years = Array.from({ length: end - calendarPickerYearStart + 1 }, (_, index) => calendarPickerYearStart + index);
-    options = '<div class="calendar-picker-period"><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="-1" aria-label="' + (isEnglish ? 'Previous decade' : '上一组年份') + '" ' + (calendarPickerYearStart === 1900 ? 'disabled' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><strong>' + calendarPickerYearStart + '–' + end + '</strong><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="1" aria-label="' + (isEnglish ? 'Next decade' : '下一组年份') + '" ' + (end === 2100 ? 'disabled' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="calendar-picker-options year-options">' + years.map((year) => '<button type="button" class="calendar-picker-option' + (year === currentYear ? ' selected' : '') + '" data-calendar-year-option="' + year + '" aria-pressed="' + (year === currentYear) + '">' + year + '</button>').join('') + '</div><form class="calendar-picker-year-jump" data-calendar-year-form><input id="calendarYearInput" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="' + (isEnglish ? 'Enter year' : '输入年份') + '" data-calendar-year-input aria-label="' + (isEnglish ? 'Enter a year from 1900 to 2100' : '输入年份，范围 1900 至 2100') + '"><button type="submit" aria-label="' + (isEnglish ? 'Go to year' : '跳转到该年份') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></form>';
+    options = '<div class="calendar-picker-period"><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="-1" aria-label="' + (isEnglish ? 'Previous years' : '上一组年份') + '" ' + (calendarPickerYearStart === 1900 ? 'disabled' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><strong>' + calendarPickerYearStart + '–' + end + '</strong><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="1" aria-label="' + (isEnglish ? 'Next years' : '下一组年份') + '" ' + (calendarPickerYearStart === 2089 ? 'disabled' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="calendar-picker-options year-options">' + years.map((year) => '<button type="button" class="calendar-picker-option' + (year === currentYear ? ' selected' : '') + '" data-calendar-year-option="' + year + '" aria-pressed="' + (year === currentYear) + '">' + year + '</button>').join('') + '</div>';
   } else {
     const monthNames = Array.from({ length: 12 }, (_, index) => isEnglish ? new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(currentYear, index, 1)) : (index + 1) + '月');
     options = '<div class="calendar-picker-options month-options">' + monthNames.map((month, index) => '<button type="button" class="calendar-picker-option' + (index === currentMonth ? ' selected' : '') + '" data-calendar-month-option="' + index + '" aria-pressed="' + (index === currentMonth) + '">' + escapeHtml(month) + '</button>').join('') + '</div>';
@@ -11048,21 +11058,15 @@ $('#calendarPickerDialog').addEventListener('click', (event) => {
   if (event.target === dialog || event.target.closest('[data-close-calendar-picker]')) return closeCalendarPickerDialog();
   const yearShift = event.target.closest('[data-calendar-year-shift]');
   if (yearShift && !yearShift.disabled) {
-    calendarPickerYearStart = Math.max(1900, Math.min(2100, calendarPickerYearStart + Number(yearShift.dataset.calendarYearShift) * 10));
+    const pages = calendarPickerYearPages();
+    const currentPage = pages.indexOf(calendarPickerYearStart);
+    calendarPickerYearStart = pages[Math.max(0, Math.min(pages.length - 1, currentPage + Number(yearShift.dataset.calendarYearShift)))];
     return renderCalendarPickerDialog('year', true);
   }
   const yearOption = event.target.closest('[data-calendar-year-option]');
   if (yearOption) { const year = Number(yearOption.dataset.calendarYearOption); closeCalendarPickerDialog(); return setCalendarMonth(year, state.month.getMonth()); }
   const monthOption = event.target.closest('[data-calendar-month-option]');
   if (monthOption) { const month = Number(monthOption.dataset.calendarMonthOption); closeCalendarPickerDialog(); return setCalendarMonth(state.month.getFullYear(), month); }
-});
-$('#calendarPickerDialog').addEventListener('submit', (event) => {
-  if (!event.target.matches('[data-calendar-year-form]')) return;
-  event.preventDefault();
-  const year = Number($('#calendarYearInput')?.value);
-  if (!Number.isInteger(year) || year < 1900 || year > 2100) return toast(state.language === 'en' ? 'Enter a year from 1900 to 2100' : '请输入 1900 至 2100 之间的年份', 'error');
-  closeCalendarPickerDialog();
-  setCalendarMonth(year, state.month.getMonth());
 });
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !$('#calendarPickerDialog').hidden) closeCalendarPickerDialog();
