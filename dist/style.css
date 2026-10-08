@@ -9620,7 +9620,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 
 /* Calendar date details: concise hierarchy, restrained color, no repeated values. */
 .lunar-dialog-card {
-  width: min(720px, 100%);
+  width: min(900px, 100%);
   max-height: min(86vh, 700px) !important;
   max-height: min(86dvh, 700px) !important;
   padding: 0 !important;
@@ -9672,7 +9672,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .lunar-dialog-more summary::after { content: '⌄'; display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--muted); font-size: 14px; font-weight: 500; transition: transform .18s ease; }
 .lunar-dialog-more[open] summary::after { transform: rotate(180deg); }
 .lunar-dialog-more[open] summary { margin-bottom: 5px; border-bottom: 1px solid var(--line); }
-.lunar-dialog-almanac-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding-top: 5px; }
+.lunar-dialog-almanac-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding-top: 5px; }
 .lunar-dialog-almanac-field { display: grid; align-content: center; gap: 5px; min-width: 0; min-height: 58px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--primary) 3%, var(--panel)); }
 .lunar-dialog-almanac-field.wide { grid-column: 1 / -1; }
 .lunar-dialog-almanac-field > span { color: color-mix(in srgb, var(--primary) 60%, var(--muted)); font-size: 10px; white-space: nowrap; }
@@ -9696,7 +9696,10 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   .lunar-dialog-almanac-field { min-height: 56px; padding: 8px; }
   .lunar-dialog-almanac-field > span, .lunar-dialog-almanac-field > strong { font-size: 9px; }
 }
-@media (min-width: 700px) { .lunar-dialog-almanac-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 700px) { .lunar-dialog-almanac-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 960px) { .lunar-dialog-almanac-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (min-width: 390px) and (max-width: 699px) { .lunar-dialog-almanac-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 361px) and (max-width: 389px) { .lunar-dialog-almanac-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 360px) { .lunar-dialog-almanac-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* Developer tools --------------------------------------------------------- */
