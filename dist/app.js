@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.525';
+const APP_VERSION = '2.18.526';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -25,6 +25,7 @@ const STORAGE = {
   translationHistory: 'onebox.translation-history',
   notifications: 'onebox.notifications',
   library: 'onebox.library',
+  readerProgress: 'onebox.reader-progress',
   readerPreferences: 'onebox.reader-preferences',
   readerLayout: 'onebox.reader-layout',
   homeFeeds: 'onebox.home-feeds',
@@ -259,9 +260,13 @@ const saveStored = (key, value) => {
 async function restorePersistentSnapshot() {
   const snapshot = await oneBoxDbGet('snapshot', 'app');
   const auth = await oneBoxDbGet('snapshot', 'github-auth');
+  const readerBackup = await oneBoxDbGet('snapshot', 'reader-library');
+  const readerCheckpoints = await oneBoxDbGet('snapshot', 'reader-progress');
   const values = { ...(snapshot?.values || {}) };
   // An explicit signed-out record also overrides an older full snapshot.
   if (auth?.value) values[STORAGE.github] = auth.value;
+  if (readerBackup?.value) values[STORAGE.library] = readerBackup.value;
+  if (readerCheckpoints?.value) values[STORAGE.readerProgress] = readerCheckpoints.value;
   let restored = false;
   Object.entries(values).forEach(([key, value]) => {
     if (localStorage.getItem(key) === null) {
@@ -1058,7 +1063,8 @@ const normalizeReaderLibrary = (value) => {
     return Number(b.lastOpenedAt || b.createdAt || 0) - Number(a.lastOpenedAt || a.createdAt || 0);
   });
   let nextOrder = ordered.reduce((max, book) => Math.max(max, Number(book.order) || 0), 0);
-  return ordered.map((book, index) => ({ ...book, order: Number.isFinite(Number(book.order)) ? Number(book.order) : nextOrder + (ordered.length - index) }));
+  const checkpoints = parseStored(STORAGE.readerProgress, {}) || {};
+  return ordered.map((book, index) => ({ ...book, ...(Number(checkpoints[book.id]?.savedAt) > Number(book.progressUpdatedAt || 0) ? { progress: checkpoints[book.id].progress, progressUpdatedAt: checkpoints[book.id].savedAt } : {}), order: Number.isFinite(Number(book.order)) ? Number(book.order) : nextOrder + (ordered.length - index) }));
 };
 const state = {
   tool: initialTool,
@@ -4424,7 +4430,19 @@ function closeRecentReading() {
 }
 
 // Reader --------------------------------------------------------------------
-function saveLibrary() { saveStored(STORAGE.library, state.library.slice(0, 80)); }
+function saveLibrary() {
+  const books = state.library.slice(0, 80);
+  saveStored(STORAGE.library, books);
+  void oneBoxDbPut('snapshot', 'reader-library', { value: JSON.stringify(books), savedAt: Date.now() });
+  const checkpoints = localStorage.getItem(STORAGE.readerProgress);
+  if (checkpoints) void oneBoxDbPut('snapshot', 'reader-progress', { value: checkpoints, savedAt: Date.now() });
+}
+function saveReaderCheckpoint(book) {
+  const checkpoints = parseStored(STORAGE.readerProgress, {}) || {};
+  book.progressUpdatedAt = Date.now();
+  checkpoints[book.id] = { progress: book.progress, savedAt: book.progressUpdatedAt };
+  saveStored(STORAGE.readerProgress, checkpoints);
+}
 function saveReaderLayout() { localStorage.setItem(STORAGE.readerLayout, state.readerLayout); queuePersistentSnapshot(); }
 function readerBookById(id) { return state.library.find((book) => book.id === id); }
 function readerHeadingId(index) { return 'reader-heading-' + index; }
@@ -4777,6 +4795,8 @@ function readerAnnotationMarkup(book) {
   if (!notes.length) return '<p class="empty compact">' + t('noAnnotations') + '</p>';
   return notes.map((note) => '<div class="reader-note"><blockquote>' + escapeHtml(note.quote) + '</blockquote><p>' + escapeHtml(note.note) + '</p><button class="icon-btn small" data-delete-annotation="' + escapeHtml(note.id) + '" aria-label="' + t('close') + '">×</button></div>').join('');
 }
+let readerPositionRestoring = false;
+let readerRestoreGeneration = 0;
 let readerProgressFrame = 0;
 let readerProgressTimer = null;
 let readerRestoreTimer = null;
@@ -4816,13 +4836,23 @@ function readerDocumentPageInfo(content) {
   return { current: Math.min(count, Math.floor(metrics.top / viewportHeight) + 1), count };
 }
 function scheduleReaderPositionRestore() {
+  readerPositionRestoring = true;
+  const generation = ++readerRestoreGeneration;
+  const bookId = state.readerBookId;
   if (readerRestoreTimer) clearTimeout(readerRestoreTimer);
   requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (generation !== readerRestoreGeneration || bookId !== state.readerBookId) return;
     restoreReaderPosition();
-    readerRestoreTimer = setTimeout(() => { readerRestoreTimer = null; restoreReaderPosition(); }, 140);
+    readerRestoreTimer = setTimeout(() => {
+      if (generation !== readerRestoreGeneration || bookId !== state.readerBookId) return;
+      readerRestoreTimer = null;
+      restoreReaderPosition();
+      requestAnimationFrame(() => { if (generation === readerRestoreGeneration) readerPositionRestoring = false; });
+    }, 140);
   }));
 }
 function scheduleReaderProgress(content) {
+  if (readerPositionRestoring || document.hidden || !content?.isConnected) return;
   const book = readerBookById(state.readerBookId); if (!book || !content || !content.scrollHeight) return;
   if (state.readerReadingMode === 'pages' && content.classList.contains('reader-page-viewport')) {
     const count = readerPageCount(content);
@@ -4830,6 +4860,7 @@ function scheduleReaderProgress(content) {
   } else {
     book.progress = readerScrollProgress(content);
   }
+  saveReaderCheckpoint(book);
   if (!readerProgressFrame) readerProgressFrame = requestAnimationFrame(() => {
     readerProgressFrame = 0;
     if (state.readerReadingMode === 'pages' && content.classList.contains('reader-page-viewport')) updateReaderPager();
@@ -4838,14 +4869,17 @@ function scheduleReaderProgress(content) {
   clearTimeout(readerProgressTimer);
   readerProgressTimer = setTimeout(() => { readerProgressTimer = null; saveLibrary(); }, 350);
 }
-function flushReaderProgress() {
-  const book = readerBookById(state.readerBookId); const content = $('[data-reader-content]');
-  if (!book || !content || !content.scrollHeight) return;
-  if (state.readerReadingMode === 'pages' && content.classList.contains('reader-page-viewport')) {
-    const count = readerPageCount(content);
-    book.progress = Math.min(1, Math.max(0, state.readerPage / Math.max(1, count - 1)));
-  } else {
-    book.progress = readerScrollProgress(content);
+function flushReaderProgress(capturePosition = true) {
+  clearTimeout(readerProgressTimer);
+  readerProgressTimer = null;
+  const book = readerBookById(state.readerBookId);
+  const content = $('[data-reader-content]');
+  if (!book) return;
+  if (capturePosition && !readerPositionRestoring && content?.scrollHeight) {
+    book.progress = state.readerReadingMode === 'pages' && content.classList.contains('reader-page-viewport')
+      ? Math.min(1, Math.max(0, state.readerPage / Math.max(1, readerPageCount(content) - 1)))
+      : readerScrollProgress(content);
+    saveReaderCheckpoint(book);
   }
   saveLibrary();
 }
@@ -5039,6 +5073,7 @@ function setReaderPagePosition(page, behavior = 'smooth') {
     }, 720);
   }
   updateReaderPager();
+  if (!readerPositionRestoring) scheduleReaderProgress(viewport);
   return nextPage;
 }
 function updateReaderPager() {
@@ -5134,6 +5169,8 @@ function ensureReaderFullscreenTool() {
   }
 }
 function toggleReaderFullscreen() {
+  flushReaderProgress();
+  readerPositionRestoring = true;
   const wasDocumentScroll = readerUsesDocumentScroll();
   const content = $('[data-reader-content]');
   const previousProgress = wasDocumentScroll ? readerScrollProgress(content) : null;
@@ -5153,6 +5190,7 @@ function toggleReaderFullscreen() {
   }
 }
 function renderReaderView(content, hint = '', toc = [], readingMode = 'pages') {
+  readerPositionRestoring = true;
   state.readerContent = content;
   state.readerHint = hint;
   state.readerToc = Array.isArray(toc) ? toc : [];
@@ -5165,6 +5203,8 @@ function renderReaderView(content, hint = '', toc = [], readingMode = 'pages') {
 }
 async function openReaderBook(id) {
   const book = readerBookById(id); if (!book) return;
+  flushReaderProgress();
+  readerPositionRestoring = true;
   releaseReaderAssets();
   state.readerImmersive = state.readerPreferences.fullscreenOnOpen === true;
   if (state.readerImmersive) requestReaderFullscreen(); else exitReaderFullscreen();
@@ -5191,11 +5231,11 @@ async function openReaderBook(id) {
   } catch (error) { releaseReaderAssets(); toast(error?.message || t('importFailed'), 'error'); state.readerBookId = null; }
 }
 function closeReader() {
+  flushReaderProgress();
   const wasDocumentScroll = readerUsesDocumentScroll();
   exitReaderFullscreen();
   if (state.readerUrl) URL.revokeObjectURL(state.readerUrl);
   releaseReaderAssets();
-  flushReaderProgress();
   if (wasDocumentScroll) window.scrollTo({ top: 0, behavior: 'auto' });
   state.readerUrl = ''; state.readerBookId = null; state.readerContent = ''; state.readerHint = ''; state.readerToc = []; state.readerDialog = ''; state.readerChromeHidden = false; state.readerImmersive = false; state.readerMode = 'library'; state.readerReadingMode = 'scroll'; state.readerPage = 0; state.readerSelectedText = ''; state.readerSelection = null; state.readerAnnotationDraft = null;
   render();
@@ -5398,9 +5438,11 @@ function setReaderReadingMode(mode) {
       book.progress = state.readerReadingMode === 'pages' && content.classList.contains('reader-page-viewport')
         ? Math.min(1, Math.max(0, state.readerPage / Math.max(1, readerPageCount(content) - 1)))
         : readerScrollProgress(content);
+      saveReaderCheckpoint(book);
       saveLibrary();
     }
   }
+  readerPositionRestoring = true;
   state.readerPreferences.readingMode = nextMode;
   saveReaderPreferences();
   state.readerReadingMode = nextMode;
@@ -5481,6 +5523,7 @@ function syncReaderBookProgressToSnapshot(book, position) {
   } else if (Number.isFinite(Number(position.progress))) {
     book.progress = Math.min(1, Math.max(0, Number(position.progress)));
   }
+  saveReaderCheckpoint(book);
 }
 function restoreReaderSnapshotImmediately(position) {
   if (!position || state.readerMode !== 'reading') return;
@@ -7299,7 +7342,7 @@ async function githubApiFetch(url, options = {}) {
   throw lastError || Error(state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败');
 }
 const GITHUB_SYNC_CHUNK_CHARS = 250000;
-const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive]);
+const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.readerProgress, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive]);
 function isSyncableStorageKey(key) {
   return String(key || '').startsWith('onebox.')
     && !GITHUB_SYNC_EXCLUDED_STORAGE_KEYS.has(key)
@@ -8596,9 +8639,13 @@ function waitForServiceWorkerActivation(registration, worker, timeoutMs = 15000)
 }
 async function requestAppReload() {
   if (state.updateReloading) return;
+  flushReaderProgress();
   state.updateReloading = true;
   clearTimeout(persistenceTimer);
   await writePersistentSnapshot();
+  await oneBoxDbPut('snapshot', 'reader-library', { value: JSON.stringify(state.library.slice(0, 80)), savedAt: Date.now() });
+  const checkpoints = localStorage.getItem(STORAGE.readerProgress);
+  if (checkpoints) await oneBoxDbPut('snapshot', 'reader-progress', { value: checkpoints, savedAt: Date.now() });
   await oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
   window.location.reload();
 }
@@ -8655,6 +8702,9 @@ function setupServiceWorker() {
 
 // Rendering and interaction --------------------------------------------------
 function render() {
+  // Persist the last measured position before replacing the viewport, never its transient zero.
+  if (state.readerMode === 'reading' && $('[data-reader-content]')) flushReaderProgress(false);
+  if (state.readerMode === 'reading') readerPositionRestoring = true;
   if (state.section !== 'mine' || !state.ticketWalletOpen || state.ticketWalletView !== 'tickets' || state.ticketWalletSelectedId || state.ticketWalletEditorOpen || state.ticketWalletMemoryDraft) {
     cancelTicketWalletReorder();
     clearTicketWalletReorderTarget();
@@ -11213,7 +11263,7 @@ window.addEventListener('pagehide', () => {
   homeFeedRequests.clear();
   state.homeFeed.loading = false;
   clearFeedNavigationPending();
-  flushReaderProgress(); clearTimeout(persistenceTimer); writePersistentSnapshot();
+  flushReaderProgress(false); clearTimeout(persistenceTimer); writePersistentSnapshot();
 });
 window.addEventListener('pageshow', (event) => {
   let returningToHome = event.persisted;
@@ -11245,7 +11295,7 @@ window.addEventListener('hashchange', () => {
   else selectTool(route);
 });
 window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', () => { if (state.theme === 'system') applyTheme(); });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { state.swRegistration?.update().catch(() => {}); if (state.section === 'home') scheduleHomeFeedSurfaceSync(); } });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { flushReaderProgress(false); void writePersistentSnapshot(); } if (!document.hidden) { state.swRegistration?.update().catch(() => {}); if (state.section === 'home') scheduleHomeFeedSurfaceSync(); } });
 window.addEventListener('focus', () => { state.swRegistration?.update().catch(() => {}); if (state.section === 'home') scheduleHomeFeedSurfaceSync(); });
 const handleReaderFullscreenChange = () => {
   const active = Boolean(readerFullscreenElement());
@@ -11288,6 +11338,10 @@ function bootApp() {
 const githubCallbackHandled = bootApp();
 persistentRecovery = restorePersistentSnapshot();
 persistentRecovery.then((restored) => {
+  if (restored && state.readerMode !== 'reading') {
+    state.library = normalizeReaderLibrary(parseStored(STORAGE.library, []));
+    if (state.section === 'tools' && state.tool === 'reader') render();
+  }
   // Recover auth in place even when IndexedDB takes longer than the reload limit.
   if (!githubCallbackHandled && !state.github.token) {
     const account = parseStored(STORAGE.github, {});
