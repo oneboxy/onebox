@@ -14673,6 +14673,10 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-add-close {
   white-space: nowrap;
   pointer-events: none;
 }
+/* Reserve the close control's width plus a gap in the selected ticket. */
+.ticket-wallet-detail-card-shell .ticket-wallet-train-type-badge {
+  right: 40px;
+}
 .ticket-wallet-train-type-badge svg {
   width: 13px;
   height: 13px;
