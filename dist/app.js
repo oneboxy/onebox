@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.548';
+const APP_VERSION = '2.18.549';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6450,22 +6450,22 @@ function closeCalendarPickerDialog() {
   const dialog = $('#calendarPickerDialog');
   if (dialog) dialog.hidden = true;
 }
-function renderCalendarPickerDialog(mode) {
+function renderCalendarPickerDialog(mode, keepYearWindow = false) {
   const dialog = $('#calendarPickerDialog');
   if (!dialog) return;
   const isEnglish = state.language === 'en';
   const currentYear = state.month.getFullYear();
   const currentMonth = state.month.getMonth();
-  if (mode === 'year') calendarPickerYearStart = Math.floor(currentYear / 10) * 10;
+  if (mode === 'year' && !keepYearWindow) calendarPickerYearStart = Math.floor(currentYear / 10) * 10;
   const title = mode === 'year' ? (isEnglish ? 'Choose year' : '选择年份') : (isEnglish ? 'Choose month' : '选择月份');
   const closeLabel = isEnglish ? 'Close' : '关闭';
   let options = '';
   if (mode === 'year') {
     const end = Math.min(calendarPickerYearStart + 9, 2100);
     const years = Array.from({ length: end - calendarPickerYearStart + 1 }, (_, index) => calendarPickerYearStart + index);
-    options = '<div class="calendar-picker-period"><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="-1" aria-label="' + (isEnglish ? 'Previous decade' : '上一组年份') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><strong>' + calendarPickerYearStart + '–' + end + '</strong><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="1" aria-label="' + (isEnglish ? 'Next decade' : '下一组年份') + '" ' + (end === 2100 ? 'disabled' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="calendar-picker-options year-options">' + years.map((year) => '<button type="button" class="calendar-picker-option' + (year === currentYear ? ' selected' : '') + '" data-calendar-year-option="' + year + '" aria-pressed="' + (year === currentYear) + '">' + year + '</button>').join('') + '</div><form class="calendar-picker-year-jump" data-calendar-year-form><label for="calendarYearInput">' + (isEnglish ? 'Or enter a year' : '或输入年份') + '</label><div><input id="calendarYearInput" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="' + currentYear + '" data-calendar-year-input aria-label="' + (isEnglish ? 'Enter year from 1900 to 2100' : '输入 1900 至 2100 年') + '"><button type="submit" class="secondary">' + (isEnglish ? 'Go' : '前往') + '</button></div></form>';
+    options = '<div class="calendar-picker-period"><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="-1" aria-label="' + (isEnglish ? 'Previous decade' : '上一组年份') + '" ' + (calendarPickerYearStart === 1900 ? 'disabled' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><strong>' + calendarPickerYearStart + '–' + end + '</strong><button type="button" class="calendar-picker-period-btn" data-calendar-year-shift="1" aria-label="' + (isEnglish ? 'Next decade' : '下一组年份') + '" ' + (end === 2100 ? 'disabled' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="calendar-picker-options year-options">' + years.map((year) => '<button type="button" class="calendar-picker-option' + (year === currentYear ? ' selected' : '') + '" data-calendar-year-option="' + year + '" aria-pressed="' + (year === currentYear) + '">' + year + '</button>').join('') + '</div><form class="calendar-picker-year-jump" data-calendar-year-form><input id="calendarYearInput" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="' + (isEnglish ? 'Enter year' : '输入年份') + '" data-calendar-year-input aria-label="' + (isEnglish ? 'Enter a year from 1900 to 2100' : '输入年份，范围 1900 至 2100') + '"><button type="submit" aria-label="' + (isEnglish ? 'Go to year' : '跳转到该年份') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></form>';
   } else {
-    const monthNames = Array.from({ length: 12 }, (_, index) => isEnglish ? new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(currentYear, index, 1)) : (index + 1) + '月');
+    const monthNames = Array.from({ length: 12 }, (_, index) => isEnglish ? new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(currentYear, index, 1)) : (index + 1) + '月');
     options = '<div class="calendar-picker-options month-options">' + monthNames.map((month, index) => '<button type="button" class="calendar-picker-option' + (index === currentMonth ? ' selected' : '') + '" data-calendar-month-option="' + index + '" aria-pressed="' + (index === currentMonth) + '">' + escapeHtml(month) + '</button>').join('') + '</div>';
   }
   dialog.innerHTML = '<div class="dialog-card calendar-picker-dialog-card" role="dialog" aria-modal="true" aria-labelledby="calendarPickerTitle"><div class="calendar-picker-dialog-head"><h2 id="calendarPickerTitle">' + title + '</h2><button type="button" class="icon-btn small" data-close-calendar-picker aria-label="' + closeLabel + '">×</button></div>' + options + '</div>';
@@ -11049,7 +11049,7 @@ $('#calendarPickerDialog').addEventListener('click', (event) => {
   const yearShift = event.target.closest('[data-calendar-year-shift]');
   if (yearShift && !yearShift.disabled) {
     calendarPickerYearStart = Math.max(1900, Math.min(2100, calendarPickerYearStart + Number(yearShift.dataset.calendarYearShift) * 10));
-    return renderCalendarPickerDialog('year');
+    return renderCalendarPickerDialog('year', true);
   }
   const yearOption = event.target.closest('[data-calendar-year-option]');
   if (yearOption) { const year = Number(yearOption.dataset.calendarYearOption); closeCalendarPickerDialog(); return setCalendarMonth(year, state.month.getMonth()); }
