@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.583';
+const APP_VERSION = '2.18.584';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2761,18 +2761,44 @@ async function mascotFlyBackToTop() {
   mascotRuntime.topReturnFlight = true;
   root.classList.add('is-top-return-flight');
   mascotSetReaction('delighted', 1600);
-  mascotSetAction('hop', 1100);
+  mascotSetAction('', 0);
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const flightTime = reducedMotion ? 1 : 900;
-  const reachedTop = waitForMascotScrollTop();
-  scrollAppTo(0, reducedMotion ? 'auto' : 'smooth');
-  await Promise.all([reachedTop, new Promise((resolve) => window.setTimeout(resolve, flightTime))]);
-  root.classList.remove('is-top-return-flight');
-  mascotRuntime.topReturnFlight = false;
-  syncMascotContext();
-  mascotSetAction('land', 640);
-  mascotSetReaction('delighted', 720);
-  mascotScheduleDock();
+  let ascent = null;
+  let descent = null;
+  try {
+    const rootTop = root.getBoundingClientRect().top;
+    const lift = Math.max(0, rootTop - mascotTopSafeInset(root));
+    const canAnimateFlight = !reducedMotion && lift > 1 && typeof root.animate === 'function' && 'translate' in root.style;
+    const reachedTop = waitForMascotScrollTop();
+    if (canAnimateFlight) {
+      const ascentDuration = Math.min(1150, Math.max(620, lift * 1.05));
+      ascent = root.animate([
+        { translate: '0px 0px' },
+        { translate: '0px -' + lift + 'px' },
+      ], { duration: ascentDuration, easing: 'cubic-bezier(.22,.75,.28,1)', fill: 'forwards' });
+    }
+    scrollAppTo(0, reducedMotion ? 'auto' : 'smooth');
+    if (ascent) await ascent.finished.catch(() => {});
+    await reachedTop;
+    if (ascent) {
+      ascent.cancel();
+      const descentDuration = Math.min(1100, Math.max(680, lift * .82));
+      descent = root.animate([
+        { translate: '0px -' + lift + 'px' },
+        { translate: '0px 0px' },
+      ], { duration: descentDuration, easing: 'cubic-bezier(.22,.68,.2,1)', fill: 'forwards' });
+      await descent.finished.catch(() => {});
+    }
+  } finally {
+    ascent?.cancel();
+    descent?.cancel();
+    root.classList.remove('is-top-return-flight');
+    mascotRuntime.topReturnFlight = false;
+    syncMascotContext();
+    mascotSetAction('land', 760);
+    mascotSetReaction('delighted', 820);
+    mascotScheduleDock();
+  }
 }
 function mascotAim(pointer) {
   const root = mascotRuntime.root;
