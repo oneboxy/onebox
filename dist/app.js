@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.581';
+const APP_VERSION = '2.18.582';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2279,7 +2279,7 @@ const MASCOT_IDLE_MAX = 9800;
 const MASCOT_IDLE_MESSAGES = ['今天也要轻轻松松哦', '我在这里陪你', '风吹过来啦', '摸摸我会有好运', '要不要看看今天的天气？'];
 const MASCOT_DRAG_MESSAGES = ['抓到我啦', '轻一点，我会晃晕的', '放这里刚刚好', '我也想换个位置'];
 const MASCOT_EDGE_MESSAGES = ['我先躲到边边～', '边边的位置刚刚好', '需要我时再叫我哦'];
-const mascotRuntime = { root: null, button: null, panel: null, speech: null, directionLayer: null, reactionLayer: null, drag: null, dockTimer: 0, reactionTimer: 0, actionTimer: 0, idleTimer: 0, speechTimer: 0, singleClickTimer: 0, tapAt: 0, boopAt: 0, boops: 0, suppressClickUntil: 0, sector: -1, position: null, lastReaction: '', lastSpeech: '', topActionAnnounced: false, launchTimer: 0, ballTimer: 0, sceneTimer: 0 };
+const mascotRuntime = { root: null, button: null, panel: null, speech: null, directionLayer: null, reactionLayer: null, drag: null, dockTimer: 0, reactionTimer: 0, actionTimer: 0, idleTimer: 0, speechTimer: 0, singleClickTimer: 0, tapAt: 0, boopAt: 0, boops: 0, suppressClickUntil: 0, sector: -1, position: null, lastReaction: '', lastSpeech: '', topActionAnnounced: false, topReturnFlight: false, launchTimer: 0, ballTimer: 0, sceneTimer: 0 };
 function mascotCellStyle(index) {
   return { backgroundPosition: (index % 3) * 50 + '% ' + Math.floor(index / 3) * 50 + '%' };
 }
@@ -2394,7 +2394,7 @@ function mascotClearDockTimer() {
 }
 function mascotScheduleDock() {
   mascotClearDockTimer();
-  if (!mascotRuntime.root || !state.mascotVisible || state.githubSync?.active || state.githubSync?.error || !mascotRuntime.panel?.hidden || mascotRuntime.drag) return;
+  if (!mascotRuntime.root || mascotRuntime.topReturnFlight || !state.mascotVisible || state.githubSync?.active || state.githubSync?.error || !mascotRuntime.panel?.hidden || mascotRuntime.drag) return;
   mascotRuntime.dockTimer = window.setTimeout(() => {
     if (!mascotRuntime.drag && mascotRuntime.panel?.hidden && !state.githubSync?.active && !state.githubSync?.error) {
       mascotRuntime.root.classList.add('is-docked');
@@ -2715,7 +2715,7 @@ function syncMascotContext() {
   const button = mascotRuntime.button;
   if (!root || !button) return;
   const syncPinned = Boolean(state.githubSync?.active || state.githubSync?.error);
-  const topAction = mascotTopActionActive() && !syncPinned;
+  const topAction = mascotRuntime.topReturnFlight || (mascotTopActionActive() && !syncPinned);
   const wasTopAction = root.classList.contains('is-top-action');
   root.classList.toggle('is-top-action', topAction);
   button.setAttribute('aria-label', topAction ? (state.language === 'en' ? 'Back to top' : '回到顶部') : (state.language === 'en' ? 'Open today overview' : '查看今日速览'));
@@ -2740,6 +2740,39 @@ function updateMascotScrollState() {
   }
   syncMascotContext();
   if (scrollingHome) mascotScheduleDock();
+}
+function waitForMascotScrollTop(timeout = 9000) {
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+    let nearTopFrames = 0;
+    const check = () => {
+      nearTopFrames = appScrollTop() <= 2 ? nearTopFrames + 1 : 0;
+      if (nearTopFrames >= 3 || Date.now() - startedAt >= timeout) { resolve(); return; }
+      requestAnimationFrame(check);
+    };
+    check();
+  });
+}
+async function mascotFlyBackToTop() {
+  const root = mascotRuntime.root;
+  if (!root || mascotRuntime.topReturnFlight) return;
+  mascotClearDockTimer();
+  clearTimeout(mascotRuntime.idleTimer);
+  mascotRuntime.topReturnFlight = true;
+  root.classList.add('is-top-return-flight');
+  mascotSetReaction('delighted', 1600);
+  mascotSetAction('hop', 1100);
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const flightTime = reducedMotion ? 1 : 900;
+  const reachedTop = waitForMascotScrollTop();
+  scrollAppTo(0, reducedMotion ? 'auto' : 'smooth');
+  await Promise.all([reachedTop, new Promise((resolve) => window.setTimeout(resolve, flightTime))]);
+  root.classList.remove('is-top-return-flight');
+  mascotRuntime.topReturnFlight = false;
+  syncMascotContext();
+  mascotSetAction('land', 640);
+  mascotSetReaction('delighted', 720);
+  mascotScheduleDock();
 }
 function mascotAim(pointer) {
   const root = mascotRuntime.root;
@@ -2818,6 +2851,7 @@ function mascotUpdateDrag(event) {
 }
 function mascotHandleTap() {
   if (Date.now() < mascotRuntime.suppressClickUntil) return;
+  if (mascotRuntime.topReturnFlight) return;
   const now = Date.now();
   clearTimeout(mascotRuntime.singleClickTimer);
   if (now - mascotRuntime.tapAt < 340) {
@@ -2827,7 +2861,7 @@ function mascotHandleTap() {
   }
   mascotRuntime.tapAt = now;
   mascotRuntime.singleClickTimer = window.setTimeout(() => {
-    if (mascotTopActionActive()) { mascotSetAction('hop', 720); scrollAppTo(0, 'smooth'); return; }
+    if (mascotRuntime.root?.classList.contains('is-top-action')) { void mascotFlyBackToTop(); return; }
     openMascotBriefing();
   }, 250);
 }

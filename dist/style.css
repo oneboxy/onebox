@@ -15533,3 +15533,32 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
 #oneboxMascotRoot.is-top-action:not(.is-docked) .onebox-mascot-propeller {
   transform: translate(-50%, -1px) scale(1);
 }
+#oneboxMascotRoot.is-top-return-flight {
+  pointer-events: none;
+  animation: mascot-top-return-flight .9s cubic-bezier(.2,.72,.22,1) both;
+}
+#oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller i:first-child {
+  animation: mascot-propeller-whirl-left .16s ease-in-out infinite;
+}
+#oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller i:nth-child(2) {
+  animation: mascot-propeller-whirl-right .16s ease-in-out infinite;
+}
+@keyframes mascot-top-return-flight {
+  0% { transform: translateY(6vh) scale(.58); opacity: .82; }
+  15% { transform: translateY(0) scale(.7); opacity: 1; }
+  36% { transform: translateY(-16vh) scale(.76); opacity: 1; }
+  72% { transform: translateY(-59vh) scale(.58); opacity: .92; }
+  100% { transform: translateY(-94vh) scale(.3); opacity: 0; }
+}
+@keyframes mascot-propeller-whirl-left {
+  0%, 100% { transform: rotate(-4deg) scaleX(1); opacity: 1; }
+  50% { transform: rotate(-4deg) scaleX(.35); opacity: .62; }
+}
+@keyframes mascot-propeller-whirl-right {
+  0%, 100% { transform: rotate(4deg) scaleX(1); opacity: .7; }
+  50% { transform: rotate(4deg) scaleX(.35); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #oneboxMascotRoot.is-top-return-flight { animation: none; }
+  #oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller i { animation: none; }
+}
