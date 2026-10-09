@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.576';
+const APP_VERSION = '2.18.577';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1172,7 +1172,8 @@ const state = {
   month: new Date(today.getFullYear(), today.getMonth(), 1), selectedDate: dateKey(today),
   events: parseStored(STORAGE.events, {}) || {},
   weatherCards: initialWeatherCards.map((item) => ({ ...item, id: item.id || uid() })),
-  activeWeatherId: initialWeatherCards[0]?.id || null, weatherLoading: false, weatherError: '', weatherRequest: 0, weatherSearchResults: [],
+  activeWeatherId: initialWeatherCards[0]?.id || null, weatherLoading: false, weatherError: '', weatherRequest: 0,
+  weatherSearchQuery: '', weatherSearchTerm: '', weatherSearchLoading: false, weatherSearchError: '', weatherSearchRequest: 0, weatherSearchResults: [],
   lunarDialogDate: null, lastCalendarTap: { key: '', at: 0 },
   translation: { source: 'auto', target: 'zh', input: '', result: '', loading: false, error: '' },
   translationHistory: parseStored(STORAGE.translationHistory, []),
@@ -7170,6 +7171,7 @@ async function getWeatherData(lat, lon) {
 }
 async function addWeatherPlace(place) {
   const request = ++state.weatherRequest;
+  state.weatherSearchRequest += 1; state.weatherSearchLoading = false; state.weatherSearchError = '';
   const currentIndex = place.isCurrentLocation ? state.weatherCards.findIndex((item) => item.isCurrentLocation) : -1;
   const coordinateIndex = state.weatherCards.findIndex((item) => Math.abs(Number(item.latitude) - Number(place.latitude)) < .01 && Math.abs(Number(item.longitude) - Number(place.longitude)) < .01);
   const existingIndex = currentIndex >= 0 ? currentIndex : coordinateIndex;
@@ -7226,27 +7228,74 @@ async function refreshWeatherCard(card) {
 async function searchWeather(query) {
   const value = query.trim();
   if (!value) return toast(state.language === 'en' ? 'Enter a city or district' : '请输入城市或区县名称', 'error');
-  state.weatherLoading = true; state.weatherError = ''; state.weatherSearchResults = []; render();
-  try {
-    let results = [];
-    try {
-      const response = await fetchWithTimeout('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(value) + '&count=8&language=' + (state.language === 'en' ? 'en' : 'zh') + '&format=json', { headers: { Accept: 'application/json' } }, 6000);
-      const data = await response.json(); results = data.results || [];
-    } catch { /* Photon below is the district-aware fallback. */ }
-    if (!results.length) {
-      const response = await fetchWithTimeout('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=8', { headers: { Accept: 'application/json' } }, 6000);
-      const data = await response.json();
-      results = (data.features || []).map((feature) => {
-        const properties = feature.properties || {}; const coordinates = feature.geometry?.coordinates || [];
-        return { name: properties.name || properties.city || value, admin2: properties.city || properties.district || '', admin1: properties.state || '', country: properties.country || '', latitude: Number(coordinates[1]), longitude: Number(coordinates[0]) };
-      }).filter((place) => Number.isFinite(place.latitude) && Number.isFinite(place.longitude));
-    }
-    state.weatherSearchResults = results;
-    if (!state.weatherSearchResults.length) state.weatherError = t('noResults');
-  } catch (error) { state.weatherError = error.message || (state.language === 'en' ? 'Place search failed' : '地点搜索失败'); }
-  finally { state.weatherLoading = false; render(); }
+  const request = ++state.weatherSearchRequest;
+  state.weatherSearchQuery = value; state.weatherSearchTerm = value; state.weatherSearchLoading = true;
+  state.weatherSearchError = ''; state.weatherSearchResults = []; updateWeatherSearchResults();
+  let failures = 0;
+  const addResults = (incoming) => {
+    if (request !== state.weatherSearchRequest || !incoming.length) return;
+    const merged = [...state.weatherSearchResults];
+    incoming.forEach((place) => {
+      const duplicate = merged.some((item) =>
+        (Math.abs(Number(item.latitude) - Number(place.latitude)) < .01 && Math.abs(Number(item.longitude) - Number(place.longitude)) < .01) ||
+        (String(item.name).toLocaleLowerCase() === String(place.name).toLocaleLowerCase() && String(item.admin1 || '').toLocaleLowerCase() === String(place.admin1 || '').toLocaleLowerCase() && String(item.country || '').toLocaleLowerCase() === String(place.country || '').toLocaleLowerCase())
+      );
+      if (!duplicate) merged.push(place);
+    });
+    state.weatherSearchResults = merged.slice(0, 8);
+    updateWeatherSearchResults();
+  };
+  const searchOpenMeteo = async () => {
+    const response = await fetchWithTimeout('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(value) + '&count=8&language=' + (state.language === 'en' ? 'en' : 'zh') + '&format=json', { headers: { Accept: 'application/json' } }, 5000);
+    if (!response.ok) throw Error('Geocoding request failed');
+    const data = await response.json();
+    return (data.results || []).map((place) => ({ ...place, latitude: Number(place.latitude), longitude: Number(place.longitude) }))
+      .filter((place) => Number.isFinite(place.latitude) && Number.isFinite(place.longitude));
+  };
+  const searchPhoton = async () => {
+    const response = await fetchWithTimeout('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=8&lang=' + (state.language === 'en' ? 'en' : 'zh'), { headers: { Accept: 'application/json' } }, 5000);
+    if (!response.ok) throw Error('Place search request failed');
+    const data = await response.json();
+    return (data.features || []).map((feature) => {
+      const properties = feature.properties || {}; const coordinates = feature.geometry?.coordinates || [];
+      return { name: properties.name || properties.city || value, admin2: properties.city || properties.district || '', admin1: properties.state || '', country: properties.country || '', latitude: Number(coordinates[1]), longitude: Number(coordinates[0]) };
+    }).filter((place) => Number.isFinite(place.latitude) && Number.isFinite(place.longitude));
+  };
+  await Promise.all([searchOpenMeteo, searchPhoton].map(async (search) => {
+    try { addResults(await search()); }
+    catch { if (request === state.weatherSearchRequest) failures += 1; }
+  }));
+  if (request !== state.weatherSearchRequest) return;
+  state.weatherSearchLoading = false;
+  if (!state.weatherSearchResults.length) {
+    state.weatherSearchError = failures === 2
+      ? (state.language === 'en' ? 'Place search is temporarily unavailable. Please try again.' : '地点搜索服务暂时不可用，请稍后重试。')
+      : t('noResults');
+  }
+  updateWeatherSearchResults();
 }
 function placeLabel(place) { return [place.name, place.admin2, place.admin1, place.country].filter(Boolean).join(' · '); }
+function weatherSearchResultsMarkup() {
+  const status = state.weatherSearchLoading
+    ? '<div class="weather-search-status" role="status"><span class="loader" aria-hidden="true"></span><span>' + (state.language === 'en' ? 'Searching places…' : '正在搜索地点…') + '</span></div>'
+    : '';
+  const error = state.weatherSearchError
+    ? '<div class="weather-search-message" role="status">' + escapeHtml(state.weatherSearchError) + '</div>'
+    : '';
+  const results = state.weatherSearchResults.length
+    ? '<div class="weather-search-results"><div class="search-results-head"><strong>' + (state.language === 'en' ? 'Search results' : '搜索结果') + '</strong><small>' + (state.language === 'en' ? 'Choose a place, then add it to weather cards' : '选择地点后再添加到天气卡片') + '</small></div>' + state.weatherSearchResults.map((place, index) => '<div class="weather-result"><span><strong>' + escapeHtml(place.name) + '</strong><small>' + escapeHtml(placeLabel(place)) + '</small></span><button class="secondary" data-weather-result-index="' + index + '">' + t('addCard') + '</button></div>').join('') + '</div>'
+    : '';
+  return status + error + results;
+}
+function updateWeatherSearchResults() {
+  const slot = $('#weatherSearchResults');
+  if (slot) slot.innerHTML = weatherSearchResultsMarkup();
+}
+function closeWeatherSearchPopover() {
+  if (!state.weatherSearchLoading && !state.weatherSearchError && !state.weatherSearchResults.length) return;
+  state.weatherSearchRequest += 1; state.weatherSearchLoading = false; state.weatherSearchError = ''; state.weatherSearchResults = [];
+  updateWeatherSearchResults();
+}
 async function reverseGeocode(latitude, longitude) {
   try {
     const response = await fetchWithTimeout('https://photon.komoot.io/reverse?lat=' + encodeURIComponent(latitude) + '&lon=' + encodeURIComponent(longitude), { headers: { Accept: 'application/json' } }, 5000);
@@ -7307,9 +7356,10 @@ function weatherAdvice(weather, current) {
 }
 function weather() {
   const active = state.weatherCards.find((item) => item.id === state.activeWeatherId) || state.weatherCards[0];
-  const search = '<form id="weatherSearch" class="weather-search"><label class="sr-only" for="cityInput">' + t('searchPlace') + '</label><div class="weather-search-field"><input id="cityInput" placeholder="' + t('searchPlace') + '" autocomplete="off"><button class="weather-location-button" type="button" data-locate aria-label="' + t('currentLocation') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg></button></div><button class="primary" type="submit">' + t('weatherSearch') + '</button></form>';
-  const results = state.weatherSearchResults.length ? '<div class="weather-search-results"><div class="search-results-head"><strong>' + (state.language === 'en' ? 'Search results' : '搜索结果') + '</strong><small>' + (state.language === 'en' ? 'Choose a place, then add it to weather cards' : '选择地点后再添加到天气卡片') + '</small></div>' + state.weatherSearchResults.map((place, index) => '<div class="weather-result"><span><strong>' + escapeHtml(place.name) + '</strong><small>' + escapeHtml(placeLabel(place)) + '</small></span><button class="secondary" data-weather-result-index="' + index + '">' + t('addCard') + '</button></div>').join('') + '</div>' : '';
-  if (!active) return heading(t('weather'), t('weatherDesc')) + search + results + '<div class="empty weather-empty">' + (state.weatherLoading ? '<span class="loader"></span>' + t('weatherLoading') : t('noWeather')) + (state.weatherError ? '<strong class="error-text">' + escapeHtml(state.weatherError) + '</strong>' : '') + '</div>';
+  const search = '<form id="weatherSearch" class="weather-search"><label class="sr-only" for="cityInput">' + t('searchPlace') + '</label><div class="weather-search-field"><input id="cityInput" value="' + escapeHtml(state.weatherSearchQuery) + '" placeholder="' + t('searchPlace') + '" autocomplete="off"><button class="weather-search-clear" type="button" data-weather-clear aria-label="' + (state.language === 'en' ? 'Clear search' : '清空搜索') + '" title="' + (state.language === 'en' ? 'Clear search' : '清空搜索') + '"' + (state.weatherSearchQuery.trim() ? '' : ' hidden') + '>×</button><button class="weather-location-button" type="button" data-locate aria-label="' + t('currentLocation') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg></button></div><button class="primary" type="submit">' + t('weatherSearch') + '</button></form>';
+  const results = '<div id="weatherSearchResults" class="weather-search-result-slot" aria-live="polite">' + weatherSearchResultsMarkup() + '</div>';
+  const searchArea = '<div class="weather-search-area">' + search + results + '</div>';
+  if (!active) return heading(t('weather'), t('weatherDesc')) + searchArea + '<div class="empty weather-empty">' + (state.weatherLoading ? '<span class="loader"></span>' + t('weatherLoading') : t('noWeather')) + (state.weatherError ? '<strong class="error-text">' + escapeHtml(state.weatherError) + '</strong>' : '') + '</div>';
   const current = active.current || {};
   const cards = state.weatherCards.map((card, index) => {
     const failed = Boolean(card.loadError && !card.current);
@@ -7322,7 +7372,7 @@ function weather() {
   const title = [active.name, active.admin2, active.admin1, active.country].filter(Boolean).join(' · ');
   if ((active.loading || active.loadError) && !active.current) {
     const failure = active.loadError ? '<div class="inline-alert">' + escapeHtml(t('weatherLoadFailed')) + '</div>' : '';
-    return heading(t('weather'), escapeHtml(title)) + search + results + failure + '<div class="weather-card-list">' + cards + '</div>';
+    return heading(t('weather'), escapeHtml(title)) + searchArea + failure + '<div class="weather-card-list">' + cards + '</div>';
   }
   const hourlyTimes = Array.isArray(active.hourly?.time) ? active.hourly.time : [];
   const hourlyTemperatures = Array.isArray(active.hourly?.temperature_2m) ? active.hourly.temperature_2m : [];
@@ -7378,7 +7428,7 @@ function weather() {
     });
   }, 0);
   return heading(t('weather'), escapeHtml(title) + ' · ' + (state.language === 'en' ? 'updated' : '更新于') + ' ' + (active.updatedAt ? new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(active.updatedAt) : (state.language === 'en' ? 'cached' : '本机缓存'))) +
-    search + results + (state.weatherError ? '<div class="inline-alert">' + escapeHtml(state.weatherError) + '，' + (state.language === 'en' ? 'showing the last successful result' : '当前显示上次成功结果') + '。</div>' : '') +
+    searchArea + (state.weatherError ? '<div class="inline-alert">' + escapeHtml(state.weatherError) + '，' + (state.language === 'en' ? 'showing the last successful result' : '当前显示上次成功结果') + '。</div>' : '') +
     '<div class="weather-card-list">' + cards + '</div>' +
     '<div class="weather-section-heading"><h3 class="weather-section-title">' + t('hourly') + '</h3><p class="weather-data-note">' + (needsHourlyRepair ? '<span class="inline-alert">' + escapeHtml(t('weatherHourlyRepairing')) + '</span> ' : '') + escapeHtml(weatherDataNote) + '</p></div><div class="hourly-strip">' + hourly + '</div><h3 class="weather-section-title">' + t('advice') + '</h3><div class="advice-strip">' + advice + '</div><h3 class="weather-section-title">' + t('daily') + '</h3><div class="weather-days">' + days + '</div>';
 }
@@ -11993,6 +12043,17 @@ workspace.addEventListener('click', async (event) => {
     Object.keys(state.events).forEach((day) => { state.events[day] = (state.events[day] || []).filter((item) => item.id !== deleteEvent.dataset.deleteEvent); if (!state.events[day].length) delete state.events[day]; });
     saveEvents(); syncAgendaReminders(); scheduleNotificationCheck(); return render();
   }
+  const weatherClear = event.target.closest('[data-weather-clear]');
+  if (weatherClear) {
+    event.preventDefault(); event.stopPropagation();
+    state.weatherSearchRequest += 1; state.weatherSearchQuery = ''; state.weatherSearchTerm = '';
+    state.weatherSearchLoading = false; state.weatherSearchError = ''; state.weatherSearchResults = [];
+    const input = $('#cityInput');
+    if (input) { input.value = ''; input.focus(); }
+    weatherClear.hidden = true;
+    updateWeatherSearchResults();
+    return;
+  }
   const weatherResult = event.target.closest('[data-weather-result-index]');
   if (weatherResult) return addWeatherPlace(state.weatherSearchResults[Number(weatherResult.dataset.weatherResultIndex)]);
   const deleteWeather = event.target.closest('[data-delete-weather]');
@@ -12059,6 +12120,12 @@ workspace.addEventListener('click', async (event) => {
   if (event.target.closest('[data-clear-translation-history]')) { state.translationHistory = []; saveTranslationHistory(); return render(); }
 });
 document.addEventListener('click', (event) => {
+  if (!event.target.closest('#workspace[data-tool="weather"] .weather-search-area')) closeWeatherSearchPopover();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeWeatherSearchPopover();
+});
+document.addEventListener('click', (event) => {
   const navigationPage = state.section === 'navigation' || (state.section === 'tools' && state.tool === 'navigation');
   if (!navigationPage || event.target.closest('#workspace[data-tool="navigation"] [data-navigation-item], #workspace[data-tool="navigation"] [data-open-navigation-add], [data-open-navigation-settings], .navigation-settings-popover, #navigationDialog')) return;
   if (state.navigationSettingsOpen) { state.navigationSettingsOpen = false; syncNavigationSettingsPopover(); }
@@ -12072,6 +12139,15 @@ workspace.addEventListener('input', (event) => {
   if (event.target.dataset.devField) { const field = event.target.dataset.devField; state.devTools[field] = event.target.type === 'checkbox' ? event.target.checked : event.target.value; updateDeveloperLiveState(field); }
   if (event.target.id === 'conversionValue') { conversion.value = event.target.value; const output = $('.conversion-result strong'); if (output) output.textContent = formatNumber(convertedValue()); }
   if (event.target.id === 'translationInput') state.translation.input = event.target.value;
+  if (event.target.id === 'cityInput') {
+    state.weatherSearchQuery = event.target.value;
+    const clearButton = event.target.closest('.weather-search-field')?.querySelector('[data-weather-clear]');
+    if (clearButton) clearButton.hidden = !state.weatherSearchQuery.trim();
+    if (state.weatherSearchQuery.trim() !== state.weatherSearchTerm && (state.weatherSearchLoading || state.weatherSearchResults.length || state.weatherSearchError)) {
+      state.weatherSearchRequest += 1; state.weatherSearchLoading = false; state.weatherSearchError = ''; state.weatherSearchResults = [];
+      updateWeatherSearchResults();
+    }
+  }
 });
 workspace.addEventListener('change', (event) => {
   if (event.target.dataset.devField === 'timestampUnit') { state.devTools.timestampUnit = event.target.value; updateDeveloperLiveState('timestampUnit'); }
