@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.564';
+const APP_VERSION = '2.18.566';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10,6 +10,8 @@ const GITHUB_OAUTH_PROXY = 'https://onebox-github-oauth.secoder.workers.dev';
 // providers can be added here and routed to their own identity adapters.
 const ACCOUNT_LOGIN_PROVIDERS = Object.freeze([
   Object.freeze({ id: 'github', name: 'GitHub', detailKey: 'githubProviderBackupHint', enabled: true, connect: () => githubLogin() }),
+  Object.freeze({ id: 'wechat', name: '微信', detailKey: 'accountProviderComingSoon', enabled: false }),
+  Object.freeze({ id: 'apple', name: 'Apple', detailKey: 'accountProviderComingSoon', enabled: false }),
 ]);
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -449,12 +451,16 @@ DICT.en.readerBackupTooLarge = 'The backup is larger than 256 MB. Back up smalle
 DICT.en.readerBackupInvalid = 'The backup is invalid or damaged. The local shelf was not changed.';
 DICT.en.readerBackupLimit = 'Restore would exceed the 80-book limit. Remove books from the current shelf first.';
 DICT.en.readerBackupFailed = 'Backup processing failed. Check available device storage and try again.';
+DICT.zh.accountLogin = '登录账号';
+DICT.en.accountLogin = 'Sign in';
 DICT.zh.oneboxAccountTitle = 'OneBox 账户';
 DICT.en.oneboxAccountTitle = 'OneBox account';
 DICT.zh.githubLoginTitle = '选择登录方式';
 DICT.en.githubLoginTitle = 'Choose a sign-in method';
 DICT.zh.githubProviderBackupHint = '私有 Gist 备份';
 DICT.en.githubProviderBackupHint = 'Private Gist backup';
+DICT.zh.accountProviderComingSoon = '即将开放';
+DICT.en.accountProviderComingSoon = 'Coming soon';
 // Keep the cloud-sync summary short; the action labels explain upload versus restore.
 const toolName = (id) => t(TOOL_DEFS[id]?.key || id);
 const storedTheme = localStorage.getItem(STORAGE.theme);
@@ -3445,7 +3451,7 @@ function renderMine() {
   const updateProgress = updateBusy ? '<span class="update-progress" role="status" aria-label="' + escapeHtml(updateStatus) + '"><span class="update-progress-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>' : '<span class="update-status-label">' + escapeHtml(updateStatus) + '</span>';
   const updateButton = state.updateAvailable ? '<button class="primary mine-update-button" data-apply-update ' + (state.updateApplying ? 'disabled' : '') + '>' + (state.updateApplying ? t('updateApplying') : t('applyUpdate')) + '</button>' : '<button class="primary mine-update-button" data-check-update ' + (state.updateChecking || state.updateApplying ? 'disabled' : '') + '>' + t('checkUpdate') + '</button>';
   const updateRow = '<div class="mine-row mine-update-row"><span class="mine-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></span><span class="mine-row-copy mine-update-copy"><strong>' + t('appUpdate') + '</strong><small class="mine-row-description">v' + APP_VERSION + (updateBusy ? ' ' : ' · ') + updateProgress + '</small></span><span class="mine-row-action">' + updateButton + '</span></div>';
-  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-open-github-page', 'github', 'GitHub', escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
+  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-open-github-page', 'github', t('accountLogin'), escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
 }
 
 function openTicketWallet() {
@@ -9437,6 +9443,14 @@ function startAccountLogin(providerId) {
   if (!provider) return;
   return provider.connect();
 }
+function accountProviderIcon(providerId) {
+  const icons = {
+    github: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.54v-2.1c-3.1.67-3.75-1.32-3.75-1.32-.5-1.29-1.24-1.63-1.24-1.63-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.62 1.22 3.26.93.1-.72.39-1.22.71-1.5-2.48-.28-5.09-1.24-5.09-5.53 0-1.22.44-2.22 1.16-3-.12-.29-.5-1.42.11-2.96 0 0 .95-.3 3.05 1.15a10.6 10.6 0 0 1 5.55 0c2.1-1.45 3.04-1.15 3.04-1.15.61 1.54.23 2.67.12 2.96.72.78 1.15 1.78 1.15 3.01 0 4.3-2.61 5.24-5.1 5.52.4.34.76 1.02.76 2.06v3.05c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/></svg>',
+    wechat: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.2 3.2c-4.45 0-8.05 2.9-8.05 6.48 0 2.02 1.17 3.83 3 5.02l-.65 2.1 2.63-1.3c.94.32 1.97.5 3.07.5.18 0 .35 0 .52-.02a5.75 5.75 0 0 1-.27-1.72c0-3.22 3.15-5.83 7.03-5.83.35 0 .69.02 1.02.07-.48-3.02-3.97-5.3-8.3-5.3Z"/><path fill="currentColor" d="M21.85 14.27c0-2.76-2.76-5-6.16-5s-6.16 2.24-6.16 5 2.76 5 6.16 5c.84 0 1.64-.13 2.36-.38l2.01 1-.5-1.6c1.4-.91 2.29-2.37 2.29-4.02Z"/><circle cx="7.2" cy="9.2" r=".8" fill="#fff"/><circle cx="12.5" cy="9.2" r=".8" fill="#fff"/><circle cx="13.45" cy="14.1" r=".68" fill="#fff"/><circle cx="17.95" cy="14.1" r=".68" fill="#fff"/></svg>',
+    apple: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M16.35 12.7c.02 2.56 2.25 3.41 2.28 3.42-.02.06-.36 1.22-1.17 2.42-.7 1.03-1.43 2.05-2.57 2.07-1.12.03-1.48-.67-2.76-.67-1.28 0-1.68.65-2.74.7-1.1.04-1.94-1.1-2.64-2.12-1.44-2.08-2.53-5.87-1.05-8.43a4.1 4.1 0 0 1 3.45-2.1c1.08-.02 2.1.73 2.76.73.65 0 1.88-.9 3.17-.77.54.02 2.06.22 3.04 1.66-.08.05-1.82 1.06-1.8 3.09ZM14.3 5.9c.58-.7.97-1.67.87-2.64-.84.03-1.86.56-2.46 1.25-.54.62-1.01 1.6-.88 2.54.94.07 1.9-.48 2.47-1.15Z"/></svg>',
+  };
+  return '<span class="account-provider-icon account-provider-icon-' + escapeHtml(providerId) + '" aria-hidden="true">' + (icons[providerId] || '') + '</span>';
+}
 function renderGithubDialog() {
   const dialog = $('#githubDialog');
   if (!dialog) return;
@@ -9448,7 +9462,7 @@ function renderGithubDialog() {
   const selection = normalizeGithubSyncSelection(state.githubSyncSelection);
   const providerActions = waiting
     ? '<div class="github-waiting-actions"><button class="github-secondary-button github-connect" disabled>' + t('githubWaiting') + '</button><button class="github-secondary-button github-cancel" data-github-cancel>' + t('githubCancel') + '</button></div>'
-    : ACCOUNT_LOGIN_PROVIDERS.filter((provider) => provider.enabled).map((provider) => '<button class="account-login-method" data-auth-provider="' + escapeHtml(provider.id) + '" ' + (provider.id === 'github' ? 'data-github-login ' : '') + (!agreementChecked ? 'disabled' : '') + '><span class="account-login-method-copy"><strong>' + escapeHtml(provider.name) + '</strong><small>' + t(provider.detailKey) + '</small></span><span class="account-login-method-action">' + (state.language === 'en' ? 'Continue' : '继续') + '</span></button>').join('');
+    : ACCOUNT_LOGIN_PROVIDERS.map((provider) => '<button class="account-login-method' + (provider.enabled ? '' : ' is-unavailable') + '" ' + (provider.enabled ? 'data-auth-provider="' + escapeHtml(provider.id) + '" ' + (!agreementChecked ? 'disabled' : '') : 'disabled aria-disabled="true"') + '>' + accountProviderIcon(provider.id) + '<strong class="account-login-method-name">' + escapeHtml(provider.name) + '</strong><small class="account-login-method-detail">' + t(provider.detailKey) + '</small></button>').join('');
   const account = connected
     ? '<div class="github-status-card is-connected"><span class="github-status-icon github-avatar' + (githubAvatarUrl(state.github.user) ? '' : ' is-fallback') + '">' + githubAvatarMarkup(state.github.user) + '</span><span class="github-status-copy"><strong>' + escapeHtml(state.github.user.login || 'GitHub') + '</strong><small>' + t('githubConnectedHint') + '</small></span><span class="github-status-badge">✓</span></div>'
     : '<div class="github-status-card github-not-connected-card"><div class="github-login-intro"><strong>' + t('githubLoginTitle') + '</strong></div><label class="github-agreement-check"><input id="githubAgreement" type="checkbox" ' + (agreementChecked ? 'checked' : '') + '><span>' + t('githubAgreementCheck') + ' <button type="button" class="github-agreement-link" data-open-agreement>' + t('viewAgreement') + '</button></span></label><div class="account-login-methods">' + providerActions + '</div></div>';
