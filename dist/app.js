@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.573';
+const APP_VERSION = '2.18.574';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7105,13 +7105,26 @@ const weatherCode = (code) => {
 };
 const weatherUrl = (lat, lon) => 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lon) + '&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m,precipitation&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,uv_index,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,wind_speed_10m_max&wind_speed_unit=kmh&timezone=auto&past_days=3&forecast_days=16';
 const weatherElevationUrl = (lat, lon) => 'https://api.open-meteo.com/v1/elevation?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lon);
-function saveWeatherCards() { saveStored(STORAGE.weatherCards, state.weatherCards); }
-function removeWeatherCard(id) {
-  if (!id) return false;
-  const index = state.weatherCards.findIndex((card) => card.id === id);
+function normalizeWeatherCards(value) {
+  const seen = new Set();
+  return (Array.isArray(value) ? value : []).filter((card) => card && typeof card === 'object').map((card) => {
+    let id = String(card.id || '').trim();
+    if (!id || seen.has(id)) id = uid();
+    seen.add(id);
+    return { ...card, id };
+  });
+}
+function saveWeatherCards() {
+  state.weatherCards = normalizeWeatherCards(state.weatherCards);
+  saveStored(STORAGE.weatherCards, state.weatherCards);
+}
+function removeWeatherCard(id, fallbackIndex = -1) {
+  let index = id ? state.weatherCards.findIndex((card) => String(card.id || '') === String(id)) : -1;
+  if (index < 0 && !id && Number.isInteger(fallbackIndex) && fallbackIndex >= 0 && fallbackIndex < state.weatherCards.length) index = fallbackIndex;
   if (index < 0) return false;
+  const removedId = state.weatherCards[index].id;
   state.weatherCards.splice(index, 1);
-  if (state.activeWeatherId === id) state.activeWeatherId = state.weatherCards[0]?.id || null;
+  if (state.activeWeatherId === removedId || !state.weatherCards.some((card) => card.id === state.activeWeatherId)) state.activeWeatherId = state.weatherCards[0]?.id || null;
   reorderTarget = null;
   reorderDrag = null;
   saveWeatherCards();
@@ -7121,9 +7134,15 @@ function removeWeatherCard(id) {
 function handleWeatherDeletePointer(event) {
   const button = event.target?.closest?.('[data-delete-weather]');
   if (!button) return false;
+  if (button.dataset.weatherDeleteHandled === 'true') {
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+  }
+  button.dataset.weatherDeleteHandled = 'true';
   event.preventDefault();
   event.stopPropagation();
-  removeWeatherCard(button.dataset.deleteWeather);
+  removeWeatherCard(button.dataset.deleteWeather, Number(button.dataset.deleteWeatherIndex));
   return true;
 }
 function weatherCardFailureText() { return state.language === 'en' ? 'Weather failed to load' : '天气获取失败'; }
@@ -7292,7 +7311,7 @@ function weather() {
     const cardCurrent = card.current || {};
     const temperature = card.loading && !card.current ? '…' : failed ? '—' : Math.round(cardCurrent.temperature_2m ?? 0) + '°';
     const details = card.loading && !card.current ? '<span class="weather-card-meta-line">' + escapeHtml(t('weatherLoading')) + '</span>' : failed ? '<span class="weather-card-meta-line">' + escapeHtml(t('weatherLoadFailed')) + '</span>' : '<span class="weather-card-meta-line">' + escapeHtml((state.language === 'en' ? 'Feels ' : '体感 ') + Math.round(cardCurrent.apparent_temperature ?? cardCurrent.temperature_2m ?? 0) + '° · ' + (state.language === 'en' ? 'Humidity ' : '湿度 ') + (cardCurrent.relative_humidity_2m ?? '—') + '%') + '</span><span class="weather-card-meta-line weather-card-meta-secondary"><span>' + escapeHtml((state.language === 'en' ? 'Wind ' : '风力 ') + weatherWindLabel(cardCurrent.wind_speed_10m) + ' · ' + Math.round(cardCurrent.wind_speed_10m ?? 0) + ' km/h') + '</span><span>' + escapeHtml(t('elevation') + ' ' + weatherElevationLabel(card.elevation)) + '</span></span>';
-    return '<article class="weather-card ' + (card.id === active.id ? 'active' : '') + (card.loading ? ' loading' : '') + (failed ? ' has-error' : '') + '" draggable="true" data-weather-card="' + card.id + '" data-weather-index="' + index + '"><button type="button" class="weather-card-delete" data-delete-weather="' + escapeHtml(card.id) + '" aria-label="' + (state.language === 'en' ? 'Delete weather card' : '删除天气卡片') + '">×</button><div class="weather-card-head"><span><strong>' + escapeHtml(card.name) + '</strong><small>' + escapeHtml([card.admin2, card.admin1].filter(Boolean).join(' · ') || card.country || '') + '</small></span><span class="weather-card-icon" aria-hidden="true">' + item[0] + '</span></div><div class="weather-card-main"><span class="weather-card-temp">' + temperature + '</span><span class="weather-card-condition">' + escapeHtml(item[1]) + '</span></div><span class="weather-card-meta">' + details + '</span></article>';
+    return '<article class="weather-card ' + (card.id === active.id ? 'active' : '') + (card.loading ? ' loading' : '') + (failed ? ' has-error' : '') + '" draggable="true" data-weather-card="' + escapeHtml(card.id) + '" data-weather-index="' + index + '"><button type="button" class="weather-card-delete" data-delete-weather="' + escapeHtml(card.id) + '" data-delete-weather-index="' + index + '" aria-label="' + (state.language === 'en' ? 'Delete weather card' : '删除天气卡片') + '">×</button><div class="weather-card-head"><span><strong>' + escapeHtml(card.name) + '</strong><small>' + escapeHtml([card.admin2, card.admin1].filter(Boolean).join(' · ') || card.country || '') + '</small></span><span class="weather-card-icon" aria-hidden="true">' + item[0] + '</span></div><div class="weather-card-main"><span class="weather-card-temp">' + temperature + '</span><span class="weather-card-condition">' + escapeHtml(item[1]) + '</span></div><span class="weather-card-meta">' + details + '</span></article>';
   }).join('');
   const title = [active.name, active.admin2, active.admin1, active.country].filter(Boolean).join(' · ');
   if ((active.loading || active.loadError) && !active.current) {
@@ -8837,7 +8856,7 @@ function hydrateGithubRuntimeState() {
   state.devTools = normalizeDevTools(parseStored(STORAGE.devTools, {}));
   state.events = parseStored(STORAGE.events, {}) || {};
   const storedWeather = parseStored(STORAGE.weatherCards, []);
-  state.weatherCards = (Array.isArray(storedWeather) ? storedWeather : []).map((item) => ({ ...item, loading: false }));
+  state.weatherCards = normalizeWeatherCards((Array.isArray(storedWeather) ? storedWeather : []).map((item) => ({ ...item, loading: false })));
   state.activeWeatherId = state.weatherCards[0]?.id || null;
   state.translationHistory = parseStored(STORAGE.translationHistory, []);
   state.notifications = parseStored(STORAGE.notifications, []);
@@ -9459,7 +9478,7 @@ async function githubDownloadTask() {
     if (githubSyncCustomGroupEnabled('calculator') && remote.calculator) saveStored(STORAGE.calculator, mergeGithubValue(parseStored(STORAGE.calculator, {}), remote.calculator));
     hydrateCalculatorFromStorage();
     if (githubSyncCustomGroupEnabled('calendar') && remote.events) { state.events = mergeGithubValue(state.events, remote.events); saveEvents(); }
-    if (githubSyncCustomGroupEnabled('weather') && Array.isArray(remote.weatherCards)) { state.weatherCards = mergeGithubValue(state.weatherCards, remote.weatherCards); state.activeWeatherId = state.weatherCards[0]?.id || null; saveWeatherCards(); }
+    if (githubSyncCustomGroupEnabled('weather') && Array.isArray(remote.weatherCards)) { state.weatherCards = normalizeWeatherCards(mergeGithubValue(state.weatherCards, remote.weatherCards)); state.activeWeatherId = state.weatherCards[0]?.id || null; saveWeatherCards(); }
     if (githubSyncCustomGroupEnabled('translation') && Array.isArray(remote.translationHistory)) { state.translationHistory = mergeGithubValue(state.translationHistory, remote.translationHistory); saveTranslationHistory(); }
     if (messagesEnabled && Array.isArray(remote.notifications)) { state.notifications = mergeGithubValue(state.notifications, remote.notifications); saveNotifications(); }
     if (readingEnabled && Array.isArray(readerRestore.library)) {
@@ -11972,8 +11991,10 @@ workspace.addEventListener('click', async (event) => {
   if (weatherResult) return addWeatherPlace(state.weatherSearchResults[Number(weatherResult.dataset.weatherResultIndex)]);
   const deleteWeather = event.target.closest('[data-delete-weather]');
   if (deleteWeather) {
+    if (deleteWeather.dataset.weatherDeleteHandled === 'true') return;
+    deleteWeather.dataset.weatherDeleteHandled = 'true';
     event.preventDefault(); event.stopPropagation();
-    return removeWeatherCard(deleteWeather.dataset.deleteWeather);
+    return removeWeatherCard(deleteWeather.dataset.deleteWeather, Number(deleteWeather.dataset.deleteWeatherIndex));
   }
   const weatherCard = event.target.closest('[data-weather-card]');
   if (weatherCard) {
