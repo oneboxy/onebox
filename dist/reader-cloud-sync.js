@@ -227,7 +227,7 @@
     if (!API_BASE) { setStatus('unconfigured', 'Cloudflare 私有存储服务尚未配置'); return; }
     if (handlers.isEnabled && !handlers.isEnabled()) {
       const reason = handlers.disabledStatus?.() || 'disabled';
-      setStatus(reason, reason === 'consent-required' ? '请在 GitHub 设置中同意书籍自动同步' : '阅读同步已关闭');
+      setStatus(reason, '阅读同步已关闭');
       return;
     }
     if (handlers.isReady && !handlers.isReady()) return;
