@@ -9417,7 +9417,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 #oneboxMascotRoot.is-dragging { transition: none; }
 #oneboxMascotRoot[data-edge="right"].is-docked { transform: translateX(calc(100% - 18px)); }
 #oneboxMascotRoot[data-edge="left"].is-docked { transform: translateX(calc(-100% + 18px)); }
-#oneboxMascotRoot.is-top-action:not(.is-docked) { transform: translateY(6vh) scale(.58); transform-origin: 50% 100%; opacity: .82; }
+#oneboxMascotRoot.is-top-action:not(.is-docked) { transform: none; opacity: 1; }
 #oneboxMascotRoot.is-top-action:not(.is-docked) .onebox-mascot-button { transform: none; transform-origin: 50% 100%; }
 .onebox-mascot-propeller { position: absolute; z-index: 4; top: -1px; left: 50%; width: 62px; height: 20px; pointer-events: none; opacity: 0; transform: translate(-50%, -4px) scale(.6); transform-origin: 50% 100%; transition: opacity .22s ease, transform .32s cubic-bezier(.2,.85,.25,1); }
 .onebox-mascot-propeller i { position: absolute; top: 1px; width: 27px; height: 8px; border: 1.5px solid #6b92ff; background: linear-gradient(180deg, #9bbdff, #4b72e4); box-shadow: 0 1px 4px rgb(54 105 255 / 25%); }
@@ -15535,13 +15535,14 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
 }
 #oneboxMascotRoot.is-top-return-flight {
   pointer-events: none;
-  will-change: translate;
 }
+#oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller { animation: none; }
+#oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller i { will-change: transform, opacity; }
 #oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller i:first-child {
-  animation: mascot-propeller-whirl-left .16s ease-in-out infinite;
+  animation: mascot-propeller-whirl-left .22s ease-in-out infinite;
 }
 #oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller i:nth-child(2) {
-  animation: mascot-propeller-whirl-right .16s ease-in-out infinite;
+  animation: mascot-propeller-whirl-right .22s ease-in-out infinite;
 }
 @keyframes mascot-propeller-whirl-left {
   0%, 100% { transform: rotate(-4deg) scaleX(1); opacity: 1; }

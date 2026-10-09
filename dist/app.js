@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.584';
+const APP_VERSION = '2.18.585';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2235,6 +2235,56 @@ function scrollAppTo(top, behavior = 'auto') {
   }
   scrollElement.scrollTo({ top: targetTop, behavior });
 }
+function scrollAppToTopDamped() {
+  const scrollElement = appScrollElement();
+  const startTop = Math.max(0, appScrollTop());
+  if (!scrollElement || startTop <= 1) return Promise.resolve(true);
+  const duration = Math.min(1450, Math.max(520, startTop * .45));
+  const previousScrollBehavior = scrollElement.style.scrollBehavior;
+  scrollElement.style.scrollBehavior = 'auto';
+
+  return new Promise((resolve) => {
+    let animationFrame = 0;
+    let startedAt = 0;
+    let finished = false;
+    const cleanup = () => {
+      window.removeEventListener('wheel', interrupt, true);
+      window.removeEventListener('touchstart', interrupt, true);
+      window.removeEventListener('pointerdown', interrupt, true);
+      window.removeEventListener('keydown', interrupt, true);
+      scrollElement.style.scrollBehavior = previousScrollBehavior;
+    };
+    const finish = (reachedTop) => {
+      if (finished) return;
+      finished = true;
+      cancelAnimationFrame(animationFrame);
+      if (reachedTop) scrollElement.scrollTop = 0;
+      cleanup();
+      resolve(reachedTop);
+    };
+    const interrupt = (event) => {
+      if (event.type === 'keydown') {
+        if (!['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) return;
+        if (event.target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      }
+      finish(false);
+    };
+    const tick = (now) => {
+      if (!startedAt) startedAt = now;
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = 1 - Math.pow(1 - progress, 4);
+      scrollElement.scrollTop = startTop * (1 - eased);
+      if (progress >= 1) finish(true);
+      else animationFrame = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener('wheel', interrupt, { capture: true, passive: true });
+    window.addEventListener('touchstart', interrupt, { capture: true, passive: true });
+    window.addEventListener('pointerdown', interrupt, true);
+    window.addEventListener('keydown', interrupt, true);
+    animationFrame = requestAnimationFrame(tick);
+  });
+}
 function captureHomeFeedPosition() {
   if (state.section !== 'home') return null;
   return { top: appScrollTop(), sourceLeft: homeSourceNav.querySelector('.feed-source-tabs')?.scrollLeft || 0 };
@@ -2741,18 +2791,6 @@ function updateMascotScrollState() {
   syncMascotContext();
   if (scrollingHome) mascotScheduleDock();
 }
-function waitForMascotScrollTop(timeout = 9000) {
-  return new Promise((resolve) => {
-    const startedAt = Date.now();
-    let nearTopFrames = 0;
-    const check = () => {
-      nearTopFrames = appScrollTop() <= 2 ? nearTopFrames + 1 : 0;
-      if (nearTopFrames >= 3 || Date.now() - startedAt >= timeout) { resolve(); return; }
-      requestAnimationFrame(check);
-    };
-    check();
-  });
-}
 async function mascotFlyBackToTop() {
   const root = mascotRuntime.root;
   if (!root || mascotRuntime.topReturnFlight) return;
@@ -2763,39 +2801,14 @@ async function mascotFlyBackToTop() {
   mascotSetReaction('delighted', 1600);
   mascotSetAction('', 0);
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  let ascent = null;
-  let descent = null;
   try {
-    const rootTop = root.getBoundingClientRect().top;
-    const lift = Math.max(0, rootTop - mascotTopSafeInset(root));
-    const canAnimateFlight = !reducedMotion && lift > 1 && typeof root.animate === 'function' && 'translate' in root.style;
-    const reachedTop = waitForMascotScrollTop();
-    if (canAnimateFlight) {
-      const ascentDuration = Math.min(1150, Math.max(620, lift * 1.05));
-      ascent = root.animate([
-        { translate: '0px 0px' },
-        { translate: '0px -' + lift + 'px' },
-      ], { duration: ascentDuration, easing: 'cubic-bezier(.22,.75,.28,1)', fill: 'forwards' });
-    }
-    scrollAppTo(0, reducedMotion ? 'auto' : 'smooth');
-    if (ascent) await ascent.finished.catch(() => {});
-    await reachedTop;
-    if (ascent) {
-      ascent.cancel();
-      const descentDuration = Math.min(1100, Math.max(680, lift * .82));
-      descent = root.animate([
-        { translate: '0px -' + lift + 'px' },
-        { translate: '0px 0px' },
-      ], { duration: descentDuration, easing: 'cubic-bezier(.22,.68,.2,1)', fill: 'forwards' });
-      await descent.finished.catch(() => {});
-    }
+    if (reducedMotion) scrollAppTo(0, 'auto');
+    else await scrollAppToTopDamped();
   } finally {
-    ascent?.cancel();
-    descent?.cancel();
     root.classList.remove('is-top-return-flight');
     mascotRuntime.topReturnFlight = false;
     syncMascotContext();
-    mascotSetAction('land', 760);
+    mascotSetAction('', 0);
     mascotSetReaction('delighted', 820);
     mascotScheduleDock();
   }
