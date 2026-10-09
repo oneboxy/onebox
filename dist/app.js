@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.578';
+const APP_VERSION = '2.18.579';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7242,7 +7242,10 @@ async function searchWeather(query) {
       );
       if (!duplicate) merged.push(place);
     });
-    state.weatherSearchResults = merged.slice(0, 8);
+    // Keep the full useful POI range from Photon (40) alongside up to eight
+    // city-level matches from Open-Meteo. The result popover scrolls, so a
+    // larger result set does not shift the weather page.
+    state.weatherSearchResults = merged.slice(0, 48);
     updateWeatherSearchResults();
   };
   const searchOpenMeteo = async () => {
@@ -7256,7 +7259,7 @@ async function searchWeather(query) {
     // Photon accepts only de/en/fr as explicit languages. Leave the parameter
     // out for Chinese so it can return its normal multilingual place matches.
     const language = state.language === 'en' ? '&lang=en' : '';
-    const response = await fetchWithTimeout('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=8' + language, { headers: { Accept: 'application/json' } }, 5000);
+    const response = await fetchWithTimeout('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=40' + language, { headers: { Accept: 'application/json' } }, 5000);
     if (!response.ok) throw Error('Place search request failed');
     const data = await response.json();
     return (data.features || []).map((feature) => {
