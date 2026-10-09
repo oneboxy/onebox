@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-/* Pages deployment marker: dining subcategories in the ticket type selector. */
-const APP_VERSION = '2.18.588';
+/* Pages deployment marker: dated ticket records create linked calendar events. */
+const APP_VERSION = '2.18.589';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -852,6 +852,9 @@ function normalizeTicketRecord(value) {
     drinkTemperature: String(source.drinkTemperature || '').trim(),
     drinkSize: String(source.drinkSize || '').trim(),
     drinkSweetness: String(source.drinkSweetness || '').trim(),
+    calendarEventId: String(source.calendarEventId || '').trim(),
+    calendarEventSourceDate: String(source.calendarEventSourceDate || '').trim(),
+    calendarEventDisabled: source.calendarEventDisabled === true,
     cafeDrink: String(source.cafeDrink || source.diningItem || '').trim(),
     cafeLocation: String(source.cafeLocation || '').trim(),
     cafeMood: String(source.cafeMood || '').trim(),
@@ -1132,11 +1135,106 @@ function ticketWalletJourneys(records = state.ticketWallet) {
   });
   return [...groups.values()].map((group) => ({ ...group, memory: state.ticketWalletMemories[group.key] || null })).sort((a, b) => ticketWalletDepartureAsc({ departAt: a.start }, { departAt: b.start }));
 }
-function saveTicketWallet() { saveStored(STORAGE.ticketWallet, state.ticketWallet); }
+function saveTicketWallet() {
+  syncTicketWalletCalendarEvents(false);
+  saveStored(STORAGE.ticketWallet, state.ticketWallet);
+}
 function saveTicketWalletDisplayOrder() { saveStored(STORAGE.ticketWalletDisplayOrder, state.ticketWalletDisplayOrder); }
 function saveTicketWalletTypeFilter() { localStorage.setItem(STORAGE.ticketWalletTypeFilter, state.ticketWalletTypeFilter); }
 function saveTicketWalletDiningKindFilter() { localStorage.setItem(STORAGE.ticketWalletDiningKindFilter, state.ticketWalletDiningKindFilter); }
 function saveTicketWalletMemories() { saveStored(STORAGE.ticketWalletMemories, state.ticketWalletMemories); }
+function ticketWalletCalendarSchedule(record) {
+  const raw = String(record?.departAt || record?.arriveAt || '').trim();
+  if (!raw) return null;
+  const localMatch = !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(raw)
+    ? raw.match(/^(?:(\d{4})[-/](\d{1,2})[-/](\d{1,2})|(?:(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日?))(?:[T\s]+(\d{1,2}):([0-5]\d))?/)
+    : null;
+  if (localMatch) {
+    const year = Number(localMatch[1] || localMatch[4]);
+    const month = Number(localMatch[2] || localMatch[5]);
+    const day = Number(localMatch[3] || localMatch[6]);
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+    const hour = Number(localMatch[7] || 0);
+    const minute = Number(localMatch[8] || 0);
+    if (hour > 23) return null;
+    const hasTime = Boolean(localMatch[7]);
+    const time = hasTime ? pad(hour) + ':' + pad(minute) : '';
+    const key = dateKey(date);
+    return { key, time, sourceDate: key + (time ? 'T' + time : '') };
+  }
+  const numeric = /^\d{10,13}$/.test(raw) ? Number(raw) * (raw.length === 10 ? 1000 : 1) : NaN;
+  const date = new Date(Number.isFinite(numeric) ? numeric : raw);
+  if (Number.isNaN(date.getTime())) return null;
+  const key = dateKey(date);
+  const time = /[T\s]\d{1,2}:[0-5]\d/.test(raw) ? pad(date.getHours()) + ':' + pad(date.getMinutes()) : '';
+  return { key, time, sourceDate: key + (time ? 'T' + time : '') };
+}
+function ticketWalletCalendarEventTitle(record) {
+  const typeLabel = ticketTypeLabel(record.type);
+  if (record.type === 'dining') {
+    const kind = TICKET_WALLET_DINING_KINDS[normalizeTicketWalletDiningKind(record.diningKind, 'drink')];
+    const details = [record.carrier, record.cafeDrink || record.diningItem].filter(Boolean).join(' · ');
+    return [kind.label[state.language === 'en' ? 1 : 0], details].filter(Boolean).join(' · ');
+  }
+  const route = [record.from, record.to].filter(Boolean).join(' → ');
+  const details = TICKET_WALLET_TRAVEL_TYPES.includes(record.type)
+    ? route || record.title
+    : record.title && record.title !== typeLabel ? record.title : [record.from, record.to].filter(Boolean).join(' · ');
+  return [typeLabel, details].filter(Boolean).join(' · ') || typeLabel;
+}
+function ticketWalletCalendarRemoveLinkedEvents(record) {
+  let changed = false;
+  Object.keys(state.events || {}).forEach((day) => {
+    const before = state.events[day] || [];
+    const after = before.filter((event) => event.sourceTicketId !== record.id && (!record.calendarEventId || event.id !== record.calendarEventId));
+    if (after.length !== before.length) changed = true;
+    if (after.length) state.events[day] = after; else delete state.events[day];
+  });
+  return changed;
+}
+function deleteTicketWalletCalendarEvents(record) {
+  if (!record || !ticketWalletCalendarRemoveLinkedEvents(record)) return;
+  saveEvents(); syncAgendaReminders(); scheduleNotificationCheck();
+}
+function syncTicketWalletCalendarEvents(persistWallet = true) {
+  let eventsChanged = false;
+  let ticketsChanged = false;
+  (state.ticketWallet || []).forEach((record) => {
+    const schedule = ticketWalletCalendarSchedule(record);
+    const linked = [];
+    Object.entries(state.events || {}).forEach(([day, events]) => (events || []).forEach((event) => {
+      if (event.sourceTicketId === record.id || record.calendarEventId && event.id === record.calendarEventId) linked.push({ day, event });
+    }));
+    if (!schedule) {
+      if (ticketWalletCalendarRemoveLinkedEvents(record)) eventsChanged = true;
+      if (record.calendarEventId || record.calendarEventSourceDate || record.calendarEventDisabled) {
+        record.calendarEventId = ''; record.calendarEventSourceDate = ''; record.calendarEventDisabled = false; ticketsChanged = true;
+      }
+      return;
+    }
+    if (record.calendarEventDisabled && record.calendarEventSourceDate === schedule.sourceDate) {
+      if (ticketWalletCalendarRemoveLinkedEvents(record)) eventsChanged = true;
+      if (record.calendarEventId) { record.calendarEventId = ''; ticketsChanged = true; }
+      return;
+    }
+    if (record.calendarEventDisabled) { record.calendarEventDisabled = false; ticketsChanged = true; }
+    const eventId = record.calendarEventId || linked[0]?.event.id || 'ticket-calendar-' + record.id;
+    const nextEvent = { id: eventId, title: ticketWalletCalendarEventTitle(record), time: schedule.time, repeat: 'once', weekdays: [], createdAt: Number(linked[0]?.event.createdAt) || Number(record.createdAt) || Date.now(), source: 'ticket-wallet', sourceTicketId: record.id };
+    const isCurrent = linked.length === 1 && linked[0].day === schedule.key && linked[0].event.id === eventId && linked[0].event.title === nextEvent.title && String(linked[0].event.time || '') === schedule.time && (linked[0].event.repeat || 'once') === 'once' && linked[0].event.source === 'ticket-wallet' && linked[0].event.sourceTicketId === record.id;
+    if (!isCurrent) {
+      if (ticketWalletCalendarRemoveLinkedEvents(record)) eventsChanged = true;
+      state.events[schedule.key] ||= [];
+      state.events[schedule.key].push(nextEvent);
+      eventsChanged = true;
+    }
+    if (record.calendarEventId !== eventId || record.calendarEventSourceDate !== schedule.sourceDate || record.calendarEventDisabled) {
+      record.calendarEventId = eventId; record.calendarEventSourceDate = schedule.sourceDate; record.calendarEventDisabled = false; ticketsChanged = true;
+    }
+  });
+  if (eventsChanged) { saveEvents(); syncAgendaReminders(); scheduleNotificationCheck(); }
+  if (ticketsChanged && persistWallet) saveStored(STORAGE.ticketWallet, state.ticketWallet);
+}
 async function hydrateTicketWalletImages() {
   const ids = [...state.ticketWallet.map((item) => item.sourceImageId), ...Object.values(state.ticketWalletMemories).map((item) => item.imageId)].filter(Boolean);
   await Promise.all([...new Set(ids)].map((id) => ticketWalletImageGet(id)));
@@ -3798,6 +3896,7 @@ async function importTicketWalletJson(file) {
 function deleteTicketWalletRecord(id) {
   const record = state.ticketWallet.find((item) => item.id === id);
   if (!record || !window.confirm(t('ticketWalletDeleteConfirm'))) return;
+  deleteTicketWalletCalendarEvents(record);
   const deleted = parseStored(STORAGE.ticketWalletDeleted, {}) || {};
   deleted[id] = Date.now(); saveStored(STORAGE.ticketWalletDeleted, deleted);
   state.ticketWallet = state.ticketWallet.filter((item) => item.id !== id); if (state.ticketWalletSelectedId === id) state.ticketWalletSelectedId = ''; saveTicketWallet();
@@ -9119,6 +9218,7 @@ function hydrateGithubRuntimeState() {
   if (Object.keys(TOOL_DEFS).includes(activeTool)) state.tool = activeTool;
   const activeHomeFeed = localStorage.getItem(STORAGE.homeFeedActive);
   if (activeHomeFeed && homeTabIds().includes(activeHomeFeed)) state.homeFeed.active = activeHomeFeed;
+  syncTicketWalletCalendarEvents();
 }
 function githubBrowserError(error) {
   const message = String(error?.message || '');
@@ -12273,7 +12373,17 @@ workspace.addEventListener('click', async (event) => {
   }
   const deleteEvent = event.target.closest('[data-delete-event]');
   if (deleteEvent) {
+    const removed = Object.values(state.events || {}).flat().find((item) => item.id === deleteEvent.dataset.deleteEvent);
     Object.keys(state.events).forEach((day) => { state.events[day] = (state.events[day] || []).filter((item) => item.id !== deleteEvent.dataset.deleteEvent); if (!state.events[day].length) delete state.events[day]; });
+    if (removed?.sourceTicketId) {
+      const ticket = state.ticketWallet.find((item) => item.id === removed.sourceTicketId);
+      if (ticket) {
+        ticket.calendarEventDisabled = true;
+        ticket.calendarEventId = '';
+        ticket.calendarEventSourceDate = ticketWalletCalendarSchedule(ticket)?.sourceDate || removed.sourceDate || '';
+        saveTicketWallet();
+      }
+    }
     saveEvents(); syncAgendaReminders(); scheduleNotificationCheck(); return render();
   }
   const weatherClear = event.target.closest('[data-weather-clear]');
@@ -12884,6 +12994,7 @@ function bootApp() {
     state.section = 'mine';
     state.tool = 'calculator';
   }
+  syncTicketWalletCalendarEvents();
   try { history.scrollRestoration = 'manual'; } catch { /* unsupported */ }
   mountMascot();
   configureReaderCloudSync();
