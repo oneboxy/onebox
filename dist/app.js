@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
-/* Pages deployment marker: staged ticket entry and coffee cup-label journal. */
-const APP_VERSION = '2.18.590';
+/* Pages deployment marker: stable startup surface during app refresh. */
+const APP_VERSION = '2.18.591';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10281,6 +10281,7 @@ function render() {
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
   workspace.innerHTML = state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
+  workspace.setAttribute('aria-busy', 'false');
   if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets') syncTicketWalletFocusStack();
   if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'journeys') requestAnimationFrame(() => { void hydrateTicketWalletMap(); });
   document.body.classList.toggle('dev-tools-fullscreen', developerFullscreen);
