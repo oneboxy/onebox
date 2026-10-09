@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.563';
+const APP_VERSION = '2.18.564';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -444,6 +444,12 @@ DICT.en.readerBackupTooLarge = 'The backup is larger than 256 MB. Back up smalle
 DICT.en.readerBackupInvalid = 'The backup is invalid or damaged. The local shelf was not changed.';
 DICT.en.readerBackupLimit = 'Restore would exceed the 80-book limit. Remove books from the current shelf first.';
 DICT.en.readerBackupFailed = 'Backup processing failed. Check available device storage and try again.';
+DICT.zh.githubLoginTitle = '用 GitHub 备份 OneBox 数据';
+DICT.zh.githubLoginDescription = '保存到你的私有 Gist，之后可在其他设备恢复。';
+DICT.zh.githubLogin = '继续授权';
+DICT.en.githubLoginTitle = 'Back up OneBox with GitHub';
+DICT.en.githubLoginDescription = 'Save to your private Gist and restore on another device.';
+DICT.en.githubLogin = 'Continue to GitHub';
 // Keep the cloud-sync summary short; the action labels explain upload versus restore.
 const toolName = (id) => t(TOOL_DEFS[id]?.key || id);
 const storedTheme = localStorage.getItem(STORAGE.theme);
@@ -9430,10 +9436,9 @@ function renderGithubDialog() {
   const waiting = Boolean(state.github.deviceCode);
   const agreementChecked = state.githubAgreementAccepted === true;
   const selection = normalizeGithubSyncSelection(state.githubSyncSelection);
-  const githubIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 19 7v10l-7 3.5L5 17V7l7-3.5Z"/><path d="m5 7 7 3.5L19 7M12 10.5V20.5"/></svg>';
   const account = connected
     ? '<div class="github-status-card is-connected"><span class="github-status-icon github-avatar' + (githubAvatarUrl(state.github.user) ? '' : ' is-fallback') + '">' + githubAvatarMarkup(state.github.user) + '</span><span class="github-status-copy"><strong>' + escapeHtml(state.github.user.login || 'GitHub') + '</strong><small>' + t('githubConnectedHint') + '</small></span><span class="github-status-badge">✓</span></div>'
-    : '<div class="github-status-card github-not-connected-card"><div class="github-status-card-main"><span class="github-status-icon">' + githubIcon + '</span><span class="github-status-copy"><strong>' + t('githubNotConnected') + '</strong><small>' + t('githubNotConnectedHint') + '</small></span></div><label class="github-agreement-check"><input id="githubAgreement" type="checkbox" ' + (agreementChecked ? 'checked' : '') + '><span>' + t('githubAgreementCheck') + ' <button type="button" class="github-agreement-link" data-open-agreement>' + t('viewAgreement') + '</button></span></label>' + (waiting ? '<div class="github-waiting-actions"><button class="github-secondary-button github-connect" disabled>' + t('githubWaiting') + '</button><button class="github-secondary-button github-cancel" data-github-cancel>' + t('githubCancel') + '</button></div>' : '<div class="github-connect-cta"><button class="github-login-cta" data-github-login ' + (!agreementChecked ? 'disabled' : '') + '><span class="github-login-cta-mark" aria-hidden="true">' + githubIcon + '</span><span>' + t('githubLogin') + '</span></button></div>') + '</div>';
+    : '<div class="github-status-card github-not-connected-card"><div class="github-login-intro"><strong>' + t('githubLoginTitle') + '</strong><small>' + t('githubLoginDescription') + '</small></div><label class="github-agreement-check"><input id="githubAgreement" type="checkbox" ' + (agreementChecked ? 'checked' : '') + '><span>' + t('githubAgreementCheck') + ' <button type="button" class="github-agreement-link" data-open-agreement>' + t('viewAgreement') + '</button></span></label>' + (waiting ? '<div class="github-waiting-actions"><button class="github-secondary-button github-connect" disabled>' + t('githubWaiting') + '</button><button class="github-secondary-button github-cancel" data-github-cancel>' + t('githubCancel') + '</button></div>' : '<div class="github-connect-cta"><button class="github-login-cta" data-github-login ' + (!agreementChecked ? 'disabled' : '') + '><span>' + t('githubLogin') + '</span></button></div>') + '</div>';
   const code = state.github.userCode ? '<div class="device-code"><div><small>' + (state.language === 'en' ? 'Authorize OneBox in GitHub' : '请在 GitHub 中授权 OneBox') + '</small><strong>' + escapeHtml(state.github.userCode) + '</strong><small>' + escapeHtml(t('githubWaiting')) + '</small></div><a class="github-device-link" href="' + escapeHtml(state.github.verificationUriComplete || state.github.verificationUri || 'https://github.com/login/device') + '" target="_blank" rel="noreferrer">' + t('openDevice') + '</a></div>' : '';
   const manualToken = state.github.manualTokenOpen && !connected ? '<section class="github-manual-token"><label for="githubAccessToken">' + t('githubAccessToken') + '</label><input id="githubAccessToken" type="password" placeholder="github_pat_…" autocomplete="off"><p>' + t('githubTokenHint') + '</p><button class="github-secondary-button" data-github-token>' + t('githubUseToken') + '</button></section>' : '';
   const actionButton = (type, label, icon, primary = false) => '<button class="github-action-button' + (primary ? ' is-primary' : '') + '" data-github-' + type + (syncing ? ' disabled' : '') + '><span class="github-action-icon" aria-hidden="true">' + icon + '</span><span class="github-action-copy"><strong>' + label + '</strong></span></button>';
@@ -9446,7 +9451,7 @@ function renderGithubDialog() {
   const actions = connected
     ? '<div class="github-action-grid">' + actionButton('upload', t('githubBackup'), uploadIcon, true) + actionButton('download', t('githubRestore'), downloadIcon) + actionButton('logout', t('githubLogout'), logoutIcon) + '</div>'
     : '';
-  dialog.innerHTML = '<div class="dialog-card github-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head github-dialog-head"><div class="github-dialog-title"><h2>GitHub</h2><small class="github-dialog-subtitle">' + t('githubDialogSubtitle') + '</small></div><button class="icon-btn small github-dialog-close" data-close-github aria-label="' + t('close') + '">×</button></div><div class="github-dialog-body"><section class="github-status-section">' + account + '</section>' + readerCloudConsent + code + manualToken + customSync + syncProgress + '</div>' + (actions ? '<section class="github-actions">' + actions + '</section>' : '') + '</div>';
+  dialog.innerHTML = '<div class="dialog-card github-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head github-dialog-head"><div class="github-dialog-title"><h2>GitHub</h2></div><button class="icon-btn small github-dialog-close" data-close-github aria-label="' + t('close') + '">×</button></div><div class="github-dialog-body"><section class="github-status-section">' + account + '</section>' + readerCloudConsent + code + manualToken + customSync + syncProgress + '</div>' + (actions ? '<section class="github-actions">' + actions + '</section>' : '') + '</div>';
   dialog.hidden = false; state.githubDialogOpen = true;
 }
 function closeGithubDialog() { const dialog = $('#githubDialog'); if (dialog) dialog.hidden = true; state.githubDialogOpen = false; }

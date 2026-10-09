@@ -15129,3 +15129,114 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
   .reader-backup-actions { width: 100%; }
   .reader-backup-button { flex: 1 1 0; min-height: 34px; }
 }
+
+/* GitHub login: concise copy, neutral consent and one clear authorization action. */
+#githubDialog {
+  background: rgba(17, 24, 39, .38);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+#githubDialog .github-dialog-card {
+  width: min(420px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .2);
+}
+#githubDialog .github-dialog-head {
+  padding: 20px 22px 10px;
+  border: 0;
+  background: var(--panel);
+}
+#githubDialog .github-dialog-head h2 { font-size: 20px; letter-spacing: -.02em; }
+#githubDialog .github-dialog-close {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+}
+#githubDialog .github-dialog-body {
+  gap: 18px;
+  padding: 8px 22px 24px;
+  background: var(--panel);
+}
+#githubDialog .github-status-section { gap: 0; }
+#githubDialog .github-status-card.github-not-connected-card {
+  display: grid;
+  gap: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+#githubDialog .github-login-intro { display: grid; gap: 6px; }
+#githubDialog .github-login-intro strong {
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 740;
+  letter-spacing: -.02em;
+  line-height: 1.35;
+}
+#githubDialog .github-login-intro small { color: var(--muted); font-size: 12px; line-height: 1.55; }
+#githubDialog .github-agreement-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+#githubDialog .github-agreement-check > span {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 7px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+#githubDialog .github-agreement-check > span::before {
+  flex-basis: 16px;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--panel);
+}
+#githubDialog .github-agreement-check > span::after { top: 5px; left: 4px; width: 7px; height: 3px; }
+#githubDialog .github-agreement-check > input:checked + span::after { border-color: var(--panel); }
+#githubDialog .github-agreement-check > input:checked + span::before { border-color: var(--ink); background: var(--ink); }
+#githubDialog .github-agreement-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+#githubDialog .github-connect-cta { padding: 0; }
+#githubDialog .github-login-cta {
+  min-height: 46px;
+  justify-content: center;
+  border: 1px solid var(--ink);
+  border-radius: 13px;
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 720;
+}
+#githubDialog .github-login-cta:hover:not(:disabled) { opacity: .9; }
+#githubDialog .github-login-cta:focus-visible { outline: 3px solid color-mix(in srgb, var(--ink) 24%, transparent); outline-offset: 2px; }
+#githubDialog .github-login-cta:disabled { opacity: .36; }
+@media (max-width: 600px) {
+  #githubDialog .github-dialog-head { padding: 18px 20px 8px; }
+  #githubDialog .github-dialog-body { padding: 8px 20px 22px; }
+  #githubDialog .github-status-card.github-not-connected-card { gap: 18px; }
+}
