@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.577';
+const APP_VERSION = '2.18.578';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7253,7 +7253,10 @@ async function searchWeather(query) {
       .filter((place) => Number.isFinite(place.latitude) && Number.isFinite(place.longitude));
   };
   const searchPhoton = async () => {
-    const response = await fetchWithTimeout('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=8&lang=' + (state.language === 'en' ? 'en' : 'zh'), { headers: { Accept: 'application/json' } }, 5000);
+    // Photon accepts only de/en/fr as explicit languages. Leave the parameter
+    // out for Chinese so it can return its normal multilingual place matches.
+    const language = state.language === 'en' ? '&lang=en' : '';
+    const response = await fetchWithTimeout('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=8' + language, { headers: { Accept: 'application/json' } }, 5000);
     if (!response.ok) throw Error('Place search request failed');
     const data = await response.json();
     return (data.features || []).map((feature) => {
