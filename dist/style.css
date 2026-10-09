@@ -15484,3 +15484,52 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
     width: min(82vw, 224px);
   }
 }
+
+/* A light, warm bamboo rotor sits clear of the pet's ears instead of reading
+   as a bulky blue hat. */
+.onebox-mascot-propeller {
+  top: -13px;
+  width: 50px;
+  height: 19px;
+  transform: translate(-50%, -3px) scale(.6);
+}
+.onebox-mascot-propeller i {
+  top: 1px;
+  width: 21px;
+  height: 5px;
+  border: 1px solid #bd8b53;
+  background: linear-gradient(180deg, #f5dfba, #d7aa70);
+  box-shadow: 0 1px 2px rgb(86 55 25 / 18%);
+}
+.onebox-mascot-propeller i:first-child {
+  left: 1px;
+  border-radius: 100% 24% 24% 100%;
+  transform: rotate(-4deg);
+}
+.onebox-mascot-propeller i:nth-child(2) {
+  right: 1px;
+  border-radius: 24% 100% 100% 24%;
+  transform: rotate(4deg);
+}
+.onebox-mascot-propeller b {
+  top: 0;
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(90deg, #a96f3d, #f3d6a5 48%, #a96f3d);
+  box-shadow: 0 1px 2px rgb(86 55 25 / 20%);
+}
+.onebox-mascot-propeller b::before {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 7px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f4d39e;
+  box-shadow: 0 0 0 1px #bd8b53;
+  content: '';
+  transform: translateX(-50%);
+}
+#oneboxMascotRoot.is-top-action:not(.is-docked) .onebox-mascot-propeller {
+  transform: translate(-50%, -1px) scale(1);
+}
