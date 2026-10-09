@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.571';
+const APP_VERSION = '2.18.572';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8534,6 +8534,95 @@ function repairReaderSyncManifest(remote, gist) {
   const hasAllSources = requiredBooks.every((book) => book.type === 'md' && typeof book.content === 'string' || Boolean(readerSyncBookEntry(book, repaired, gist)));
   return { remote: repaired, hasAllSources };
 }
+function readerSyncHasOrphanedBookAssets(remote, gist) {
+  const referenced = new Set();
+  Object.values(remote?.readerFiles?.books || {}).forEach((entry) => {
+    (Array.isArray(entry?.files) ? entry.files : []).forEach((name) => referenced.add(name));
+  });
+  return Object.keys(gist?.files || {}).some((name) => name.startsWith('onebox-book-') && name.endsWith('.b64') && !referenced.has(name));
+}
+async function recoverReaderBooksFromGistHistory(remote, gist) {
+  if (!gist?.id) return { remote, gist, recovered: 0 };
+  let history = [];
+  try { history = await githubGistHistory(gist); }
+  catch (error) {
+    if (error?.code === 'github-auth-expired') throw error;
+    return { remote, gist, recovered: 0 };
+  }
+  const priorVersions = history.slice(1, 6);
+  if (!priorVersions.length) return { remote, gist, recovered: 0 };
+
+  const library = readerSyncLibrary(remote).slice();
+  const booksById = new Map(library.filter((book) => book?.id).map((book) => [book.id, book]));
+  const manifest = remote?.readerFiles?.books && typeof remote.readerFiles.books === 'object' && !Array.isArray(remote.readerFiles.books)
+    ? { ...remote.readerFiles.books }
+    : {};
+  const files = { ...(gist.files || {}) };
+  let recovered = 0;
+
+  for (const [versionIndex, item] of priorVersions.entries()) {
+    const version = item?.version || item?.sha || '';
+    if (!version) continue;
+    try {
+      const revision = await githubGistDetails(gist, version);
+      const content = await githubFileContent(revision?.files?.['onebox-settings.json']);
+      const historicalRemote = parseGithubSyncPayload(content);
+      if (!readerSyncHasLibrary(historicalRemote)) continue;
+
+      for (const historicalBook of readerSyncLibrary(historicalRemote)) {
+        if (!historicalBook?.id || !['md', 'txt', 'pdf', 'epub'].includes(historicalBook.type)) continue;
+        const currentBook = booksById.get(historicalBook.id) || null;
+        const currentEntry = currentBook && readerSyncBookEntry(currentBook, { ...remote, readerFiles: { ...remote?.readerFiles, books: manifest } }, { ...gist, files });
+        const hasCurrentSource = currentBook && (currentBook.type === 'md' && typeof currentBook.content === 'string' || Boolean(currentEntry));
+        if (hasCurrentSource) continue;
+
+        const historicalEntry = readerSyncBookEntry(historicalBook, historicalRemote, revision);
+        const hasInlineMarkdown = historicalBook.type === 'md' && typeof historicalBook.content === 'string';
+        if (!currentBook && !historicalEntry && !hasInlineMarkdown) continue;
+        if (currentBook && historicalEntry && Number(currentBook.size) !== Number(historicalEntry.size)) continue;
+
+        let recoveredEntry = null;
+        if (historicalEntry?.files?.length) {
+          const suffix = String(version).replace(/[^a-zA-Z0-9]/g, '').slice(-12) || String(versionIndex);
+          const recoveredFiles = [];
+          for (const [chunkIndex, oldName] of historicalEntry.files.entries()) {
+            const oldFile = revision.files?.[oldName];
+            if (!oldFile) break;
+            const newName = 'onebox-book-recovery-' + syncAssetKey(historicalBook.id) + '-' + suffix + '-' + chunkIndex + '.b64';
+            files[newName] = oldFile;
+            recoveredFiles.push(newName);
+          }
+          if (recoveredFiles.length === historicalEntry.files.length) {
+            recoveredEntry = { ...historicalEntry, files: recoveredFiles };
+            if (historicalEntry.cover && revision.files?.[historicalEntry.cover]) {
+              const coverName = 'onebox-book-recovery-' + syncAssetKey(historicalBook.id) + '-' + suffix + '.cover';
+              files[coverName] = revision.files[historicalEntry.cover];
+              recoveredEntry.cover = coverName;
+            }
+          }
+        }
+        if (!recoveredEntry && !hasInlineMarkdown) continue;
+
+        if (!currentBook) {
+          library.push(historicalBook);
+          booksById.set(historicalBook.id, historicalBook);
+        }
+        if (recoveredEntry) manifest[historicalBook.id] = recoveredEntry;
+        recovered += 1;
+      }
+    } catch (error) {
+      if (error?.code === 'github-auth-expired') throw error;
+      // A damaged older revision should not block restoring the newest backup.
+    }
+  }
+
+  if (!recovered) return { remote, gist, recovered };
+  return {
+    remote: { ...remote, library, readerFiles: { ...remote?.readerFiles, version: remote?.readerFiles?.version || 1, books: manifest } },
+    gist: { ...gist, files },
+    recovered,
+  };
+}
 async function restoreReaderSyncAssets(remote, gist, onProgress = null) {
   const repaired = repairReaderSyncManifest(remote, gist);
   remote = repaired.remote;
@@ -9322,9 +9411,9 @@ async function githubDownloadTask() {
         if (Object.prototype.hasOwnProperty.call(readingRemote, key)) remote[key] = readingRemote[key];
       });
     }
-    if (readingEnabled && readerSyncHasLibrary(remote)) {
+    if (readingEnabled && gist?.id) {
       let readerRepair = repairReaderSyncManifest(remote, gist);
-      if (!readerRepair.hasAllSources) {
+      if (!readerRepair.hasAllSources && readerSyncHasLibrary(remote)) {
         updateGithubSync(mode, 50, state.language === 'en' ? 'Looking for book files in older backups…' : '正在旧备份中查找书籍原文件…');
         const expandedCandidates = await findGithubGists(true, candidates);
         expandedCandidates.forEach((candidate) => collectAssetFiles(candidate.files));
@@ -9333,6 +9422,18 @@ async function githubDownloadTask() {
           if (!expandedFiles[name]) expandedFiles[name] = file;
         });
         gist = { ...gist, files: expandedFiles };
+        readerRepair = repairReaderSyncManifest(remote, gist);
+      }
+
+      // A later backup may have removed a book from its shelf metadata while
+      // older Gist revisions still retain both the book record and its file.
+      // Inspect a small recent history window when the current backup is empty
+      // or its source files are incomplete, then restore those recoverable books.
+      if (!readerRepair.hasAllSources || readerSyncLibrary(remote).length === 0 || readerSyncHasOrphanedBookAssets(remote, gist)) {
+        updateGithubSync(mode, 54, state.language === 'en' ? 'Looking through recent book backups…' : '正在最近的备份版本中查找书籍…');
+        const recovered = await recoverReaderBooksFromGistHistory(remote, gist);
+        remote = recovered.remote;
+        gist = recovered.gist;
         readerRepair = repairReaderSyncManifest(remote, gist);
       }
       remote = readerRepair.remote;
