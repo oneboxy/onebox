@@ -35,7 +35,7 @@ GitHub Pages 是纯静态托管，OneBox 使用 GitHub Device Flow，不把 OAut
 
 配置完成后，导入书籍、阅读进度保存、重新联网、重新打开页面和切回页面都会触发自动同步；离线时数据仍保存在本机，恢复网络后补传。书籍文件以 SHA-256 校验，重复同步不会重新上传未改变的文件。单本上限 64 MB，书架最多 80 本。在一台设备删除书籍后，删除也会同步到其他设备。手动 GitHub Gist 备份仍可继续使用。
 
-**当前仓库没有 Cloudflare 账户凭据，因此 Worker 尚未部署，书籍尚未上传。** `dist/reader-sync-config.js` 默认留空，避免在设置完成前把书籍发送到不确定的账户。部署 Worker 后，把输出的 Worker URL 填入该文件，再发布 Pages，自动同步才会启用。
+**Worker 当前尚未部署，书籍尚未上传。** `dist/reader-sync-config.js` 默认留空，避免服务部署完成前发送书籍。启用 Cloudflare R2 并部署 Worker 后，把输出的 Worker URL 填入该文件，再发布 Pages，自动同步才会启用。
 
 ### 部署到你自己的 Cloudflare 账户
 

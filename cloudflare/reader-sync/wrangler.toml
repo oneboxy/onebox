@@ -6,7 +6,7 @@ workers_dev = true
 [[d1_databases]]
 binding = "DB"
 database_name = "onebox-reader-sync"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "6467f2e8-3711-4b9d-93c0-34a82c6db75b"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
