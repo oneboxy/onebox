@@ -15341,3 +15341,22 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
   #githubDialog .github-action-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   #githubDialog .github-action-button { min-height: 66px; }
 }
+
+/* Center the switch thumb mathematically inside its pill track. */
+#githubDialog .github-sync-option { align-items: center; }
+#githubDialog .github-sync-option > span { line-height: 1.2; }
+#githubDialog .github-sync-option input {
+  display: block;
+  position: relative;
+  align-self: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 18px;
+  margin-block: 0;
+  vertical-align: middle;
+}
+#githubDialog .github-sync-option input::after {
+  top: 50%;
+  transform: translateY(-50%);
+}
+#githubDialog .github-sync-option input:checked::after { transform: translate(12px, -50%); }
