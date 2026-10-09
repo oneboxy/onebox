@@ -6,6 +6,11 @@ const APP_VERSION = '2.18.564';
 // which is consumed immediately and never sent to a server.
 const GITHUB_CLIENT_ID = 'Ov23ctkkhpGrGvqFTNhn';
 const GITHUB_OAUTH_PROXY = 'https://onebox-github-oauth.secoder.workers.dev';
+// Authentication providers stay separate from OneBox data ownership. Future
+// providers can be added here and routed to their own identity adapters.
+const ACCOUNT_LOGIN_PROVIDERS = Object.freeze([
+  Object.freeze({ id: 'github', name: 'GitHub', detailKey: 'githubProviderBackupHint', enabled: true, connect: () => githubLogin() }),
+]);
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const uid = () => Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
@@ -444,12 +449,12 @@ DICT.en.readerBackupTooLarge = 'The backup is larger than 256 MB. Back up smalle
 DICT.en.readerBackupInvalid = 'The backup is invalid or damaged. The local shelf was not changed.';
 DICT.en.readerBackupLimit = 'Restore would exceed the 80-book limit. Remove books from the current shelf first.';
 DICT.en.readerBackupFailed = 'Backup processing failed. Check available device storage and try again.';
-DICT.zh.githubLoginTitle = '用 GitHub 备份 OneBox 数据';
-DICT.zh.githubLoginDescription = '保存到你的私有 Gist，之后可在其他设备恢复。';
-DICT.zh.githubLogin = '继续授权';
-DICT.en.githubLoginTitle = 'Back up OneBox with GitHub';
-DICT.en.githubLoginDescription = 'Save to your private Gist and restore on another device.';
-DICT.en.githubLogin = 'Continue to GitHub';
+DICT.zh.oneboxAccountTitle = 'OneBox 账户';
+DICT.en.oneboxAccountTitle = 'OneBox account';
+DICT.zh.githubLoginTitle = '选择登录方式';
+DICT.en.githubLoginTitle = 'Choose a sign-in method';
+DICT.zh.githubProviderBackupHint = '私有 Gist 备份';
+DICT.en.githubProviderBackupHint = 'Private Gist backup';
 // Keep the cloud-sync summary short; the action labels explain upload versus restore.
 const toolName = (id) => t(TOOL_DEFS[id]?.key || id);
 const storedTheme = localStorage.getItem(STORAGE.theme);
@@ -9427,6 +9432,11 @@ function renderAgreementDialog() {
   dialog.hidden = false;
 }
 function closeAgreementDialog() { const dialog = $('#agreementDialog'); if (dialog) dialog.hidden = true; }
+function startAccountLogin(providerId) {
+  const provider = ACCOUNT_LOGIN_PROVIDERS.find((item) => item.id === providerId && item.enabled);
+  if (!provider) return;
+  return provider.connect();
+}
 function renderGithubDialog() {
   const dialog = $('#githubDialog');
   if (!dialog) return;
@@ -9436,9 +9446,12 @@ function renderGithubDialog() {
   const waiting = Boolean(state.github.deviceCode);
   const agreementChecked = state.githubAgreementAccepted === true;
   const selection = normalizeGithubSyncSelection(state.githubSyncSelection);
+  const providerActions = waiting
+    ? '<div class="github-waiting-actions"><button class="github-secondary-button github-connect" disabled>' + t('githubWaiting') + '</button><button class="github-secondary-button github-cancel" data-github-cancel>' + t('githubCancel') + '</button></div>'
+    : ACCOUNT_LOGIN_PROVIDERS.filter((provider) => provider.enabled).map((provider) => '<button class="account-login-method" data-auth-provider="' + escapeHtml(provider.id) + '" ' + (provider.id === 'github' ? 'data-github-login ' : '') + (!agreementChecked ? 'disabled' : '') + '><span class="account-login-method-copy"><strong>' + escapeHtml(provider.name) + '</strong><small>' + t(provider.detailKey) + '</small></span><span class="account-login-method-action">' + (state.language === 'en' ? 'Continue' : '继续') + '</span></button>').join('');
   const account = connected
     ? '<div class="github-status-card is-connected"><span class="github-status-icon github-avatar' + (githubAvatarUrl(state.github.user) ? '' : ' is-fallback') + '">' + githubAvatarMarkup(state.github.user) + '</span><span class="github-status-copy"><strong>' + escapeHtml(state.github.user.login || 'GitHub') + '</strong><small>' + t('githubConnectedHint') + '</small></span><span class="github-status-badge">✓</span></div>'
-    : '<div class="github-status-card github-not-connected-card"><div class="github-login-intro"><strong>' + t('githubLoginTitle') + '</strong><small>' + t('githubLoginDescription') + '</small></div><label class="github-agreement-check"><input id="githubAgreement" type="checkbox" ' + (agreementChecked ? 'checked' : '') + '><span>' + t('githubAgreementCheck') + ' <button type="button" class="github-agreement-link" data-open-agreement>' + t('viewAgreement') + '</button></span></label>' + (waiting ? '<div class="github-waiting-actions"><button class="github-secondary-button github-connect" disabled>' + t('githubWaiting') + '</button><button class="github-secondary-button github-cancel" data-github-cancel>' + t('githubCancel') + '</button></div>' : '<div class="github-connect-cta"><button class="github-login-cta" data-github-login ' + (!agreementChecked ? 'disabled' : '') + '><span>' + t('githubLogin') + '</span></button></div>') + '</div>';
+    : '<div class="github-status-card github-not-connected-card"><div class="github-login-intro"><strong>' + t('githubLoginTitle') + '</strong></div><label class="github-agreement-check"><input id="githubAgreement" type="checkbox" ' + (agreementChecked ? 'checked' : '') + '><span>' + t('githubAgreementCheck') + ' <button type="button" class="github-agreement-link" data-open-agreement>' + t('viewAgreement') + '</button></span></label><div class="account-login-methods">' + providerActions + '</div></div>';
   const code = state.github.userCode ? '<div class="device-code"><div><small>' + (state.language === 'en' ? 'Authorize OneBox in GitHub' : '请在 GitHub 中授权 OneBox') + '</small><strong>' + escapeHtml(state.github.userCode) + '</strong><small>' + escapeHtml(t('githubWaiting')) + '</small></div><a class="github-device-link" href="' + escapeHtml(state.github.verificationUriComplete || state.github.verificationUri || 'https://github.com/login/device') + '" target="_blank" rel="noreferrer">' + t('openDevice') + '</a></div>' : '';
   const manualToken = state.github.manualTokenOpen && !connected ? '<section class="github-manual-token"><label for="githubAccessToken">' + t('githubAccessToken') + '</label><input id="githubAccessToken" type="password" placeholder="github_pat_…" autocomplete="off"><p>' + t('githubTokenHint') + '</p><button class="github-secondary-button" data-github-token>' + t('githubUseToken') + '</button></section>' : '';
   const actionButton = (type, label, icon, primary = false) => '<button class="github-action-button' + (primary ? ' is-primary' : '') + '" data-github-' + type + (syncing ? ' disabled' : '') + '><span class="github-action-icon" aria-hidden="true">' + icon + '</span><span class="github-action-copy"><strong>' + label + '</strong></span></button>';
@@ -9451,7 +9464,7 @@ function renderGithubDialog() {
   const actions = connected
     ? '<div class="github-action-grid">' + actionButton('upload', t('githubBackup'), uploadIcon, true) + actionButton('download', t('githubRestore'), downloadIcon) + actionButton('logout', t('githubLogout'), logoutIcon) + '</div>'
     : '';
-  dialog.innerHTML = '<div class="dialog-card github-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head github-dialog-head"><div class="github-dialog-title"><h2>GitHub</h2></div><button class="icon-btn small github-dialog-close" data-close-github aria-label="' + t('close') + '">×</button></div><div class="github-dialog-body"><section class="github-status-section">' + account + '</section>' + readerCloudConsent + code + manualToken + customSync + syncProgress + '</div>' + (actions ? '<section class="github-actions">' + actions + '</section>' : '') + '</div>';
+  dialog.innerHTML = '<div class="dialog-card github-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head github-dialog-head"><div class="github-dialog-title"><h2>' + t('oneboxAccountTitle') + '</h2></div><button class="icon-btn small github-dialog-close" data-close-github aria-label="' + t('close') + '">×</button></div><div class="github-dialog-body"><section class="github-status-section">' + account + '</section>' + readerCloudConsent + code + manualToken + customSync + syncProgress + '</div>' + (actions ? '<section class="github-actions">' + actions + '</section>' : '') + '</div>';
   dialog.hidden = false; state.githubDialogOpen = true;
 }
 function closeGithubDialog() { const dialog = $('#githubDialog'); if (dialog) dialog.hidden = true; state.githubDialogOpen = false; }
@@ -12294,6 +12307,8 @@ $('#recentReadingDialog').addEventListener('click', (event) => {
 $('#githubDialog').addEventListener('click', (event) => {
   if (event.target === $('#githubDialog') || event.target.closest('[data-close-github]')) return closeGithubDialog();
   if (event.target.closest('[data-open-agreement]')) { event.preventDefault(); event.stopPropagation(); return renderAgreementDialog(); }
+  const providerButton = event.target.closest('[data-auth-provider]');
+  if (providerButton) return startAccountLogin(providerButton.dataset.authProvider);
   if (event.target.closest('[data-github-login]')) return githubLogin();
   if (event.target.closest('[data-github-cancel]')) return cancelGithubLogin();
   if (event.target.closest('[data-github-token]')) return githubUseAccessToken();
@@ -12305,8 +12320,7 @@ $('#githubDialog').addEventListener('change', (event) => {
   if (event.target.id === 'githubAgreement') {
     state.githubAgreementAccepted = event.target.checked;
     localStorage.setItem(STORAGE.githubAgreement, String(state.githubAgreementAccepted));
-    const login = $('#githubDialog [data-github-login]');
-    if (login) login.disabled = !state.githubAgreementAccepted;
+    $$('#githubDialog [data-auth-provider]').forEach((login) => { login.disabled = !state.githubAgreementAccepted; });
   }
   if (event.target.matches('[data-reader-cloud-consent]')) {
     state.readerCloudConsentAccepted = event.target.checked;

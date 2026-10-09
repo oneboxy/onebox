@@ -15180,6 +15180,31 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
   line-height: 1.35;
 }
 #githubDialog .github-login-intro small { color: var(--muted); font-size: 12px; line-height: 1.55; }
+.account-login-methods { display: grid; gap: 8px; }
+.account-login-method {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--panel-2);
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.account-login-method-copy { display: grid; min-width: 0; gap: 2px; }
+.account-login-method-copy strong { font-size: 12px; font-weight: 740; }
+.account-login-method-copy small { color: var(--muted); font-size: 10px; line-height: 1.35; }
+.account-login-method-action { flex: 0 0 auto; color: var(--muted); font-size: 11px; font-weight: 700; }
+.account-login-method:hover:not(:disabled), .account-login-method:focus-visible { border-color: color-mix(in srgb, var(--ink) 35%, var(--line)); background: color-mix(in srgb, var(--ink) 3%, var(--panel-2)); outline: none; }
+.account-login-method:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 12%, transparent); }
+.account-login-method:disabled { opacity: .48; cursor: not-allowed; }
 #githubDialog .github-agreement-check {
   display: flex;
   align-items: center;

@@ -29,6 +29,12 @@ GitHub Pages 是纯静态托管，OneBox 使用 GitHub Device Flow，不把 OAut
 
 首页订阅内容、节假日和天气接口响应属于网络缓存，不参与同步；GitHub 登录令牌也不会上传到 Gist。
 
+### 多登录方式与数据互通
+
+登录服务商和 OneBox 数据身份需要分开：服务商只负责验证身份，数据应归属稳定的 OneBox 账号，再由不同同步适配器读写。登录弹窗使用 `ACCOUNT_LOGIN_PROVIDERS` 注册表，目前只启用 GitHub；添加其他登录方式时，不应把新的登录名直接当成另一份数据账户。
+
+当前 GitHub 私有 Gist 备份仍与 GitHub 账号绑定，尚不能自动和未来的 Apple 或其他账号互通。要实现互通，需要后端提供稳定的 OneBox 账号 ID 和已验证的身份关联流程；用户关联账号后，再将现有 Gist/书籍数据迁移或合并到该 OneBox 账号。关联必须由用户明确确认，不能只凭相同邮箱或用户名自动合并。
+
 ## 阅读内容自动同步（Cloudflare）
 
 阅读模块的独立自动同步服务位于 `cloudflare/reader-sync/`：书籍原文件放进 Cloudflare R2 私有存储，书架信息、笔记和阅读进度放进 Cloudflare D1。文件不使用公开 URL；访问需要先用 OneBox 已有的 GitHub 登录令牌换取短期会话。Worker 只用该令牌向 GitHub 验证当前用户，不把它写入数据库或日志。不同 GitHub 用户的数据按用户 ID 隔离。
