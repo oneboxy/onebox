@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.574';
+const APP_VERSION = '2.18.575';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7146,6 +7146,13 @@ function handleWeatherDeletePointer(event) {
   return true;
 }
 function weatherCardFailureText() { return state.language === 'en' ? 'Weather failed to load' : '天气获取失败'; }
+function weatherLocationError(error) {
+  if (!window.isSecureContext) return state.language === 'en' ? 'Location requires a secure HTTPS page. Reopen OneBox over HTTPS.' : '定位需要 HTTPS 安全页面，请通过 HTTPS 重新打开 OneBox。';
+  if (error?.code === 1) return state.language === 'en' ? 'Location permission was denied. Allow location access for this site in your browser settings, then retry.' : '浏览器拒绝了定位权限。请在浏览器的网站设置中允许此网站获取位置，再重试。';
+  if (error?.code === 2) return state.language === 'en' ? 'Your device could not determine its location. Check system Location Services and network, then retry.' : '设备暂时无法确定位置。请检查系统定位服务和网络后重试。';
+  if (error?.code === 3) return state.language === 'en' ? 'Location timed out. Move to an area with a clearer signal or retry.' : '定位请求超时。请检查定位信号，或稍后重试。';
+  return state.language === 'en' ? 'Could not get your location. Check browser and system location settings, then retry.' : '无法获取当前位置。请检查浏览器和系统定位设置后重试。';
+}
 async function getWeatherData(lat, lon) {
   const response = await fetchWithTimeout(weatherUrl(lat, lon), { headers: { Accept: 'application/json' } }, 9000);
   if (!response.ok) throw Error(state.language === 'en' ? 'Weather service is unavailable' : '天气服务暂时不可用');
@@ -12006,9 +12013,23 @@ workspace.addEventListener('click', async (event) => {
   }
   if (event.target.closest('[data-add-weather-card]')) { $('#cityInput')?.focus(); return toast(state.language === 'en' ? 'Search a city or district to add a card' : '搜索城市或区县即可添加天气卡片'); }
   if (event.target.closest('[data-locate]')) {
-    if (!navigator.geolocation) return toast(state.language === 'en' ? 'Geolocation is unavailable' : '当前浏览器不支持定位', 'error');
-    state.weatherLoading = true; render();
-    return navigator.geolocation.getCurrentPosition(async (position) => addWeatherPlace(await reverseGeocode(position.coords.latitude, position.coords.longitude)), () => { state.weatherLoading = false; state.weatherError = state.language === 'en' ? 'Location permission was denied' : '无法获取当前位置，请检查浏览器权限'; render(); });
+    if (!navigator.geolocation) {
+      state.weatherLoading = false;
+      state.weatherError = state.language === 'en' ? 'This browser does not support location access.' : '当前浏览器不支持定位。';
+      return render();
+    }
+    state.weatherLoading = true; state.weatherError = ''; render();
+    try {
+      return navigator.geolocation.getCurrentPosition((position) => {
+        void (async () => addWeatherPlace(await reverseGeocode(position.coords.latitude, position.coords.longitude)))().catch((error) => {
+          state.weatherLoading = false; state.weatherError = weatherLocationError(error); render();
+        });
+      }, (error) => {
+        state.weatherLoading = false; state.weatherError = weatherLocationError(error); render();
+      }, { enableHighAccuracy: false, maximumAge: 120000, timeout: 15000 });
+    } catch (error) {
+      state.weatherLoading = false; state.weatherError = weatherLocationError(error); render();
+    }
   }
   if (event.target.closest('[data-swap]')) { [conversion.from, conversion.to] = [conversion.to, conversion.from]; return render(); }
   if (event.target.closest('[data-swap-language]')) {
