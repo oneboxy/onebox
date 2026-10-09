@@ -15672,26 +15672,6 @@ body:has(.ticket-wallet-page) .ticket-wallet-dining-filter::-webkit-scrollbar { 
 .ticket-wallet-dining-filter-option.active { border-color: color-mix(in srgb, var(--primary) 24%, var(--line)); background: color-mix(in srgb, var(--primary) 8%, var(--panel)); color: var(--primary); }
 .ticket-wallet-dining-filter-option > span:first-child { font-size: 12px; }
 .ticket-wallet-dining-filter-option b { color: color-mix(in srgb, currentColor 72%, var(--muted)); font-size: 9px; font-weight: 700; }
-.ticket-wallet-dining-kind-list { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 14px; }
-.ticket-wallet-dining-kind {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 35px;
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  background: var(--panel);
-  color: var(--muted);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: border-color .16s ease, color .16s ease, background .16s ease;
-}
-.ticket-wallet-dining-kind.active { border-color: color-mix(in srgb, var(--primary) 44%, var(--line)); background: color-mix(in srgb, var(--primary) 8%, var(--panel)); color: var(--primary); }
-.ticket-wallet-dining-kind > span { font-size: 13px; }
 .ticket-wallet-drink-tags { display: grid; gap: 10px; margin: 0 0 14px; padding: 11px 12px; border: 1px solid color-mix(in srgb, var(--line) 88%, #a78562); border-radius: 12px; background: color-mix(in srgb, var(--panel) 88%, #f6eee3); }
 .ticket-wallet-drink-tags > div:first-child > span,
 .ticket-wallet-drink-attribute > span { display: block; margin-bottom: 6px; color: var(--muted); font-size: 10px; font-weight: 750; }
@@ -15708,7 +15688,6 @@ body:has(.ticket-wallet-page) .ticket-wallet-dining-filter::-webkit-scrollbar { 
   body:has(.ticket-wallet-page) .ticket-wallet-filter-row { display: grid; gap: 5px; }
   body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll { border-right: 0; }
   body:has(.ticket-wallet-page) .ticket-wallet-dining-filter { margin: 0 9px 5px; padding: 3px 0 4px; border-top: 1px solid var(--line); border-left: 0; }
-  .ticket-wallet-dining-kind { min-height: 32px; padding-inline: 10px; }
   .ticket-wallet-drink-tags { padding: 10px; }
   .ticket-wallet-drink-attribute { display: block; }
   .ticket-wallet-drink-attribute > span { margin: 0 0 5px; }
