@@ -15453,3 +15453,34 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
   transform: translateY(-50%);
 }
 #githubDialog .github-sync-option input:checked::after { transform: translate(12px, -50%); }
+
+/* Weather locations stay on one horizontal rail. Once the cards exceed the
+   available width, swipe or scroll sideways instead of wrapping to another row. */
+#workspace[data-tool="weather"] .weather-card-list {
+  display: flex;
+  flex-flow: row nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+#workspace[data-tool="weather"] .weather-card-list::-webkit-scrollbar { display: block; height: 5px; }
+#workspace[data-tool="weather"] .weather-card-list::-webkit-scrollbar-track { background: transparent; }
+#workspace[data-tool="weather"] .weather-card-list::-webkit-scrollbar-thumb { border-radius: 999px; background: var(--line); }
+#workspace[data-tool="weather"] .weather-card {
+  flex: 0 0 clamp(208px, 24vw, 260px);
+  width: clamp(208px, 24vw, 260px);
+  min-width: 0;
+}
+#workspace[data-tool="weather"] .weather-card.active { flex-basis: clamp(208px, 24vw, 260px); }
+@media (max-width: 600px) {
+  #workspace[data-tool="weather"] .weather-card-list::-webkit-scrollbar { display: none; }
+  #workspace[data-tool="weather"] .weather-card-list { scrollbar-width: none; }
+  #workspace[data-tool="weather"] .weather-card,
+  #workspace[data-tool="weather"] .weather-card.active {
+    flex-basis: min(82vw, 224px);
+    width: min(82vw, 224px);
+  }
+}
