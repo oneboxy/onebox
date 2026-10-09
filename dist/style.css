@@ -15697,3 +15697,133 @@ html[data-theme="dark"] .ticket-wallet-drink-tags,
 html[data-theme-mode="dark-gray"] .ticket-wallet-drink-tags { background: color-mix(in srgb, var(--panel-2) 86%, var(--panel)); }
 html[data-theme="dark"] .ticket-wallet-cafe-tags > i,
 html[data-theme-mode="dark-gray"] .ticket-wallet-cafe-tags > i { border-color: color-mix(in srgb, var(--line) 78%, #9b704e); background: color-mix(in srgb, var(--panel) 80%, transparent); color: var(--muted); }
+
+/* Cup-label workflow: choose a ticket first, then complete a realistic drink sticker. */
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head { align-items: flex-start; }
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head small { display: block; max-width: 540px; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+body:has(.ticket-wallet-page) .ticket-wallet-add-original-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+body:has(.ticket-wallet-page) .ticket-wallet-add-original-heading .ghost { min-height: 28px; padding: 3px 8px; font-size: 10px; }
+body:has(.ticket-wallet-page) .ticket-wallet-add-current-type { display: flex; align-items: center; gap: 8px; min-height: 34px; margin-top: 14px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); color: var(--muted); font-size: 10px; }
+body:has(.ticket-wallet-page) .ticket-wallet-add-current-type strong { color: var(--ink); font-size: 11px; }
+body:has(.ticket-wallet-page) .ticket-wallet-add-current-type button { min-height: 27px; margin-left: auto; padding: 3px 8px; font-size: 10px; }
+body:has(.ticket-wallet-page) .ticket-wallet-add-stage-actions { justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--line); }
+body:has(.ticket-wallet-page) .ticket-wallet-add-stage-actions button { min-height: 42px; padding: 0 18px; border-radius: 12px; }
+.ticket-wallet-cafe-label-editor,
+.ticket-wallet-add-fields { display: grid; gap: 14px; margin-top: 16px; }
+.ticket-wallet-dining-note-preview { display: grid; gap: 5px; width: min(100%, 480px); box-sizing: border-box; justify-self: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
+.ticket-wallet-dining-note-preview > small { color: var(--muted); font-size: 10px; font-weight: 750; }
+.ticket-wallet-dining-note-preview > strong { overflow: hidden; font-size: 18px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-dining-note-preview > span { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 10px; }
+.ticket-wallet-dining-note-preview > span > b,
+.ticket-wallet-dining-note-preview > span > i { overflow: hidden; font-style: normal; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cafe-label-heading { display: flex; align-items: center; justify-content: space-between; }
+.ticket-wallet-cafe-label-heading strong,
+.ticket-wallet-cafe-label-heading small { display: block; }
+.ticket-wallet-cafe-label-heading strong { font-size: 14px; }
+.ticket-wallet-cafe-label-heading small { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.ticket-wallet-cup-label {
+  position: relative;
+  display: grid;
+  width: min(100%, 480px);
+  min-height: 236px;
+  box-sizing: border-box;
+  align-content: start;
+  justify-self: center;
+  overflow: hidden;
+  gap: 10px;
+  padding: 17px 19px 13px;
+  border: 1px solid #a9c6cf;
+  border-radius: 9px;
+  background: linear-gradient(132deg, #e4f1f3 0%, #d3e6eb 52%, #eaf3f5 100%);
+  color: #183844;
+  box-shadow: 0 8px 18px rgb(26 58 68 / 11%), inset 0 0 0 1px rgb(255 255 255 / 58%);
+}
+.ticket-wallet-cup-label::before,
+.ticket-wallet-cup-label::after { position: absolute; content: ''; pointer-events: none; }
+.ticket-wallet-cup-label::before { top: -38px; right: -24px; width: 44%; height: 137%; background: linear-gradient(150deg, rgb(255 255 255 / 32%), rgb(93 151 165 / 9%)); transform: rotate(24deg); }
+.ticket-wallet-cup-label::after { right: 20px; bottom: 48px; width: 96px; height: 22px; background: repeating-linear-gradient(90deg, #537d87 0 2px, transparent 2px 4px, #537d87 4px 5px, transparent 5px 8px); opacity: .2; }
+.ticket-wallet-cup-label > * { position: relative; z-index: 1; }
+.ticket-wallet-cup-label-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; padding-bottom: 7px; border-bottom: 1px solid rgb(50 91 103 / 20%); }
+.ticket-wallet-cup-label-brand { overflow: hidden; font-size: 11px; font-weight: 800; letter-spacing: .03em; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-mode { flex: 0 0 auto; padding: 3px 7px; border: 1px solid rgb(54 99 110 / 27%); border-radius: 2px; font-size: 8px; font-weight: 800; letter-spacing: .08em; }
+.ticket-wallet-cup-label-number { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin-top: -3px; }
+.ticket-wallet-cup-label-number small { align-self: center; color: #4e7079; font-size: 8px; font-weight: 800; letter-spacing: .1em; }
+.ticket-wallet-cup-label-number strong { color: #143541; font-size: clamp(42px, 8vw, 56px); font-weight: 850; letter-spacing: -.07em; line-height: .9; }
+.ticket-wallet-cup-label-drink { display: grid; gap: 2px; margin-top: 1px; }
+.ticket-wallet-cup-label-drink small { color: #52737b; font-size: 9px; font-weight: 750; }
+.ticket-wallet-cup-label-drink strong { max-width: 100%; overflow: hidden; font-size: clamp(18px, 3vw, 23px); font-weight: 850; letter-spacing: -.025em; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-options { min-height: 15px; color: #42636c; font-size: 10px; font-weight: 650; }
+.ticket-wallet-cup-label-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 8px; border-top: 1px dashed rgb(50 91 103 / 28%); color: #4f7078; font-size: 9px; }
+.ticket-wallet-cup-label-bottom span { max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cafe-label-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 12px; }
+.ticket-wallet-cafe-label-fields > label { display: grid; min-width: 0; gap: 5px; }
+.ticket-wallet-cafe-label-fields > label > span,
+.ticket-wallet-cafe-field-label { color: var(--muted); font-size: 10px; font-weight: 750; }
+.ticket-wallet-cafe-label-fields input,
+.ticket-wallet-cafe-label-fields select { width: 100%; min-width: 0; height: 38px; box-sizing: border-box; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; }
+.ticket-wallet-cafe-label-fields input::placeholder { color: color-mix(in srgb, var(--muted) 72%, transparent); }
+.ticket-wallet-cafe-field-wide { grid-column: 1 / -1; }
+.ticket-wallet-cafe-mode-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.ticket-wallet-cafe-tag-groups { display: grid; grid-column: 1 / -1; gap: 9px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--panel-2) 82%, var(--panel)); }
+.ticket-wallet-cafe-tag-row { display: grid; gap: 6px; }
+.ticket-wallet-cafe-tag-row > span { color: var(--muted); font-size: 10px; font-weight: 750; }
+.ticket-wallet-cafe-tag-row > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.ticket-wallet-cafe-tag-groups .ticket-wallet-drink-attribute { gap: 8px; }
+.ticket-wallet-cafe-tag-groups .ticket-wallet-drink-attribute > span { min-width: 52px; }
+.ticket-wallet-add-fields > h3 { margin: 0; font-size: 14px; }
+.ticket-wallet-cup-label-ticket {
+  --ticket-accent: #527f8a;
+  --physical-ink: #173b47;
+  min-height: 230px;
+  padding: 18px 20px 14px;
+  border: 1px solid #a8c4cc !important;
+  border-radius: 10px;
+  background: linear-gradient(132deg, #e5f1f3 0%, #d4e7eb 52%, #edf4f5 100%);
+  color: #173b47;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 56%);
+}
+.ticket-wallet-cup-label-ticket::before { background: linear-gradient(145deg, transparent 0 44%, rgb(80 131 144 / 7%) 44% 64%, transparent 64%); opacity: 1; }
+.ticket-wallet-cup-label-saved-top,
+.ticket-wallet-cup-label-saved-number,
+.ticket-wallet-cup-label-saved-drink,
+.ticket-wallet-cup-label-saved-options,
+.ticket-wallet-cup-label-saved-bottom,
+.ticket-wallet-cup-label-saved-footer { position: relative; z-index: 1; }
+.ticket-wallet-cup-label-saved-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 7px; border-bottom: 1px solid rgb(50 91 103 / 20%); }
+.ticket-wallet-cup-label-saved-top > span { overflow: hidden; font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-saved-top > b { flex: 0 0 auto; font-size: 8px; letter-spacing: .08em; }
+.ticket-wallet-cup-label-saved-number { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin-top: 7px; }
+.ticket-wallet-cup-label-saved-number small,
+.ticket-wallet-cup-label-saved-drink small { color: #4e7079; font-size: 8px; font-weight: 800; letter-spacing: .09em; }
+.ticket-wallet-cup-label-saved-number strong { color: #143541; font-size: 46px; font-weight: 850; letter-spacing: -.07em; line-height: .88; }
+.ticket-wallet-cup-label-saved-drink { display: grid; gap: 2px; margin-top: 8px; }
+.ticket-wallet-cup-label-saved-drink small { font-size: 9px; letter-spacing: .02em; }
+.ticket-wallet-cup-label-saved-drink strong { overflow: hidden; font-size: 21px; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-saved-options { display: flex; flex-wrap: wrap; gap: 4px; min-height: 20px; margin-top: 7px; }
+.ticket-wallet-cup-label-saved-options > i { display: inline-flex; align-items: center; min-height: 18px; padding: 1px 6px; border: 1px solid rgb(53 97 108 / 20%); border-radius: 2px; background: rgb(255 255 255 / 24%); font-size: 8px; font-style: normal; }
+.ticket-wallet-cup-label-saved-bottom { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; padding-top: 7px; border-top: 1px dashed rgb(50 91 103 / 25%); color: #4f7078; font-size: 9px; }
+.ticket-wallet-cup-label-saved-bottom > span { max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-saved-footer { display: flex; align-items: center; gap: 9px; margin-top: 8px; color: #4f7078; font-size: 9px; }
+.ticket-wallet-cup-label-saved-footer > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-saved-footer .ticket-wallet-cafe-rating-stars { display: inline-flex; gap: 0; }
+.ticket-wallet-cup-label-saved-footer .ticket-wallet-cafe-rating-stars button,
+.ticket-wallet-cup-label-saved-footer .ticket-wallet-cafe-rating-stars i { width: 12px; height: 15px; color: #b17b45; font-size: 10px; }
+.ticket-wallet-cup-label-saved-footer > strong { margin-left: auto; color: #173b47; font-size: 11px; white-space: nowrap; }
+.ticket-wallet-cup-label-photo { position: absolute; right: 15px; bottom: 42px; z-index: 2; display: block; width: 48px; height: 58px; overflow: hidden; padding: 3px; border: 1px solid rgb(23 59 71 / 22%); border-radius: 4px; background: rgb(255 255 255 / 65%); transform: rotate(2deg); }
+.ticket-wallet-cup-label-photo img { display: block; width: 100%; height: 100%; border-radius: 2px; object-fit: cover; }
+@media (max-width: 620px) {
+  .ticket-wallet-cafe-label-fields { gap: 9px 8px; }
+  .ticket-wallet-cafe-label-fields input,
+  .ticket-wallet-cafe-label-fields select { height: 36px; padding-inline: 8px; font-size: 11px; }
+  .ticket-wallet-cafe-tag-groups { padding: 8px; }
+  .ticket-wallet-cup-label { min-height: 220px; padding: 15px 15px 12px; }
+  .ticket-wallet-cup-label::after { right: 15px; width: 72px; }
+  .ticket-wallet-cup-label-ticket { min-height: 218px; padding: 15px 15px 12px; }
+  .ticket-wallet-cup-label-saved-number strong { font-size: 42px; }
+  .ticket-wallet-cup-label-saved-drink strong { font-size: 18px; }
+  .ticket-wallet-cup-label-photo { right: 12px; bottom: 38px; width: 39px; height: 48px; }
+  .ticket-wallet-cup-label-saved-footer { gap: 6px; }
+  body:has(.ticket-wallet-page) .ticket-wallet-add-stage-actions button { min-height: 40px; padding-inline: 13px; }
+}
+html[data-theme="dark"] .ticket-wallet-cafe-tag-groups,
+html[data-theme-mode="dark-gray"] .ticket-wallet-cafe-tag-groups { background: color-mix(in srgb, var(--panel-2) 82%, var(--panel)); }
