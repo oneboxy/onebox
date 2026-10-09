@@ -15555,3 +15555,86 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
 @media (prefers-reduced-motion: reduce) {
   #oneboxMascotRoot.is-top-return-flight .onebox-mascot-propeller i { animation: none; }
 }
+
+/* Coffee sticker journal: a compact keepsake ticket for dining entries. */
+.ticket-wallet-cafe-setup {
+  margin-top: 15px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, #9c7455 18%, var(--line));
+  border-radius: 16px;
+  background: color-mix(in srgb, #fbf6ee 64%, var(--panel));
+}
+.ticket-wallet-cafe-setup-head { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+.ticket-wallet-cafe-setup-mark { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border: 1px solid #e4d4c1; border-radius: 11px; background: #fffaf2; font-size: 18px; }
+.ticket-wallet-cafe-setup-head strong,
+.ticket-wallet-cafe-setup-head small { display: block; }
+.ticket-wallet-cafe-setup-head strong { color: var(--ink); font-size: 13px; }
+.ticket-wallet-cafe-setup-head small { margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.ticket-wallet-cafe-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ticket-wallet-cafe-form label { display: grid; min-width: 0; gap: 5px; }
+.ticket-wallet-cafe-form label > span { color: var(--muted); font-size: 10px; font-weight: 700; }
+.ticket-wallet-cafe-form input,
+.ticket-wallet-cafe-form select { width: 100%; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 9px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; }
+.ticket-wallet-cafe-form input::placeholder { color: color-mix(in srgb, var(--muted) 72%, transparent); }
+.ticket-wallet-cafe-form .ticket-wallet-cafe-form-wide { grid-column: 1 / -1; }
+.ticket-wallet-cafe-mood-picks { display: flex; flex-wrap: wrap; gap: 6px; }
+.ticket-wallet-cafe-mood-pick { min-height: 26px; padding: 4px 8px; border: 1px solid #e4d6c5; border-radius: 999px; background: var(--panel); color: #80674f; font: inherit; font-size: 10px; cursor: pointer; }
+.ticket-wallet-cafe-mood-pick.active { border-color: #c6a17d; background: #f5eadc; color: #61452d; }
+.ticket-wallet-cafe-journal {
+  --ticket-accent: #9b704e;
+  --physical-ink: #49392d;
+  --physical-bg: linear-gradient(145deg, #fbf4e9 0%, #fffdf9 78%);
+  min-height: 246px;
+  padding: 16px 17px 13px;
+  border-color: #e8dcca;
+  border-radius: 18px;
+  background: var(--physical-bg);
+  box-shadow: 0 10px 22px rgb(80 57 35 / 9%), inset 0 0 0 1px rgb(255 255 255 / 68%);
+}
+.ticket-wallet-cafe-journal::before { background: radial-gradient(circle, #a78562 0 .8px, transparent 1px) 0 0 / 17px 17px; opacity: .12; }
+.ticket-wallet-cafe-head,
+.ticket-wallet-cafe-body,
+.ticket-wallet-cafe-footer { position: relative; z-index: 1; }
+.ticket-wallet-cafe-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ticket-wallet-cafe-stamp { display: grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border: 1px solid #e8d8c3; border-radius: 12px; background: #fffaf2; font-size: 19px; }
+.ticket-wallet-cafe-heading { display: grid; min-width: 0; gap: 2px; }
+.ticket-wallet-cafe-heading > small { color: #9b7958; font-size: 8px; font-weight: 800; letter-spacing: .1em; }
+.ticket-wallet-cafe-heading > strong { overflow: hidden; color: #3f3025; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cafe-heading > span { color: #887866; font-size: 10px; }
+.ticket-wallet-cafe-source { margin-left: auto; flex: 0 0 auto; padding: 4px 7px; border: 1px solid #e8ddcf; border-radius: 999px; color: #957858; font-size: 8px; font-weight: 750; letter-spacing: .04em; }
+.ticket-wallet-cafe-body { display: grid; grid-template-columns: minmax(0, 1fr) 78px; align-items: center; gap: 12px; min-height: 118px; margin-top: 9px; padding-top: 10px; border-top: 1px dashed #ddcbb6; }
+.ticket-wallet-cafe-copy { display: grid; min-width: 0; gap: 5px; }
+.ticket-wallet-cafe-copy > small { color: #a08061; font-size: 9px; font-weight: 750; letter-spacing: .08em; }
+.ticket-wallet-cafe-copy > strong { overflow: hidden; color: #3b2c21; font-size: 18px; font-weight: 780; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cafe-place { overflow: hidden; color: #897664; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cafe-rating { display: inline-flex; align-items: center; gap: 6px; width: fit-content; }
+.ticket-wallet-cafe-rating-stars { display: inline-flex; align-items: center; gap: 1px; }
+.ticket-wallet-cafe-rating-stars > i,
+.ticket-wallet-cafe-rating-stars > button { display: grid; width: 14px; height: 18px; place-items: center; padding: 0; border: 0; background: transparent; color: #bd8954; font: inherit; font-size: 13px; line-height: 1; }
+.ticket-wallet-cafe-rating-stars > button { cursor: pointer; }
+.ticket-wallet-cafe-rating-stars > button:hover { color: #805b37; }
+.ticket-wallet-cafe-rating > small { color: #99846e; font-size: 9px; }
+.ticket-wallet-cafe-photo { position: relative; display: grid; width: 72px; height: 94px; box-sizing: border-box; place-items: center; justify-self: center; overflow: visible; padding: 5px; border: 1px solid #e2d4c2; border-radius: 5px; background: #fffefa; color: #947554; box-shadow: 0 4px 10px rgb(70 50 32 / 12%); transform: rotate(2deg); }
+button.ticket-wallet-cafe-photo { cursor: pointer; }
+.ticket-wallet-cafe-photo::before { position: absolute; z-index: 2; top: -5px; left: 50%; width: 31px; height: 11px; border: 1px solid rgb(190 168 137 / 35%); background: rgb(237 224 201 / 78%); content: ''; transform: translateX(-50%) rotate(-4deg); }
+.ticket-wallet-cafe-photo img { display: block; width: 100%; height: 100%; border-radius: 2px; object-fit: cover; }
+.ticket-wallet-cafe-photo > span { position: absolute; right: 4px; bottom: 4px; padding: 2px 4px; border-radius: 3px; background: rgb(255 252 246 / 88%); color: #74563c; font-size: 7px; font-weight: 800; }
+.ticket-wallet-cafe-photo-empty { align-content: center; gap: 3px; background: #f3e9dc; transform: rotate(-2deg); }
+.ticket-wallet-cafe-photo-empty > span { font-size: 28px; line-height: 1; }
+.ticket-wallet-cafe-photo-empty > small { color: #947554; font-size: 8px; }
+.ticket-wallet-cafe-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; padding-top: 9px; border-top: 1px solid #eee4d8; }
+.ticket-wallet-cafe-footer > span { display: inline-flex; align-items: center; min-width: 0; overflow: hidden; gap: 5px; color: #755f4a; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cafe-footer > span i { display: grid; width: 17px; height: 17px; flex: 0 0 auto; place-items: center; border: 1px solid #e7d7c3; border-radius: 50%; color: #a47a50; font-size: 10px; font-style: normal; }
+.ticket-wallet-cafe-footer > strong { flex: 0 0 auto; color: #574332; font-size: 12px; }
+.ticket-wallet-cafe-journal .ticket-wallet-physical-edit-target:hover,
+.ticket-wallet-cafe-journal .ticket-wallet-physical-edit-target:focus-visible { color: #a46f43; }
+@media (max-width: 480px) {
+  .ticket-wallet-cafe-setup { padding: 12px; }
+  .ticket-wallet-cafe-form { gap: 9px 8px; }
+  .ticket-wallet-cafe-form input,
+  .ticket-wallet-cafe-form select { height: 35px; padding-inline: 8px; font-size: 11px; }
+  .ticket-wallet-cafe-journal { min-height: 232px; padding: 14px 13px 12px; }
+  .ticket-wallet-cafe-body { grid-template-columns: minmax(0, 1fr) 68px; min-height: 108px; gap: 8px; }
+  .ticket-wallet-cafe-photo { width: 64px; height: 86px; }
+  .ticket-wallet-cafe-copy > strong { font-size: 16px; }
+}
