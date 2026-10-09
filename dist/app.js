@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.561';
+const APP_VERSION = '2.18.562';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -194,6 +194,24 @@ async function oneBoxDbPut(storeName, key, value) {
     try {
       transaction = db.transaction(storeName, 'readwrite');
       transaction.objectStore(storeName).put(value, key);
+    } catch { resolve(false); return; }
+    transaction.oncomplete = () => resolve(true);
+    transaction.onerror = transaction.onabort = () => resolve(false);
+  });
+}
+async function oneBoxDbPutBatch(entriesByStore) {
+  const db = await openOneBoxDb();
+  if (!db) return false;
+  const stores = Object.keys(entriesByStore || {}).filter((name) => db.objectStoreNames.contains(name));
+  if (!stores.length) return false;
+  return new Promise((resolve) => {
+    let transaction;
+    try {
+      transaction = db.transaction(stores, 'readwrite');
+      stores.forEach((name) => {
+        const store = transaction.objectStore(name);
+        (entriesByStore[name] || []).forEach(([key, value]) => store.put(value, key));
+      });
     } catch { resolve(false); return; }
     transaction.oncomplete = () => resolve(true);
     transaction.onerror = transaction.onabort = () => resolve(false);
@@ -398,6 +416,34 @@ const DICT = {
 const t = (key) => DICT[state.language]?.[key] || DICT.zh[key] || key;
 DICT.zh.readerHint = '支持 md、txt、pdf、epub；同步状态见下方';
 DICT.en.readerHint = 'Read md, txt, pdf and epub; sync status below.';
+DICT.zh.readerBackupTitle = 'iCloud Drive 书籍备份';
+DICT.zh.readerBackupHint = '手动导出书籍原文件、阅读进度和笔记。iPhone 分享时选择“存储到文件 → iCloud Drive”，其他设备从 iCloud Drive 导入。';
+DICT.zh.readerBackupExport = '导出备份';
+DICT.zh.readerBackupImport = '导入备份';
+DICT.zh.readerBackupBuilding = '正在整理书籍…';
+DICT.zh.readerBackupReady = '备份文件已生成，请在分享菜单选择“存储到文件 → iCloud Drive”。';
+DICT.zh.readerBackupExported = '备份文件已下载，可将它保存到 iCloud Drive。';
+DICT.zh.readerBackupImported = '书籍、阅读进度和笔记已恢复';
+DICT.zh.readerBackupEmpty = '书架为空，没有可导出的书籍。';
+DICT.zh.readerBackupMissingSource = '有书籍原文件缺失，请先在仍保存原书的设备恢复文件，再创建完整备份。';
+DICT.zh.readerBackupTooLarge = '备份超过 256 MB。请分批备份书籍后再导入。';
+DICT.zh.readerBackupInvalid = '备份文件无效或已损坏，没有更改本机书架。';
+DICT.zh.readerBackupLimit = '恢复后书籍数量会超过 80 本，请先整理当前书架。';
+DICT.zh.readerBackupFailed = '备份处理失败，请检查设备可用空间后重试。';
+DICT.en.readerBackupTitle = 'iCloud Drive book backup';
+DICT.en.readerBackupHint = 'Export original books, reading progress and notes. On iPhone, choose “Save to Files → iCloud Drive” in the share sheet; import it on another device.';
+DICT.en.readerBackupExport = 'Export backup';
+DICT.en.readerBackupImport = 'Import backup';
+DICT.en.readerBackupBuilding = 'Preparing books…';
+DICT.en.readerBackupReady = 'Backup created. Choose “Save to Files → iCloud Drive” in the share sheet.';
+DICT.en.readerBackupExported = 'Backup downloaded. You can save it to iCloud Drive.';
+DICT.en.readerBackupImported = 'Books, progress and notes restored';
+DICT.en.readerBackupEmpty = 'The shelf is empty; there are no books to export.';
+DICT.en.readerBackupMissingSource = 'A book file is missing. Restore it on the device that still has the original, then create a complete backup.';
+DICT.en.readerBackupTooLarge = 'The backup is larger than 256 MB. Back up smaller groups of books.';
+DICT.en.readerBackupInvalid = 'The backup is invalid or damaged. The local shelf was not changed.';
+DICT.en.readerBackupLimit = 'Restore would exceed the 80-book limit. Remove books from the current shelf first.';
+DICT.en.readerBackupFailed = 'Backup processing failed. Check available device storage and try again.';
 // Keep the cloud-sync summary short; the action labels explain upload versus restore.
 const toolName = (id) => t(TOOL_DEFS[id]?.key || id);
 const storedTheme = localStorage.getItem(STORAGE.theme);
@@ -4721,6 +4767,225 @@ function saveLibrary(options = {}) {
     queueReaderCloudSync(2200);
   }
 }
+const READER_BACKUP_MAGIC = new TextEncoder().encode('ONEBOX-READER-BACKUP\n');
+const READER_BACKUP_MAX_BYTES = 256 * 1024 * 1024;
+const READER_BACKUP_MAX_MANIFEST_BYTES = 4 * 1024 * 1024;
+let readerBackupBusy = false;
+function readerBackupBytes(value) {
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  if (ArrayBuffer.isView(value)) return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  return null;
+}
+async function readerBackupHash(bytes) {
+  if (!window.crypto?.subtle) throw Error('SHA-256 unavailable');
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+  return [...digest].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+function readerBackupMetadata(book) {
+  const metadata = {};
+  Object.entries(book || {}).forEach(([key, value]) => {
+    if (key === 'content' || key === 'syncFileMissing' || key.startsWith('_')) return;
+    metadata[key] = value;
+  });
+  return metadata;
+}
+function readerBackupCheckpoint(book, checkpoints) {
+  const checkpoint = checkpoints?.[book.id];
+  return Number(checkpoint?.savedAt) > Number(book.progressUpdatedAt || 0)
+    ? { progress: checkpoint.progress, savedAt: Number(checkpoint.savedAt) }
+    : { progress: book.progress, savedAt: Number(book.progressUpdatedAt || 0) };
+}
+async function readerBackupSource(book) {
+  let bytes = readerBackupBytes(await oneBoxDbGet('books', book.id));
+  if (!bytes && book.type === 'md' && typeof book.content === 'string') bytes = new TextEncoder().encode(book.content);
+  if (!bytes) throw Error('missing-book-source');
+  return bytes;
+}
+async function buildReaderBackupFile() {
+  const books = state.library.slice(0, 80);
+  if (!books.length) throw Error('empty-reader-library');
+  const checkpoints = parseStored(STORAGE.readerProgress, {}) || {};
+  const segments = [];
+  const records = [];
+  let payloadSize = 0;
+  for (const book of books) {
+    const source = await readerBackupSource(book);
+    const record = { metadata: readerBackupMetadata(book), source: { offset: payloadSize, length: source.byteLength, sha256: await readerBackupHash(source) } };
+    segments.push(source); payloadSize += source.byteLength;
+    const progress = readerBackupCheckpoint(book, checkpoints);
+    if (progress.savedAt) { record.metadata.progress = progress.progress; record.metadata.progressUpdatedAt = progress.savedAt; }
+    const cover = typeof book._coverData === 'string' ? book._coverData : await oneBoxDbGet('book-covers', book.id);
+    if (typeof cover === 'string' && /^data:image\//i.test(cover)) {
+      const coverBytes = new TextEncoder().encode(cover);
+      if (coverBytes.byteLength <= 8 * 1024 * 1024) {
+        record.cover = { offset: payloadSize, length: coverBytes.byteLength, sha256: await readerBackupHash(coverBytes) };
+        segments.push(coverBytes); payloadSize += coverBytes.byteLength;
+      }
+    }
+    records.push(record);
+    if (payloadSize + READER_BACKUP_MAGIC.length + 4 > READER_BACKUP_MAX_BYTES) throw Error('backup-too-large');
+  }
+  const manifest = { app: 'OneBox', kind: 'reader-library-backup', version: 1, createdAt: new Date().toISOString(), payloadBytes: payloadSize, books: records };
+  const manifestBytes = new TextEncoder().encode(JSON.stringify(manifest));
+  if (manifestBytes.byteLength > READER_BACKUP_MAX_MANIFEST_BYTES || payloadSize + READER_BACKUP_MAGIC.byteLength + 4 + manifestBytes.byteLength > READER_BACKUP_MAX_BYTES) throw Error('backup-too-large');
+  const length = new Uint8Array(4);
+  new DataView(length.buffer).setUint32(0, manifestBytes.byteLength, true);
+  const date = new Date().toISOString().slice(0, 10);
+  return new File([READER_BACKUP_MAGIC, length, manifestBytes, ...segments], 'OneBox-Reader-' + date + '.oneboxreader', { type: 'application/octet-stream', lastModified: Date.now() });
+}
+function downloadReaderBackup(file) {
+  const url = URL.createObjectURL(file);
+  const link = document.createElement('a');
+  link.href = url; link.download = file.name; link.hidden = true;
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+async function exportReaderBackup(button) {
+  if (readerBackupBusy) return;
+  readerBackupBusy = true;
+  const originalLabel = button?.textContent || t('readerBackupExport');
+  if (button) { button.disabled = true; button.textContent = t('readerBackupBuilding'); }
+  try {
+    const file = await buildReaderBackupFile();
+    let shareFiles = false;
+    try { shareFiles = Boolean(navigator.share && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })); } catch {}
+    if (shareFiles) {
+      try {
+        await navigator.share({ files: [file], title: t('readerBackupTitle'), text: t('readerBackupReady') });
+        toast(t('readerBackupReady'));
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+        downloadReaderBackup(file);
+        toast(t('readerBackupExported'));
+      }
+    } else {
+      downloadReaderBackup(file);
+      toast(t('readerBackupExported'));
+    }
+  } catch (error) {
+    const key = error?.message === 'empty-reader-library' ? 'readerBackupEmpty' : error?.message === 'missing-book-source' ? 'readerBackupMissingSource' : error?.message === 'backup-too-large' ? 'readerBackupTooLarge' : 'readerBackupFailed';
+    toast(t(key), 'error');
+  } finally {
+    readerBackupBusy = false;
+    if (button) { button.disabled = false; button.textContent = originalLabel; }
+  }
+}
+function readerBackupIntegrityError() { throw Error('invalid-reader-backup'); }
+async function parseReaderBackupFile(file) {
+  if (!file || file.size > READER_BACKUP_MAX_BYTES) throw Error('backup-too-large');
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (bytes.byteLength < READER_BACKUP_MAGIC.byteLength + 4 || !READER_BACKUP_MAGIC.every((byte, index) => bytes[index] === byte)) readerBackupIntegrityError();
+  const headerOffset = READER_BACKUP_MAGIC.byteLength;
+  const manifestLength = new DataView(bytes.buffer, bytes.byteOffset + headerOffset, 4).getUint32(0, true);
+  const manifestStart = headerOffset + 4;
+  const payloadStart = manifestStart + manifestLength;
+  if (!manifestLength || manifestLength > READER_BACKUP_MAX_MANIFEST_BYTES || payloadStart > bytes.byteLength) readerBackupIntegrityError();
+  let manifest;
+  try { manifest = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes.subarray(manifestStart, payloadStart))); } catch { readerBackupIntegrityError(); }
+  if (manifest?.app !== 'OneBox' || manifest?.kind !== 'reader-library-backup' || manifest?.version !== 1 || !Array.isArray(manifest.books) || manifest.books.length > 80 || !manifest.books.length || Number(manifest.payloadBytes) !== bytes.byteLength - payloadStart) readerBackupIntegrityError();
+  const segments = [];
+  const parsedBooks = [];
+  const ids = new Set();
+  const payload = bytes.subarray(payloadStart);
+  for (const record of manifest.books) {
+    const metadata = record?.metadata;
+    const type = String(metadata?.type || '').toLowerCase();
+    const id = String(metadata?.id || '');
+    if (!metadata || !id || ids.has(id) || !String(metadata.name || '').trim() || !['md', 'txt', 'pdf', 'epub'].includes(type)) readerBackupIntegrityError();
+    ids.add(id);
+    const source = record.source;
+    if (!source || !Number.isSafeInteger(source.offset) || !Number.isSafeInteger(source.length) || source.offset < 0 || source.length < 0 || source.offset + source.length > payload.byteLength || !/^[a-f0-9]{64}$/i.test(source.sha256 || '')) readerBackupIntegrityError();
+    const sourceBytes = payload.slice(source.offset, source.offset + source.length);
+    if (await readerBackupHash(sourceBytes) !== String(source.sha256).toLowerCase()) readerBackupIntegrityError();
+    segments.push({ offset: source.offset, length: source.length });
+    let cover = '';
+    if (record.cover) {
+      const item = record.cover;
+      if (!Number.isSafeInteger(item.offset) || !Number.isSafeInteger(item.length) || item.length > 8 * 1024 * 1024 || item.offset < 0 || item.length < 1 || item.offset + item.length > payload.byteLength || !/^[a-f0-9]{64}$/i.test(item.sha256 || '')) readerBackupIntegrityError();
+      const coverBytes = payload.slice(item.offset, item.offset + item.length);
+      if (await readerBackupHash(coverBytes) !== String(item.sha256).toLowerCase()) readerBackupIntegrityError();
+      cover = new TextDecoder('utf-8', { fatal: true }).decode(coverBytes);
+      if (!/^data:image\//i.test(cover)) readerBackupIntegrityError();
+      segments.push({ offset: item.offset, length: item.length });
+    }
+    parsedBooks.push({ metadata: { ...metadata, type }, sourceBytes, cover });
+  }
+  segments.sort((a, b) => a.offset - b.offset);
+  let nextOffset = 0;
+  for (const segment of segments) {
+    if (segment.offset !== nextOffset) readerBackupIntegrityError();
+    nextOffset += segment.length;
+  }
+  if (nextOffset !== payload.byteLength) readerBackupIntegrityError();
+  return parsedBooks;
+}
+function readerBackupAnnotationMerge(current = [], incoming = []) {
+  const merged = new Map();
+  [...current, ...incoming].forEach((note, index) => {
+    if (!note || typeof note !== 'object') return;
+    const key = String(note.id || [note.quote || '', note.note || '', note.createdAt || index].join('|'));
+    const previous = merged.get(key);
+    if (!previous || Number(note.updatedAt || note.createdAt || 0) >= Number(previous.updatedAt || previous.createdAt || 0)) merged.set(key, note);
+  });
+  return [...merged.values()];
+}
+async function importReaderBackup(file) {
+  try {
+    const imported = await parseReaderBackupFile(file);
+    const localCheckpoints = parseStored(STORAGE.readerProgress, {}) || {};
+    const library = [...state.library];
+    const bookWrites = [];
+    const coverWrites = [];
+    const restoredCheckpoints = { ...localCheckpoints };
+    for (const item of imported) {
+      const incoming = item.metadata;
+      const matching = library.find((book) => book.id === incoming.id)
+        || library.find((book) => incoming.fingerprint && book.fingerprint === incoming.fingerprint)
+        || library.find((book) => book.syncFileMissing && book.type === incoming.type && book.name?.trim().toLocaleLowerCase() === incoming.name.trim().toLocaleLowerCase() && Number(book.size) === item.sourceBytes.byteLength);
+      const targetId = matching?.id || incoming.id;
+      let merged = incoming;
+      if (matching) {
+        const preferIncoming = Number(incoming.updatedAt || incoming.createdAt || 0) > Number(matching.updatedAt || matching.createdAt || 0);
+        merged = preferIncoming ? { ...matching, ...incoming } : { ...incoming, ...matching };
+        merged.id = targetId;
+        merged.createdAt = Number(matching.createdAt || incoming.createdAt || Date.now());
+        merged.annotations = readerBackupAnnotationMerge(matching.annotations, incoming.annotations);
+        const localProgress = readerBackupCheckpoint(matching, localCheckpoints);
+        const incomingProgress = { progress: incoming.progress, savedAt: Number(incoming.progressUpdatedAt || 0) };
+        const progress = incomingProgress.savedAt > localProgress.savedAt ? incomingProgress : localProgress;
+        merged.progress = progress.progress;
+        merged.progressUpdatedAt = progress.savedAt;
+        delete merged.syncFileMissing;
+        library[library.indexOf(matching)] = merged;
+      } else {
+        merged = { ...incoming, id: targetId, annotations: readerBackupAnnotationMerge([], incoming.annotations) };
+        library.push(merged);
+      }
+      merged.size = item.sourceBytes.byteLength;
+      if (merged.type === 'md') merged.content = readerDecodeText(item.sourceBytes);
+      delete merged.syncFileMissing;
+      bookWrites.push([targetId, item.sourceBytes.buffer.slice(item.sourceBytes.byteOffset, item.sourceBytes.byteOffset + item.sourceBytes.byteLength)]);
+      if (item.cover) {
+        coverWrites.push([targetId, item.cover]);
+        merged.hasCover = true;
+        readerDefineCover(merged, item.cover);
+      } else if (!matching) merged.hasCover = false;
+      if (merged.progressUpdatedAt) restoredCheckpoints[targetId] = { progress: merged.progress, savedAt: merged.progressUpdatedAt };
+    }
+    if (library.length > 80) throw Error('backup-library-limit');
+    const written = await oneBoxDbPutBatch({ books: bookWrites, 'book-covers': coverWrites });
+    if (!written) throw Error('backup-write-failed');
+    state.library = normalizeReaderLibrary(library);
+    saveStored(STORAGE.readerProgress, restoredCheckpoints);
+    saveLibrary({ preserveUpdatedAt: true, skipCloudSync: true });
+    queuePersistentSnapshot();
+    if (state.readerMode !== 'reading') render();
+    toast(t('readerBackupImported'));
+  } catch (error) {
+    const key = error?.message === 'backup-too-large' ? 'readerBackupTooLarge' : error?.message === 'backup-library-limit' ? 'readerBackupLimit' : error?.message === 'backup-write-failed' ? 'readerBackupFailed' : 'readerBackupInvalid';
+    toast(t(key), 'error');
+  }
+}
 function saveReaderCheckpoint(book) {
   const checkpoints = parseStored(STORAGE.readerProgress, {}) || {};
   book.progressUpdatedAt = Date.now();
@@ -6274,7 +6539,8 @@ function reader() {
   const libraryBody = '<div class="reader-book-grid ' + layoutClass + (!books.length ? ' reader-book-grid-empty' : '') + '">' + (books.length ? cards : '') + readerAddCardMarkup() + '</div>';
   const layoutIcon = state.readerLayout === 'list' ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/><path d="M5 6h.01M5 12h.01M5 18h.01"/></svg><span>宫格</span>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span>列表</span>';
   const cloudStatus = window.OneBoxReaderCloudSync?.status?.() || { state: 'idle', message: '' };
-  return '<div class="reader-library-view"><section class="reader-library-panel"><div class="reader-library-head"><div class="reader-library-title-copy"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><small class="reader-cloud-sync-status" id="readerCloudSyncStatus" data-state="' + escapeHtml(cloudStatus.state || 'idle') + '">' + escapeHtml(readerCloudStatusLabel(cloudStatus)) + '</small></div><div class="reader-library-actions"><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="切换书架布局">' + layoutIcon + '</button></div></div>' + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,text/markdown,text/plain,application/pdf,application/epub+zip"></div>';
+  const backupPanel = '<aside class="reader-backup-panel"><div class="reader-backup-copy"><strong>' + t('readerBackupTitle') + '</strong><small>' + t('readerBackupHint') + '</small></div><div class="reader-backup-actions"><button class="reader-backup-button primary" data-reader-backup-export>' + t('readerBackupExport') + '</button><button class="reader-backup-button" data-reader-backup-import>' + t('readerBackupImport') + '</button></div></aside>';
+  return '<div class="reader-library-view"><section class="reader-library-panel"><div class="reader-library-head"><div class="reader-library-title-copy"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><small class="reader-cloud-sync-status" id="readerCloudSyncStatus" data-state="' + escapeHtml(cloudStatus.state || 'idle') + '">' + escapeHtml(readerCloudStatusLabel(cloudStatus)) + '</small></div><div class="reader-library-actions"><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="切换书架布局">' + layoutIcon + '</button></div></div>' + backupPanel + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,text/markdown,text/plain,application/pdf,application/epub+zip"><input id="readerBackupInput" type="file" hidden accept=".oneboxreader,application/octet-stream"></div>';
 }
 
 // Calendar data --------------------------------------------------------------
@@ -11430,6 +11696,9 @@ workspace.addEventListener('click', async (event) => {
     state.readerLayout = state.readerLayout === 'list' ? 'grid' : 'list';
     saveReaderLayout(); return render();
   }
+  const readerBackupExportButton = event.target.closest('[data-reader-backup-export]');
+  if (readerBackupExportButton) return exportReaderBackup(readerBackupExportButton);
+  if (event.target.closest('[data-reader-backup-import]')) { $('#readerBackupInput')?.click(); return; }
   const newAction = event.target.closest('[data-feed-only-new]');
   if (newAction) { event.preventDefault(); event.stopPropagation(); return revealHomeFeedNew(newAction.closest('[data-feed-source]')?.dataset.feedSource || state.homeFeed.active); }
   const loadMoreAction = event.target.closest('[data-feed-load-more]');
@@ -11636,6 +11905,7 @@ workspace.addEventListener('input', (event) => {
 workspace.addEventListener('change', (event) => {
   if (event.target.dataset.devField === 'timestampUnit') { state.devTools.timestampUnit = event.target.value; updateDeveloperLiveState('timestampUnit'); }
   if (event.target.id === 'readerFileInput') { importReaderFiles(event.target.files); return; }
+  if (event.target.id === 'readerBackupInput') { const file = event.target.files?.[0]; if (file) void importReaderBackup(file).finally(() => { event.target.value = ''; }); return; }
   if (event.target.id === 'ticketWalletFileInput') { importTicketWalletImage(event.target.files?.[0]); event.target.value = ''; return; }
   if (event.target.id === 'ticketWalletMemoryImageInput') { importTicketWalletImage(event.target.files?.[0]); event.target.value = ''; return; }
   if (event.target.id === 'ticketWalletJsonInput') { importTicketWalletJson(event.target.files?.[0]); event.target.value = ''; return; }

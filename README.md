@@ -29,6 +29,10 @@ GitHub Pages 是纯静态托管，OneBox 使用 GitHub Device Flow，不把 OAut
 
 首页订阅内容、节假日和天气接口响应属于网络缓存，不参与同步；GitHub 登录令牌也不会上传到 Gist。
 
+## iCloud Drive 阅读备份
+
+阅读书架提供手动导出/导入备份，文件包含书籍原文件、阅读进度、笔记和已有封面。iPhone 导出后，在系统分享菜单选择“存储到文件 → iCloud Drive”；其他设备从 iCloud Drive 选择该备份文件导入。导入会合并到现有书架并校验文件，不会删除本机已有书籍。网页不能在后台直接写入用户的 iCloud Drive，因此这项方式需要手动保存和导入，不是自动实时同步；单个备份包上限为 256 MB。
+
 ## 阅读内容自动同步（Cloudflare）
 
 阅读模块的独立自动同步服务位于 `cloudflare/reader-sync/`：书籍原文件放进 Cloudflare R2 私有存储，书架信息、笔记和阅读进度放进 Cloudflare D1。文件不使用公开 URL；访问需要先用 OneBox 已有的 GitHub 登录令牌换取短期会话。Worker 只用该令牌向 GitHub 验证当前用户，不把它写入数据库或日志。不同 GitHub 用户的数据按用户 ID 隔离。

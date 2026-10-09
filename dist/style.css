@@ -15079,6 +15079,37 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
 .reader-cloud-sync-status[data-state="success"] { color: var(--success); }
 .reader-cloud-sync-status[data-state="error"] { color: var(--danger); }
 .reader-cloud-sync-status[data-state="offline"] { color: var(--muted); }
+.reader-backup-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--panel-2);
+}
+.reader-backup-copy { display: grid; min-width: 0; gap: 3px; }
+.reader-backup-copy strong { color: var(--ink); font-size: 12px; font-weight: 760; }
+.reader-backup-copy small { color: var(--muted); font-size: 10px; line-height: 1.45; }
+.reader-backup-actions { display: flex; flex: 0 0 auto; gap: 7px; }
+.reader-backup-button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.reader-backup-button.primary { border-color: color-mix(in srgb, var(--primary) 28%, var(--line)); background: var(--soft); color: var(--primary); }
+.reader-backup-button:hover, .reader-backup-button:focus-visible { border-color: var(--primary); outline: none; }
+.reader-backup-button:disabled { opacity: .65; cursor: progress; }
 #githubDialog .github-reader-cloud-consent { align-items: flex-start; margin: 2px 0 4px; }
 #githubDialog .github-reader-cloud-consent > span {
   display: grid;
@@ -15091,3 +15122,10 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-template-op
 #githubDialog .github-reader-cloud-consent > span::after { top: 7px; left: 6px; }
 #githubDialog .github-reader-cloud-consent strong { grid-column: 2; color: var(--ink); font-size: 11px; line-height: 1.4; }
 #githubDialog .github-reader-cloud-consent small { grid-column: 2; color: var(--muted); font-size: 10px; line-height: 1.45; }
+
+@media (max-width: 600px) {
+  .reader-backup-panel { align-items: stretch; flex-direction: column; gap: 9px; padding: 10px 11px; }
+  .reader-backup-copy small { font-size: 10px; }
+  .reader-backup-actions { width: 100%; }
+  .reader-backup-button { flex: 1 1 0; min-height: 34px; }
+}
