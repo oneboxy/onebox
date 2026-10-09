@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: broad ticket wallet categories and date grouping. */
-const APP_VERSION = '2.18.575';
+const APP_VERSION = '2.18.576';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2597,8 +2597,8 @@ function changeMascotPoem() {
   window.setTimeout(() => button?.classList.remove('is-refreshing'), 480);
 }
 async function refreshMascotWeatherForCurrentPlace() {
-  const current = state.weatherCards.find((item) => item.isCurrentLocation);
-  const card = current || state.weatherCards.find((item) => item.id === state.activeWeatherId) || state.weatherCards[0];
+  const card = state.weatherCards[0];
+  const current = card?.isCurrentLocation ? card : null;
   if (!card || state.weatherLoading) return;
   state.weatherLoading = true;
   try {
@@ -2617,7 +2617,6 @@ async function refreshMascotWeatherForCurrentPlace() {
     if (!moved && Date.now() - Number(card.updatedAt || 0) < 30 * 60 * 1000) return;
     const data = await getWeatherData(place.latitude, place.longitude);
     Object.assign(card, data, place, { updatedAt: Date.now(), loading: false, loadError: false });
-    state.activeWeatherId = card.id;
     saveWeatherCards();
   } catch {
     card.loading = false;
@@ -2644,7 +2643,7 @@ function mascotReadingMarkup() {
   return '<button type="button" class="onebox-mascot-reading-line" data-mascot-action="reader" aria-label="' + escapeHtml(readingLabel + ' ' + bookName) + '"><span class="onebox-mascot-reading-content"><span class="onebox-mascot-reading-label"><span class="onebox-mascot-line-icon" aria-hidden="true">' + TOOL_DEFS.reader.icon + '</span><small>' + escapeHtml(readingLabel) + '</small></span><span class="onebox-mascot-reading-book"><strong>' + escapeHtml(bookName) + '</strong><em>' + percent + '%</em></span></span></button>';
 }
 function mascotWeatherMarkup() {
-  const weather = state.weatherCards.find((item) => item.isCurrentLocation) || state.weatherCards.find((item) => item.id === state.activeWeatherId) || state.weatherCards[0];
+  const weather = state.weatherCards[0];
   if (!weather) return '<p class="onebox-mascot-empty">' + escapeHtml(state.language === 'en' ? 'Add a weather place first' : '还没有天气卡片') + '</p>';
   if (weather.loading && !weather.current) return '<p class="onebox-mascot-empty">' + escapeHtml(t('weatherLoading')) + '</p>';
   const current = weather.current || {};
