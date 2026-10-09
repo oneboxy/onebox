@@ -9828,7 +9828,6 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   overflow: auto;
   text-align: left;
   border: 1px solid var(--line);
-  border-top: 3px solid var(--primary);
 }
 .lunar-dialog-head {
   position: sticky;
