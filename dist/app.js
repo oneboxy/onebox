@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.603';
+const APP_VERSION = '2.18.604';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4268,7 +4268,6 @@ function ticketWalletTrainBlueTemplateMarkup(data, sourceHint = '', editable = t
     '<title>', escapeHtml(data.from + '到' + data.to + ' ' + data.trainNo), '</title>',
     '<defs><linearGradient id="', gradientId, '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8eaf2"/><stop offset=".62" stop-color="#7dd4e1"/><stop offset="1" stop-color="#38b9d2"/></linearGradient></defs>',
     '<rect class="ticket-paper ticket-paper-blue" width="1096" height="695" rx="18" fill="url(#', gradientId, ')"/>',
-    '<g class="ticket-wallet-svg-kind-badge"><rect x="910" y="27" width="156" height="40" rx="8"/><text x="988" y="53" text-anchor="middle">火车票</text></g>',
     '<path class="ticket-blue-haze" d="M0 420c150-35 254 23 389-18s225-18 336 5 239-4 371 22v266H0Z"/>',
     '<g class="ticket-blue-train-art" aria-hidden="true"><path d="M42 523c124-4 210 18 324-7 92-20 134-53 224-48 113 6 167 48 263 53 73 4 129-7 201-27v64H42Z"/><path d="M173 541h720c-44 23-91 28-145 27H327c-61 0-111-9-154-27Zm168-26h75l33-45h106l27 45h94l28-39 93 4 28 35H341Z"/><path d="M477 470h104l13 45H463Zm-234 99h45m38 0h45m348 0h45m38 0h45"/></g>',
     serial,
@@ -4311,7 +4310,6 @@ function ticketWalletTrainTemplateMarkup(data, sourceHint = '', editable = true,
     '<title>', escapeHtml(data.from + '到' + data.to + ' ' + data.trainNo), '</title>',
     '<defs><pattern id="', patternId, '" width="210" height="154" patternUnits="userSpaceOnUse"><path d="M18 34h42v34H18zM31 42v18M80 25c18 7 29 22 25 42-5 21-26 31-45 22M145 23c24 6 41 27 36 50-4 18-20 31-38 34M130 91c24-17 51-12 66 11"/><path d="M22 119c29-20 56-16 77 7m18-2c22-19 50-15 72 5"/></pattern></defs>',
     '<rect class="ticket-paper" width="1096" height="695"/><rect class="ticket-paper-pattern" width="1096" height="695" fill="url(#', patternId, ')"/>',
-    '<g class="ticket-wallet-svg-kind-badge"><rect x="910" y="27" width="156" height="40" rx="8"/><text x="988" y="53" text-anchor="middle">火车票</text></g>',
     serial,
     '<g class="ticket-route">', fromStation,
     trainNo,
@@ -4444,7 +4442,7 @@ function ticketWalletTrainCardMarkup(record, index, contextClass = '', contextSt
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
   const rowAttributes = interactive ? '' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + '</div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><span class="ticket-wallet-train-type-badge">' + TICKET_TYPES.train.icon + '<span>' + escapeHtml(ticketTypeLabel(record.type)) + '</span></span>' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + '</div>';
 }
 function ticketWalletCardMarkup(record, index, contextClass = '', contextStyle = '') {
   const interactive = contextClass.includes('ticket-wallet-detail-row');
@@ -4502,10 +4500,10 @@ function ticketWalletStackDensity(count) {
 function ticketWalletStackPeek(count) {
   const size = Math.max(1, Number(count) || 1);
   if (size === 1) return 0;
-  // Keep the requested 60px reveal for a normal pack. For unusually large
-  // packs, reduce only the vertical step so the stack remains usable.
-  if (size <= 6) return 60;
-  return Math.max(8, Math.floor(360 / (size - 1)));
+  // Restore the earlier compact reveal so each ticket peeks out without
+  // pushing the stack too far down the page.
+  if (size <= 6) return 20;
+  return Math.max(8, Math.floor(120 / (size - 1)));
 }
 function ticketWalletStackAttrs(count) {
   return 'data-ticket-stack-count="' + Math.max(1, Number(count) || 1) + '" data-ticket-stack-density="' + ticketWalletStackDensity(count) + '"';
