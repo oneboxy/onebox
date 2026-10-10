@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.604';
+const APP_VERSION = '2.18.605';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4500,22 +4500,21 @@ function ticketWalletStackDensity(count) {
 function ticketWalletStackPeek(count) {
   const size = Math.max(1, Number(count) || 1);
   if (size === 1) return 0;
-  // Restore the earlier compact reveal so each ticket peeks out without
-  // pushing the stack too far down the page.
-  if (size <= 6) return 20;
-  return Math.max(8, Math.floor(120 / (size - 1)));
+  // Reveal the station names on covered tickets. Match the CSS clamp so
+  // reorder and return animations use the same responsive spacing.
+  const viewportWidth = typeof window !== 'undefined' ? (window.innerWidth || 800) : 800;
+  return Math.round(Math.max(60, Math.min(96, viewportWidth * 0.12)));
 }
 function ticketWalletStackAttrs(count) {
   return 'data-ticket-stack-count="' + Math.max(1, Number(count) || 1) + '" data-ticket-stack-density="' + ticketWalletStackDensity(count) + '"';
 }
 function ticketWalletStackStyle(count) {
   const size = Math.max(1, Number(count) || 1);
-  const peek = ticketWalletStackPeek(size);
-  const bottom = 32 + size * peek;
-  // Keep the pack step on the stack itself. Older responsive rules also set
-  // --ticket-stack-peek on train rows, which made the row transform use a
-  // different step from the stack's reserved space in Safari.
-  return '--ticket-stack-count:' + size + ';--ticket-stack-peek:' + peek + 'px;--ticket-stack-step:' + peek + 'px;--ticket-stack-bottom:' + bottom + 'px';
+  const peek = size === 1 ? '0px' : 'clamp(60px, 12vw, 96px)';
+  const bottom = size === 1 ? '32px' : 'calc(32px + ' + Array(size).fill(peek).join(' + ') + ')';
+  // Keep the responsive pack step on the stack itself so every card reveal
+  // and its reserved page height stay in sync across screen sizes.
+  return '--ticket-stack-count:' + size + ';--ticket-stack-peek:' + peek + ';--ticket-stack-step:' + peek + ';--ticket-stack-bottom:' + bottom;
 }
 function ticketWalletDetailReturnPackMarkup(records, selectedId) {
   return '<div class="ticket-wallet-return-pack ticket-wallet-stack-section" aria-hidden="true"><div class="ticket-wallet-stack ticket-wallet-return-pack-stack" ' + ticketWalletStackAttrs(records.length) + ' style="' + ticketWalletStackStyle(records.length) + '">' + records.map((item, index) => item.id === selectedId ? '' : ticketWalletCardMarkup(item, index)).join('') + '</div></div>';
