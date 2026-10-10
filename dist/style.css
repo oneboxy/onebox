@@ -16136,3 +16136,59 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
   .ticket-wallet-cotti-footer > strong { max-width: 60%; font-size: clamp(12px, 3.8vw, 15px); }
   .ticket-wallet-cotti-footer > span { font-size: clamp(11px, 3.5vw, 14px); }
 }
+
+/* Luckin cup labels are landscape slips. Keep a two-column composition on
+   phones too, while letting the product-identity strip use the full width. */
+.ticket-wallet-cup-label-luckin-real,
+.ticket-wallet-cup-label-ticket .ticket-wallet-cup-label-luckin-real {
+  display: grid;
+  width: min(100%, 640px);
+  min-height: 0;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  grid-template-areas:
+    "head head"
+    "order drink"
+    "product product"
+    "footer footer";
+  align-content: start;
+  align-items: start;
+  gap: 9px 16px;
+  box-sizing: border-box;
+  padding: 17px 19px 14px;
+}
+.ticket-wallet-luckin-header { grid-area: head; }
+.ticket-wallet-luckin-order { grid-area: order; align-self: stretch; grid-template-columns: minmax(0, 1fr) 60px; min-height: 75px; gap: 6px; }
+.ticket-wallet-luckin-drink { grid-area: drink; align-self: center; }
+.ticket-wallet-luckin-product { grid-area: product; width: 100%; }
+.ticket-wallet-luckin-footer { grid-area: footer; width: 100%; }
+@media (max-width: 500px) {
+  .ticket-wallet-cup-label-luckin-real,
+  .ticket-wallet-cup-label-ticket .ticket-wallet-cup-label-luckin-real {
+    width: min(100%, 440px);
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+    gap: 7px 10px;
+    padding: 13px 12px 11px;
+  }
+  .ticket-wallet-luckin-order { grid-template-columns: minmax(0, 1fr) 44px; min-height: 62px; gap: 4px; }
+  .ticket-wallet-luckin-number { flex-wrap: wrap; align-items: baseline; gap: 2px 4px; }
+  .ticket-wallet-luckin-number > strong { font-size: clamp(31px, 10vw, 40px); }
+  .ticket-wallet-luckin-number > span { font-size: 8px; }
+  .ticket-wallet-luckin-number > span b { font-size: 10px; }
+  .ticket-wallet-luckin-real .ticket-wallet-cup-label-code { width: 44px; height: 48px; }
+  .ticket-wallet-luckin-real .ticket-wallet-cup-label-code > svg { width: 37px; }
+  .ticket-wallet-luckin-real .ticket-wallet-cup-label-code > small { font-size: 4px; }
+  .ticket-wallet-luckin-drink { gap: 3px; }
+  .ticket-wallet-luckin-drink > strong { font-size: clamp(17px, 5.3vw, 22px); }
+  .ticket-wallet-luckin-specs { min-height: 24px; gap: 5px; }
+  .ticket-wallet-luckin-temperature { min-width: 23px; height: 23px; font-size: 15px; }
+  .ticket-wallet-luckin-size { font-size: 16px; }
+  .ticket-wallet-luckin-custom { gap: 2px 4px; font-size: 9px; }
+  .ticket-wallet-luckin-product { padding-top: 5px; }
+  .ticket-wallet-luckin-product-grid > span { gap: 2px; padding-inline: 4px; font-size: 8px; }
+  .ticket-wallet-luckin-product-grid > span > b { font-size: 7px; }
+  .ticket-wallet-luckin-footer { gap: 5px; padding-top: 5px; }
+  .ticket-wallet-luckin-footer > div { gap: 2px; }
+  .ticket-wallet-luckin-footer > div > strong { font-size: 8px; }
+  .ticket-wallet-luckin-footer > div > small { font-size: 7px; }
+  .ticket-wallet-luckin-footer > b { max-width: 38%; font-size: 7px; }
+}
