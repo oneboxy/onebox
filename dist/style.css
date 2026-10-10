@@ -9648,7 +9648,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   right: -5px;
   bottom: calc(100% + 18px);
   box-sizing: border-box;
-  width: min(294px, calc(100vw - 28px));
+  width: min(360px, calc(100vw - 28px));
   max-height: min(520px, calc(100dvh - 40px));
   overflow: visible;
   scrollbar-width: none;
@@ -9665,6 +9665,8 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 #oneboxMascotRoot[data-panel-side="left"] .onebox-mascot-panel { right: auto; left: -5px; }
 .onebox-mascot-cloud {
   position: relative;
+  box-sizing: border-box;
+  width: 100%;
   overflow: visible;
   padding: 17px 17px 14px;
   border: 1px solid var(--line);
@@ -9735,8 +9737,8 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .onebox-mascot-cloud-actions { display: grid; gap: 6px; margin-top: 13px; }
 .onebox-mascot-action-row { display: flex; flex-wrap: wrap; gap: 5px; min-width: 0; align-items: stretch; justify-content: flex-start; }
 .onebox-mascot-action-row-interactions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; width: 100%; }
-.onebox-mascot-action-row-interactions button { width: 100%; min-width: 0; min-height: 34px; justify-content: center; gap: 2px; padding: 5px 1px; font-size: 9px; line-height: 1.15; white-space: normal; }
-.onebox-mascot-action-row-interactions .onebox-mascot-action-label { min-width: 0; overflow: hidden; overflow-wrap: anywhere; text-align: center; }
+.onebox-mascot-cloud .onebox-mascot-action-row-interactions button { box-sizing: border-box; display: flex; width: 100%; min-width: 0; min-height: 42px; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 2px; font-size: 10px; line-height: 1.15; white-space: nowrap; text-align: center; }
+.onebox-mascot-action-row-interactions .onebox-mascot-action-label { display: block; width: 100%; min-width: 0; overflow: visible; overflow-wrap: normal; text-align: center; text-overflow: clip; white-space: nowrap; }
 .onebox-mascot-action-row-interactions .onebox-mascot-action-icon { width: 13px; height: 13px; flex-basis: 13px; }
 .onebox-mascot-action-row-interactions .onebox-mascot-action-icon svg { width: 13px; height: 13px; }
 .onebox-mascot-cloud-actions button { display: inline-flex; flex: 0 0 auto; min-width: 0; align-items: center; justify-content: flex-start; gap: 4px; padding: 7px 7px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--primary) 8%, transparent); color: var(--ink); cursor: pointer; font: inherit; font-size: 10px; line-height: 1.1; white-space: nowrap; }
@@ -9874,11 +9876,12 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   #oneboxMascotRoot[data-mascot-display="full"] { height: 96px; top: calc(75vh - 48px); }
   #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-button,
   #oneboxMascotRoot[data-mascot-display="full"] .onebox-mascot-visual { height: 96px; }
-  .onebox-mascot-panel { bottom: calc(100% + 18px); width: min(278px, calc(100vw - 20px)); }
+  .onebox-mascot-panel { bottom: calc(100% + 18px); width: min(320px, calc(100vw - 20px)); }
   .onebox-mascot-cloud { padding: 15px 14px 13px; }
   .onebox-mascot-cloud-actions button { gap: 2px; padding: 6px 2px; font-size: 9px; }
   .onebox-mascot-action-row-interactions { gap: 3px; }
-  .onebox-mascot-action-row-interactions button { min-height: 33px; padding: 4px 1px; font-size: 8px; }
+  .onebox-mascot-cloud .onebox-mascot-action-row-interactions button { min-height: 42px; gap: 2px; padding: 4px 2px; font-size: 9px; }
+  .onebox-mascot-action-row-interactions .onebox-mascot-action-label { font-size: 9px; }
   .onebox-mascot-action-icon { width: 14px; height: 14px; flex-basis: 14px; }
   .onebox-mascot-action-icon svg { width: 14px; height: 14px; }
   .onebox-mascot-speech { bottom: calc(100% + 8px); max-width: min(210px, calc(100vw - 20px)); }
