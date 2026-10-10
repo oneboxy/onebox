@@ -15739,3 +15739,87 @@ html[data-theme="dark"] .app-boot-mark,
 html[data-theme-mode="dark-gray"] .app-boot-mark { background: #f7f7f8; }
 html[data-theme="dark"] .app-boot-mark svg,
 html[data-theme-mode="dark-gray"] .app-boot-mark svg { stroke: #17181c; }
+
+/* Realistic portrait receipt sticker for the currently supported Luckin template. */
+.ticket-wallet-cup-label {
+  position: relative;
+  display: grid;
+  width: min(100%, 340px);
+  min-height: 474px;
+  box-sizing: border-box;
+  align-content: start;
+  justify-self: center;
+  gap: 13px;
+  overflow: hidden;
+  padding: 18px 19px 16px;
+  border: 1px solid #a9c3ca;
+  border-radius: 7px;
+  background: linear-gradient(154deg, #dcecf0 0%, #d5e7ec 58%, #e3eef1 100%);
+  color: #173744;
+  box-shadow: 0 7px 17px rgb(36 65 72 / 11%), inset 0 0 0 1px rgb(255 255 255 / 48%);
+}
+.ticket-wallet-cup-label::before,
+.ticket-wallet-cup-label::after { display: none; }
+.ticket-wallet-cup-label > * { position: relative; z-index: 1; }
+.ticket-wallet-cup-label-top { display: flex; align-items: start; justify-content: space-between; gap: 10px; min-width: 0; }
+.ticket-wallet-cup-label-greeting { display: flex; align-items: baseline; min-width: 0; font-size: 12px; font-weight: 700; }
+.ticket-wallet-cup-label-greeting-name { min-width: 28px; }
+.ticket-wallet-cup-label-provider { flex: 0 0 auto; padding-top: 2px; color: #42636d; font-size: 9px; font-weight: 800; letter-spacing: .06em; }
+.ticket-wallet-cup-label-order { display: grid; grid-template-columns: minmax(0, 1fr) 82px; align-items: center; gap: 11px; min-height: 119px; }
+.ticket-wallet-cup-label-pickup { display: grid; align-content: center; min-width: 0; gap: 3px; }
+.ticket-wallet-cup-label-pickup > small,
+.ticket-wallet-cup-label-drink > small,
+.ticket-wallet-cup-label-product > small,
+.ticket-wallet-cup-label-bottom small { color: #42636d; font-size: 8px; font-weight: 750; letter-spacing: .04em; }
+.ticket-wallet-cup-label-pickup > strong { display: block; min-width: 0; color: #122f3b; font-size: 65px; font-weight: 850; letter-spacing: -.075em; line-height: .93; }
+.ticket-wallet-cup-label-number { overflow-wrap: anywhere; }
+.ticket-wallet-cup-label-count { display: flex; align-items: center; justify-content: space-between; gap: 7px; min-width: 0; color: #41616b; font-size: 9px; font-weight: 650; }
+.ticket-wallet-cup-label-count b { font-weight: 750; }
+.ticket-wallet-cup-label-count > i { overflow: hidden; flex: 0 1 auto; color: #58747c; font-size: 8px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-code { position: relative; display: grid; width: 82px; height: 82px; box-sizing: border-box; align-content: center; justify-items: center; overflow: hidden; padding: 4px; border: 1px solid rgb(38 78 90 / 20%); border-radius: 2px; background: rgb(247 251 252 / 78%); color: #42636d; }
+button.ticket-wallet-cup-label-code { cursor: pointer; }
+.ticket-wallet-cup-label-code img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 74% 23%; }
+.ticket-wallet-cup-label-code > span { position: absolute; right: 0; bottom: 0; left: 0; padding: 2px 1px; background: rgb(235 245 247 / 88%); color: #244653; font-size: 6px; font-weight: 800; letter-spacing: .04em; text-align: center; }
+.ticket-wallet-cup-label-code.is-empty b { display: grid; width: 34px; height: 34px; place-items: center; border: 1px dashed #8caab2; color: #52737c; font-size: 10px; letter-spacing: .05em; }
+.ticket-wallet-cup-label-drink { display: grid; gap: 4px; min-width: 0; padding-top: 3px; }
+.ticket-wallet-cup-label-drink > strong { display: block; min-width: 0; color: #173744; font-size: 19px; font-weight: 850; line-height: 1.28; overflow-wrap: anywhere; }
+.ticket-wallet-cup-label-options { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 17px; color: #315764; font-size: 10px; font-weight: 700; }
+.ticket-wallet-cup-label-option-preview:empty::before { content: attr(data-placeholder); color: rgb(49 87 100 / 63%); font-weight: 500; }
+.ticket-wallet-cup-label-options .ticket-wallet-cafe-inline-edit:empty::before { content: attr(data-placeholder); }
+.ticket-wallet-cup-label-option-separator { color: #688891; font-style: normal; }
+.ticket-wallet-cup-label-option-empty { color: #58747c; font-size: 9px; font-weight: 500; }
+.ticket-wallet-cup-label-product { display: grid; gap: 4px; min-width: 0; padding-top: 2px; }
+.ticket-wallet-cup-label-product > span { display: -webkit-box; overflow: hidden; color: #496972; font-size: 8px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.ticket-wallet-cup-label-bottom { display: grid; gap: 8px; margin-top: auto; padding-top: 11px; border-top: 1px dashed rgb(48 86 98 / 33%); }
+.ticket-wallet-cup-label-bottom > span { display: grid; gap: 3px; min-width: 0; }
+.ticket-wallet-cup-label-bottom b { min-width: 0; overflow: hidden; color: #355763; font-size: 9px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-store b { display: block; }
+.ticket-wallet-cup-label-store em { color: #79949a; font-style: normal; }
+.ticket-wallet-cup-label .ticket-wallet-cafe-inline-edit { border-radius: 1px; cursor: text; text-decoration: none; }
+.ticket-wallet-cup-label .ticket-wallet-cafe-inline-edit:focus { outline: 1px dotted #557c86; outline-offset: 2px; }
+.ticket-wallet-cup-label .ticket-wallet-physical-edit-target { cursor: pointer; text-decoration: none; }
+.ticket-wallet-cup-label .ticket-wallet-physical-edit-target:hover,
+.ticket-wallet-cup-label .ticket-wallet-physical-edit-target:focus-visible { color: #123440; outline: 1px dotted #557c86; outline-offset: 2px; }
+.ticket-wallet-cup-label-saved-edit:empty::before { content: attr(data-placeholder); color: rgb(49 87 100 / 63%); font-weight: 500; }
+.ticket-wallet-cup-label-ticket {
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  overflow: visible;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ticket-wallet-cup-label-ticket::before,
+.ticket-wallet-cup-label-ticket::after { display: none !important; }
+.ticket-wallet-cup-label-ticket .ticket-wallet-cup-label { width: min(100%, 340px); }
+body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticket.ticket-wallet-cup-label-ticket { border: 0 !important; background: transparent !important; box-shadow: none !important; }
+@media (max-width: 500px) {
+  .ticket-wallet-cup-label { width: min(100%, 320px); min-height: 450px; gap: 11px; padding: 16px 16px 14px; }
+  .ticket-wallet-cup-label-order { grid-template-columns: minmax(0, 1fr) 76px; min-height: 110px; gap: 8px; }
+  .ticket-wallet-cup-label-pickup > strong { font-size: clamp(52px, 17vw, 62px); }
+  .ticket-wallet-cup-label-code { width: 76px; height: 76px; }
+  .ticket-wallet-cup-label-drink > strong { font-size: 17px; }
+}
