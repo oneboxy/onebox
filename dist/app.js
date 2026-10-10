@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.593';
+const APP_VERSION = '2.18.594';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -590,6 +590,10 @@ function navigationNameFromUrl(value) {
 function navigationUsesDesktopBrandIcon(value) {
   try { return /(^|\.)bilibili\.com$/i.test(new URL(value).hostname); } catch { return false; }
 }
+// Use the bundled mark so Spotify's icon stays consistent across mobile and desktop favicon services.
+function navigationUsesSpotifyBrandIcon(value) {
+  try { return /(^|\.)(?:spotify\.com|spotify\.link|spoti\.fi)$/i.test(new URL(value).hostname); } catch { return false; }
+}
 function navigationUsesOneBoxBrandIcon(value) {
   try {
     const url = new URL(value);
@@ -661,6 +665,7 @@ function navigationIconSources(value) {
   try {
     const parsed = new URL(url);
     const hostname = parsed.hostname;
+    if (navigationUsesSpotifyBrandIcon(url)) return [navigationAppAssetUrl('icons/spotify.svg?v=' + APP_VERSION)];
     if (navigationUsesDesktopBrandIcon(url)) return [navigationAppAssetUrl('icons/bilibili.svg'), 'https://static.hdslb.com/images/favicon.ico', 'https://www.bilibili.com/favicon.ico'];
     if (navigationUsesOneBoxBrandIcon(url)) return [navigationAppAssetUrl('icons/onebox-brand-v317-192.png?v=2.18.334'), navigationAppAssetUrl('icons/onebox-brand-v317-512.png?v=2.18.334')];
     const direct = navigationAssetBases(url).flatMap((base) => [
@@ -3379,7 +3384,7 @@ function navigationIconMarkup(site, extraClass = '') {
   // A service URL can be the only reliable source for a site. It is still a
   // valid cached result and must be preferred on the next render/reload.
   const preferredIcon = navigationIconForSite(site?.icon, site?.url);
-  const preferGenerated = navigationUsesDesktopBrandIcon(site?.url) || navigationUsesOneBoxBrandIcon(site?.url);
+  const preferGenerated = navigationUsesSpotifyBrandIcon(site?.url) || navigationUsesDesktopBrandIcon(site?.url) || navigationUsesOneBoxBrandIcon(site?.url);
   const sources = preferGenerated
     ? [...new Set([...generatedSources, preferredIcon].filter(Boolean))]
     : [...new Set([preferredIcon, ...generatedSources].filter(Boolean))];
