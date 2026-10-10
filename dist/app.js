@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.596';
+const APP_VERSION = '2.18.597';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -62,7 +62,6 @@ const STORAGE = {
   ticketWallet: 'onebox.ticket-wallet',
   ticketWalletDisplayOrder: 'onebox.ticket-wallet-display-order',
   ticketWalletTypeFilter: 'onebox.ticket-wallet-type-filter',
-  ticketWalletDiningKindFilter: 'onebox.ticket-wallet-dining-kind-filter',
   ticketWalletMemories: 'onebox.ticket-wallet-memories',
   ticketWalletMapCache: 'onebox.ticket-wallet-map-cache',
   ticketWalletDeleted: 'onebox.ticket-wallet-deleted',
@@ -775,7 +774,6 @@ function normalizeTicketType(value, fallback = 'other') {
 }
 function ticketWalletCategoryForType(type) { return TICKET_WALLET_TYPE_CATEGORIES[normalizeTicketType(type)] || 'other'; }
 function normalizeTicketWalletDiningKind(value, fallback = 'other') { return Object.prototype.hasOwnProperty.call(TICKET_WALLET_DINING_KINDS, value) ? value : fallback; }
-function normalizeTicketWalletDiningKindFilter(value) { return value === 'all' || Object.prototype.hasOwnProperty.call(TICKET_WALLET_DINING_KINDS, value) ? value : 'all'; }
 function normalizeTicketWalletFilter(value) {
   const filter = String(value || '').trim();
   if (Object.prototype.hasOwnProperty.call(TICKET_WALLET_CATEGORIES, filter)) return filter;
@@ -888,7 +886,6 @@ function normalizeTicketMemories(value) {
 const storedTicketWallet = normalizeTicketWallet(parseStored(STORAGE.ticketWallet, []));
 const storedTicketWalletDisplayOrder = parseStored(STORAGE.ticketWalletDisplayOrder, []);
 const storedTicketWalletTypeFilter = localStorage.getItem(STORAGE.ticketWalletTypeFilter);
-const storedTicketWalletDiningKindFilter = localStorage.getItem(STORAGE.ticketWalletDiningKindFilter);
 const storedTicketMemories = normalizeTicketMemories(parseStored(STORAGE.ticketWalletMemories, {}));
 function ticketTypeLabel(type) {
   const labels = TICKET_TYPE_LABELS[type] || TICKET_TYPE_LABELS.other;
@@ -1148,7 +1145,6 @@ function saveTicketWallet() {
 }
 function saveTicketWalletDisplayOrder() { saveStored(STORAGE.ticketWalletDisplayOrder, state.ticketWalletDisplayOrder); }
 function saveTicketWalletTypeFilter() { localStorage.setItem(STORAGE.ticketWalletTypeFilter, state.ticketWalletTypeFilter); }
-function saveTicketWalletDiningKindFilter() { localStorage.setItem(STORAGE.ticketWalletDiningKindFilter, state.ticketWalletDiningKindFilter); }
 function saveTicketWalletMemories() { saveStored(STORAGE.ticketWalletMemories, state.ticketWalletMemories); }
 function ticketWalletCalendarSchedule(record) {
   const raw = String(record?.departAt || record?.arriveAt || '').trim();
@@ -1315,7 +1311,7 @@ const state = {
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
   homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
   navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationDialog: null, navigationFolderDraft: null, navigationSettingsOpen: false,
-  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: normalizeTicketWalletFilter(storedTicketWalletTypeFilter), ticketWalletDiningKindFilter: normalizeTicketWalletDiningKindFilter(storedTicketWalletDiningKindFilter), ticketWalletSelectedId: '', ticketWalletDisplayOrder: Array.isArray(storedTicketWalletDisplayOrder) ? storedTicketWalletDisplayOrder.filter((id) => typeof id === 'string') : [], ticketWalletEditorOpen: false, ticketWalletEditorStage: 'choose', ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
+  ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: normalizeTicketWalletFilter(storedTicketWalletTypeFilter), ticketWalletSelectedId: '', ticketWalletDisplayOrder: Array.isArray(storedTicketWalletDisplayOrder) ? storedTicketWalletDisplayOrder.filter((id) => typeof id === 'string') : [], ticketWalletEditorOpen: false, ticketWalletEditorStage: 'choose', ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
   notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, githubDialogOpen: false, recentReadingOpen: false,
@@ -3836,10 +3832,11 @@ async function saveTicketWalletRecord() {
   const selectedTemplate = selectedType === 'train' ? (draft.template === 'crh-blue-v1' ? 'crh-blue-v1' : 'pink-physical-v1') : draft.template;
   let next;
   if (selectedType === 'dining') {
-    const field = (name) => workspace.querySelector('[data-ticket-wallet-cafe-field="' + name + '"]')?.value?.trim() || '';
-    const cafeDrink = field('cafeDrink');
-    const carrier = field('carrier');
-    next = normalizeTicketRecord({ ...draft, type: selectedType, template: selectedTemplate, title: cafeDrink || carrier || ticketTypeLabel(selectedType), carrier, cafeDrink, diningItem: cafeDrink, ticketNo: field('ticketNo'), departAt: field('departAt'), price: field('price'), cafeLocation: field('cafeLocation'), cafeRating: Number(field('cafeRating')) || 0, cafeMood: field('cafeMood'), drinkExtras: field('drinkExtras'), drinkServiceMode: draft.drinkServiceMode || '', updatedAt: Date.now() });
+    const cafeDrink = String(draft.cafeDrink || draft.diningItem || '').trim();
+    const carrier = String(draft.carrier || '').trim();
+    const dateText = String(draft.departAt || '').trim();
+    const departAt = dateText ? ticketWalletDateFromText(dateText, dateText) || dateText : '';
+    next = normalizeTicketRecord({ ...draft, type: selectedType, template: selectedTemplate, title: cafeDrink || carrier || ticketTypeLabel(selectedType), carrier, cafeDrink, diningItem: cafeDrink, ticketNo: String(draft.ticketNo || '').trim(), departAt, price: String(draft.price || '').trim(), cafeLocation: String(draft.cafeLocation || '').trim(), cafeRating: Number(draft.cafeRating) || 0, cafeMood: String(draft.cafeMood || '').trim(), drinkExtras: String(draft.drinkExtras || '').trim(), drinkServiceMode: draft.drinkServiceMode || '', updatedAt: Date.now() });
   } else {
     const from = ticketWalletValue('#ticketWalletFrom'); const to = ticketWalletValue('#ticketWalletTo'); const routeName = from && to ? from + '至' + to : '';
     const passengerName = selectedType === 'train' ? ticketWalletValue('#ticketWalletPassengerName') : String(draft.passengerName || '');
@@ -3850,7 +3847,6 @@ async function saveTicketWalletRecord() {
   const index = state.ticketWallet.findIndex((item) => item.id === state.ticketWalletEditingId);
   if (index >= 0) state.ticketWallet[index] = { ...state.ticketWallet[index], ...next, id: state.ticketWalletEditingId, createdAt: state.ticketWallet[index].createdAt };
   else { state.ticketWallet.push(next); state.ticketWalletTypeFilter = ticketWalletCategoryForType(next.type); saveTicketWalletTypeFilter(); }
-  if (next.type === 'dining') { state.ticketWalletDiningKindFilter = next.diningKind; saveTicketWalletDiningKindFilter(); }
   state.ticketWallet = normalizeTicketWallet(state.ticketWallet); saveTicketWallet(); closeTicketWalletEditor(); render(); void hydrateTicketWalletImages(); toast(index >= 0 ? t('ticketWalletSaved') : t('ticketWalletAdded'));
 }
 async function importTicketWalletImage(file) {
@@ -3951,41 +3947,44 @@ function closeTicketWalletOriginal() { const dialog = $('#ticketWalletOriginalDi
 function ticketWalletField(label, id, value, type = 'text', extra = '') {
   return '<label class="ticket-wallet-field"><span>' + escapeHtml(label) + '</span><input id="' + id + '" type="' + type + '" value="' + escapeHtml(type === 'datetime-local' ? ticketWalletDateInputValue(value) : value || '') + '" ' + extra + '></label>';
 }
+function ticketWalletCafeDateText(value) {
+  const date = new Date(value);
+  if (!value || Number.isNaN(date.getTime())) return '';
+  return date.getFullYear() + '/' + pad(date.getMonth() + 1) + '/' + pad(date.getDate()) + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+}
+function ticketWalletCafeInlineMarkup(field, value, placeholder, label, tag = 'span', className = '', previewKey = '') {
+  const preview = previewKey ? ' data-cafe-preview="' + previewKey + '"' : '';
+  return '<' + tag + ' class="ticket-wallet-cafe-inline-edit ' + className + '" contenteditable="true" role="textbox" spellcheck="false" aria-label="' + escapeHtml(label) + '" data-placeholder="' + escapeHtml(placeholder) + '" data-ticket-wallet-cafe-inline="' + field + '"' + preview + '>' + escapeHtml(value || '') + '</' + tag + '>';
+}
+function ticketWalletCafeDraftRatingMarkup(rating, english) {
+  const value = Math.min(5, Math.max(0, Number(rating) || 0));
+  return '<span class="ticket-wallet-cafe-rating-stars ticket-wallet-cafe-draft-rating" role="group" aria-label="' + (english ? 'Rating' : '评分') + '">' + [1, 2, 3, 4, 5].map((score) => '<button type="button" data-ticket-wallet-cafe-draft-rate="' + score + '" aria-label="' + escapeHtml(english ? 'Rate ' + score + ' out of 5' : '评 ' + score + ' 星') + '" aria-pressed="' + (value >= score) + '">' + (value >= score ? '★' : '☆') + '</button>').join('') + '</span>';
+}
 function ticketWalletAddTemplateMarkup(draft) {
   if (draft.type === 'dining') {
     const english = state.language === 'en';
     const kind = normalizeTicketWalletDiningKind(draft.diningKind, 'drink');
     const kindMeta = TICKET_WALLET_DINING_KINDS[kind];
-    if (kind !== 'drink') {
-      const itemName = english ? kindMeta.item[1] : kindMeta.item[0];
-      const itemPlaceholder = english ? 'What did you have?' : '记下这次吃的餐点';
-      const moods = english ? ['A little treat', 'Slow morning', 'New favorite', 'Try again'] : ['今日特调', '适合放空', '本周最爱', '下次再来'];
-      const moodPills = moods.map((mood) => '<button type="button" class="ticket-wallet-cafe-mood-pick' + (draft.cafeMood === mood ? ' active' : '') + '" data-ticket-wallet-cafe-mood-preset="' + escapeHtml(mood) + '">' + escapeHtml(mood) + '</button>').join('');
-      const rating = Number(draft.cafeRating) || 0;
-      const ratingOptions = ['<option value="0"' + (!rating ? ' selected' : '') + '>' + (english ? 'Not rated' : '暂不评分') + '</option>'].concat([1, 2, 3, 4, 5].map((score) => '<option value="' + score + '"' + (rating === score ? ' selected' : '') + '>' + '★'.repeat(score) + '</option>')).join('');
-      const date = draft.departAt ? ticketWalletDateLabel(draft.departAt) : (english ? 'Date / time' : '日期 / 时间');
-      return '<section class="ticket-wallet-cafe-label-editor ticket-wallet-cafe-journal-editor"><div class="ticket-wallet-cafe-label-heading"><div><strong>' + escapeHtml(kindMeta.note[english ? 1 : 0]) + '</strong><small>' + (english ? 'Keep the dish, place and moment together.' : '记下餐点、店铺和当时的心情。') + '</small></div></div><div class="ticket-wallet-dining-note-preview"><small>' + escapeHtml(kindMeta.label[english ? 1 : 0]) + '</small><strong data-cafe-preview="drink">' + escapeHtml(draft.cafeDrink || draft.diningItem || itemName) + '</strong><span><b data-cafe-preview="brand">' + escapeHtml(draft.carrier || (english ? 'Restaurant / shop' : '店铺 / 餐厅')) + '</b><i data-cafe-preview="date">' + escapeHtml(date) + '</i></span></div><div class="ticket-wallet-cafe-label-fields"><label><span>' + (english ? 'Restaurant / shop' : '店铺 / 餐厅') + '</span><input type="text" data-ticket-wallet-cafe-field="carrier" value="' + escapeHtml(draft.carrier || '') + '" placeholder="' + (english ? 'Name of the place' : '例：店铺或餐厅名称') + '"></label><label><span>' + itemName + '</span><input type="text" data-ticket-wallet-cafe-field="cafeDrink" value="' + escapeHtml(draft.cafeDrink || draft.diningItem || '') + '" placeholder="' + itemPlaceholder + '"></label><label><span>' + (english ? 'Date / time' : '到店时间') + '</span><input type="datetime-local" data-ticket-wallet-cafe-field="departAt" value="' + escapeHtml(ticketWalletDateInputValue(draft.departAt || Date.now())) + '"></label><label><span>' + (english ? 'Spend' : '花费') + '</span><input type="text" data-ticket-wallet-cafe-field="price" value="' + escapeHtml(draft.price || '') + '" placeholder="' + (english ? '$ / ¥' : '例：¥32') + '"></label><label><span>' + (english ? 'Location' : '地点') + '</span><input type="text" data-ticket-wallet-cafe-field="cafeLocation" value="' + escapeHtml(draft.cafeLocation || '') + '" placeholder="' + (english ? 'City or neighborhood' : '城市 / 街区') + '"></label><label><span>' + (english ? 'Rating' : '评分') + '</span><select data-ticket-wallet-cafe-field="cafeRating">' + ratingOptions + '</select></label><label class="ticket-wallet-cafe-field-wide"><span>' + (english ? 'Journal sticker' : '手帐贴纸') + '</span><div class="ticket-wallet-cafe-mood-picks">' + moodPills + '</div><input type="text" data-ticket-wallet-cafe-field="cafeMood" value="' + escapeHtml(draft.cafeMood || '') + '" placeholder="' + (english ? 'Write a short memory' : '写下一句自己的贴纸文案') + '"></label></div></section>';
-    }
     const moods = english ? ['A little treat', 'Slow morning', 'New favorite', 'Try again'] : ['今日特调', '适合放空', '本周最爱', '下次再来'];
-    const rating = Number(draft.cafeRating) || 0;
-    const ratingOptions = ['<option value="0"' + (!rating ? ' selected' : '') + '>' + (english ? 'Not rated' : '暂不评分') + '</option>']
-      .concat([1, 2, 3, 4, 5].map((score) => '<option value="' + score + '"' + (rating === score ? ' selected' : '') + '>' + '★'.repeat(score) + '</option>')).join('');
-    const moodOptions = moods.map((mood) => '<button type="button" class="ticket-wallet-cafe-mood-pick' + (draft.cafeMood === mood ? ' active' : '') + '" data-ticket-wallet-cafe-mood-preset="' + escapeHtml(mood) + '">' + escapeHtml(mood) + '</button>').join('');
+    const moodPills = moods.map((mood) => '<button type="button" class="ticket-wallet-cafe-mood-pick' + (draft.cafeMood === mood ? ' active' : '') + '" data-ticket-wallet-cafe-mood-preset="' + escapeHtml(mood) + '">' + escapeHtml(mood) + '</button>').join('');
+    const itemName = english ? kindMeta.item[1] : kindMeta.item[0];
+    const dateText = ticketWalletCafeDateText(draft.departAt);
+    const stickerTitle = english ? kindMeta.note[1] : kindMeta.note[0];
+    if (kind !== 'drink') {
+      const preview = '<article class="ticket-wallet-dining-note-preview" aria-label="' + escapeHtml(english ? 'Editable dining sticker' : '可编辑餐饮便签') + '"><small>' + escapeHtml(kindMeta.label[english ? 1 : 0]) + '</small>' + ticketWalletCafeInlineMarkup('cafeDrink', draft.cafeDrink || draft.diningItem, itemName, itemName, 'strong', 'ticket-wallet-dining-note-item', 'drink') + '<div class="ticket-wallet-dining-note-row"><span>' + ticketWalletCafeInlineMarkup('carrier', draft.carrier, english ? 'Restaurant / shop' : '店铺 / 餐厅', english ? 'Restaurant / shop' : '店铺 / 餐厅', 'b', '', 'brand') + '</span><span>' + ticketWalletCafeInlineMarkup('departAt', dateText, english ? 'YYYY/MM/DD HH:mm' : '年/月/日 时:分', english ? 'Date and time' : '到店时间', 'i', '', 'date') + '</span></div><div class="ticket-wallet-dining-note-row ticket-wallet-dining-note-place">' + ticketWalletCafeInlineMarkup('cafeLocation', draft.cafeLocation, english ? 'Location' : '地点 / 街区', english ? 'Location' : '地点', 'span', '', 'location') + '</div><div class="ticket-wallet-dining-note-footer">' + ticketWalletCafeInlineMarkup('cafeMood', draft.cafeMood, english ? 'Sticker note' : '写一句手帐文案', english ? 'Sticker note' : '手帐贴纸', 'span', '', 'mood') + ticketWalletCafeDraftRatingMarkup(draft.cafeRating, english) + ticketWalletCafeInlineMarkup('price', draft.price, english ? 'Spend' : '花费', english ? 'Spend' : '花费', 'strong', '', 'price') + '</div></article>';
+      return '<section class="ticket-wallet-cafe-label-editor ticket-wallet-cafe-journal-editor"><div class="ticket-wallet-cafe-label-heading"><div><strong>' + escapeHtml(stickerTitle) + '</strong><small>' + (english ? 'Tap text on the note to edit it.' : '直接点击便签上的文字编辑。') + '</small></div></div>' + preview + '<div class="ticket-wallet-cafe-preset-row"><span>' + (english ? 'Sticker ideas' : '贴纸灵感') + '</span><div class="ticket-wallet-cafe-mood-picks">' + moodPills + '</div></div></section>';
+    }
     const categoryLabels = { '拿铁类': 'Lattes', '美式类': 'Americanos', '冷萃类': 'Cold brew', '冰茶冰奶类': 'Iced tea & milk', '轻乳茶类': 'Milk tea', '果蔬茶类': 'Fruit & vegetable tea', '特调类': 'Specials', '其他非咖啡类': 'Other non-coffee' };
     const categoryPills = LUCKIN_DRINK_CATEGORIES.map((item) => '<button type="button" class="ticket-wallet-drink-tag' + (draft.drinkCategory === item ? ' active' : '') + '" data-ticket-wallet-drink-category="' + escapeHtml(item) + '" aria-pressed="' + (draft.drinkCategory === item) + '">' + escapeHtml(english ? categoryLabels[item] : item) + '</button>').join('');
     const attributeLabels = { drinkTemperature: english ? 'Temperature' : '温度', drinkSize: english ? 'Size' : '杯型', drinkSweetness: english ? 'Sweetness' : '甜度' };
     const attributeOptions = Object.entries(LUCKIN_DRINK_ATTRIBUTES).map(([field, values]) => '<div class="ticket-wallet-drink-attribute"><span>' + attributeLabels[field] + '</span><div>' + values.map((value) => '<button type="button" class="ticket-wallet-drink-tag' + (draft[field] === value ? ' active' : '') + '" data-ticket-wallet-drink-attribute="' + field + '" data-value="' + escapeHtml(value) + '" aria-pressed="' + (draft[field] === value) + '">' + escapeHtml(english ? ({ 冰: 'Iced', 热: 'Hot', 大杯: 'Large', 超大杯: 'Extra large', 标准甜: 'Regular', 少少甜: 'Less sweet', 微甜: 'Lightly sweet', 不另外加糖: 'No added sugar' })[value] : value) + '</button>').join('') + '</div></div>').join('');
-    const itemName = english ? kindMeta.item[1] : kindMeta.item[0];
-    const itemPlaceholder = kind === 'drink' ? (english ? 'e.g. Coconut latte' : '例：生椰拿铁') : (english ? 'What did you order?' : '记下这次点的餐');
     const modes = [['dine-in', english ? 'Dine in' : '堂食'], ['pickup', english ? 'Pickup' : '自取'], ['delivery', english ? 'Delivery' : '外送']];
     const modePills = modes.map(([value, label]) => '<button type="button" class="ticket-wallet-drink-tag' + (draft.drinkServiceMode === value ? ' active' : '') + '" data-ticket-wallet-drink-mode="' + value + '" aria-pressed="' + (draft.drinkServiceMode === value) + '">' + label + '</button>').join('');
-    const selectedAttributes = [draft.drinkTemperature, draft.drinkSize, draft.drinkSweetness, draft.drinkExtras].filter(Boolean).join(' · ');
-    const previewDate = draft.departAt ? ticketWalletDateLabel(draft.departAt) : (english ? 'Date / time' : '日期 / 时间');
-    const labelPreview = '<article class="ticket-wallet-cup-label" aria-label="' + (english ? 'Live cup label preview' : '杯贴标签预览') + '"><div class="ticket-wallet-cup-label-top"><span class="ticket-wallet-cup-label-brand" data-cafe-preview="brand">' + escapeHtml(draft.carrier || (english ? 'Cafe name' : '店铺名称')) + '</span><span class="ticket-wallet-cup-label-mode" data-cafe-preview="mode">' + escapeHtml(modes.find(([value]) => value === draft.drinkServiceMode)?.[1] || (english ? 'ORDER' : '订单')) + '</span></div><div class="ticket-wallet-cup-label-number"><small>' + (english ? 'PICK-UP NO.' : '取餐号码') + '</small><strong data-cafe-preview="number">' + escapeHtml(draft.ticketNo || '—') + '</strong></div><div class="ticket-wallet-cup-label-drink"><small>' + escapeHtml(kindMeta.label[english ? 1 : 0]) + '</small><strong data-cafe-preview="drink">' + escapeHtml(draft.cafeDrink || draft.diningItem || itemName) + '</strong></div><div class="ticket-wallet-cup-label-options" data-cafe-preview="options">' + (selectedAttributes ? escapeHtml(selectedAttributes) : (english ? 'Drink options' : '温度 · 杯型 · 甜度')) + '</div><div class="ticket-wallet-cup-label-bottom"><span data-cafe-preview="date">' + escapeHtml(previewDate) + '</span><span data-cafe-preview="location">' + escapeHtml(draft.cafeLocation || (english ? 'Cafe' : '门店')) + '</span></div></article>';
-    const drinkTags = kind === 'drink' ? '<div class="ticket-wallet-cafe-tag-groups"><div class="ticket-wallet-cafe-tag-row"><span>' + (english ? 'Luckin menu' : '饮品标签') + '</span><div>' + categoryPills + '</div></div>' + attributeOptions + '</div>' : '';
-    const moodPills = moods.map((mood) => '<button type="button" class="ticket-wallet-cafe-mood-pick' + (draft.cafeMood === mood ? ' active' : '') + '" data-ticket-wallet-cafe-mood-preset="' + escapeHtml(mood) + '">' + escapeHtml(mood) + '</button>').join('');
-    const templateTitle = kind === 'drink' ? (english ? 'Coffee cup label' : '咖啡杯贴标签') : (english ? kindMeta.note[1] : kindMeta.note[0]);
-    return '<section class="ticket-wallet-cafe-label-editor"><div class="ticket-wallet-cafe-label-heading"><div><strong>' + templateTitle + '</strong><small>' + (english ? 'A pickup label layout with the order number and drink options up front.' : '按杯贴样式突出取餐号、饮品名称和口味选项。') + '</small></div></div>' + labelPreview + '<div class="ticket-wallet-cafe-label-fields"><label><span>' + (english ? 'Cafe / brand' : '店铺 / 品牌') + '</span><input type="text" data-ticket-wallet-cafe-field="carrier" value="' + escapeHtml(draft.carrier || '') + '" placeholder="' + (english ? 'e.g. Luckin Coffee' : '例：瑞幸咖啡') + '"></label><label><span>' + (english ? 'Pickup number' : '取餐号') + '</span><input type="text" data-ticket-wallet-cafe-field="ticketNo" value="' + escapeHtml(draft.ticketNo || '') + '" placeholder="' + (english ? 'e.g. 589' : '例：589') + '"></label><label class="ticket-wallet-cafe-field-wide"><span>' + itemName + '</span><input type="text" data-ticket-wallet-cafe-field="cafeDrink" value="' + escapeHtml(draft.cafeDrink || draft.diningItem || '') + '" placeholder="' + itemPlaceholder + '"></label><div class="ticket-wallet-cafe-field-wide"><span class="ticket-wallet-cafe-field-label">' + (english ? 'Order mode' : '到店方式') + '</span><div class="ticket-wallet-cafe-mode-picks">' + modePills + '</div></div>' + drinkTags + '<label class="ticket-wallet-cafe-field-wide"><span>' + (english ? 'Extra / note' : '加料 / 口味备注') + '</span><input type="text" data-ticket-wallet-cafe-field="drinkExtras" value="' + escapeHtml(draft.drinkExtras || '') + '" placeholder="' + (english ? 'e.g. Oat milk, extra shot' : '例：燕麦奶、加浓、少冰') + '"></label><label><span>' + (english ? 'Order time' : '下单时间') + '</span><input type="datetime-local" data-ticket-wallet-cafe-field="departAt" value="' + escapeHtml(ticketWalletDateInputValue(draft.departAt || Date.now())) + '"></label><label><span>' + (english ? 'Spend' : '花费') + '</span><input type="text" data-ticket-wallet-cafe-field="price" value="' + escapeHtml(draft.price || '') + '" placeholder="' + (english ? '$ / ¥' : '例：¥32') + '"></label><label><span>' + (english ? 'Cafe location' : '门店 / 地点') + '</span><input type="text" data-ticket-wallet-cafe-field="cafeLocation" value="' + escapeHtml(draft.cafeLocation || '') + '" placeholder="' + (english ? 'City or neighborhood' : '城市 / 街区，可用于地图') + '"></label><label><span>' + (english ? 'Rating' : '评分') + '</span><select data-ticket-wallet-cafe-field="cafeRating">' + ratingOptions + '</select></label><label class="ticket-wallet-cafe-field-wide"><span>' + (english ? 'Journal sticker' : '手帐贴纸') + '</span><div class="ticket-wallet-cafe-mood-picks">' + moodPills + '</div><input type="text" data-ticket-wallet-cafe-field="cafeMood" value="' + escapeHtml(draft.cafeMood || '') + '" placeholder="' + (english ? 'Write a short memory' : '写下一句自己的贴纸文案') + '"></label></div></section>';
+    const selectedAttributes = [draft.drinkTemperature, draft.drinkSize, draft.drinkSweetness].filter(Boolean).join(' · ');
+    const previewKind = kindMeta.label[english ? 1 : 0] + (draft.drinkCategory ? ' · ' + draft.drinkCategory : '');
+    const labelPreview = '<article class="ticket-wallet-cup-label" aria-label="' + (english ? 'Editable coffee cup label' : '可编辑咖啡杯贴') + '"><div class="ticket-wallet-cup-label-top">' + ticketWalletCafeInlineMarkup('carrier', draft.carrier, english ? 'Cafe / brand' : '店铺名称', english ? 'Cafe / brand' : '店铺 / 品牌', 'span', 'ticket-wallet-cup-label-brand', 'brand') + '<span class="ticket-wallet-cup-label-mode" data-cafe-preview="mode">' + escapeHtml(modes.find(([value]) => value === draft.drinkServiceMode)?.[1] || (english ? 'ORDER' : '订单')) + '</span></div><div class="ticket-wallet-cup-label-number"><small>' + (english ? 'PICK-UP NO.' : '取餐号码') + '</small>' + ticketWalletCafeInlineMarkup('ticketNo', draft.ticketNo, english ? 'Pickup no.' : '取餐号', english ? 'Pickup number' : '取餐号', 'strong', '', 'number') + '</div><div class="ticket-wallet-cup-label-drink"><small data-cafe-preview="kind">' + escapeHtml(previewKind) + '</small>' + ticketWalletCafeInlineMarkup('cafeDrink', draft.cafeDrink || draft.diningItem, itemName, itemName, 'strong', '', 'drink') + '</div><div class="ticket-wallet-cup-label-options"><span class="ticket-wallet-cup-label-option-chip" data-cafe-preview="attributes" data-placeholder="' + (english ? 'Choose drink options below' : '在下方选择温度、杯型和甜度') + '">' + escapeHtml(selectedAttributes) + '</span>' + ticketWalletCafeInlineMarkup('drinkExtras', draft.drinkExtras, english ? 'Extra / note' : '加料 / 口味备注', english ? 'Extra / note' : '加料 / 口味备注', 'span', 'ticket-wallet-cup-label-option-chip', 'extras') + '</div><div class="ticket-wallet-cup-label-footer">' + ticketWalletCafeInlineMarkup('cafeMood', draft.cafeMood, english ? 'Sticker note' : '手帐贴纸文案', english ? 'Sticker note' : '手帐贴纸', 'span', '', 'mood') + ticketWalletCafeDraftRatingMarkup(draft.cafeRating, english) + ticketWalletCafeInlineMarkup('price', draft.price, english ? 'Spend' : '花费', english ? 'Spend' : '花费', 'strong', '', 'price') + '</div><div class="ticket-wallet-cup-label-bottom">' + ticketWalletCafeInlineMarkup('departAt', dateText, english ? 'YYYY/MM/DD HH:mm' : '年/月/日 时:分', english ? 'Order time' : '下单时间', 'span', '', 'date') + ticketWalletCafeInlineMarkup('cafeLocation', draft.cafeLocation, english ? 'Cafe location' : '门店 / 地点', english ? 'Cafe location' : '门店地点', 'span', '', 'location') + '</div></article>';
+    const drinkTags = '<div class="ticket-wallet-cafe-tag-groups"><div class="ticket-wallet-cafe-tag-row"><span>' + (english ? 'Luckin drink tags' : '饮品标签') + '</span><div>' + categoryPills + '</div></div>' + attributeOptions + '<div class="ticket-wallet-cafe-tag-row"><span>' + (english ? 'Order mode' : '到店方式') + '</span><div>' + modePills + '</div></div><div class="ticket-wallet-cafe-tag-row"><span>' + (english ? 'Sticker ideas' : '贴纸灵感') + '</span><div class="ticket-wallet-cafe-mood-picks">' + moodPills + '</div></div></div>';
+    return '<section class="ticket-wallet-cafe-label-editor"><div class="ticket-wallet-cafe-label-heading"><div><strong>' + (english ? 'Coffee cup label' : '咖啡杯贴标签') + '</strong><small>' + (english ? 'Tap text on the label to edit it; choose drink tags below.' : '直接点击杯贴上的文字编辑；口味标签在下方选择。') + '</small></div></div>' + labelPreview + drinkTags + '</section>';
   }
   const isTrain = draft.type === 'train';
   const isFlight = draft.type === 'flight';
@@ -3997,27 +3996,34 @@ function ticketWalletAddTemplateMarkup(draft) {
   const legend = isFlight ? (state.language === 'en' ? 'Airline ticket style' : '航空公司票面') : (state.language === 'en' ? 'Ticket style' : '票面样式');
   return '<fieldset class="ticket-wallet-template-picker"><legend>' + escapeHtml(legend) + '</legend><div class="ticket-wallet-template-options' + layoutClass + '">' + options.map((item) => '<button type="button" class="ticket-wallet-template-option ' + (draft.template === item.id ? 'active' : '') + '" aria-pressed="' + (draft.template === item.id ? 'true' : 'false') + '" data-ticket-wallet-template="' + item.id + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>').join('') + '</div></fieldset>';
 }
-function updateTicketWalletCafeLabelPreview() {
+function updateTicketWalletCafeLabelPreview(activeNode = null) {
   const draft = state.ticketWalletDraft;
   if (!draft || draft.type !== 'dining') return;
-  const field = (name) => workspace.querySelector('[data-ticket-wallet-cafe-field="' + name + '"]')?.value?.trim() || '';
   const english = state.language === 'en';
   const kind = TICKET_WALLET_DINING_KINDS[normalizeTicketWalletDiningKind(draft.diningKind, 'drink')];
   const labels = { 'dine-in': english ? 'Dine in' : '堂食', pickup: english ? 'Pickup' : '自取', delivery: english ? 'Delivery' : '外送' };
-  const drink = field('cafeDrink') || field('diningItem') || kind.item[english ? 1 : 0];
-  const options = [draft.drinkTemperature, draft.drinkSize, draft.drinkSweetness, field('drinkExtras')].filter(Boolean).join(' · ') || (english ? 'Drink options' : '温度 · 杯型 · 甜度');
+  const selectedAttributes = [draft.drinkTemperature, draft.drinkSize, draft.drinkSweetness].filter(Boolean).join(' · ');
   const values = {
-    brand: field('carrier') || (english ? 'Cafe name' : '店铺名称'),
-    number: field('ticketNo') || '—',
-    drink,
+    brand: String(draft.carrier || '').trim(),
+    number: String(draft.ticketNo || '').trim(),
+    drink: String(draft.cafeDrink || draft.diningItem || '').trim(),
+    kind: kind.label[english ? 1 : 0] + (draft.drinkCategory && draft.diningKind === 'drink' ? ' · ' + draft.drinkCategory : ''),
     mode: labels[draft.drinkServiceMode] || (english ? 'ORDER' : '订单'),
-    options,
-    date: field('departAt') ? ticketWalletDateLabel(field('departAt')) : (english ? 'Date / time' : '日期 / 时间'),
-    location: field('cafeLocation') || (english ? 'Cafe' : '门店'),
+    attributes: selectedAttributes,
+    extras: String(draft.drinkExtras || '').trim(),
+    date: ticketWalletCafeDateText(draft.departAt),
+    location: String(draft.cafeLocation || '').trim(),
+    mood: String(draft.cafeMood || '').trim(),
+    price: String(draft.price || '').trim(),
   };
   Object.entries(values).forEach(([key, value]) => {
     const node = workspace.querySelector('[data-cafe-preview="' + key + '"]');
-    if (node) node.textContent = value;
+    if (node && node !== activeNode) node.textContent = value;
+  });
+  workspace.querySelectorAll('[data-ticket-wallet-cafe-draft-rate]').forEach((button) => {
+    const active = Number(draft.cafeRating) >= Number(button.dataset.ticketWalletCafeDraftRate);
+    button.textContent = active ? '★' : '☆';
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
 }
 function ticketWalletAddFieldsMarkup(draft) {
@@ -4057,9 +4063,11 @@ function renderTicketWalletEditor() {
   const closeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
   const importLabel = state.language === 'en' ? 'Import photo / ticket' : '导入原件或小票';
   const createLabel = state.language === 'en' ? 'Create manually' : '手动创建';
+  const cafeKind = normalizeTicketWalletDiningKind(draft.diningKind, 'drink');
+  const cafeKindLabel = TICKET_WALLET_DINING_KINDS[cafeKind].note[state.language === 'en' ? 1 : 0];
   const stageTitle = stage === 'choose'
     ? (state.language === 'en' ? 'Choose ticket type' : '选择票据类型')
-    : isCafe ? (state.language === 'en' ? 'Fill the cup label' : '填写饮品杯贴') : (state.language === 'en' ? 'Fill ticket details' : '填写票据信息');
+    : isCafe ? (state.language === 'en' ? (cafeKind === 'drink' ? 'Edit coffee cup label' : 'Edit ' + cafeKindLabel) : (cafeKind === 'drink' ? '填写饮品杯贴' : '填写' + cafeKindLabel)) : (state.language === 'en' ? 'Fill ticket details' : '填写票据信息');
   const selectionActions = '<div class="ticket-wallet-create-options" role="group" aria-label="' + (state.language === 'en' ? 'Choose how to start' : '选择添加方式') + '"><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-import-image><span class="ticket-wallet-create-option-icon" aria-hidden="true">' + imageIcon + '</span><span><strong>' + importLabel + '</strong><small>' + (state.language === 'en' ? 'Recognize details from a photo, then review them' : '识别图片信息，随后检查并填写模板') + '</small></span></button><button type="button" class="ticket-wallet-create-option" data-ticket-wallet-create-empty="blank"><span class="ticket-wallet-create-option-icon ticket-wallet-create-option-plus" aria-hidden="true">＋</span><span><strong>' + createLabel + '</strong><small>' + (state.language === 'en' ? 'Start with a blank template' : '从空白模板开始填写') + '</small></span></button></div>';
   const currentTypeLabel = isCafe ? TICKET_WALLET_DINING_KINDS[normalizeTicketWalletDiningKind(draft.diningKind, 'drink')].label[state.language === 'en' ? 1 : 0] : (TICKET_TYPE_LABELS[draft.type] || TICKET_TYPE_LABELS.other)[state.language === 'en' ? 1 : 0];
   const currentTypeSummary = '<div class="ticket-wallet-add-current-type"><span>' + (state.language === 'en' ? 'Current type' : '当前类型') + '</span><strong>' + escapeHtml(currentTypeLabel) + '</strong><button type="button" class="ghost" data-ticket-wallet-stage-back>' + (state.language === 'en' ? 'Change' : '更改') + '</button></div>';
@@ -4067,7 +4075,7 @@ function renderTicketWalletEditor() {
   const detailMarkup = stage === 'details'
     ? recognitionMarkup + currentTypeSummary + ticketWalletAddTemplateMarkup(draft) + ticketWalletAddFieldsMarkup(draft) + '<div class="ticket-wallet-add-original-field"><div class="ticket-wallet-add-original-heading"><span class="ticket-wallet-add-field-label">' + originalTitle + '</span><button type="button" class="ghost" data-ticket-wallet-import-image>' + (state.language === 'en' ? 'Add / replace' : '添加 / 更换') + '</button></div>' + originalMarkup + '</div>' + editActions
     : ticketWalletAddTypeSelectorMarkup(draft) + selectionActions;
-  return '<section class="ticket-wallet-editor ticket-wallet-add-page" aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><div class="ticket-wallet-editor-head"><div><h2>' + stageTitle + '</h2><small>' + (stage === 'choose' ? (state.language === 'en' ? 'Select the category and type before importing or creating.' : '先选票据大类和类型，再导入原件或手动创建。') : (state.language === 'en' ? 'Review the recognized details before saving.' : '确认识别结果和模板信息后保存。')) + '</small></div><button type="button" class="ticket-wallet-detail-close ticket-wallet-add-close" data-ticket-wallet-cancel aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button></div>' + detailMarkup + '</section>';
+  return '<section class="ticket-wallet-editor ticket-wallet-add-page" aria-label="' + escapeHtml(t('ticketWalletAddTicket')) + '"><div class="ticket-wallet-editor-head"><div><h2>' + stageTitle + '</h2><small>' + (stage === 'choose' ? (state.language === 'en' ? 'Select the category and type before importing or creating.' : '先选票据大类和类型，再导入原件或手动创建。') : isCafe ? (state.language === 'en' ? 'Tap the sticker text to edit it, then save.' : '点击便签上的文案直接编辑，确认后保存。') : (state.language === 'en' ? 'Review the recognized details before saving.' : '确认识别结果和模板信息后保存。')) + '</small></div><button type="button" class="ticket-wallet-detail-close ticket-wallet-add-close" data-ticket-wallet-cancel aria-label="' + escapeHtml(closeLabel) + '">' + closeIcon + '</button></div>' + detailMarkup + '</section>';
 }
 function ticketWalletTrainDateParts(value) {
   const date = new Date(value); if (Number.isNaN(date.getTime())) return { date: '日期待补充', time: '' };
@@ -4451,21 +4459,9 @@ function syncTicketWalletFocusStack() {
     if (maxBottom > 0) stack.style.height = maxBottom + 'px';
   }
 }
-function ticketWalletDiningKindFilterMarkup(records) {
-  if (normalizeTicketWalletFilter(state.ticketWalletTypeFilter) !== 'dining') return '';
-  const dining = records.filter((record) => ticketWalletCategoryForType(record.type) === 'dining');
-  const options = [{ key: 'all', label: state.language === 'en' ? 'All dining' : '全部' }, ...Object.entries(TICKET_WALLET_DINING_KINDS).map(([key, item]) => ({ key, label: item.label[state.language === 'en' ? 1 : 0], icon: item.icon }))];
-  return '<nav class="ticket-wallet-dining-filter" aria-label="' + (state.language === 'en' ? 'Dining types' : '餐饮细类') + '">' + options.map((item) => {
-    const count = item.key === 'all' ? dining.length : dining.filter((record) => normalizeTicketWalletDiningKind(record.diningKind) === item.key).length;
-    const active = state.ticketWalletDiningKindFilter === item.key;
-    return '<button type="button" class="ticket-wallet-dining-filter-option' + (active ? ' active' : '') + '" data-ticket-wallet-dining-kind-filter="' + item.key + '" aria-pressed="' + active + '">' + (item.icon ? '<span aria-hidden="true">' + item.icon + '</span>' : '') + '<span>' + escapeHtml(item.label) + '</span><b>' + count + '</b></button>';
-  }).join('') + '</nav>';
-}
 function ticketWalletFilteredRecords(records) {
   const category = normalizeTicketWalletFilter(state.ticketWalletTypeFilter);
-  const categorized = category === 'all' ? records : records.filter((record) => ticketWalletCategoryForType(record.type) === category);
-  if (category !== 'dining' || state.ticketWalletDiningKindFilter === 'all') return categorized;
-  return categorized.filter((record) => normalizeTicketWalletDiningKind(record.diningKind) === normalizeTicketWalletDiningKindFilter(state.ticketWalletDiningKindFilter));
+  return category === 'all' ? records : records.filter((record) => ticketWalletCategoryForType(record.type) === category);
 }
 function ticketWalletMapRecords(records) {
   return ticketWalletFilteredRecords(records).filter((record) => TICKET_WALLET_TRAVEL_TYPES.includes(record.type) && record.from && record.to);
@@ -5001,7 +4997,7 @@ function renderTicketWalletJourneys() {
 }
 function renderTicketWallet() {
   const journeys = ticketWalletJourneys(); const orderedTickets = ticketWalletDisplayRecords(state.ticketWallet); const visibleTickets = ticketWalletFilteredRecords(orderedTickets);
-  const ticketWalletFilterRow = state.ticketWalletEditorOpen ? '' : '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div>' + ticketWalletDiningKindFilterMarkup(state.ticketWallet) + '</div>';
+  const ticketWalletFilterRow = state.ticketWalletEditorOpen ? '' : '<div class="ticket-wallet-filter-row"><div class="ticket-wallet-filter-scroll" data-tab-rail="ticket-filters">' + ticketWalletCategoryMarkup(state.ticketWallet) + '</div></div>';
   const ticketWalletPageBody = state.ticketWalletView === 'journeys' ? renderTicketWalletJourneys() : state.ticketWallet.length ? '<section class="ticket-wallet-stack-section">' + (visibleTickets.length ? ticketWalletStackMarkup(visibleTickets) : '<div class="ticket-wallet-filter-empty"><span>✦</span><strong>此分类还没有票据</strong><small>可以导入票据或手动添加</small></div>') + '</section>' : '<div class="ticket-wallet-empty"><span class="ticket-wallet-empty-icon">✦</span><h2>' + escapeHtml(t('ticketWalletEmpty')) + '</h2><p>' + escapeHtml(t('ticketWalletDescription')) + '</p><div class="ticket-wallet-empty-actions"><button class="ticket-wallet-empty-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '">＋</button></div></div>';
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
   const ticketWalletTopAdd = state.ticketWalletView === 'tickets' && !state.ticketWalletEditorOpen ? '<button class="ticket-wallet-header-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button>' : '';
@@ -9266,7 +9262,6 @@ function hydrateGithubRuntimeState() {
   state.ticketWalletDisplayOrder = parseStored(STORAGE.ticketWalletDisplayOrder, []);
   state.ticketWalletMemories = normalizeTicketMemories(parseStored(STORAGE.ticketWalletMemories, {}));
   state.ticketWalletTypeFilter = normalizeTicketWalletFilter(localStorage.getItem(STORAGE.ticketWalletTypeFilter));
-  state.ticketWalletDiningKindFilter = normalizeTicketWalletDiningKindFilter(localStorage.getItem(STORAGE.ticketWalletDiningKindFilter));
   if (!state.ticketWallet.some((record) => record.id === state.ticketWalletSelectedId)) state.ticketWalletSelectedId = '';
   void hydrateTicketWalletImages();
   state.devTools = normalizeDevTools(parseStored(STORAGE.devTools, {}));
@@ -12065,12 +12060,18 @@ workspace.addEventListener('click', async (event) => {
     }
     return;
   }
+  const cafeDraftRatingButton = event.target.closest('[data-ticket-wallet-cafe-draft-rate]');
+  if (cafeDraftRatingButton && state.ticketWalletEditorOpen && state.ticketWalletDraft?.type === 'dining') {
+    state.ticketWalletDraft.cafeRating = Number(cafeDraftRatingButton.dataset.ticketWalletCafeDraftRate) || 0;
+    updateTicketWalletCafeLabelPreview();
+    return;
+  }
   const cafeMoodPreset = event.target.closest('[data-ticket-wallet-cafe-mood-preset]');
   if (cafeMoodPreset && state.ticketWalletEditorOpen && state.ticketWalletDraft?.type === 'dining') {
     const mood = cafeMoodPreset.dataset.ticketWalletCafeMoodPreset || '';
     state.ticketWalletDraft.cafeMood = mood;
-    const moodInput = workspace.querySelector('[data-ticket-wallet-cafe-field="cafeMood"]');
-    if (moodInput) moodInput.value = mood;
+    const moodLabel = workspace.querySelector('[data-ticket-wallet-cafe-inline="cafeMood"]');
+    if (moodLabel) moodLabel.textContent = mood;
     workspace.querySelectorAll('[data-ticket-wallet-cafe-mood-preset]').forEach((button) => button.classList.toggle('active', button === cafeMoodPreset));
     return;
   }
@@ -12130,14 +12131,6 @@ workspace.addEventListener('click', async (event) => {
     clearTicketWalletReorderTarget();
     selectTicketWalletFilter(ticketWalletFilter.dataset.ticketWalletFilter || 'all');
     return;
-  }
-  const ticketWalletDiningKindFilter = event.target.closest('[data-ticket-wallet-dining-kind-filter]');
-  if (ticketWalletDiningKindFilter) {
-    const nextKind = normalizeTicketWalletDiningKindFilter(ticketWalletDiningKindFilter.dataset.ticketWalletDiningKindFilter);
-    state.ticketWalletDiningKindFilter = nextKind;
-    state.ticketWalletSelectedId = '';
-    saveTicketWalletDiningKindFilter();
-    return render();
   }
   const ticketWalletAddDiningKind = event.target.closest('[data-ticket-wallet-add-dining-kind]');
   if (ticketWalletAddDiningKind && state.ticketWalletEditorOpen && state.ticketWalletDraft?.type === 'dining') {
@@ -12577,7 +12570,31 @@ workspace.addEventListener('dblclick', (event) => {
   const day = event.target.closest('[data-date]');
   if (day && state.section === 'tools' && state.tool === 'calendar') { event.preventDefault(); renderLunarDialog(day.dataset.date); }
 });
+workspace.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' || !event.target.closest('[data-ticket-wallet-cafe-inline]')) return;
+  event.preventDefault();
+  event.target.blur();
+});
+workspace.addEventListener('focusout', (event) => {
+  const cafeInline = event.target.closest('[data-ticket-wallet-cafe-inline]');
+  if (!cafeInline || !state.ticketWalletEditorOpen || state.ticketWalletDraft?.type !== 'dining') return;
+  const field = cafeInline.dataset.ticketWalletCafeInline;
+  const rawValue = String(cafeInline.innerText || cafeInline.textContent || '').replace(/[\r\n]+/g, ' ').replace(/\u00a0/g, ' ').trim();
+  const value = field === 'departAt' && rawValue ? ticketWalletDateFromText(rawValue, rawValue) || rawValue : rawValue;
+  state.ticketWalletDraft[field] = value;
+  if (field === 'cafeDrink') state.ticketWalletDraft.diningItem = value;
+  updateTicketWalletCafeLabelPreview();
+});
 workspace.addEventListener('input', (event) => {
+  const cafeInline = event.target.closest('[data-ticket-wallet-cafe-inline]');
+  if (cafeInline && state.ticketWalletEditorOpen && state.ticketWalletDraft?.type === 'dining') {
+    const field = cafeInline.dataset.ticketWalletCafeInline;
+    const value = String(cafeInline.innerText || cafeInline.textContent || '').replace(/[\r\n]+/g, ' ').replace(/\u00a0/g, ' ');
+    state.ticketWalletDraft[field] = value;
+    if (field === 'cafeDrink') state.ticketWalletDraft.diningItem = value;
+    updateTicketWalletCafeLabelPreview(cafeInline);
+    if (field === 'cafeMood') workspace.querySelectorAll('[data-ticket-wallet-cafe-mood-preset]').forEach((button) => button.classList.toggle('active', button.dataset.ticketWalletCafeMoodPreset === value.trim()));
+  }
   if (event.target.dataset.ticketWalletCafeField && state.ticketWalletEditorOpen && state.ticketWalletDraft) {
     const field = event.target.dataset.ticketWalletCafeField;
     state.ticketWalletDraft[field] = field === 'cafeRating' ? Number(event.target.value) || 0 : event.target.value;

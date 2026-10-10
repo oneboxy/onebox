@@ -15546,39 +15546,7 @@ button.ticket-wallet-cafe-photo { cursor: pointer; }
   .ticket-wallet-cafe-copy > strong { font-size: 16px; }
 }
 
-/* Dining subcategories and Luckin-inspired drink journal tags. */
-body:has(.ticket-wallet-page) .ticket-wallet-dining-filter {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  flex: 0 0 auto;
-  padding: 2px 0 2px 10px;
-  border-left: 1px solid var(--line);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-body:has(.ticket-wallet-page) .ticket-wallet-dining-filter::-webkit-scrollbar { display: none; }
-.ticket-wallet-dining-filter-option {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  gap: 5px;
-  min-height: 31px;
-  padding: 5px 9px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: 11px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.ticket-wallet-dining-filter-option.active { border-color: color-mix(in srgb, var(--primary) 24%, var(--line)); background: color-mix(in srgb, var(--primary) 8%, var(--panel)); color: var(--primary); }
-.ticket-wallet-dining-filter-option > span:first-child { font-size: 12px; }
-.ticket-wallet-dining-filter-option b { color: color-mix(in srgb, currentColor 72%, var(--muted)); font-size: 9px; font-weight: 700; }
+/* Luckin-inspired drink journal tags. */
 .ticket-wallet-drink-tags { display: grid; gap: 10px; margin: 0 0 14px; padding: 11px 12px; border: 1px solid color-mix(in srgb, var(--line) 88%, #a78562); border-radius: 12px; background: color-mix(in srgb, var(--panel) 88%, #f6eee3); }
 .ticket-wallet-drink-tags > div:first-child > span,
 .ticket-wallet-drink-attribute > span { display: block; margin-bottom: 6px; color: var(--muted); font-size: 10px; font-weight: 750; }
@@ -15594,7 +15562,6 @@ body:has(.ticket-wallet-page) .ticket-wallet-dining-filter::-webkit-scrollbar { 
 @media (max-width: 760px) {
   body:has(.ticket-wallet-page) .ticket-wallet-filter-row { display: grid; gap: 5px; }
   body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll { border-right: 0; }
-  body:has(.ticket-wallet-page) .ticket-wallet-dining-filter { margin: 0 9px 5px; padding: 3px 0 4px; border-top: 1px solid var(--line); border-left: 0; }
   .ticket-wallet-drink-tags { padding: 10px; }
   .ticket-wallet-drink-attribute { display: block; }
   .ticket-wallet-drink-attribute > span { margin: 0 0 5px; }
@@ -15628,6 +15595,25 @@ body:has(.ticket-wallet-page) .ticket-wallet-add-stage-actions button { min-heig
 .ticket-wallet-cafe-label-heading small { display: block; }
 .ticket-wallet-cafe-label-heading strong { font-size: 14px; }
 .ticket-wallet-cafe-label-heading small { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.ticket-wallet-cafe-inline-edit { min-width: 0; max-width: 100%; border-radius: 2px; outline: none; cursor: text; text-decoration: underline dotted rgb(65 102 112 / 38%); text-underline-offset: 3px; }
+.ticket-wallet-cafe-inline-edit:focus { text-decoration-style: solid; text-decoration-color: currentColor; }
+.ticket-wallet-cafe-inline-edit:empty::before { content: attr(data-placeholder); color: color-mix(in srgb, currentColor 55%, transparent); font-weight: 500; }
+.ticket-wallet-cup-label-options { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.ticket-wallet-cup-label-option-chip { display: inline-flex; min-height: 18px; box-sizing: border-box; align-items: center; padding: 1px 6px; border: 1px solid rgb(53 97 108 / 20%); border-radius: 2px; background: rgb(255 255 255 / 24%); color: inherit; font-size: 8px; font-weight: 600; }
+.ticket-wallet-cup-label-option-chip:empty::before { content: attr(data-placeholder); color: color-mix(in srgb, currentColor 65%, transparent); }
+.ticket-wallet-cup-label-footer { display: flex; min-width: 0; align-items: center; gap: 7px; color: #4f7078; font-size: 9px; }
+.ticket-wallet-cup-label-footer > [data-ticket-wallet-cafe-inline="cafeMood"] { overflow: hidden; flex: 1 1 auto; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-cup-label-footer > [data-ticket-wallet-cafe-inline="price"] { flex: 0 0 auto; color: #173b47; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.ticket-wallet-cup-label-footer .ticket-wallet-cafe-rating-stars button { width: 12px; height: 15px; font-size: 10px; }
+.ticket-wallet-dining-note-row { display: flex; min-width: 0; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; }
+.ticket-wallet-dining-note-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-dining-note-row > span:last-child { text-align: right; }
+.ticket-wallet-dining-note-place { justify-content: flex-start; }
+.ticket-wallet-dining-note-footer { display: flex; min-width: 0; align-items: center; gap: 8px; margin-top: 3px; color: var(--muted); font-size: 10px; }
+.ticket-wallet-dining-note-footer > [data-ticket-wallet-cafe-inline="cafeMood"] { overflow: hidden; flex: 1 1 auto; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-dining-note-footer > [data-ticket-wallet-cafe-inline="price"] { flex: 0 0 auto; font-weight: 750; white-space: nowrap; }
+.ticket-wallet-cafe-preset-row { display: grid; gap: 6px; }
+.ticket-wallet-cafe-preset-row > span { color: var(--muted); font-size: 10px; font-weight: 750; }
 .ticket-wallet-cup-label {
   position: relative;
   display: grid;
