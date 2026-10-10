@@ -15941,3 +15941,66 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticke
   border-color: color-mix(in srgb, var(--primary) 28%, var(--line));
   background: color-mix(in srgb, var(--primary) 6%, var(--panel));
 }
+
+
+/* Keep supporting copy on the heading row, with a quieter size. */
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head > div:first-child,
+body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading > div {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  column-gap: 9px;
+  row-gap: 2px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head h2 {
+  flex: 0 0 auto;
+  margin: 0;
+  white-space: nowrap;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-add-page .ticket-wallet-editor-head small,
+body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading small {
+  display: inline;
+  min-width: 100px;
+  max-width: none;
+  flex: 1 1 120px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.ticket-wallet-cafe-brand-mark {
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+}
+.ticket-wallet-cafe-brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.ticket-wallet-cup-label-brand {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+.ticket-wallet-cup-label-brand > img {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.ticket-wallet-cafe-brand-option[data-ticket-wallet-cafe-brand="mixue"] .ticket-wallet-cafe-brand-mark { background: #d92e36; }
+.ticket-wallet-cup-label-mixue-cup-label-v1 .ticket-wallet-cup-label-brand > img { background: #d92e36; }
