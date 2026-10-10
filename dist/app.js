@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.602';
+const APP_VERSION = '2.18.603';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4444,7 +4444,7 @@ function ticketWalletTrainCardMarkup(record, index, contextClass = '', contextSt
   const sourceHint = source?.src ? t('ticketWalletSourceReady') : record.sourceImageId ? t('ticketWalletSourceMissing') : '';
   const swipeButtons = ticketWalletSwipeActionButtons(record, interactive);
   const rowAttributes = interactive ? '' : ' data-swipe-row data-ticket-wallet-pack-row="true"';
-  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '"><span class="ticket-wallet-train-type-badge">' + TICKET_TYPES.train.icon + '<span>' + escapeHtml(ticketTypeLabel(record.type)) + '</span></span>' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + '</div>';
+  return '<div class="swipe-row ticket-wallet-swipe-row ticket-wallet-swipe-row-train' + (contextClass ? ' ' + contextClass : '') + '"' + rowAttributes + ' style="--ticket-stack-index:' + index + ';' + contextStyle + '"><article class="ticket-wallet-card ticket-wallet-card-train ticket-wallet-train-card swipe-content" data-ticket-wallet-card="' + escapeHtml(record.id) + '">' + ticketWalletTrainTemplateMarkup(ticketWalletTrainTemplateData(record), sourceHint, interactive) + '</article>' + '</div>';
 }
 function ticketWalletCardMarkup(record, index, contextClass = '', contextStyle = '') {
   const interactive = contextClass.includes('ticket-wallet-detail-row');
