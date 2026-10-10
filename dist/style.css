@@ -16004,3 +16004,135 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
 
 .ticket-wallet-cafe-brand-option[data-ticket-wallet-cafe-brand="mixue"] .ticket-wallet-cafe-brand-mark { background: #d92e36; }
 .ticket-wallet-cup-label-mixue-cup-label-v1 .ticket-wallet-cup-label-brand > img { background: #d92e36; }
+
+/* Brand-specific cafe cup slips modeled on the real Luckin and Cotti labels. */
+.ticket-wallet-cup-label-luckin-real {
+  width: min(100%, 360px);
+  min-height: 0;
+  align-content: start;
+  gap: 12px;
+  padding: 18px 18px 15px;
+  border-color: #9fcbd8;
+  border-radius: 17px 17px 22px 22px;
+  background: linear-gradient(148deg, #d9f1f8 0%, #c9e9f3 54%, #dff3f8 100%);
+  color: #101b22;
+  box-shadow: 0 8px 18px rgb(26 58 68 / 10%), inset 0 0 0 1px rgb(255 255 255 / 60%);
+  --luckin-ink: #101b22;
+  --luckin-muted: #395762;
+}
+.ticket-wallet-cup-label-luckin-real::before,
+.ticket-wallet-cup-label-luckin-real::after { display: none; }
+.ticket-wallet-luckin-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; min-width: 0; }
+.ticket-wallet-luckin-header .ticket-wallet-cup-label-greeting { color: var(--luckin-ink); font-size: 14px; font-weight: 800; }
+.ticket-wallet-luckin-brand { display: grid; grid-template-columns: minmax(0, 1fr) 25px; grid-template-rows: auto auto; align-items: center; column-gap: 5px; min-width: 0; color: var(--luckin-ink); text-align: right; }
+.ticket-wallet-luckin-brand img { grid-column: 2; grid-row: 1 / span 2; width: 25px; height: 25px; object-fit: contain; }
+.ticket-wallet-luckin-brand strong { grid-column: 1; grid-row: 2; overflow: hidden; font-size: 8px; letter-spacing: .02em; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-luckin-scan-copy { grid-column: 1; grid-row: 1; font-size: 10px; font-weight: 850; line-height: 1.1; }
+.ticket-wallet-luckin-order { display: grid; grid-template-columns: minmax(0, 1fr) 65px; align-items: center; gap: 7px; min-width: 0; min-height: 96px; }
+.ticket-wallet-luckin-number { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.ticket-wallet-luckin-number > strong { min-width: 0; color: #651a23; font-size: clamp(48px, 14vw, 62px); font-weight: 850; letter-spacing: -.075em; line-height: .9; }
+.ticket-wallet-luckin-number > span { flex: 0 0 auto; color: var(--luckin-ink); font-size: 11px; font-weight: 800; }
+.ticket-wallet-luckin-number > span b { font-size: 15px; }
+.ticket-wallet-luckin-real .ticket-wallet-cup-label-code { width: 65px; height: 68px; gap: 1px; padding: 3px; border-color: rgb(26 71 87 / 22%); border-radius: 4px; background: rgb(255 255 255 / 82%); }
+.ticket-wallet-luckin-real .ticket-wallet-cup-label-code > svg { display: block; width: 54px; max-width: 100%; aspect-ratio: 1; }
+.ticket-wallet-luckin-real .ticket-wallet-cup-label-code-watermark { top: 43%; left: 50%; padding: 2px 4px; border: 1px solid rgb(255 255 255 / 86%); border-radius: 3px; background: rgb(244 251 253 / 90%); color: #315b66; font-size: 8px; letter-spacing: .06em; transform: translate(-50%, -50%) rotate(-12deg); }
+.ticket-wallet-luckin-real .ticket-wallet-cup-label-code > small { position: static; display: block; max-width: 100%; color: #315b66; font-size: 5px; font-weight: 800; line-height: 1.05; text-align: center; overflow-wrap: anywhere; }
+.ticket-wallet-luckin-drink { display: grid; gap: 5px; min-width: 0; }
+.ticket-wallet-luckin-category { color: var(--luckin-muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+.ticket-wallet-luckin-drink > strong { display: block; min-width: 0; color: var(--luckin-ink); font-size: clamp(23px, 6vw, 29px); font-weight: 900; letter-spacing: -.035em; line-height: 1.18; overflow-wrap: anywhere; }
+.ticket-wallet-luckin-specs { display: flex; align-items: center; gap: 8px; min-height: 31px; }
+.ticket-wallet-luckin-temperature { display: inline-flex; min-width: 28px; height: 28px; align-items: center; justify-content: center; padding-inline: 3px; box-sizing: border-box; border-radius: 3px; background: #2163bf; color: #fff; font-size: 18px; font-weight: 900; }
+.ticket-wallet-luckin-size { color: var(--luckin-ink); font-size: 20px; font-weight: 850; }
+.ticket-wallet-luckin-custom { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 6px; min-width: 0; color: var(--luckin-ink); font-size: 12px; line-height: 1.45; }
+.ticket-wallet-luckin-custom > span { min-width: 0; }
+.ticket-wallet-luckin-custom > i { color: var(--luckin-muted); font-size: 10px; font-style: normal; }
+.ticket-wallet-luckin-custom b { font-weight: 650; }
+.ticket-wallet-luckin-service { display: flex; align-items: baseline; gap: 5px; color: var(--luckin-muted); font-size: 9px; }
+.ticket-wallet-luckin-service > small { font-weight: 750; }
+.ticket-wallet-luckin-service > b { color: var(--luckin-ink); font-weight: 750; }
+.ticket-wallet-luckin-product { display: grid; gap: 4px; min-width: 0; padding-top: 8px; border-top: 1px solid rgb(29 79 94 / 17%); }
+.ticket-wallet-luckin-product > strong { color: var(--luckin-ink); font-size: 13px; font-weight: 850; }
+.ticket-wallet-luckin-product > small { color: var(--luckin-muted); font-size: 9px; }
+.ticket-wallet-luckin-product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); min-width: 0; }
+.ticket-wallet-luckin-product-grid > span { display: grid; align-content: start; gap: 4px; min-width: 0; padding: 2px 8px; color: var(--luckin-ink); font-size: 9px; line-height: 1.35; overflow-wrap: anywhere; }
+.ticket-wallet-luckin-product-grid > span:first-child { padding-left: 0; }
+.ticket-wallet-luckin-product-grid > span + span { border-left: 1px solid rgb(29 79 94 / 30%); }
+.ticket-wallet-luckin-product-grid > span > b { color: var(--luckin-muted); font-size: 8px; font-weight: 750; }
+.ticket-wallet-luckin-footer { display: flex; align-items: end; justify-content: space-between; gap: 8px; min-width: 0; padding-top: 8px; border-top: 1px dashed rgb(29 79 94 / 36%); }
+.ticket-wallet-luckin-footer > div { display: grid; gap: 4px; min-width: 0; }
+.ticket-wallet-luckin-footer > div > strong { color: var(--luckin-ink); font-size: 10px; font-weight: 750; }
+.ticket-wallet-luckin-footer > div > small { overflow: hidden; color: var(--luckin-muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.ticket-wallet-luckin-footer > b { flex: 0 0 auto; color: var(--luckin-ink); font-size: 9px; font-weight: 700; text-align: right; }
+.ticket-wallet-luckin-real .ticket-wallet-cafe-inline-edit:empty::before,
+.ticket-wallet-luckin-real .ticket-wallet-cup-label-saved-edit:empty::before { color: rgb(16 27 34 / 52%); font-weight: 500; }
+
+.ticket-wallet-cup-label-cotti-real {
+  width: min(100%, 430px);
+  min-height: 0;
+  align-content: start;
+  gap: 13px;
+  padding: 19px 20px 16px;
+  border: 1px solid #d5d1c7;
+  border-radius: 17px 17px 22px 22px;
+  background: linear-gradient(160deg, #fffefa 0%, #f8f6ef 58%, #fffdf8 100%);
+  color: #111;
+  box-shadow: 0 8px 18px rgb(41 38 27 / 10%), inset 0 0 0 1px rgb(255 255 255 / 80%);
+  --cotti-ink: #111;
+  --cotti-muted: #55534d;
+}
+.ticket-wallet-cup-label-cotti-real::before,
+.ticket-wallet-cup-label-cotti-real::after { display: none; }
+.ticket-wallet-cotti-header { display: grid; grid-template-columns: minmax(0, 1fr) 82px; align-items: start; gap: 12px; min-width: 0; }
+.ticket-wallet-cotti-wordmark { display: flex; align-items: center; min-width: 0; color: var(--cotti-ink); line-height: 1; }
+.ticket-wallet-cotti-wordmark > img { width: 28px; height: 28px; flex: 0 0 28px; margin-right: 4px; border-radius: 6px; object-fit: contain; }
+.ticket-wallet-cotti-wordmark > span { margin-right: 6px; font-size: 29px; font-weight: 900; letter-spacing: -.1em; }
+.ticket-wallet-cotti-wordmark > strong { overflow: hidden; font-family: Arial, Helvetica, sans-serif; font-size: clamp(20px, 5.4vw, 29px); font-weight: 950; letter-spacing: -.055em; text-overflow: clip; white-space: nowrap; }
+.ticket-wallet-cotti-wordmark > sup { align-self: flex-start; margin: 0 0 0 2px; font-size: 8px; font-weight: 800; }
+.ticket-wallet-cotti-real .ticket-wallet-cup-label-code { width: 82px; height: 88px; gap: 2px; padding: 4px; border-color: rgb(17 17 17 / 15%); border-radius: 2px; background: #fff; }
+.ticket-wallet-cotti-real .ticket-wallet-cup-label-code > svg { width: 70px; max-width: 100%; aspect-ratio: 1; }
+.ticket-wallet-cotti-real .ticket-wallet-cup-label-code-watermark { top: 44%; left: 50%; padding: 3px 5px; border: 1px solid rgb(255 255 255 / 86%); border-radius: 2px; background: rgb(255 255 255 / 90%); color: #333; font-size: 9px; font-weight: 800; transform: translate(-50%, -50%) rotate(-12deg); }
+.ticket-wallet-cotti-real .ticket-wallet-cup-label-code > small { position: static; display: block; max-width: 100%; color: #333; font-size: 5px; font-weight: 800; line-height: 1.05; text-align: center; overflow-wrap: anywhere; }
+.ticket-wallet-cotti-number { display: flex; align-items: baseline; gap: 12px; min-width: 0; margin-top: -6px; }
+.ticket-wallet-cotti-number > strong { min-width: 0; color: var(--cotti-ink); font-size: clamp(55px, 14vw, 80px); font-weight: 900; letter-spacing: -.08em; line-height: .9; }
+.ticket-wallet-cotti-number > span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; min-width: 0; color: var(--cotti-ink); font-size: clamp(18px, 4.5vw, 25px); font-weight: 750; }
+.ticket-wallet-cotti-number > span b { font-size: inherit; font-weight: 750; }
+.ticket-wallet-cotti-drink { display: grid; gap: 7px; min-width: 0; }
+.ticket-wallet-cotti-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px; min-width: 0; color: var(--cotti-ink); font-size: clamp(25px, 6.5vw, 34px); font-weight: 900; line-height: 1.12; overflow-wrap: anywhere; }
+.ticket-wallet-cotti-name > i { margin-inline: 3px; font-style: normal; }
+.ticket-wallet-cotti-details { display: flex; flex-wrap: wrap; gap: 2px 4px; min-width: 0; color: var(--cotti-ink); font-size: clamp(14px, 3.8vw, 20px); line-height: 1.55; overflow-wrap: anywhere; }
+.ticket-wallet-cotti-details > i { color: #333; font-style: normal; }
+.ticket-wallet-cotti-footer { display: flex; align-items: end; justify-content: space-between; gap: 12px; min-width: 0; margin-top: 14px; padding-top: 6px; color: var(--cotti-ink); }
+.ticket-wallet-cotti-footer > strong { max-width: 62%; font-size: clamp(13px, 3.7vw, 18px); font-weight: 750; line-height: 1.2; }
+.ticket-wallet-cotti-footer > span { flex: 0 0 auto; font-size: clamp(12px, 3.5vw, 17px); font-weight: 650; white-space: nowrap; }
+.ticket-wallet-cotti-real .ticket-wallet-cafe-inline-edit:empty::before,
+.ticket-wallet-cotti-real .ticket-wallet-cup-label-saved-edit:empty::before { color: rgb(17 17 17 / 48%); font-weight: 500; }
+@media (max-width: 500px) {
+  .ticket-wallet-cup-label-luckin-real { width: min(100%, 360px); gap: 10px; padding: 15px 14px 13px; }
+  .ticket-wallet-luckin-order { grid-template-columns: minmax(0, 1fr) 58px; min-height: 82px; gap: 5px; }
+  .ticket-wallet-luckin-number { gap: 5px; }
+  .ticket-wallet-luckin-number > strong { font-size: clamp(45px, 15vw, 58px); }
+  .ticket-wallet-luckin-number > span { font-size: 9px; }
+  .ticket-wallet-luckin-number > span b { font-size: 12px; }
+  .ticket-wallet-luckin-real .ticket-wallet-cup-label-code { width: 58px; height: 62px; }
+  .ticket-wallet-luckin-real .ticket-wallet-cup-label-code > svg { width: 49px; }
+  .ticket-wallet-luckin-drink > strong { font-size: clamp(21px, 7vw, 26px); }
+  .ticket-wallet-luckin-custom { font-size: 11px; }
+  .ticket-wallet-luckin-product-grid > span { padding-inline: 5px; }
+  .ticket-wallet-luckin-footer { align-items: start; }
+  .ticket-wallet-luckin-footer > b { max-width: 40%; font-size: 8px; }
+  .ticket-wallet-cup-label-cotti-real { width: min(100%, 430px); gap: 11px; padding: 15px 14px 13px; }
+  .ticket-wallet-cotti-header { grid-template-columns: minmax(0, 1fr) 68px; gap: 8px; }
+  .ticket-wallet-cotti-wordmark > span { margin-right: 4px; font-size: 23px; }
+  .ticket-wallet-cotti-wordmark > img { width: 22px; height: 22px; flex-basis: 22px; margin-right: 2px; }
+  .ticket-wallet-cotti-wordmark > strong { font-size: clamp(17px, 5.8vw, 24px); }
+  .ticket-wallet-cotti-real .ticket-wallet-cup-label-code { width: 68px; height: 73px; }
+  .ticket-wallet-cotti-real .ticket-wallet-cup-label-code > svg { width: 58px; }
+  .ticket-wallet-cotti-number { gap: 8px; }
+  .ticket-wallet-cotti-number > strong { font-size: clamp(49px, 15vw, 67px); }
+  .ticket-wallet-cotti-number > span { font-size: clamp(15px, 4.5vw, 21px); }
+  .ticket-wallet-cotti-name { font-size: clamp(21px, 6.8vw, 28px); }
+  .ticket-wallet-cotti-details { font-size: clamp(13px, 4vw, 17px); }
+  .ticket-wallet-cotti-footer { gap: 7px; margin-top: 10px; }
+  .ticket-wallet-cotti-footer > strong { max-width: 60%; font-size: clamp(12px, 3.8vw, 15px); }
+  .ticket-wallet-cotti-footer > span { font-size: clamp(11px, 3.5vw, 14px); }
+}
