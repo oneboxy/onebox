@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.591';
+const APP_VERSION = '2.18.592';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2841,7 +2841,7 @@ function mascotBriefingMarkup() {
   const todayLabel = mascotDateLabel();
   const language = state.language === 'en';
   const hello = MASCOT_DAILY_GREETINGS[mascotDailyIndex(MASCOT_DAILY_GREETINGS.length)][language ? 1 : 0];
-  const hint = language ? 'Tap a little button, or double-tap me to see a surprise' : '点一点下面的小按钮，或者双击我看看惊喜';
+  const hint = language ? 'Tap me to return to the top; long-press and drag me to the bottom to launch a rocket; double-tap for a surprise.' : '点我回到顶部；长按并拖到屏幕底部发射火箭；双击我还有惊喜。';
   const label = (zh, en) => language ? en : zh;
   const icon = (id) => TOOL_DEFS[id]?.icon || SECTION_DEFS[id]?.icon || '';
   const actionRows = '<div class="onebox-mascot-action-row onebox-mascot-action-row-interactions">' + mascotActionButton('pat', label('摸摸头', 'Pat me'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"/></svg>') + mascotActionButton('ball', label('玩玩球', 'Play ball'), '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 5.1 1.1 4.2-3.4 2.5M15.5 5.1l-1.1 4.2 3.4 2.5M7.3 15.3h4.1l2.5 3.5M16.7 15.3h-4.1l-2.5 3.5"/></svg>') + mascotActionButton('snack', label('喂零食', 'Treat'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14l-1.3 10H6.3L5 8.5Z"/><path d="M8 8.5a4 4 0 0 1 8 0M9 12h.01M12 14h.01M15 12h.01"/></svg>') + mascotActionButton('highfive', label('击个掌', 'High five'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.2V5.6a1.4 1.4 0 0 1 2.8 0v4.2-5.6a1.4 1.4 0 0 1 2.8 0v5.3-4.3a1.4 1.4 0 0 1 2.8 0v5.2-2.1a1.4 1.4 0 0 1 2.8 0v5.3c0 3.3-2.7 6-6 6h-1.1c-2.3 0-4.3-1.3-5.3-3.3L5.6 13a1.6 1.6 0 0 1 2.9-.8Z"/></svg>') + mascotActionButton('nap', label('打个盹', 'Nap'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5h16M6 16.5V12a6 6 0 0 1 12 0v4.5M9 8V5M12 7V3M15 8V5"/></svg>') + '</div><div class="onebox-mascot-action-row onebox-mascot-action-row-tools">' + mascotActionButton('weather', label('天气', 'Weather'), icon('weather')) + mascotActionButton('calendar', label('日历', 'Calendar'), icon('calendar')) + mascotActionButton('reader', label('阅读', 'Reading'), icon('reader')) + mascotActionButton('navigation', label('导航', 'Navigation'), icon('navigation')) + mascotActionButton('calculator', label('计算', 'Calculator'), icon('calculator')) + '</div><div class="onebox-mascot-action-row onebox-mascot-action-row-sections">' + mascotActionButton('home', label('首页', 'Home'), icon('home')) + mascotActionButton('messages', label('消息', 'Messages'), icon('messages')) + mascotActionButton('mine', label('我的', 'Me'), icon('mine')) + '</div>';
@@ -2885,20 +2885,19 @@ function mascotPlayTrick() {
   mascotShowSpeech(state.language === 'en' ? 'Whoa, too fast!' : '哎呀，转晕啦！', 1800, 'dizzy');
 }
 function mascotTopActionActive() {
-  return state.section === 'home' && appScrollTop() > 84 && !mascotRuntime.root?.classList.contains('is-docked');
+  return state.section === 'home' && appScrollTop() > 84;
 }
 function syncMascotContext() {
   const root = mascotRuntime.root;
   const button = mascotRuntime.button;
   if (!root || !button) return;
-  const syncPinned = Boolean(state.githubSync?.active || state.githubSync?.error);
-  const topAction = mascotRuntime.topReturnFlight || (mascotTopActionActive() && !syncPinned);
+  const topAction = mascotRuntime.topReturnFlight || mascotTopActionActive();
   const wasTopAction = root.classList.contains('is-top-action');
   root.classList.toggle('is-top-action', topAction);
   button.setAttribute('aria-label', topAction ? (state.language === 'en' ? 'Back to top' : '回到顶部') : (state.language === 'en' ? 'Open today overview' : '查看今日速览'));
   if (topAction && !wasTopAction && !mascotRuntime.topActionAnnounced) {
     mascotRuntime.topActionAnnounced = true;
-    mascotShowSpeech(state.language === 'en' ? 'Tap me to go back up!' : '点我就可以回到上方哟！', 2300, 'top');
+    mascotShowSpeech(state.language === 'en' ? 'Tap to go back up; long-press and drag me to the bottom to launch a rocket!' : '点我回顶，长按拖到底部发射火箭！', 3000, 'top');
   }
   if (!topAction) mascotRuntime.topActionAnnounced = false;
   mascotSyncPanelSide();
@@ -2918,7 +2917,7 @@ function updateMascotScrollState() {
   syncMascotContext();
   if (scrollingHome) mascotScheduleDock();
 }
-async function mascotFlyBackToTop() {
+async function mascotFlyBackToTop({ fromRocket = false } = {}) {
   const root = mascotRuntime.root;
   if (!root || mascotRuntime.topReturnFlight) return;
   mascotClearDockTimer();
@@ -2926,7 +2925,7 @@ async function mascotFlyBackToTop() {
   mascotRuntime.topReturnFlight = true;
   root.classList.add('is-top-return-flight');
   mascotSetReaction('delighted', 1600);
-  mascotSetAction('', 0);
+  if (!fromRocket) mascotSetAction('', 0);
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   try {
     if (reducedMotion) scrollAppTo(0, 'auto');
@@ -2935,7 +2934,7 @@ async function mascotFlyBackToTop() {
     root.classList.remove('is-top-return-flight');
     mascotRuntime.topReturnFlight = false;
     syncMascotContext();
-    mascotSetAction('', 0);
+    if (!fromRocket || !root.classList.contains('is-launching')) mascotSetAction('', 0);
     mascotSetReaction('delighted', 820);
     mascotScheduleDock();
   }
@@ -3042,7 +3041,8 @@ function mascotLaunchRocket() {
   root.classList.add('is-launching');
   mascotSetReaction('delighted', 1100);
   mascotSetAction('rocket', 1100);
-  mascotShowSpeech(state.language === 'en' ? 'Rocket launch! Up we go!' : '咻——火箭发射，冲上去啦！', 1800, 'rocket');
+  mascotShowSpeech(state.language === 'en' ? 'Rocket ride back to the top!' : '火箭发射，带你回到页面顶部！', 2200, 'rocket');
+  void mascotFlyBackToTop({ fromRocket: true });
   mascotRuntime.launchTimer = window.setTimeout(() => {
     root.classList.remove('is-launching');
     mascotSetAction('', 0);
@@ -3097,7 +3097,7 @@ function mountMascot() {
   if (mascotRuntime.root) return;
   const root = document.createElement('aside');
   root.id = 'oneboxMascotRoot'; root.className = 'onebox-mascot-root'; root.dataset.edge = 'right'; root.dataset.panelSide = 'right';
-  root.innerHTML = '<span class="onebox-mascot-propeller" aria-hidden="true"><i></i><i></i><b></b></span><span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><div class="onebox-mascot-sync-progress" data-mascot-sync-progress data-sync-place="above" hidden><button type="button" class="onebox-mascot-sync-trigger" data-mascot-sync-trigger aria-live="polite"><span class="onebox-mascot-sync-dot" aria-hidden="true"></span><strong data-mascot-sync-message></strong><span class="onebox-mascot-sync-ring" data-mascot-sync-ring aria-hidden="true"><em data-mascot-sync-percent>0%</em></span></button><button type="button" class="onebox-mascot-sync-dismiss" data-mascot-sync-dismiss aria-label="关闭同步状态" title="关闭" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg></button></div><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
+  root.innerHTML = '<span class="onebox-mascot-rocket" aria-hidden="true">🚀</span><span class="onebox-mascot-ball" aria-hidden="true">⚽</span><span class="onebox-mascot-snack" aria-hidden="true">🍪</span><span class="onebox-mascot-highfive" aria-hidden="true">🖐️</span><span class="onebox-mascot-nap" aria-hidden="true">💤</span><div class="onebox-mascot-speech" role="status" aria-live="polite" hidden></div><div class="onebox-mascot-panel" hidden></div><div class="onebox-mascot-sync-progress" data-mascot-sync-progress data-sync-place="above" hidden><button type="button" class="onebox-mascot-sync-trigger" data-mascot-sync-trigger aria-live="polite"><span class="onebox-mascot-sync-dot" aria-hidden="true"></span><strong data-mascot-sync-message></strong><span class="onebox-mascot-sync-ring" data-mascot-sync-ring aria-hidden="true"><em data-mascot-sync-percent>0%</em></span></button><button type="button" class="onebox-mascot-sync-dismiss" data-mascot-sync-dismiss aria-label="关闭同步状态" title="关闭" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg></button></div><button type="button" class="onebox-mascot-button" aria-label="查看今日速览"><span class="onebox-mascot-visual" aria-hidden="true">' + MASCOT_FULL_BODY_MARKUP + '<span class="onebox-mascot-layer onebox-mascot-direction"></span><span class="onebox-mascot-layer onebox-mascot-reaction"></span><span class="onebox-mascot-outfit" aria-hidden="true"></span><img class="onebox-mascot-fallback" src="icons/mascot-fox-full.png?v=2.18.264" alt="" draggable="false"></span></button>';
   document.body.appendChild(root);
   mascotRuntime.root = root; mascotRuntime.button = $('.onebox-mascot-button', root); mascotRuntime.panel = $('.onebox-mascot-panel', root); mascotRuntime.speech = $('.onebox-mascot-speech', root); mascotRuntime.directionLayer = $('.onebox-mascot-direction', root); mascotRuntime.reactionLayer = $('.onebox-mascot-reaction', root);
   mascotRuntime.directionLayer.style.backgroundImage = 'url("' + MASCOT_ASSETS.directions + '")';
