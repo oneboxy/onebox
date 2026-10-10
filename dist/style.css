@@ -16192,3 +16192,22 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
   .ticket-wallet-luckin-footer > div > small { font-size: 7px; }
   .ticket-wallet-luckin-footer > b { max-width: 38%; font-size: 7px; }
 }
+
+/* Keep the QR in the header so it cannot cover the drink name/specification. */
+.ticket-wallet-luckin-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 58px;
+  align-items: center;
+  gap: 8px;
+}
+.ticket-wallet-luckin-header > .ticket-wallet-cup-label-code { width: 58px; height: 62px; }
+.ticket-wallet-luckin-order { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+.ticket-wallet-luckin-product-grid > span { min-height: 42px; }
+@media (max-width: 500px) {
+  .ticket-wallet-luckin-header { grid-template-columns: minmax(0, 1fr) auto 42px; gap: 5px; }
+  .ticket-wallet-luckin-header > .ticket-wallet-cup-label-code { width: 42px; height: 46px; }
+  .ticket-wallet-luckin-header > .ticket-wallet-cup-label-code > svg { width: 35px; }
+  .ticket-wallet-luckin-header > .ticket-wallet-cup-label-code > small { font-size: 3.5px; }
+  .ticket-wallet-luckin-order { min-height: 0; }
+  .ticket-wallet-luckin-product-grid > span { min-height: 34px; }
+}
