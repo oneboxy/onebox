@@ -1,4 +1,4 @@
-Warning: truncated output (original token count: 182744)
+Warning: truncated output (original token count: 182748)
 Total output lines: 15949
 
 :root {
@@ -1285,7 +1285,7 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 @keyframes feed-shimmer { 50% { background-position: -100% 0; } }
 
 /* Scientific keypad controls -------------------------------------------- */
-#workspace[…132744 tokens truncated…-wallet-return-pack .ticket-wallet-stack {
+#workspace[…132748 tokens truncated… .ticket-wallet-stack {
     padding-bottom: calc(44px + (var(--ticket-stack-count) - 1) * var(--ticket-stack-peek, 96px));
   }
 }
@@ -2750,7 +2750,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticke
 .ticket-wallet-cup-label-code { width: 94px; height: 106px; grid-template-rows: 1fr auto; gap: 3px; padding: 5px; }
 .ticket-wallet-cup-label-code > svg { display: block; width: 78px; max-width: 100%; aspect-ratio: 1; }
 .ticket-wallet-cup-label-code > .ticket-wallet-cup-label-code-watermark { position: absolute; top: 40%; right: auto; bottom: auto; left: 50%; width: auto; padding: 4px 7px; border: 1px solid rgb(255 255 255 / 75%); border-radius: 3px; background: rgb(246 251 252 / 88%); color: #315b66; font-size: 10px; letter-spacing: .1em; transform: translate(-50%, -50%) rotate(-12deg); }
-.ticket-wallet-cup-label-code > small { position: static; display: block; color: #345d68; font-size: 5.5px; font-weight: 800; line-height: 1.1; text-align: center; white-space: nowrap; }
+.ticket-wallet-cup-label-code > small { position: static; display: block; max-width: 100%; color: #345d68; font-size: 6px; font-weight: 800; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
 .ticket-wallet-cup-label-luckin-cup-label-v1 { --cafe-sticker-accent: #4e6bb3; }
 .ticket-wallet-cup-label-starbucks-cup-label-v1 { border-color: #9dbcae; background: linear-gradient(150deg, #e5f0e9, #d5e7dc 58%, #edf3ef); color: #153d30; --cafe-sticker-accent: #087554; }
 .ticket-wallet-cup-label-cotti-cup-label-v1 { border-color: #c9b69e; background: linear-gradient(150deg, #f1e9df, #e9ddcf 58%, #f5f0e8); color: #493522; --cafe-sticker-accent: #614329; }
@@ -2770,7 +2770,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack .ticket-wallet-physical-ticke
   .ticket-wallet-cup-label-order { grid-template-columns: minmax(0, 1fr) 88px; min-height: 112px; }
   .ticket-wallet-cup-label-code { width: 88px; height: 102px; }
   .ticket-wallet-cup-label-code > svg { width: 72px; }
-  .ticket-wallet-cup-label-code > small { font-size: 5px; }
+  .ticket-wallet-cup-label-code > small { font-size: 6px; }
   .ticket-wallet-cup-label-option { padding-inline: 4px; }
   .ticket-wallet-add-dining-filter-option { min-height: 32px; padding-inline: 10px; }
   .ticket-wallet-physical-ticket.is-draft { padding: 16px 14px 12px; }
