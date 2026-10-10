@@ -8,6 +8,7 @@
   --line: #e5e8f0;
   --primary: #17191f;
   --primary-2: #565b66;
+  --primary-contrast: #fff;
   --soft: #eef0f4;
   --danger: #d14d5b;
   --warning: #cf7a1f;
@@ -185,7 +186,7 @@ footer span { opacity: .75; }
 .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-top: 12px; }
 .key { border: 0; border-radius: 14px; padding: 16px 8px; background: #f0f2f7; color: var(--ink); font-weight: 700; cursor: pointer; }
 .key.op { background: var(--soft); color: var(--primary); }
-.key.equal { background: var(--primary); color: #fff; }
+.key.equal { background: var(--primary); color: var(--primary-contrast, #fff); }
 .key.danger { color: var(--danger); }
 .scientific-bar { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .scientific-bar[hidden] { display: none; }
@@ -209,7 +210,7 @@ footer span { opacity: .75; }
 input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--ink); padding: 13px 14px; outline: none; }
 input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(64, 92, 245, .12); }
 textarea { min-height: 130px; resize: vertical; }
-.primary { border: 0; border-radius: 13px; background: var(--primary); color: #fff; padding: 13px 18px; font-weight: 750; cursor: pointer; }
+.primary { border: 0; border-radius: 13px; background: var(--primary); color: var(--primary-contrast, #fff); padding: 13px 18px; font-weight: 750; cursor: pointer; }
 .full-width { width: 100%; text-align: center; }
 
 .calendar-layout, .translation-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(290px, .8fr); gap: 24px; }
@@ -229,7 +230,7 @@ textarea { min-height: 130px; resize: vertical; }
 .day.selected { background: var(--soft); border-color: var(--primary); box-shadow: inset 0 -3px var(--primary); }
 .day.holiday small.day-label { color: var(--danger); }
 .day.workday small.day-label { color: var(--warning); }
-.day i { position: absolute; right: 6px; top: 5px; width: 15px; height: 15px; border-radius: 50%; background: var(--primary); color: white; font-size: 9px; font-style: normal; line-height: 15px; }
+.day i { position: absolute; right: 6px; top: 5px; width: 15px; height: 15px; border-radius: 50%; background: var(--primary); color: var(--primary-contrast, #fff); font-size: 9px; font-style: normal; line-height: 15px; }
 .calendar-legend { display: flex; gap: 14px; color: var(--muted); font-size: 11px; margin: 0 0 9px; }
 .calendar-legend span { display: flex; gap: 5px; align-items: center; }
 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--primary); }
@@ -526,7 +527,7 @@ body { overscroll-behavior-y: none; }
 .calculator-layout:has(.scientific-bar:not([hidden])) .keys { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .calculator-layout:has(.scientific-bar:not([hidden])) .science-key { min-height: 42px; border-radius: 50%; aspect-ratio: 1; padding: 4px 1px; }
 .scientific-toggle { background: var(--soft); color: var(--primary); font-size: 13px; }
-.scientific-toggle[aria-pressed="true"] { background: var(--primary); color: #fff; }
+.scientific-toggle[aria-pressed="true"] { background: var(--primary); color: var(--primary-contrast, #fff); }
 .popover { top: calc(58px + env(safe-area-inset-top)); right: 14px; }
 button:not(:disabled):hover { transform: none; }
 button:not(:disabled):active { transform: scale(.98); }
@@ -1130,7 +1131,7 @@ main { padding-bottom: calc(94px + env(safe-area-inset-bottom)); }
 .reader-library-title-row h2 { margin: 0; font-size: 25px; letter-spacing: -.03em; }
 .reader-library-head small { display: block; max-width: 430px; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .reader-book-count { display: inline-grid; min-width: 22px; height: 22px; place-items: center; padding: 0 6px; border-radius: 99px; background: var(--soft); color: var(--primary); font-size: 11px; font-weight: 800; }
-.reader-library-add { width: 42px; height: 42px; flex: 0 0 42px; border: 0; border-radius: 50%; background: var(--primary); color: #fff; font-size: 26px; line-height: 1; box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 26%, transparent); cursor: pointer; }
+.reader-library-add { width: 42px; height: 42px; flex: 0 0 42px; border: 0; border-radius: 50%; background: var(--primary); color: var(--primary-contrast, #fff); font-size: 26px; line-height: 1; box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 26%, transparent); cursor: pointer; }
 .reader-book-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 15px; padding-top: 5px; }
 .reader-book-card { position: relative; display: block; min-width: 0; overflow: visible; border: 0; border-radius: 0; background: transparent; }
 .reader-book-open { display: block; width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
@@ -1243,7 +1244,7 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 .feed-source-tab { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid transparent; border-radius: 11px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; white-space: nowrap; }
 .feed-source-tab.active { background: var(--soft); border-color: var(--primary); color: var(--primary); }
 .feed-source-mark, .feed-source-tag b { display: inline-grid; place-items: center; flex: 0 0 auto; width: 22px; height: 22px; border-radius: 7px; font-size: 10px; font-weight: 850; letter-spacing: -.04em; }
-.feed-source-mark.all, .feed-source-tag.all b { background: var(--primary); color: #fff; }
+.feed-source-mark.all, .feed-source-tag.all b { background: var(--primary); color: var(--primary-contrast, #fff); }
 .feed-source-mark.ithome, .feed-source-tag.ithome b { background: #d92f36; color: #fff; }
 .feed-source-mark.huxiu, .feed-source-tag.huxiu b { background: #20242b; color: #f1d7a4; }
 .feed-source-mark.zhihu, .feed-source-tag.zhihu b { background: #1677ff; color: #fff; }
@@ -1283,7 +1284,7 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 /* Scientific keypad controls -------------------------------------------- */
 #workspace[data-tool="calculator"] .science-control-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 0 8px; }
 #workspace[data-tool="calculator"] .science-control-bar[hidden] { display: none; }
-#workspace[data-tool="calculator"] .science-control-key { min-height: 35px; padding: 6px 3px; border: 1px solid var(--primary); border-radius: 11px; background: var(--primary); color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; }
+#workspace[data-tool="calculator"] .science-control-key { min-height: 35px; padding: 6px 3px; border: 1px solid var(--primary); border-radius: 11px; background: var(--primary); color: var(--primary-contrast, #fff); font-size: 12px; font-weight: 750; cursor: pointer; }
 #workspace[data-tool="calculator"] .calculator-layout:has(.scientific-bar:not([hidden])) .keys { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 #workspace[data-tool="calculator"] .calculator-layout:has(.scientific-bar:not([hidden])) .key { min-height: 46px; }
 
@@ -1298,7 +1299,7 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 .setting-toggle input { appearance: none; -webkit-appearance: none; position: relative; width: 38px; height: 22px; flex: 0 0 38px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 35%, transparent); cursor: pointer; transition: background .15s ease, border-color .15s ease; }
 .setting-toggle input::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--muted); transition: transform .15s ease, background .15s ease; }
 .setting-toggle input:checked { border-color: var(--primary); background: var(--primary); }
-.setting-toggle input:checked::after { transform: translateX(16px); background: #fff; }
+.setting-toggle input:checked::after { transform: translateX(16px); background: var(--primary-contrast, #fff); }
 .setting-toggle input:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 25%, transparent); outline-offset: 2px; }
 
 @media (max-width: 600px) {
@@ -1492,14 +1493,14 @@ main:has(#workspace[data-tool="home"]), main:has(#workspace[data-tool="messages"
 }
 #settingsDialog .setting-toggle input::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--muted); transition: transform .16s ease, background .16s ease; }
 #settingsDialog .setting-toggle input:checked { border-color: var(--primary); background: var(--primary); }
-#settingsDialog .setting-toggle input:checked::after { transform: translateX(14px); background: #fff; }
+#settingsDialog .setting-toggle input:checked::after { transform: translateX(14px); background: var(--primary-contrast, #fff); }
 #settingsDialog .settings-update-section { margin-top: 10px; padding-top: 10px; }
 #settingsDialog .settings-update-section .settings-row { align-items: center; }
 #settingsDialog .settings-update-section .settings-row h3 { min-width: 0; flex: 1; }
 #settingsDialog .settings-version { display: inline-flex; align-items: center; gap: 4px; }
 .new-badge { display: inline-grid; place-items: center; width: 16px; height: 16px; color: var(--primary); vertical-align: -3px; }
 .new-badge svg { width: 15px; height: 15px; fill: currentColor; stroke: currentColor; stroke-width: 1.2; }
-#settingsDialog .update-check-button, #settingsDialog [data-apply-update] { flex: 0 0 auto; padding: 7px 12px; border-color: var(--primary); background: var(--primary); color: #fff; font-size: 12px; }
+#settingsDialog .update-check-button, #settingsDialog [data-apply-update] { flex: 0 0 auto; padding: 7px 12px; border-color: var(--primary); background: var(--primary); color: var(--primary-contrast, #fff); font-size: 12px; }
 
 @media (max-width: 760px) {
   :root { --app-header-height: calc(58px + env(safe-area-inset-top)); }
@@ -2897,6 +2898,7 @@ html[data-theme-mode="dark-gray"] body:has(.ticket-wallet-page) .ticket-wallet-c
 html[data-theme="dark"][data-color="mono"] {
   --primary: #f5f6fa;
   --primary-2: #b8bdc8;
+  --primary-contrast: #151515;
   --soft: color-mix(in srgb, var(--primary) 12%, var(--panel));
   --bg-top: color-mix(in srgb, var(--primary) 8%, var(--bg));
 }
@@ -3314,7 +3316,7 @@ html.reader-focus main:has(#workspace[data-tool="reader"]) { padding-top: calc(v
 .reader-reading-controls { display: flex; justify-content: flex-end; min-height: 32px; margin-bottom: 8px; }
 .reader-view-switch { display: inline-flex; padding: 2px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); }
 .reader-view-button { padding: 5px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
-.reader-view-button.active { background: var(--primary); color: #fff; }
+.reader-view-button.active { background: var(--primary); color: var(--primary-contrast, #fff); }
 .reader-reading-shell .reader-content { width: 100%; box-sizing: border-box; min-height: 0; flex: 1 1 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); }
 .reader-scroll-content { overflow: auto; padding: 28px clamp(20px, 6vw, 76px); }
 .reader-page-viewport { overflow-x: hidden; overflow-y: hidden; padding: 0; scroll-behavior: smooth; }
@@ -3440,7 +3442,7 @@ html.reader-focus main:has(#workspace[data-tool="reader"]) { padding-top: calc(v
 }
 
 /* Only the Mine update action follows the configured accent. */
-.mine-update-button.primary { background: var(--primary); color: #fff; }
+.mine-update-button.primary { background: var(--primary); color: var(--primary-contrast, #fff); }
 
 @media (max-width: 760px) {
   #workspace[data-tool="translate"] .translation-input-wrap textarea { min-height: 86px; }
@@ -3963,7 +3965,7 @@ main:has(#workspace[data-tool="calculator"]) {
 }
 #workspace[data-tool="calculator"] .calculator-grid .key.equal {
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-contrast, #fff);
 }
 #workspace[data-tool="calculator"] .calculator-grid .angle-toggle {
   grid-column: span 2;
@@ -3979,7 +3981,7 @@ main:has(#workspace[data-tool="calculator"]) {
 }
 #workspace[data-tool="calculator"] .calculator-grid .key[data-toggle-inverse][aria-pressed="true"] {
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-contrast, #fff);
 }
 
 @media (max-width: 760px) {
@@ -4335,7 +4337,7 @@ main:has(#workspace[data-tool="calculator"]) {
 .reader-tool-button svg, .reader-head-actions svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .reader-reading-shell .reader-view-switch { border-color: var(--reader-line); background: color-mix(in srgb, var(--reader-panel) 86%, var(--soft)); }
 .reader-reading-shell .reader-view-button { color: var(--reader-muted); }
-.reader-reading-shell .reader-view-button.active { background: var(--primary); color: #fff; }
+.reader-reading-shell .reader-view-button.active { background: var(--primary); color: var(--primary-contrast, #fff); }
 .reader-reading-shell .reader-content { background: var(--reader-panel); border-color: var(--reader-line); color: var(--reader-ink); font-family: var(--reader-font); font-size: var(--reader-size); line-height: var(--reader-line-height); letter-spacing: var(--reader-letter-spacing); }
 .reader-reading-shell .reader-scroll-content { background: var(--reader-bg); }
 .reader-reading-shell .reader-page-flow { background: var(--reader-bg); }
@@ -4857,28 +4859,6 @@ html[data-theme="dark"] .language-tool-card {
 html[data-theme="dark"] .reader-theme-dot.theme-dark {
   background: #000;
   border-color: var(--line);
-}
-
-/* White is the neutral dark-mode accent. Give solid controls dark text so
-   the monochrome palette remains readable instead of white-on-white. */
-html[data-theme="dark"][data-color="mono"] .primary:not(.mine-update-button),
-html[data-theme="dark"][data-color="mono"] .key.equal,
-html[data-theme="dark"][data-color="mono"] .science-toggle[aria-pressed="true"],
-html[data-theme="dark"][data-color="mono"] .reader-library-add,
-html[data-theme="dark"][data-color="mono"] .reader-view-button.active,
-html[data-theme="dark"][data-color="mono"] #workspace[data-tool="calculator"] .science-control-key,
-html[data-theme="dark"][data-color="mono"] #settingsDialog [data-apply-update] {
-  background: #f5f5f5;
-  color: #000;
-}
-html[data-theme="dark"][data-color="mono"] .setting-toggle input:checked,
-html[data-theme="dark"][data-color="mono"] #settingsDialog .setting-toggle input:checked {
-  background: #f5f5f5;
-  border-color: #f5f5f5;
-}
-html[data-theme="dark"][data-color="mono"] .setting-toggle input:checked::after,
-html[data-theme="dark"][data-color="mono"] #settingsDialog .setting-toggle input:checked::after {
-  background: #000;
 }
 
 /* 2.18.57: page swipes keep the source/tool rail outside the moving content
@@ -6372,7 +6352,7 @@ html.reader-focus #readerDialog .reader-dialog-card {
 .reader-dialog-primary {
   border-color: var(--primary) !important;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-contrast, #fff);
 }
 
 /* Installed PWA fullscreen can retain the app's old main height and safe-area
@@ -10764,7 +10744,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   text-align: left;
   font: inherit;
 }
-.github-action-button.is-primary { border-color: transparent; background: var(--primary); color: #fff; box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 22%, transparent); }
+.github-action-button.is-primary { border-color: transparent; background: var(--primary); color: var(--primary-contrast, #fff); box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 22%, transparent); }
 .github-action-button:disabled, .github-secondary-button:disabled, .github-disconnect-button:disabled { cursor: wait; opacity: .58; }
 .github-action-icon { display: grid; flex: 0 0 30px; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: color-mix(in srgb, currentColor 12%, transparent); }
 .github-action-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
@@ -10794,7 +10774,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
 .github-disconnect-button strong { color: var(--ink); font-size: 11px; }
 .github-disconnect-button small { font-size: 10px; }
 .github-waiting-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-#githubDialog .github-device-link { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; padding: 8px 11px; border: 1px solid var(--primary); border-radius: 12px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 750; text-decoration: none; }
+#githubDialog .github-device-link { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; padding: 8px 11px; border: 1px solid var(--primary); border-radius: 12px; background: var(--primary); color: var(--primary-contrast, #fff); font-size: 11px; font-weight: 750; text-decoration: none; }
 .github-sync-progress { gap: 7px; padding: 10px 11px; border-radius: 15px; }
 .github-sync-progress-head strong { font-size: 11px; line-height: 1.35; }
 .github-sync-progress-head span { font-size: 11px; }
@@ -10920,7 +10900,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
   border-radius: 11px;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-contrast, #fff);
   box-shadow: 0 6px 14px color-mix(in srgb, var(--primary) 20%, transparent);
   cursor: pointer;
   font: inherit;
@@ -10929,7 +10909,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   white-space: nowrap;
 }
 #githubDialog .github-login-cta:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
-#githubDialog .github-login-cta-mark { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 6px; background: color-mix(in srgb, #fff 18%, transparent); }
+#githubDialog .github-login-cta-mark { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 6px; background: color-mix(in srgb, currentColor 16%, transparent); }
 #githubDialog .github-login-cta-mark svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
 #githubDialog .github-login-cta-arrow { margin-left: 2px; font-size: 15px; line-height: 1; }
 @media (max-width: 380px) {
@@ -11120,8 +11100,8 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   left: 6px;
   width: 8px;
   height: 4px;
-  border-bottom: 2px solid #fff;
-  border-left: 2px solid #fff;
+  border-bottom: 2px solid var(--primary-contrast, #fff);
+  border-left: 2px solid var(--primary-contrast, #fff);
   content: '';
   opacity: 0;
   transform: rotate(-45deg) scale(.7);
@@ -11403,7 +11383,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   background: var(--primary);
 }
 #githubDialog .github-sync-option input:checked::after {
-  background: #fff;
+  background: var(--primary-contrast, #fff);
   opacity: 1;
   transform: translateX(12px);
 }
@@ -11492,7 +11472,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   background: var(--primary);
 }
 #githubDialog .github-sync-option input:checked::after {
-  background: #fff;
+  background: var(--primary-contrast, #fff);
   transform: translateX(12px);
 }
 #githubDialog .github-sync-option input:focus-visible {
@@ -11783,7 +11763,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
 .ticket-wallet-template-option { position: relative; display: flex; align-items: center; gap: 11px; min-width: 0; padding: 11px 38px 11px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); color: var(--ink); text-align: left; cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease, transform .15s ease; }
 .ticket-wallet-template-option:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--line)); }
 .ticket-wallet-template-option.active { border: 2px solid var(--primary); padding: 10px 37px 10px 11px; background: color-mix(in srgb, var(--primary) 13%, var(--panel-2)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 23%, transparent), 0 5px 14px color-mix(in srgb, var(--primary) 14%, transparent); }
-.ticket-wallet-template-option.active::after { position: absolute; top: 50%; right: 10px; display: grid; width: 21px; height: 21px; place-items: center; transform: translateY(-50%); border-radius: 50%; background: var(--primary); color: #fff; content: '✓'; font-size: 13px; font-weight: 900; line-height: 1; }
+.ticket-wallet-template-option.active::after { position: absolute; top: 50%; right: 10px; display: grid; width: 21px; height: 21px; place-items: center; transform: translateY(-50%); border-radius: 50%; background: var(--primary); color: var(--primary-contrast, #fff); content: '✓'; font-size: 13px; font-weight: 900; line-height: 1; }
 .ticket-wallet-template-option:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 .ticket-wallet-template-option > span:last-child { display: grid; gap: 3px; min-width: 0; }
 .ticket-wallet-template-option strong { font-size: 12px; }
