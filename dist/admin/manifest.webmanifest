@@ -1,0 +1,15 @@
+{
+  "id": "./index.html",
+  "name": "OneBox 管理后台",
+  "short_name": "OneBox 管理",
+  "description": "OneBox 管理后台 PWA",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#f4f6fb",
+  "icons": [
+    { "src": "../icons/onebox-brand-v317-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "../icons/onebox-brand-v317-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

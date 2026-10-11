@@ -15,3 +15,7 @@ bucket_name = "onebox-reader-books"
 
 [vars]
 ALLOWED_ORIGIN = "https://oneboxy.github.io"
+BOOTSTRAP_SUPERADMIN_GITHUB_IDS = "9962337"
+
+[triggers]
+crons = ["15 * * * *"]

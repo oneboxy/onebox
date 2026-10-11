@@ -35,33 +35,30 @@ GitHub Pages 是纯静态托管，OneBox 使用 GitHub Device Flow，不把 OAut
 
 当前 GitHub 私有 Gist 备份仍与 GitHub 账号绑定，尚不能自动和未来的 Apple 或其他账号互通。要实现互通，需要后端提供稳定的 OneBox 账号 ID 和已验证的身份关联流程；用户关联账号后，再将现有 Gist/书籍数据迁移或合并到该 OneBox 账号。关联必须由用户明确确认，不能只凭相同邮箱或用户名自动合并。
 
-## 阅读内容自动同步（Cloudflare）
+## Cloudflare 云端账号与后台
 
-阅读模块的独立自动同步服务位于 `cloudflare/reader-sync/`：书籍原文件放进 Cloudflare R2 私有存储，书架信息、笔记和阅读进度放进 Cloudflare D1。文件不使用公开 URL；访问需要先用 OneBox 已有的 GitHub 登录令牌换取短期会话。Worker 只用该令牌向 GitHub 验证当前用户，不把它写入数据库或日志。不同 GitHub 用户的数据按用户 ID 隔离。
+`cloudflare/reader-sync/` 中的 Cloudflare Worker 负责 GitHub OAuth 会话、私有阅读文件同步和 OneBox 用户云端数据。D1 保存按 GitHub 数字 ID 隔离的用户数据、账号状态、权限、公告、模块开关、回收站和审计记录；R2 保存书籍及用户附件，不提供公开文件 URL。GitHub 令牌只用于向 GitHub 验证身份，不写入 D1 或 R2。Pages 继续托管静态前台、云端授权页和 `/admin/` 后台 PWA。
 
-配置完成后，导入书籍、阅读进度保存、重新联网、重新打开页面和切回页面都会触发自动同步；离线时数据仍保存在本机，恢复网络后补传。书籍文件以 SHA-256 校验，重复同步不会重新上传未改变的文件。单本上限 64 MB，书架最多 80 本。在一台设备删除书籍后，删除也会同步到其他设备。手动 GitHub Gist 备份仍可继续使用。
+普通用户在 OneBox 前台连接 GitHub 后，打开 `/cloud-sync.html` 查看本机数据概况并明确勾选授权，才会把 OneBox 数据和附件迁移到云端。迁移完成后可在页面开启此设备的自动同步；本机和云端更改按更新时间合并。现有 GitHub Gist 不会自动导入，需先在前台恢复到本机，再进行迁移。后台用户列表只包含已连接云端的账号。
 
-**Worker 当前尚未部署，书籍尚未上传。** `dist/reader-sync-config.js` 默认留空，避免服务部署完成前发送书籍。启用 Cloudflare R2 并部署 Worker 后，把输出的 Worker URL 填入该文件，再发布 Pages，自动同步才会启用。
+后台地址是 `/admin/`。超级管理员可按 GitHub 数字 ID 邀请管理员，并分配超级管理员、用户管理员、个人数据管理员、内容运营或只读审计角色。个人数据导出与删除权限可单独授权；查看、编辑、导出、删除和恢复等操作会写入审计记录。用户删除会进入 30 天回收站；到期后由 Worker 定时清除。后台导出为 ZIP，包含用户 JSON 与附件文件。模块开关隐藏模块入口并阻止直接访问，保留用户数据；广告按页面位置及起止时间发布，公告可发给全体或指定用户并记录已读状态。后台 PWA 离线时仅显示外壳，不缓存或展示个人数据。
 
-### 部署到你自己的 Cloudflare 账户
+**这套云端服务目前尚未部署，`dist/reader-sync-config.js` 的 Worker URL 仍为空。** 页面发布后，在 Worker 部署并配置好之前，云端同步和后台会显示未配置状态，不会上传本机内容。
 
-在有 Cloudflare 登录能力的终端执行：
+### 部署 Cloudflare Worker
+
+`wrangler.toml` 使用 `onebox-reader-sync` D1 数据库、`onebox-reader-books` R2 存储桶，并将 GitHub 数字 ID `9962337` 作为初始超级管理员。确认该 ID 对应预期管理员后，在已登录 Cloudflare 的终端执行：
 
 ```bash
 npx wrangler login
-npx wrangler r2 bucket create onebox-reader-books
-npx wrangler d1 create onebox-reader-sync
-```
-
-把 D1 命令返回的 `database_id` 填入 `cloudflare/reader-sync/wrangler.toml`，再运行：
-
-```bash
 npx wrangler d1 migrations apply onebox-reader-sync --remote --config cloudflare/reader-sync/wrangler.toml
 npx wrangler deploy --config cloudflare/reader-sync/wrangler.toml
 npx wrangler secret put SESSION_SECRET --config cloudflare/reader-sync/wrangler.toml
 ```
 
-`SESSION_SECRET` 应使用随机生成的长字符串。部署完成后，把 Wrangler 输出的 `workers.dev` 地址写入 `dist/reader-sync-config.js` 的 `ONEBOX_READER_SYNC_API`，提交并部署 GitHub Pages。服务启用前不执行书籍上传。
+如果目标账号尚未有配置中的 D1 数据库或 R2 存储桶，先运行 `npx wrangler d1 create onebox-reader-sync` 与 `npx wrangler r2 bucket create onebox-reader-books`，并把新数据库的 `database_id` 写回 `wrangler.toml`。部署前要按顺序应用 `0001_reader_books.sql` 和 `0002_onebox_cloud_admin.sql`。`SESSION_SECRET` 使用随机长字符串。
+
+Worker 部署后，将其 `workers.dev` URL 填入 `dist/reader-sync-config.js` 的 `ONEBOX_READER_SYNC_API`；`ONEBOX_CLOUD_API` 会自动沿用该地址。再发布 Pages，才能启用云端账号、迁移页和 `/admin/` 后台。书籍同步仍使用原有阅读 API；通用 OneBox 数据迁移需要用户在授权页明确同意后才启动。
 
 ## 发布前检查
 

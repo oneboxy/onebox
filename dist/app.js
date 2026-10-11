@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.610';
+const APP_VERSION = '2.18.612';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -202,7 +202,7 @@ async function oneBoxDbPut(storeName, key, value) {
       transaction = db.transaction(storeName, 'readwrite');
       transaction.objectStore(storeName).put(value, key);
     } catch { resolve(false); return; }
-    transaction.oncomplete = () => resolve(true);
+    transaction.oncomplete = () => { if (storeName !== 'snapshot') window.dispatchEvent(new CustomEvent('onebox:indexeddb-changed', { detail: { store: storeName, key, operation: 'put', value } })); resolve(true); };
     transaction.onerror = transaction.onabort = () => resolve(false);
   });
 }
@@ -220,7 +220,7 @@ async function oneBoxDbPutBatch(entriesByStore) {
         (entriesByStore[name] || []).forEach(([key, value]) => store.put(value, key));
       });
     } catch { resolve(false); return; }
-    transaction.oncomplete = () => resolve(true);
+    transaction.oncomplete = () => { stores.forEach((name) => (entriesByStore[name] || []).forEach(([key, value]) => window.dispatchEvent(new CustomEvent('onebox:indexeddb-changed', { detail: { store: name, key, operation: 'put', value } })))); resolve(true); };
     transaction.onerror = transaction.onabort = () => resolve(false);
   });
 }
@@ -233,7 +233,7 @@ async function oneBoxDbDelete(storeName, key) {
       transaction = db.transaction(storeName, 'readwrite');
       transaction.objectStore(storeName).delete(key);
     } catch { resolve(false); return; }
-    transaction.oncomplete = () => resolve(true);
+    transaction.oncomplete = () => { if (storeName !== 'snapshot') window.dispatchEvent(new CustomEvent('onebox:indexeddb-changed', { detail: { store: storeName, key, operation: 'delete' } })); resolve(true); };
     transaction.onerror = transaction.onabort = () => resolve(false);
   });
 }
@@ -1513,11 +1513,28 @@ const SECTION_DEFS = {
 SECTION_DEFS.navigation.icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"/></svg>';
 SECTION_DEFS.navigation.activeIcon = '<svg class="filled-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12 2.5Zm4.55 6.32-2.19 5.47-5.36 2.2a.9.9 0 0 1-1.18-1.17l2.15-5.34 5.41-2.27a.9.9 0 0 1 1.17 1.11Z"/></svg>';
 const sectionIcon = (item, active) => active ? item.activeIcon : item.icon;
+function cloudModuleEnabled(key) { return window.OneBoxCloudConfig?.modules?.[key] !== false; }
+function toolModuleKey(id) { return ({ dev: 'developer', convert: 'conversion', translate: 'translation' })[id] || id; }
+function currentRouteModule() {
+  if (state.section === 'mine') return state.ticketWalletOpen ? 'ticket-wallet' : 'settings';
+  if (state.section === 'navigation') return 'navigation';
+  if (state.section === 'messages') return 'messages';
+  if (state.section === 'home') return 'home';
+  return toolModuleKey(state.tool);
+}
+function firstAvailableRoute() {
+  for (const section of ['home', 'messages', 'navigation', 'mine']) {
+    const key = section === 'mine' ? 'settings' : section;
+    if (cloudModuleEnabled(key) && (section !== 'navigation' || state.navigationLocation === 'main')) return section;
+  }
+  const tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && cloudModuleEnabled(toolModuleKey(id)));
+  return tool ? tool : '';
+}
 function renderNav() {
   const includeNavigation = state.navigationLocation === 'tools';
   const normalizedOrder = normalizeToolOrder(state.toolOrder, includeNavigation);
   if (normalizedOrder.join('|') !== state.toolOrder.join('|')) { state.toolOrder = normalizedOrder; saveToolOrder(); }
-  const toolIds = includeNavigation ? normalizedOrder : normalizedOrder.filter((id) => id !== 'navigation');
+  const toolIds = (includeNavigation ? normalizedOrder : normalizedOrder.filter((id) => id !== 'navigation')).filter((id) => cloudModuleEnabled(toolModuleKey(id)));
   const previousTabs = nav.querySelector('.tool-tabs');
   const previousScrollLeft = previousTabs?.scrollLeft || 0;
   const tabsMarkup = toolIds.map((id, index) => {
@@ -1570,7 +1587,7 @@ function scrollToolTabs(direction) {
   tabs.scrollBy({ left: direction * Math.max(120, Math.round(tabs.clientWidth * .72)), behavior: 'smooth' });
 }
 function mainSectionEntries() {
-  return Object.values(SECTION_DEFS).filter((item) => item.key !== 'navigation' || state.navigationLocation === 'main');
+  return Object.values(SECTION_DEFS).filter((item) => (item.key !== 'navigation' || state.navigationLocation === 'main') && cloudModuleEnabled(item.key === 'mine' ? 'settings' : item.key));
 }
 function renderTopNav() {
   const layoutNav = $('#layoutNav');
@@ -1607,6 +1624,7 @@ function renderBottomNav() {
 function selectTool(id) {
   if (id === 'convert') id = 'translate';
   if (!TOOL_DEFS[id]) id = 'calculator';
+  if (!cloudModuleEnabled(toolModuleKey(id))) { toast(state.language === 'en' ? 'This module is currently unavailable' : '此模块暂不可用'); const fallback = firstAvailableRoute(); if (fallback) selectSection(fallback); return; }
   awardPetPoints(2, 'tool', 'tool:' + id + ':' + dateKey(new Date()));
   const revealActiveTab = () => requestAnimationFrame(() => { focusActiveToolTab(true); updateToolTabOverflowControls(); });
   if (id === 'navigation') {
@@ -1627,6 +1645,7 @@ function selectTool(id) {
 }
 function selectSection(section) {
   if (!SECTION_DEFS[section]) section = 'tools';
+  if (section !== 'tools' && !cloudModuleEnabled(section === 'mine' ? 'settings' : section)) { toast(state.language === 'en' ? 'This module is currently unavailable' : '此模块暂不可用'); const fallback = firstAvailableRoute(); if (fallback) selectSection(fallback); return; }
   if (section === 'navigation' && state.navigationLocation === 'tools') return selectTool('navigation');
   if (section !== 'mine') { state.ticketWalletOpen = false; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null; }
   const unchanged = state.section === section;
@@ -3652,8 +3671,12 @@ function notificationItemsMarkup() {
   if (!items.length) return '<p class="empty compact">' + t('noMessages') + '</p>';
   return items.map(notificationRowMarkup).join('');
 }
+function cloudAnnouncementMarkup(item, compact = false) {
+  return '<article class="onebox-cloud-announcement ' + (item.read ? 'is-read' : 'is-unread') + (compact ? ' is-compact' : '') + '" data-cloud-announcement="' + escapeHtml(item.id) + '"><div><strong>' + escapeHtml(item.title || (state.language === 'en' ? 'Announcement' : '公告')) + '</strong><p>' + escapeHtml(item.body || '') + '</p></div>' + (item.read ? '<small>' + (state.language === 'en' ? 'Read' : '已读') + '</small>' : '<button type="button" data-cloud-announcement-read="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Mark read' : '标为已读') + '</button>') + '</article>';
+}
 function renderMessages() {
-  return '<div class="section-page message-page"><div class="message-panel"><div class="message-panel-head"><button class="secondary compact-action" data-mark-notifications-read>' + t('markRead') + '</button></div><div class="notification-list">' + notificationItemsMarkup() + '</div></div></div>';
+  const announcements = (window.OneBoxCloudConfig?.announcements || []).filter((item) => item.placement === 'message-center');
+  return '<div class="section-page message-page"><div class="message-panel">' + (announcements.length ? '<section class="onebox-cloud-announcements"><h2>' + (state.language === 'en' ? 'Announcements' : '公告') + '</h2>' + announcements.map((item) => cloudAnnouncementMarkup(item)).join('') + '</section>' : '') + '<div class="message-panel-head"><button class="secondary compact-action" data-mark-notifications-read>' + t('markRead') + '</button></div><div class="notification-list">' + notificationItemsMarkup() + '</div></div></div>';
 }
 
 function renderMine() {
@@ -3665,6 +3688,7 @@ function renderMine() {
     agreement: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4M9 12h6M9 15h3M14 16.5l1.5 1.5 2.5-3"/></svg>',
     pet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 1.5-4L12 7l4.5-2L18 9v5.2c0 3.4-2.7 5.8-6 5.8s-6-2.4-6-5.8Z"/><circle cx="9.2" cy="12.2" r=".8"/><circle cx="14.8" cy="12.2" r=".8"/><path d="M9.5 15.2c1.5 1.2 3.5 1.2 5 0"/></svg>',
     wallet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h9a2 2 0 0 1 2 2v9"/><rect x="5" y="8" width="12" height="11" rx="2"/><path d="M8 12h4"/></svg>',
+    cloud: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 18.5h9a4 4 0 0 0 .5-7.97A6 6 0 0 0 5.2 9.2a4.7 4.7 0 0 0 2.3 9.3Z"/><path d="M12 15v-6m-2.5 2.5L12 9l2.5 2.5"/></svg>',
   })[name];
   const row = (action, glyph, title, description) => '<button class="mine-row" ' + action + '><span class="mine-row-icon">' + icon(glyph) + '</span><span class="mine-row-copy"><strong>' + title + '</strong><small class="mine-row-description">' + description + '</small></span><span>›</span></button>';
   const updateBusy = state.updateChecking || state.updateApplying;
@@ -3672,7 +3696,7 @@ function renderMine() {
   const updateProgress = updateBusy ? '<span class="update-progress" role="status" aria-label="' + escapeHtml(updateStatus) + '"><span class="update-progress-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>' : '<span class="update-status-label">' + escapeHtml(updateStatus) + '</span>';
   const updateButton = state.updateAvailable ? '<button class="primary mine-update-button" data-apply-update ' + (state.updateApplying ? 'disabled' : '') + '>' + (state.updateApplying ? t('updateApplying') : t('applyUpdate')) + '</button>' : '<button class="primary mine-update-button" data-check-update ' + (state.updateChecking || state.updateApplying ? 'disabled' : '') + '>' + t('checkUpdate') + '</button>';
   const updateRow = '<div class="mine-row mine-update-row"><span class="mine-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></span><span class="mine-row-copy mine-update-copy"><strong>' + t('appUpdate') + '</strong><small class="mine-row-description">v' + APP_VERSION + (updateBusy ? ' ' : ' · ') + updateProgress + '</small></span><span class="mine-row-action">' + updateButton + '</span></div>';
-  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-open-github-page', 'github', t('accountLogin'), escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
+  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-open-cloud-sync', 'cloud', state.language === 'en' ? 'OneBox cloud sync' : 'OneBox 云端同步', state.language === 'en' ? 'Choose and authorize data migration' : '授权迁移数据并开启跨设备同步') + row('data-open-github-page', 'github', t('accountLogin'), escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
 }
 
 function openTicketWallet() {
@@ -10385,7 +10409,50 @@ function setupServiceWorker() {
 }
 
 // Rendering and interaction --------------------------------------------------
+function cloudContentElement(markup) {
+  const template = document.createElement('template'); template.innerHTML = markup; return template.content.firstElementChild;
+}
+function publicAdMarkup(item) {
+  const safeUrl = (value) => { try { const url = new URL(String(value || '')); return ['http:', 'https:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } };
+  const image = safeUrl(item.imageUrl), target = safeUrl(item.targetUrl), content = '<strong>' + escapeHtml(item.title || '') + '</strong><p>' + escapeHtml(item.body || '') + '</p>' + (image ? '<img src="' + escapeHtml(image) + '" alt="" loading="lazy">' : '');
+  return '<aside class="onebox-public-ad" data-public-ad="' + escapeHtml(item.id || '') + '">' + (target ? '<a href="' + escapeHtml(target) + '" target="_blank" rel="noopener noreferrer">' + content + '</a>' : content) + '<small>推广</small></aside>';
+}
+function injectCloudContent() {
+  const config = window.OneBoxCloudConfig || {}, ads = Array.isArray(config.ads) ? config.ads : [], announcements = Array.isArray(config.announcements) ? config.announcements : [];
+  const add = (selector, placement, mode = 'prepend') => {
+    const target = $(selector, workspace); if (!target) return;
+    const matches = ads.filter((item) => item.placement === placement);
+    (mode === 'before' ? matches : [...matches].reverse()).forEach((item) => { const node = cloudContentElement(publicAdMarkup(item)); if (mode === 'before') target.parentNode?.insertBefore(node, target); else target.prepend(node); });
+  };
+  if (state.section === 'home') {
+    add('.home-page', 'home-top');
+    add('.feed-hint', 'home-feed', 'before');
+  } else if (state.section === 'tools') {
+    add('.section-page', 'tools-top');
+    if (state.tool === 'weather') add('.section-page', 'weather-top');
+    if (state.tool === 'calendar') add('.section-page', 'calendar-top');
+  } else if (state.section === 'mine' && state.ticketWalletOpen) add('.section-page', 'ticket-wallet-top');
+
+  const banner = announcements.find((item) => item.placement === 'banner' && !item.read);
+  if (banner) workspace.prepend(cloudContentElement('<section class="onebox-cloud-banner" data-cloud-announcement="' + escapeHtml(banner.id) + '"><div><strong>' + escapeHtml(banner.title || '公告') + '</strong><p>' + escapeHtml(banner.body || '') + '</p></div><button type="button" data-cloud-announcement-read="' + escapeHtml(banner.id) + '" aria-label="关闭公告">×</button></section>'));
+  const activeModal = $('#oneboxAnnouncementModal');
+  if (activeModal && !announcements.some((item) => item.id === activeModal.dataset.cloudAnnouncement && item.placement === 'modal' && !item.read)) activeModal.remove();
+  const modal = announcements.find((item) => { let dismissed = false; try { dismissed = sessionStorage.getItem('onebox-announcement-dismissed-' + item.id) === 'true'; } catch {} return item.placement === 'modal' && !item.read && !dismissed; });
+  if (modal && !$('#oneboxAnnouncementModal')) {
+    document.body.append(cloudContentElement('<div class="onebox-announcement-overlay" id="oneboxAnnouncementModal" role="dialog" aria-modal="true" aria-labelledby="oneboxAnnouncementTitle" data-cloud-announcement="' + escapeHtml(modal.id) + '"><article><button type="button" data-cloud-announcement-read="' + escapeHtml(modal.id) + '" aria-label="关闭公告">×</button><h2 id="oneboxAnnouncementTitle">' + escapeHtml(modal.title || '公告') + '</h2><p>' + escapeHtml(modal.body || '') + '</p><button type="button" class="onebox-announcement-confirm" data-cloud-announcement-read="' + escapeHtml(modal.id) + '">知道了</button></article></div>'));
+  }
+}
 function render() {
+  if (!cloudModuleEnabled(currentRouteModule())) {
+    const fallback = firstAvailableRoute();
+    state.ticketWalletOpen = false;
+    if (fallback) {
+      if (SECTION_DEFS[fallback]) { state.section = fallback; if (fallback === 'tools') state.tool = Object.keys(TOOL_DEFS).find((id) => cloudModuleEnabled(toolModuleKey(id))) || 'calculator'; }
+      else { state.section = 'tools'; state.tool = fallback; }
+      history.replaceState(null, '', '#' + (state.section === 'tools' ? state.tool : state.section));
+    }
+  }
+  const allModulesUnavailable = !cloudModuleEnabled(currentRouteModule());
   // Persist the last measured position before replacing the viewport, never its transient zero.
   if (state.readerMode === 'reading' && $('[data-reader-content]')) flushReaderProgress(false);
   if (state.readerMode === 'reading') readerPositionRestoring = true;
@@ -10404,7 +10471,9 @@ function render() {
   nav.hidden = state.section !== 'tools' || developerFullscreen;
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
-  workspace.innerHTML = state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
+  workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
+  $('#settingsBtn').hidden = !cloudModuleEnabled('settings');
+  injectCloudContent();
   workspace.setAttribute('aria-busy', 'false');
   if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'tickets') syncTicketWalletFocusStack();
   if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'journeys') requestAnimationFrame(() => { void hydrateTicketWalletMap(); });
@@ -12562,6 +12631,7 @@ workspace.addEventListener('click', async (event) => {
     return;
   }
   if (event.target.closest('[data-open-settings-page]')) return renderSettings();
+  if (event.target.closest('[data-open-cloud-sync]')) { location.href = new URL('cloud-sync.html', document.baseURI).href; return; }
   if (event.target.closest('[data-open-pet-page]')) return renderPetDialog();
   if (event.target.closest('[data-check-update]')) return checkForUpdate();
   if (event.target.closest('[data-apply-update]')) return applyUpdate();
@@ -13313,6 +13383,22 @@ persistentRecovery.then((restored) => {
   if (restored && !githubCallbackHandled && performance.now() < 5000) { window.location.reload(); return; }
   readerCloudReady = true;
   if (state.github.token) queueReaderCloudSync(500);
+  window.dispatchEvent(new CustomEvent('onebox:app-ready'));
 }).catch(() => { /* local persistence is optional */ });
 
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') $$('.ticket-wallet-detail-more[open]').forEach((menu) => { menu.open = false; menu.querySelector('summary')?.focus(); }); });
+document.addEventListener('click', (event) => {
+  const announcementButton = event.target.closest('[data-cloud-announcement-read]');
+  const overlay = $('#oneboxAnnouncementModal');
+  if (announcementButton) {
+    const id = announcementButton.dataset.cloudAnnouncementRead;
+    if (overlay?.dataset.cloudAnnouncement === id) { try { sessionStorage.setItem('onebox-announcement-dismissed-' + id, 'true'); } catch {} overlay.remove(); }
+    const config = window.OneBoxCloudConfig || {};
+    config.announcements = (config.announcements || []).map((item) => item.id === id ? { ...item, read: true } : item);
+    window.OneBoxCloudConfig = config; window.dispatchEvent(new CustomEvent('onebox:public-config', { detail: config }));
+    void window.OneBoxCloudSync?.markAnnouncementRead?.(id).catch(() => {});
+    return;
+  }
+  if (overlay && event.target === overlay) { overlay.querySelector('[data-cloud-announcement-read]')?.click(); }
+});
+window.addEventListener('onebox:public-config', () => { renderNav(); renderBottomNav(); render(); });

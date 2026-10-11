@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6fb">
+  <meta name="description" content="OneBox 管理后台">
+  <title>OneBox 管理后台</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="../favicon-v317.ico">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-app">
+    <aside class="sidebar">
+      <a class="brand" href="../#home"><img src="../icons/onebox-brand-v317-48.png" alt=""><b>OneBox</b><span>管理后台</span></a>
+      <nav class="side-nav" aria-label="管理功能">
+        <button data-page="overview" class="active"><i>⌂</i>总览</button>
+        <button data-page="users"><i>♙</i>用户管理</button>
+        <button data-page="content"><i>▤</i>广告与公告</button>
+        <button data-page="modules"><i>▦</i>模块管理</button>
+        <button data-page="admins"><i>♧</i>管理员</button>
+        <button data-page="recycle"><i>↶</i>回收站</button>
+        <button data-page="audit"><i>◷</i>审计记录</button>
+      </nav>
+      <div class="sidebar-bottom"><a href="../#home">返回 OneBox 前台</a><span>后台 PWA · 离线不缓存个人数据</span></div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar">
+        <div><span class="eyebrow">ONEBOX CONTROL</span><h1 id="pageTitle">总览</h1></div>
+        <div class="topbar-user"><span class="online-dot"></span><span id="connectionLabel">正在连接</span><button id="accountButton" class="account-button" hidden></button></div>
+      </header>
+      <section id="loginPanel" class="login-panel" hidden>
+        <div class="login-mark">◈</div><h2>登录 OneBox 管理后台</h2>
+        <p id="loginMessage">使用已授权的 GitHub 账号。管理员身份和每项操作都会由服务端校验。</p>
+        <a class="button primary" href="../#mine" target="_blank" rel="noopener">前往 OneBox 连接 GitHub</a>
+        <small>连接后返回此页即可继续。后台不会保存 GitHub 令牌。</small>
+        <button id="retryLogin" class="button subtle" type="button">已连接，重新验证</button>
+      </section>
+      <div id="apiPanel" class="notice notice-warning" hidden></div>
+      <div id="permissionPanel" class="notice notice-danger" hidden></div>
+      <div id="appContent" hidden>
+        <section class="page-section active" data-section="overview"><div class="stat-grid" id="statsGrid"></div><div class="panel"><div class="panel-heading"><div><h2>最近操作</h2><p>个人数据查看、导出、编辑和删除都会留痕</p></div><button class="button subtle" data-go="audit">查看全部</button></div><div id="recentAudit" class="audit-list"></div></div></section>
+        <section class="page-section" data-section="users"><div class="panel"><div class="panel-heading"><div><h2>用户</h2><p>只列出接入 OneBox 云端的账号</p></div><span id="userCount" class="muted"></span></div><div class="toolbar"><input id="userSearch" type="search" placeholder="搜索 GitHub 用户名或 ID"><select id="userStatus"><option value="">全部状态</option><option value="active">正常</option><option value="suspended">已停用</option><option value="deleted">回收站中</option><option value="purged">已清除</option></select><button id="searchUsers" class="button">搜索</button></div><div id="userTable" class="table-wrap"></div></div></section>
+        <section class="page-section" data-section="content"><div class="segmented"><button data-kind="ads" class="active">广告</button><button data-kind="announcements">公告</button></div><div class="panel"><div class="panel-heading"><div><h2 id="contentHeading">广告投放</h2><p>按页面位置和起止时间排期</p></div><button id="addContent" class="button primary">新建</button></div><div id="contentList" class="content-list"></div></div></section>
+        <section class="page-section" data-section="modules"><div class="panel"><div class="panel-heading"><div><h2>全站模块开关</h2><p>下架后隐藏入口并阻止直达，用户数据保留</p></div><button id="saveModules" class="button primary">保存更改</button></div><div id="moduleList" class="module-list"></div></div></section>
+        <section class="page-section" data-section="admins"><div class="panel"><div class="panel-heading"><div><h2>管理员与角色</h2><p>通过 GitHub 数字 ID 授权，权限在服务端校验</p></div></div><form id="inviteAdmin" class="invite-form"><label>GitHub 数字 ID<input name="githubId" inputmode="numeric" required placeholder="例如 9962337"></label><label>GitHub 用户名（便于识别）<input name="githubLogin" placeholder="用户名"></label><label>角色<select name="role"><option value="user_admin">用户管理员</option><option value="personal_data_admin">个人数据管理员</option><option value="content_operator">内容运营</option><option value="read_only_auditor">只读审计</option><option value="super_admin">超级管理员</option></select></label><div class="grant-options"><label><input type="checkbox" name="grantExport">个人数据导出</label><label><input type="checkbox" name="grantDelete">个人数据删除</label></div><button class="button primary" type="submit">邀请 / 更新角色</button></form><div id="adminList" class="admin-list"></div></div></section>
+        <section class="page-section" data-section="recycle"><div class="panel"><div class="panel-heading"><div><h2>数据回收站</h2><p>数据保留 30 天，之后自动永久清除</p></div><button id="refreshRecycle" class="button subtle">刷新</button></div><div id="recycleList" class="content-list"></div></div></section>
+        <section class="page-section" data-section="audit"><div class="panel"><div class="panel-heading"><div><h2>审计记录</h2><p>记录敏感操作的操作者、时间、对象和结果</p></div><button id="refreshAudit" class="button subtle">刷新</button></div><div id="auditList" class="audit-list"></div></div></section>
+      </div>
+      <div id="toast" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+  <nav class="mobile-nav" aria-label="管理功能"><button data-page="overview">总览</button><button data-page="users">用户</button><button data-page="content">内容</button><button data-page="modules">模块</button><button data-page="admins">管理员</button><button data-page="recycle">回收站</button><button data-page="audit">审计</button></nav>
+  <dialog id="adminDialog" class="admin-dialog"><form method="dialog"><button class="dialog-close" aria-label="关闭">×</button></form><div id="dialogContent"></div></dialog>
+  <script src="../reader-sync-config.js"></script>
+  <script src="admin.js" defer></script>
+</body>
+</html>

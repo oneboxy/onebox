@@ -1,31 +1,35 @@
-const CACHE = 'onebox-v542';
+const CACHE = 'onebox-v544';
 const APP_SHELL = [
   './',
   'index.html',
-  'style.css?v=2.18.610',
-  'app.js?v=2.18.610',
-  'calendar-data.js?v=2.18.610',
-  'reader-sync-config.js?v=2.18.610',
-  'reader-cloud-sync.js?v=2.18.610',
+  'style.css?v=2.18.612',
+  'app.js?v=2.18.612',
+  'calendar-data.js?v=2.18.612',
+  'reader-sync-config.js?v=2.18.612',
+  'reader-cloud-sync.js?v=2.18.612',
+  'cloud-sync.js?v=2.18.612',
+  'cloud-sync.html',
+  'cloud-sync.css',
+  'cloud-migration.js',
   'manifest.webmanifest',
-  'manifest.webmanifest?v=2.18.610',
-  'favicon-v317.ico?v=2.18.610',
+  'manifest.webmanifest?v=2.18.612',
+  'favicon-v317.ico?v=2.18.612',
   'apple-touch-icon.png',
   'apple-touch-icon-precomposed.png',
-  'apple-touch-icon.png?v=2.18.610',
-  'icons/onebox-brand-v317-16.png?v=2.18.610',
-  'icons/onebox-brand-v317-32.png?v=2.18.610',
-  'icons/onebox-brand-v317-48.png?v=2.18.610',
-  'icons/onebox-brand-v317-64.png?v=2.18.610',
-  'icons/onebox-brand-v317-128.png?v=2.18.610',
-  'icons/onebox-brand-v317-120.png?v=2.18.610',
-  'icons/onebox-brand-v317-152.png?v=2.18.610',
-  'icons/onebox-brand-v317-167.png?v=2.18.610',
-  'icons/onebox-brand-v317-180.png?v=2.18.610',
-  'icons/onebox-brand-v317-192.png?v=2.18.610',
-  'icons/onebox-brand-v317-256.png?v=2.18.610',
-  'icons/onebox-brand-v317-512.png?v=2.18.610',
-  'icons/onebox-brand-v317-1024.png?v=2.18.610',
+  'apple-touch-icon.png?v=2.18.612',
+  'icons/onebox-brand-v317-16.png?v=2.18.612',
+  'icons/onebox-brand-v317-32.png?v=2.18.612',
+  'icons/onebox-brand-v317-48.png?v=2.18.612',
+  'icons/onebox-brand-v317-64.png?v=2.18.612',
+  'icons/onebox-brand-v317-128.png?v=2.18.612',
+  'icons/onebox-brand-v317-120.png?v=2.18.612',
+  'icons/onebox-brand-v317-152.png?v=2.18.612',
+  'icons/onebox-brand-v317-167.png?v=2.18.612',
+  'icons/onebox-brand-v317-180.png?v=2.18.612',
+  'icons/onebox-brand-v317-192.png?v=2.18.612',
+  'icons/onebox-brand-v317-256.png?v=2.18.612',
+  'icons/onebox-brand-v317-512.png?v=2.18.612',
+  'icons/onebox-brand-v317-1024.png?v=2.18.612',
   'icons/mascot-fox-full-reactions.png',
   'icons/mascot-fox-full-reactions.png?v=2.18.311',
   'icons/mascot-fox-full.png',
@@ -40,7 +44,7 @@ const APP_SHELL = [
   'icons/bilibili.ico?v=2.18.311',
   'icons/bilibili.svg',
   'icons/bilibili.svg?v=2.18.311',
-  'icons/spotify.svg?v=2.18.610',
+  'icons/spotify.svg?v=2.18.612',
   'icons/cafe-brand-luckin.png',
   'icons/cafe-brand-starbucks.png',
   'icons/cafe-brand-cotti.png',
@@ -89,7 +93,14 @@ self.addEventListener('fetch', (event) => {
     || url.pathname.endsWith('/style.css')
     || url.pathname.endsWith('/calendar-data.js')
     || url.pathname.endsWith('/reader-sync-config.js')
-    || url.pathname.endsWith('/reader-cloud-sync.js');
+    || url.pathname.endsWith('/reader-cloud-sync.js')
+    || url.pathname.endsWith('/cloud-sync.js')
+    || url.pathname.endsWith('/cloud-sync.html')
+    || url.pathname.endsWith('/cloud-sync.css')
+    || url.pathname.endsWith('/cloud-migration.js');
+  // Cloudflare APIs return current module flags, live content, and private
+  // account data. They must never become part of the static PWA cache.
+  if (url.pathname.startsWith('/v1/')) return;
   if (isAppShellRequest) {
     event.respondWith(fetch(event.request, { cache: 'no-store' })
       .then((response) => {
