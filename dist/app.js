@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.617';
+const APP_VERSION = '2.18.618';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -5302,7 +5302,7 @@ function renderHomeFeedActivityFilters() {
   const options = [
     ['read', t('feedFootprintRead')], ['like', t('feedFootprintLike')], ['dislike', t('feedFootprintDislike')],
   ];
-  return '<div class="feed-activity-filters" role="tablist" aria-label="' + escapeHtml(t('footprint')) + '">' + options.map(([id, label]) => '<button type="button" class="feed-activity-filter ' + (state.homeFeed.activityFilter === id ? 'active' : '') + '" data-feed-activity-filter="' + id + '" role="tab" aria-selected="' + (state.homeFeed.activityFilter === id) + '">' + escapeHtml(label) + '<span>' + counts[id] + '</span></button>').join('') + '</div>';
+  return '<div class="feed-activity-filters" role="tablist" aria-label="' + escapeHtml(t('footprint')) + '"><div class="feed-activity-filter-group">' + options.map(([id, label]) => '<button type="button" class="feed-activity-filter ' + (state.homeFeed.activityFilter === id ? 'active' : '') + '" data-feed-activity-filter="' + id + '" role="tab" aria-selected="' + (state.homeFeed.activityFilter === id) + '">' + escapeHtml(label) + '<span>' + counts[id] + '</span></button>').join('') + '</div></div>';
 }
 function renderRecentReading() {
   const dialog = $('#recentReadingDialog');
