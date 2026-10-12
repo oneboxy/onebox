@@ -91,7 +91,7 @@
   }
 
   async function api(path, options = {}, retried = false) {
-    if (!API) throw Error('Cloudflare Worker URL 尚未配置。');
+    if (!API) throw Error('当前没有集中式后台服务。');
     if (!state.session) await newSession();
     const response = await fetch(API + path, { ...options, headers: { accept: 'application/json', ...(options.body && !(options.body instanceof Blob) ? { 'content-type': 'application/json' } : {}), ...(options.headers || {}), authorization: 'Bearer ' + state.session }, cache: 'no-store' });
     if (response.status === 401 && !retried) { state.session = ''; return api(path, options, true); }
@@ -122,7 +122,7 @@
 
   function showSetupError(message) {
     $('#apiPanel').hidden = false;
-    $('#apiPanel').innerHTML = '<strong>后台服务暂不可用</strong><br>' + escape(message) + '<br><small>管理数据不会写入浏览器离线缓存。完成 Cloudflare Worker 配置后再登录。</small>';
+    $('#apiPanel').innerHTML = '<strong>当前使用个人 Gist 存储</strong><br>' + escape(message) + '<br><small>每个 GitHub 用户管理自己的 Gist，因此后台暂不提供跨用户查看、编辑、导出或删除。OneBox 不会把个人数据写入 Cloudflare。</small>';
     $('#loginPanel').hidden = true;
     $('#appContent').hidden = true;
   }
@@ -156,7 +156,7 @@
     window.addEventListener('offline', setOnline);
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
     if (!navigator.onLine) return;
-    if (!API) return showSetupError('Worker 地址为空。部署 Cloudflare Worker 后，把 workers.dev 地址写入 reader-sync-config.js。');
+    if (!API) return showSetupError('个人数据同步已改为保存到各自的 GitHub 秘密 Gist，当前没有集中式管理接口。请在 OneBox「我的 → 账号」管理自己的同步。');
     try {
       const me = await api('/v1/admin/me');
       state.admin = me.admin;

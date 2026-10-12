@@ -117,6 +117,23 @@ function cleanMetadata(value, id) {
   if (typeof metadata.name !== 'string' || metadata.name.length > 500 || !['md', 'txt', 'pdf', 'epub'].includes(metadata.type)) return null;
   const encodedSize = Number(metadata.size);
   if (!Number.isFinite(encodedSize) || encodedSize < 0 || encodedSize > MAX_BOOK_BYTES) return null;
+  if (metadata.githubFile !== undefined && metadata.githubFile !== null) {
+    const file = metadata.githubFile;
+    if (!file || typeof file !== 'object' || Array.isArray(file)
+      || !/^[A-Za-z0-9_-]{1,120}$/.test(String(file.gistId || ''))
+      || !validSha256(file.sha256)
+      || !Array.isArray(file.files) || !file.files.length || file.files.length > 100
+      || file.files.some((name) => typeof name !== 'string' || name.length > 255 || !/^[A-Za-z0-9_.-]+$/.test(name))
+      || Number(file.size) !== encodedSize
+      || !['md', 'txt', 'pdf', 'epub'].includes(file.type)) return null;
+    metadata.githubFile = {
+      gistId: String(file.gistId),
+      files: file.files.map((name) => String(name)),
+      sha256: String(file.sha256).toLowerCase(),
+      size: encodedSize,
+      type: file.type,
+    };
+  }
   return metadata;
 }
 
@@ -124,12 +141,6 @@ function progressValue(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.min(1, Math.max(0, number)) : 0;
 }
-
-function contentTypeForBook(type) {
-  return ({ md: 'text/markdown; charset=utf-8', txt: 'text/plain; charset=utf-8', pdf: 'application/pdf', epub: 'application/epub+zip' })[type] || 'application/octet-stream';
-}
-
-function fileKeyFor(userId, bookId, sha256) { return userId + '/' + bookId + '/' + sha256.toLowerCase(); }
 
 async function readJson(request, maxBytes = MAX_JSON_BYTES) {
   const contentLength = Number(request.headers.get('Content-Length') || 0);
@@ -178,7 +189,7 @@ async function listBooks(userId, env) {
     let progress = 0;
     try { metadata = JSON.parse(row.metadata_json || '{}'); } catch { /* skip invalid data */ }
     try { progress = JSON.parse(row.progress_json || '0'); } catch { /* use default progress */ }
-    return { id: row.book_id, metadata, progress: progressValue(progress), progressUpdatedAt: Number(row.progress_updated_at) || 0, updatedAt: Number(row.updated_at) || 0, file: row.file_key ? { sha256: row.file_sha256, size: Number(row.file_size) || 0, type: row.file_type || '' } : null };
+    return { id: row.book_id, metadata, progress: progressValue(progress), progressUpdatedAt: Number(row.progress_updated_at) || 0, updatedAt: Number(row.updated_at) || 0, file: metadata.githubFile || null };
   });
   return responseJson({ books, deleted: (deletionResult.results || []).map((row) => ({ id: row.book_id, deletedAt: Number(row.deleted_at) || 0 })) });
 }
@@ -227,48 +238,11 @@ async function upsertBooks(request, userId, env) {
   return responseJson({ saved: statements.length });
 }
 
-async function putBookFile(request, userId, bookId, env) {
-  const length = Number(request.headers.get('Content-Length') || 0);
-  if (length > MAX_BOOK_BYTES) return responseJson({ error: 'book_file_too_large', maxBytes: MAX_BOOK_BYTES }, 413);
-  const sha256 = request.headers.get('X-Content-SHA256') || '';
-  if (!validSha256(sha256)) return responseJson({ error: 'invalid_file_hash' }, 400);
-  const row = await env.DB.prepare('SELECT metadata_json, file_key FROM reader_books WHERE user_id = ? AND book_id = ?').bind(userId, bookId).first();
-  if (!row) return responseJson({ error: 'book_metadata_missing' }, 404);
-  const metadata = JSON.parse(row.metadata_json || '{}');
-  const expectedSize = Number(metadata.size) || 0;
-  const bytes = await request.arrayBuffer();
-  if (bytes.byteLength > MAX_BOOK_BYTES) return responseJson({ error: 'invalid_file_size' }, 413);
-  if (expectedSize !== bytes.byteLength) return responseJson({ error: 'file_size_mismatch' }, 400);
-  const actualHash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  if (!safeEqual(actualHash, sha256.toLowerCase())) return responseJson({ error: 'file_hash_mismatch' }, 400);
-  const key = fileKeyFor(userId, bookId, actualHash);
-  await env.BOOKS_BUCKET.put(key, bytes, { httpMetadata: { contentType: contentTypeForBook(metadata.type) }, customMetadata: { userId, bookId, sha256: actualHash } });
-  await env.DB.prepare('UPDATE reader_books SET file_key = ?, file_sha256 = ?, file_size = ?, file_type = ? WHERE user_id = ? AND book_id = ?')
-    .bind(key, actualHash, bytes.byteLength, contentTypeForBook(metadata.type), userId, bookId).run();
-  if (row.file_key && row.file_key !== key) await env.BOOKS_BUCKET.delete(row.file_key);
-  return responseJson({ saved: true, sha256: actualHash, size: bytes.byteLength });
-}
-
-async function getBookFile(userId, bookId, env) {
-  const row = await env.DB.prepare('SELECT file_key, file_sha256, file_size, file_type FROM reader_books WHERE user_id = ? AND book_id = ?')
-    .bind(userId, bookId).first();
-  if (!row?.file_key) return responseJson({ error: 'book_file_missing' }, 404);
-  const object = await env.BOOKS_BUCKET.get(row.file_key);
-  if (!object) return responseJson({ error: 'book_file_missing' }, 404);
-  const headers = new Headers({ 'content-type': row.file_type || 'application/octet-stream', 'content-length': String(row.file_size || object.size), 'cache-control': 'private, no-store', 'x-content-sha256': row.file_sha256 || '' });
-  object.writeHttpMetadata(headers);
-  headers.set('cache-control', 'private, no-store');
-  headers.set('x-content-sha256', row.file_sha256 || '');
-  return new Response(object.body, { headers });
-}
-
 async function deleteBook(userId, bookId, env) {
-  const row = await env.DB.prepare('SELECT file_key FROM reader_books WHERE user_id = ? AND book_id = ?').bind(userId, bookId).first();
   const deletedAt = Date.now();
   await env.DB.prepare('INSERT INTO reader_book_deletions (user_id, book_id, deleted_at) VALUES (?, ?, ?) ON CONFLICT(user_id, book_id) DO UPDATE SET deleted_at = MAX(reader_book_deletions.deleted_at, excluded.deleted_at)')
     .bind(userId, bookId, deletedAt).run();
   await env.DB.prepare('DELETE FROM reader_books WHERE user_id = ? AND book_id = ?').bind(userId, bookId).run();
-  if (row?.file_key) await env.BOOKS_BUCKET.delete(row.file_key);
   return responseJson({ deleted: true, deletedAt });
 }
 
@@ -531,19 +505,19 @@ async function cloudRoute(request, url, env, identity) {
         let fileName = String(request.headers.get('X-File-Name') || fileId).slice(0, 720);
         try { fileName = decodeURIComponent(fileName); } catch { /* keep a safe literal filename */ }
         fileName = fileName.slice(0, 240).replace(/[\\/\r\n]/g, '_');
-        await env.BOOKS_BUCKET.put(objectKey, bytes, { httpMetadata: { contentType }, customMetadata: { userId: identity.id, dataKey: key, fileId, sha256: digest } });
+        await env.FILES_BUCKET.put(objectKey, bytes, { httpMetadata: { contentType }, customMetadata: { userId: identity.id, dataKey: key, fileId, sha256: digest } });
         await env.DB.batch([env.DB.prepare(`INSERT INTO onebox_user_files (user_id, file_id, data_key, object_key, file_name, content_type, size_bytes, sha256, created_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(user_id, file_id) DO UPDATE SET data_key = excluded.data_key, object_key = excluded.object_key,
           file_name = excluded.file_name, content_type = excluded.content_type, size_bytes = excluded.size_bytes, sha256 = excluded.sha256, created_at = excluded.created_at`)
           .bind(identity.id, fileId, key, objectKey, fileName, contentType, bytes.byteLength, digest, Date.now()),
           env.DB.prepare('DELETE FROM onebox_file_tombstones WHERE user_id = ? AND file_id = ?').bind(identity.id, fileId)]);
-        if (existing?.object_key && existing.object_key !== objectKey) await env.BOOKS_BUCKET.delete(existing.object_key);
+        if (existing?.object_key && existing.object_key !== objectKey) await env.FILES_BUCKET.delete(existing.object_key);
         return responseJson({ saved: true, id: fileId, size: bytes.byteLength, sha256: digest });
       }
       if (method === 'GET') {
         const row = await userFileObject(identity.id, fileId, env);
         if (!row) return cloudError('file_not_found', 404);
-        const object = await env.BOOKS_BUCKET.get(row.object_key);
+        const object = await env.FILES_BUCKET.get(row.object_key);
         if (!object) return cloudError('file_not_found', 404);
         const headers = new Headers({ 'content-type': row.content_type, 'content-length': String(row.size_bytes), 'cache-control': 'private, no-store', 'content-disposition': `attachment; filename*=UTF-8''${encodeURIComponent(row.file_name)}`, 'x-content-sha256': row.sha256 });
         object.writeHttpMetadata(headers);
@@ -661,7 +635,7 @@ async function cloudRoute(request, url, env, identity) {
         await softDeleteUserFile(userId, fileId, identity, env);
         return responseJson({ deleted: true, retentionDays: 30 });
       }
-      const object = await env.BOOKS_BUCKET.get(row.object_key);
+      const object = await env.FILES_BUCKET.get(row.object_key);
       if (!object) return cloudError('file_not_found', 404);
       await auditAdmin(env, identity, 'user_data.file_view', 'user', userId, { fileId });
       const headers = new Headers({ 'content-type': row.content_type, 'content-length': String(row.size_bytes), 'cache-control': 'private, no-store', 'content-disposition': `attachment; filename*=UTF-8''${encodeURIComponent(row.file_name)}`, 'x-content-sha256': row.sha256 });
@@ -830,8 +804,7 @@ async function route(request, env) {
   if (request.method === 'PUT' && path === '/v1/library') return upsertBooks(request, identity.sub, env);
   const bookId = bookIdFromPath(path);
   if (!bookId) return responseJson({ error: 'not_found' }, 404);
-  if (request.method === 'PUT' && path.endsWith('/file')) return putBookFile(request, identity.sub, bookId, env);
-  if (request.method === 'GET' && path.endsWith('/file')) return getBookFile(identity.sub, bookId, env);
+  if (path.endsWith('/file')) return responseJson({ error: 'book_files_stored_in_github' }, 410);
   if (request.method === 'DELETE' && !path.endsWith('/file')) return deleteBook(identity.sub, bookId, env);
   return responseJson({ error: 'not_found' }, 404);
 }
@@ -842,11 +815,9 @@ async function purgeExpiredUserData(env) {
   for (const item of expired.results || []) {
     if (item.data_key === '__account__') {
       const userFiles = await env.DB.prepare('SELECT object_key FROM onebox_user_files WHERE user_id = ?').bind(item.user_id).all();
-      for (const file of userFiles.results || []) await env.BOOKS_BUCKET.delete(file.object_key);
+      for (const file of userFiles.results || []) await env.FILES_BUCKET.delete(file.object_key);
       const recycledFiles = await env.DB.prepare("SELECT value_json FROM onebox_recycle_bin WHERE user_id = ? AND data_key = '__file__' AND restored_at IS NULL").bind(item.user_id).all();
-      for (const row of recycledFiles.results || []) { const file = parseJson(row.value_json, {}); if (file.object_key) await env.BOOKS_BUCKET.delete(file.object_key); }
-      const bookFiles = await env.DB.prepare('SELECT file_key FROM reader_books WHERE user_id = ? AND file_key IS NOT NULL').bind(item.user_id).all();
-      for (const file of bookFiles.results || []) await env.BOOKS_BUCKET.delete(file.file_key);
+      for (const row of recycledFiles.results || []) { const file = parseJson(row.value_json, {}); if (file.object_key) await env.FILES_BUCKET.delete(file.object_key); }
       await env.DB.batch([
         env.DB.prepare('DELETE FROM onebox_user_files WHERE user_id = ?').bind(item.user_id),
         env.DB.prepare('DELETE FROM onebox_file_tombstones WHERE user_id = ?').bind(item.user_id),
@@ -857,13 +828,13 @@ async function purgeExpiredUserData(env) {
       ]);
     } else if (item.data_key === '__file__') {
       const file = parseJson(item.value_json, {});
-      if (file.object_key) await env.BOOKS_BUCKET.delete(file.object_key);
+      if (file.object_key) await env.FILES_BUCKET.delete(file.object_key);
       await env.DB.prepare('DELETE FROM onebox_file_tombstones WHERE user_id = ? AND file_id = ?').bind(item.user_id, file.file_id || '').run();
     } else {
       const current = await env.DB.prepare('SELECT deleted_at FROM onebox_user_data WHERE user_id = ? AND data_key = ?').bind(item.user_id, item.data_key).first();
       if (Number(current?.deleted_at) === Number(item.deleted_at)) {
         const files = await env.DB.prepare('SELECT object_key FROM onebox_user_files WHERE user_id = ? AND data_key = ?').bind(item.user_id, item.data_key).all();
-        for (const file of files.results || []) await env.BOOKS_BUCKET.delete(file.object_key);
+        for (const file of files.results || []) await env.FILES_BUCKET.delete(file.object_key);
         await env.DB.batch([
           env.DB.prepare('DELETE FROM onebox_user_files WHERE user_id = ? AND data_key = ?').bind(item.user_id, item.data_key),
           env.DB.prepare('DELETE FROM onebox_user_data WHERE user_id = ? AND data_key = ? AND deleted_at = ?').bind(item.user_id, item.data_key, item.deleted_at),
