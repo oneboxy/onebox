@@ -1255,8 +1255,8 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 .feed-source-mark.hupu, .feed-source-tag.hupu b { background: #d52b2b; color: #fff; }
 .feed-source-mark.thepaper, .feed-source-tag.thepaper b { background: #fff; color: #222; }
 .feed-source-mark.jiemian, .feed-source-tag.jiemian b { background: transparent; color: #fff; }
-.feed-source-mark.footprint { background: var(--soft); color: var(--primary); }
-.feed-source-mark.footprint svg { width: 16px; height: 16px; fill: currentColor; }
+.feed-source-mark.footprint { background: transparent; color: var(--muted); }
+.feed-source-mark.footprint svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.45; stroke-linecap: round; stroke-linejoin: round; }
 @keyframes feed-spin { to { transform: rotate(360deg); } }
 .feed-panel { margin-top: 12px; overflow: hidden; border-radius: 20px; }
 .feed-period-tabs { display: flex; align-items: center; gap: 26px; padding: 0 18px; border-bottom: 1px solid var(--line); }

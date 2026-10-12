@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.614';
+const APP_VERSION = '2.18.615';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1283,7 +1283,7 @@ function homeTabEntries() {
   return [{ id: 'footprint', name: t('footprint'), badge: '足', className: 'footprint', local: true }, ...sources];
 }
 function homeTabMarkMarkup(entry, extraClass = '') {
-  if (entry.id === 'footprint') return '<span class="feed-source-mark footprint' + (extraClass ? ' ' + extraClass : '') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="2.2"/><circle cx="16.5" cy="8.5" r="2.2"/><circle cx="6" cy="16.5" r="2.2"/><circle cx="15.5" cy="18" r="2.2"/></svg></span>';
+  if (entry.id === 'footprint') return '<span class="feed-source-mark footprint' + (extraClass ? ' ' + extraClass : '') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.4 3.2c1.4 0 2.3 1.9 2.3 4.1 0 1.9-.7 3.2-1.9 3.3-1.3.1-2.2-1.5-2.2-3.5 0-2.1.8-3.9 1.8-3.9Z"/><path d="M6.9 11.3c1.9-.4 4 .6 4.4 2.2.3 1.3-.9 2.4-2.8 2.9-1.8.5-3.8.3-4.1-.9-.4-1.5.8-3.7 2.5-4.2Z"/><path d="M16.6 7.1c1.3-.1 2.3 1.5 2.5 3.4.2 1.8-.3 3.2-1.4 3.5-1.2.3-2.3-1-2.6-2.9-.3-2 .5-3.9 1.5-4Z"/><path d="M16.3 14c1.8-.7 4 .1 4.6 1.6.5 1.2-.5 2.5-2.2 3.3-1.7.8-3.7 1-4.2-.1-.6-1.4.2-3.9 1.8-4.8Z"/></svg></span>';
   return homeFeedSourceMarkMarkup(entry, extraClass);
 }
 function homeTabIds() {
