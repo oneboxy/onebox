@@ -9,7 +9,7 @@
   const DATA_KEYS = new Set([
     'onebox.theme','onebox.language','onebox.layout','onebox.color','onebox.color-explicit','onebox.top-display','onebox.footprint','onebox.open-mode','onebox.mascot-position','onebox.mascot-visible','onebox.mascot-display-mode','onebox.pet-profile',
     'onebox.tool-order','onebox.navigation','onebox.navigation-location','onebox.home-feed-order','onebox.home-feed-visibility','onebox.home-feed-active',
-    'onebox.home-feed-read','onebox.reader-progress','onebox.reader-preferences','onebox.reader-layout','onebox.library',
+    'onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-preferences','onebox.reader-layout','onebox.library',
     'onebox.notifications','onebox.notification-preference','onebox.events','onebox.weather-cards','onebox.weather',
     'onebox.translation-history','onebox.translation-history-open','onebox.calculator','onebox.dev-tools',
     'onebox.ticket-wallet','onebox.ticket-wallet-display-order','onebox.ticket-wallet-type-filter','onebox.ticket-wallet-memories','onebox.ticket-wallet-deleted'
@@ -18,6 +18,27 @@
   let sessionToken = '', sessionExpiresAt = 0, sessionGithubToken = '', syncTimer = 0, syncing = false, syncPromise = null, syncReady = false;
   const pendingKeys = new Set(), pendingFiles = new Set(), pendingFileDeletes = new Map();
   let publicConfig = { modules: {}, ads: [], announcements: [] }, publicConfigPromise = null;
+
+  function parseActivityMap(value) {
+    try { const parsed = typeof value === 'string' ? JSON.parse(value) : value; return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}; } catch { return {}; }
+  }
+  function mergeActivityMaps(localValue, remoteValue) {
+    const local = parseActivityMap(localValue), remote = parseActivityMap(remoteValue), merged = {};
+    [...new Set([...Object.keys(local), ...Object.keys(remote)])].forEach((id) => {
+      const left = local[id] && typeof local[id] === 'object' ? local[id] : {}, right = remote[id] && typeof remote[id] === 'object' ? remote[id] : {};
+      const leftUpdatedAt = Number(left.updatedAt) || 0, rightUpdatedAt = Number(right.updatedAt) || 0;
+      const latest = rightUpdatedAt >= leftUpdatedAt ? right : left, other = latest === right ? left : right;
+      const reactionRecord = (Number(right.reactionAt) || 0) >= (Number(left.reactionAt) || 0) ? right : left;
+      merged[id] = {
+        ...(latest.item || other.item ? { item: latest.item || other.item } : {}),
+        readAt: Math.max(Number(left.readAt) || 0, Number(right.readAt) || 0),
+        reaction: String(reactionRecord.reaction || ''),
+        reactionAt: Math.max(Number(left.reactionAt) || 0, Number(right.reactionAt) || 0),
+        updatedAt: Math.max(leftUpdatedAt, rightUpdatedAt),
+      };
+    });
+    return merged;
+  }
 
   function githubToken() {
     try { return String(JSON.parse(localStorage.getItem('onebox.github') || '{}').token || '').trim(); } catch { return ''; }
@@ -262,6 +283,15 @@
           }
           if (!remoteItem) { if (localValue !== null) pendingKeys.add(key); continue; }
           const localUpdatedAt = Number(clocks[key]) || 0, remoteUpdatedAt = Number(remoteItem.updatedAt) || 0;
+          if (key === 'onebox.home-feed-activity' && localValue !== null) {
+            const remoteValue = typeof remoteItem.value === 'string' ? remoteItem.value : JSON.stringify(remoteItem.value);
+            const mergedValue = JSON.stringify(mergeActivityMaps(localValue, remoteValue));
+            const encodedRemote = JSON.stringify(parseActivityMap(remoteValue));
+            if (mergedValue !== localValue) localStorage.setItem(key, mergedValue);
+            if (mergedValue !== encodedRemote) { setClock(key, Math.max(Date.now(), localUpdatedAt, remoteUpdatedAt)); pendingKeys.add(key); }
+            else setClock(key, Math.max(localUpdatedAt, remoteUpdatedAt));
+            continue;
+          }
           if (localValue === null || remoteUpdatedAt >= localUpdatedAt) {
             const nextValue = typeof remoteItem.value === 'string' ? remoteItem.value : JSON.stringify(remoteItem.value);
             localStorage.setItem(key, nextValue); setClock(key, remoteUpdatedAt);

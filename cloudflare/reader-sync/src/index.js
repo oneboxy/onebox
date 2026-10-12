@@ -9,7 +9,7 @@ const DATA_KEYS = Object.freeze({
   'onebox.open-mode': 'settings', 'onebox.mascot-position': 'settings', 'onebox.mascot-visible': 'settings',
   'onebox.mascot-display-mode': 'settings', 'onebox.pet-profile': 'settings', 'onebox.tool-order': 'navigation',
   'onebox.navigation': 'navigation', 'onebox.navigation-location': 'navigation', 'onebox.home-feed-order': 'navigation',
-  'onebox.home-feed-visibility': 'navigation', 'onebox.home-feed-active': 'navigation', 'onebox.home-feed-read': 'reading', 'onebox.reader-progress': 'reading',
+  'onebox.home-feed-visibility': 'navigation', 'onebox.home-feed-active': 'navigation', 'onebox.home-feed-read': 'reading', 'onebox.home-feed-activity': 'reading', 'onebox.reader-progress': 'reading',
   'onebox.reader-preferences': 'reading', 'onebox.reader-layout': 'reading', 'onebox.library': 'reading',
   'onebox.notifications': 'messages', 'onebox.notification-preference': 'messages', 'onebox.events': 'calendar',
   'onebox.weather-cards': 'weather', 'onebox.weather': 'weather', 'onebox.translation-history': 'translation',

@@ -4278,6 +4278,20 @@ main:has(#workspace[data-tool="calculator"]) {
 #workspace[data-tool="home"] .feed-item-media { width: 100%; height: auto; aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel-2); }
 #workspace[data-tool="home"] .feed-item.is-read { background: color-mix(in srgb, var(--primary) 4%, var(--panel)); }
 #workspace[data-tool="home"] .feed-item.is-read h2 { color: var(--muted); }
+.feed-item-reactions { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; margin-left: auto; }
+.feed-reaction-button { display: inline-grid; width: 25px; height: 25px; flex: 0 0 25px; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; transition: color .14s ease, background .14s ease, border-color .14s ease; }
+.feed-reaction-button svg { width: 15px; height: 15px; fill: currentColor; }
+.feed-reaction-button:hover, .feed-reaction-button:focus-visible { border-color: var(--line); background: var(--panel-2); color: var(--ink); outline: none; }
+.feed-reaction-button.is-like { color: var(--primary); }
+.feed-reaction-button.is-dislike { color: var(--danger); }
+.feed-reaction-button.is-active { border-color: color-mix(in srgb, currentColor 30%, var(--line)); background: color-mix(in srgb, currentColor 10%, var(--panel)); }
+.feed-activity-filters { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 6px 16px; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: none; }
+.feed-activity-filters::-webkit-scrollbar { display: none; }
+.feed-activity-filter { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; min-height: 30px; padding: 5px 10px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+.feed-activity-filter span { color: inherit; font-variant-numeric: tabular-nums; }
+.feed-activity-filter.active { border-color: color-mix(in srgb, var(--primary) 38%, var(--line)); background: color-mix(in srgb, var(--primary) 9%, var(--panel)); color: var(--primary); font-weight: 750; }
+.jiemian-flash-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.jiemian-flash-footer .feed-item-reactions { margin-top: 8px; }
 
 #workspace[data-tool="translate"] .translation-toolbar { align-items: end !important; }
 #workspace[data-tool="translate"] .translation-toolbar .field-inline { display: block !important; min-width: 0; margin: 0 !important; }

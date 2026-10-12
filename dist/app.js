@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.612';
+const APP_VERSION = '2.18.613';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -37,6 +37,7 @@ const STORAGE = {
   readerLayout: 'onebox.reader-layout',
   homeFeeds: 'onebox.home-feeds',
   homeFeedRead: 'onebox.home-feed-read',
+  homeFeedActivity: 'onebox.home-feed-activity',
   homeFeedActive: 'onebox.home-feed-active',
   homeFeedOrder: 'onebox.home-feed-order',
   homeFeedVisibility: 'onebox.home-feed-visibility',
@@ -139,7 +140,7 @@ function saveGithubSyncSelection() { saveStored(STORAGE.githubSyncSelection, sta
 const GITHUB_CUSTOM_SYNC_STORAGE_KEYS = Object.freeze({
   settings: new Set([STORAGE.theme, STORAGE.language, STORAGE.layout, STORAGE.color, STORAGE.colorExplicit, STORAGE.topDisplay, STORAGE.footprint, STORAGE.mascotVisible, STORAGE.mascotDisplayMode, STORAGE.mascotPosition, STORAGE.petProfile]),
   navigation: new Set([STORAGE.toolOrder, STORAGE.navigation, STORAGE.navigationLocation, STORAGE.openMode, STORAGE.homeFeedOrder, STORAGE.homeFeedVisibility]),
-  reading: new Set([STORAGE.readerPreferences, STORAGE.readerLayout, STORAGE.homeFeedRead]),
+  reading: new Set([STORAGE.readerPreferences, STORAGE.readerLayout, STORAGE.homeFeedRead, STORAGE.homeFeedActivity]),
   messages: new Set([STORAGE.notifications, STORAGE.notificationPreference]),
   calendar: new Set([STORAGE.events]),
   weather: new Set([STORAGE.weatherCards, STORAGE.legacyWeather]),
@@ -150,7 +151,7 @@ const GITHUB_CUSTOM_SYNC_STORAGE_KEYS = Object.freeze({
 const GITHUB_SYNC_GROUP_FIELDS = Object.freeze({
   settings: ['theme', 'color', 'languageMode', 'language', 'layoutMode', 'topDisplay', 'footprint', 'mascotVisible', 'mascotDisplayMode', 'mascotPosition', 'petProfile'],
   navigation: ['toolOrder', 'homeFeedOrder', 'homeFeedVisibility', 'navigation', 'navigationLocation', 'openMode'],
-  reading: ['library', 'readerPreferences', 'readerLayout', 'homeFeedRead', 'readerFiles'],
+  reading: ['library', 'readerPreferences', 'readerLayout', 'homeFeedRead', 'homeFeedActivity', 'readerFiles'],
   messages: ['notifications', 'notificationPreference'],
   calendar: ['events'],
   weather: ['weatherCards'],
@@ -352,7 +353,8 @@ const DICT = {
     home: '首页', tools: '工具', navigation: '导航', messages: '消息', mine: '我的', quickTools: '常用工具', openSettings: '打开设置', noMessages: '还没有消息。', homeTabs: '首页', homeTabsSelected: '已选择 {count} 项', homeSourceManage: '首页来源', homeSourceManageHint: '选择要显示在首页导航中的来源', homeSourceAdd: '添加', homeSourceRemove: '移除', homeSourceEmpty: '暂时没有其他来源',
     ticketWallet: '卡包', ticketWalletDescription: '出行票据、电影票、门票和餐饮记录都收进卡包。', ticketWalletTickets: '票据', ticketWalletJourneys: '旅迹', ticketWalletAdd: '手动添加', ticketWalletAddTicket: '添加票据', ticketWalletAddShort: '添加', ticketWalletImport: '导入票据', ticketWalletImportImage: '导入截图 / 扫描件', ticketWalletImportJson: '导入票据数据', ticketWalletEmpty: '把第一张票放进来，旅程会从这里开始。', ticketWalletCount: '票据', ticketWalletUpcoming: '待出行', ticketWalletJourneyCount: '旅迹', ticketWalletEditor: '票据详情', ticketWalletSave: '保存票据', ticketWalletCancel: '取消', ticketWalletType: '票种', ticketWalletTrain: '火车票', ticketWalletFlight: '机票', ticketWalletFerry: '船票', ticketWalletOther: '其他票据', ticketWalletTitle: '票据名称', ticketWalletCarrier: '承运方', ticketWalletFrom: '出发地', ticketWalletTo: '目的地', ticketWalletDepart: '出发时间', ticketWalletArrive: '到达时间', ticketWalletTicketNo: '票号 / 订单号', ticketWalletTrainNo: '车次', ticketWalletSerial: '票号', ticketWalletPrice: '票价', ticketWalletSeatClass: '席别', ticketWalletPassengerInfo: '乘客信息', ticketWalletPassengerName: '乘车人姓名', ticketWalletPassengerId: '证件号码', ticketWalletCode: '票据编码', ticketWalletSeat: '座位 / 舱位', ticketWalletPassenger: '乘客', ticketWalletJourney: '旅迹名称', ticketWalletNotes: '备注', ticketWalletOriginal: '原始票据', ticketWalletRecognizeAgain: '重新识别', ticketWalletEdit: '编辑', ticketWalletDelete: '删除', ticketWalletDeleteConfirm: '确定删除这张票据吗？', ticketWalletMemory: '旅行回忆', ticketWalletAddMemory: '添加回忆', ticketWalletEditMemory: '编辑回忆', ticketWalletMemoryTitle: '回忆标题', ticketWalletMemoryDescription: '写下这段旅程', ticketWalletMemorySave: '保存回忆', ticketWalletShare: '分享旅迹', ticketWalletApple: '导入 Apple 钱包', ticketWalletAppleHint: '普通截图不能直接导入 Apple 钱包；需要有效的 .pkpass 票券。', ticketWalletNoJourney: '还没有可展示的旅迹。', ticketWalletSourceReady: '已保留原图', ticketWalletSourceMissing: '原图未加载', ticketWalletAdded: '票据已加入卡包', ticketWalletSaved: '票据已保存', ticketWalletDeleted: '票据已删除', ticketWalletMemorySaved: '回忆已保存', ticketWalletNeedRoute: '请至少填写出发地和目的地', ticketWalletAppleDownloaded: '原始 Apple 票券已下载',
     navigationTitle: '网站导航', navigationHint: '点击卡片显示操作，长按可以拖动排序或聚合文件夹。', navigationToolbarHint: '长按编辑 · 拖动聚合', navigationAdd: '添加网站', navigationEmpty: '还没有网站，先添加一个常用网址吧。', navigationUrl: '网站地址', navigationUrlPlaceholder: '粘贴或输入网址', navigationName: '网站名称', navigationNamePlaceholder: '可选，默认使用网站名称', navigationIcon: '网站图标', navigationIconHint: '输入网址后自动获取', navigationSave: '保存网站', navigationEdit: '编辑网站', navigationEditSave: '保存修改', navigationActionEdit: '编辑', navigationActionDelete: '删除', navigationActionCancel: '取消', navigationFolderEdit: '编辑文件夹', navigationAddToFolder: '添加到文件夹', navigationFolder: '文件夹', navigationFolderName: '文件夹名称', navigationFolderPlaceholder: '例如：工作、阅读', navigationCreateFolder: '新建文件夹', navigationSaveFolder: '保存文件夹', navigationFolderAdd: '添加网站', navigationFolderDelete: '解散文件夹', navigationFolderDeleteConfirm: '解散文件夹后，里面的网站会保留在导航中，确定解散文件夹吗？', navigationFolderDissolved: '文件夹已解散', navigationFolderEmpty: '文件夹还是空的，添加几个网站吧。', navigationRemove: '删除', navigationOpen: '打开网站', navigationSettings: '导航设置', navigationOpenModeHint: '网站打开方式', navigationOpenModeCurrent: '当前页', navigationOpenModeNewTab: '新标签页', navigationAlreadyExists: '这个网站已经添加过了', navigationInvalidUrl: '请输入有效的 http 或 https 地址', navigationDropHint: '松开后聚合为文件夹', navigationFolderCreated: '文件夹已创建', navigationAdded: '网站已添加', navigationDeleted: '网站已删除', navigationMoved: '网站已移入文件夹', navigationOrderSaved: '导航顺序已保存', navigationSiteCount: '{count} 个网站',
-    allFeeds: '全部', feedRefresh: '刷新', feedLoading: '正在加载信息流…', feedEmpty: '暂时没有可显示的内容。', feedUpdated: '更新于', feedLastRefresh: '上次成功刷新', feedNewItems: '刷新后新增', feedShowNew: '只看新增', feedShowAll: '显示全部', feedTabNew: '新增', feedOpen: '打开原文', feedPartial: '部分订阅源暂时不可用', feedProxyHint: '内容来自公开 RSS 订阅，首页每个来源最多保留 120 条或 7 天内内容。', feedLoadMore: '查看更早内容', feedTabPrevious: '查看前面的首页 Tab', feedTabNext: '查看后面的首页 Tab',
+    feedArticleFeedback: '文章评价', feedLike: '喜欢', feedDislike: '不喜欢', feedFootprintRead: '看过', feedFootprintLike: '喜欢', feedFootprintDislike: '不喜欢', feedFootprintEmptyRead: '还没有看过文章。', feedFootprintEmptyLike: '还没有喜欢的文章。', feedFootprintEmptyDislike: '还没有标记不喜欢的文章。',
+    allFeeds: '全部', feedRefresh: '刷新', feedLoading: '正在加载信息流…', feedEmpty: '暂时没有可显示的内容。', feedUpdated: '更新于', feedLastRefresh: '上次成功刷新', feedNewItems: '刷新后新增', feedShowNew: '只看新增', feedShowAll: '显示全部', feedTabNew: '新增', feedOpen: '打开原文', feedPartial: '部分订阅源暂时不可用', feedProxyHint: 'RSS 每来源保留 120 条或 7 天；足迹记录保存在本机，登录并开启云同步后可跨设备同步。', feedLoadMore: '查看更早内容', feedTabPrevious: '查看前面的首页 Tab', feedTabNext: '查看后面的首页 Tab',
     converterType: '换算类型', from: '从', to: '到', result: '结果', swap: '交换单位', copyResult: '复制结果',
     copied: '已复制', translationInput: '输入待翻译内容', translateNow: '开始翻译', saveTranslation: '保存到本机',
     source: '源语言', target: '目标语言', translationResult: '翻译结果', translationHistory: '最近翻译',
@@ -398,7 +400,8 @@ const DICT = {
     home: 'Home', tools: 'Tools', navigation: 'Navigation', messages: 'Messages', mine: 'Me', quickTools: 'Quick tools', openSettings: 'Open settings', noMessages: 'No messages yet.', homeTabs: 'Home', homeTabsSelected: '{count} selected',
     ticketWallet: 'Wallet', ticketWalletDescription: 'Keep travel, movie and admission tickets plus dining records together.', ticketWalletTickets: 'Tickets', ticketWalletJourneys: 'Journeys', ticketWalletAdd: 'Add manually', ticketWalletAddTicket: 'Add ticket', ticketWalletAddShort: 'Add', ticketWalletImport: 'Import ticket', ticketWalletImportImage: 'Import image', ticketWalletImportJson: 'Import ticket data', ticketWalletEmpty: 'Add your first ticket and start a journey.', ticketWalletCount: 'Tickets', ticketWalletUpcoming: 'Upcoming', ticketWalletJourneyCount: 'Journeys', ticketWalletEditor: 'Ticket details', ticketWalletSave: 'Save ticket', ticketWalletCancel: 'Cancel', ticketWalletType: 'Type', ticketWalletTrain: 'Train', ticketWalletFlight: 'Flight', ticketWalletFerry: 'Ferry', ticketWalletOther: 'Other', ticketWalletTitle: 'Ticket name', ticketWalletCarrier: 'Carrier', ticketWalletFrom: 'From', ticketWalletTo: 'To', ticketWalletDepart: 'Departure', ticketWalletArrive: 'Arrival', ticketWalletTicketNo: 'Ticket / order no.', ticketWalletTrainNo: 'Train no.', ticketWalletSerial: 'Ticket serial', ticketWalletPrice: 'Fare', ticketWalletSeatClass: 'Seat class', ticketWalletPassengerInfo: 'Passenger details', ticketWalletPassengerName: 'Passenger name', ticketWalletPassengerId: 'Document number', ticketWalletCode: 'Ticket code', ticketWalletSeat: 'Seat / cabin', ticketWalletPassenger: 'Passenger', ticketWalletJourney: 'Journey name', ticketWalletNotes: 'Notes', ticketWalletOriginal: 'Original ticket', ticketWalletRecognizeAgain: 'Recognize again', ticketWalletEdit: 'Edit', ticketWalletDelete: 'Delete', ticketWalletDeleteConfirm: 'Delete this ticket?', ticketWalletMemory: 'Travel memory', ticketWalletAddMemory: 'Add memory', ticketWalletEditMemory: 'Edit memory', ticketWalletMemoryTitle: 'Memory title', ticketWalletMemoryDescription: 'Write about this journey', ticketWalletMemorySave: 'Save memory', ticketWalletShare: 'Share journey', ticketWalletApple: 'Add to Apple Wallet', ticketWalletAppleHint: 'An image cannot be added directly to Apple Wallet; a valid signed .pkpass file is required.', ticketWalletNoJourney: 'No journeys yet.', ticketWalletSourceReady: 'Original kept', ticketWalletSourceMissing: 'Original unavailable', ticketWalletAdded: 'Ticket added', ticketWalletSaved: 'Ticket saved', ticketWalletDeleted: 'Ticket deleted', ticketWalletMemorySaved: 'Memory saved', ticketWalletNeedRoute: 'Add a departure and destination first', ticketWalletAppleDownloaded: 'Original Apple pass downloaded',
     navigationTitle: 'Web navigation', navigationHint: 'Tap a card for actions; long-press to reorder or create a folder.', navigationToolbarHint: 'Long-press to edit · drag to group', navigationAdd: 'Add website', navigationEmpty: 'No websites yet. Add a favorite site to get started.', navigationUrl: 'Website URL', navigationUrlPlaceholder: 'https://example.com', navigationName: 'Website name', navigationNamePlaceholder: 'Optional; defaults to the site name', navigationIcon: 'Website icon', navigationIconHint: 'Fetched automatically from the URL', navigationSave: 'Save website', navigationAddToFolder: 'Add to folder', navigationEdit: 'Edit website', navigationEditSave: 'Save changes', navigationActionEdit: 'Edit', navigationActionDelete: 'Delete', navigationActionCancel: 'Cancel', navigationFolderEdit: 'Edit folder', navigationFolder: 'Folder', navigationFolderName: 'Folder name', navigationFolderPlaceholder: 'For example: Work, Reading', navigationCreateFolder: 'New folder', navigationSaveFolder: 'Save folder', navigationFolderAdd: 'Add website', navigationFolderDelete: 'Dissolve folder', navigationFolderDeleteConfirm: 'Dissolving the folder will keep its websites in navigation. Continue?', navigationFolderDissolved: 'Folder dissolved', navigationFolderEmpty: 'This folder is empty. Add some websites.', navigationRemove: 'Delete', navigationOpen: 'Open website', navigationSettings: 'Navigation settings', navigationOpenModeHint: 'Open websites in', navigationOpenModeCurrent: 'Current page', navigationOpenModeNewTab: 'New tab', navigationAlreadyExists: 'This website has already been added', navigationInvalidUrl: 'Enter a valid http or https URL', navigationDropHint: 'Release to create a folder', navigationFolderCreated: 'Folder created', navigationAdded: 'Website added', navigationDeleted: 'Website deleted', navigationMoved: 'Website moved into folder', navigationOrderSaved: 'Navigation order saved', navigationSiteCount: '{count} sites',
-    allFeeds: 'All', feedRefresh: 'Refresh', feedLoading: 'Loading feeds…', feedEmpty: 'No items to show yet.', feedUpdated: 'Updated', feedLastRefresh: 'Last successful refresh', feedNewItems: 'New since refresh', feedShowNew: 'Only new', feedShowAll: 'Show all', feedTabNew: 'new', feedOpen: 'Open original', feedPartial: 'Some feeds are temporarily unavailable', feedProxyHint: 'Public RSS subscriptions; up to 120 items or 7 days are kept per source on this device.', feedLoadMore: 'Show older items', feedTabPrevious: 'Show previous home tabs', feedTabNext: 'Show more home tabs',
+    feedArticleFeedback: 'Article feedback', feedLike: 'Like', feedDislike: 'Dislike', feedFootprintRead: 'Seen', feedFootprintLike: 'Liked', feedFootprintDislike: 'Disliked', feedFootprintEmptyRead: 'No articles viewed yet.', feedFootprintEmptyLike: 'No liked articles yet.', feedFootprintEmptyDislike: 'No disliked articles yet.',
+    allFeeds: 'All', feedRefresh: 'Refresh', feedLoading: 'Loading feeds…', feedEmpty: 'No items to show yet.', feedUpdated: 'Updated', feedLastRefresh: 'Last successful refresh', feedNewItems: 'New since refresh', feedShowNew: 'Only new', feedShowAll: 'Show all', feedTabNew: 'new', feedOpen: 'Open original', feedPartial: 'Some feeds are temporarily unavailable', feedProxyHint: 'RSS keeps up to 120 items or 7 days per source. Footprints stay on this device and sync across devices after account cloud sync is enabled.', feedLoadMore: 'Show older items', feedTabPrevious: 'Show previous home tabs', feedTabNext: 'Show more home tabs',
     converterType: 'Conversion', from: 'From', to: 'To', result: 'Result', swap: 'Swap units', copyResult: 'Copy result',
     copied: 'Copied', translationInput: 'Text to translate', translateNow: 'Translate', saveTranslation: 'Save locally',
     source: 'Source', target: 'Target', translationResult: 'Translation', translationHistory: 'Recent translations',
@@ -477,6 +480,7 @@ const storedReaderPreferences = parseStored(STORAGE.readerPreferences, {}) || {}
 const storedReaderLayout = localStorage.getItem(STORAGE.readerLayout) || 'grid';
 const storedHomeFeeds = parseStored(STORAGE.homeFeeds, {}) || {};
 const storedHomeFeedRead = parseStored(STORAGE.homeFeedRead, {}) || {};
+const storedHomeFeedActivity = parseStored(STORAGE.homeFeedActivity, {}) || {};
 const storedHomeFeedOrder = parseStored(STORAGE.homeFeedOrder, DEFAULT_HOME_FEED_ORDER);
 const storedHomeFeedVisibility = parseStored(STORAGE.homeFeedVisibility, null);
 const storedHomeFeedActive = localStorage.getItem(STORAGE.homeFeedActive) || '';
@@ -1326,11 +1330,12 @@ const state = {
   library: normalizeReaderLibrary(storedLibrary),
   readerBookId: null, readerUrl: '', readerAssetUrls: [], readerContent: '', readerHint: '', readerToc: [], readerDialog: '', readerChromeHidden: false, readerImmersive: false, readerMode: 'library', readerReadingMode: 'scroll', readerPage: 0, readerSelectedText: '', readerSelection: null, readerAnnotationDraft: null, readerSelectionInput: 'mouse', readerLayout: storedReaderLayout === 'list' ? 'list' : 'grid', annotationBookId: null,
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
-  homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
+  homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, activityFilter: 'read', hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
   navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationDialog: null, navigationFolderDraft: null, navigationSettingsOpen: false,
   ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletTypeFilter: normalizeTicketWalletFilter(storedTicketWalletTypeFilter), ticketWalletSelectedId: '', ticketWalletDisplayOrder: Array.isArray(storedTicketWalletDisplayOrder) ? storedTicketWalletDisplayOrder.filter((id) => typeof id === 'string') : [], ticketWalletEditorOpen: false, ticketWalletEditorStage: 'choose', ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
+  homeFeedActivity: storedHomeFeedActivity && typeof storedHomeFeedActivity === 'object' ? storedHomeFeedActivity : {},
   notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, githubDialogOpen: false, recentReadingOpen: false,
   notificationPreference: storedNotificationPreference === 'deny' ? 'deny' : 'allow',
   topDisplay: { theme: storedTopDisplay.theme !== false, language: storedTopDisplay.language !== false, messages: storedTopDisplay.messages !== false },
@@ -1826,11 +1831,79 @@ function feedDate(value, item) {
   return new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(date);
 }
 function saveHomeFeedRead() { saveStored(STORAGE.homeFeedRead, state.homeFeedRead); }
+function saveHomeFeedActivity() { saveStored(STORAGE.homeFeedActivity, state.homeFeedActivity); }
+function compactFeedActivityItem(item) {
+  if (!item || typeof item !== 'object' || !item.id) return null;
+  return {
+    id: String(item.id), source: String(item.source || '').slice(0, 60),
+    title: String(item.title || '').slice(0, 500), link: safeExternalUrl(item.link) || '',
+    publishedMs: Number(feedItemTimestamp(item)) || 0,
+  };
+}
+function findHomeFeedItem(id) {
+  if (!id) return null;
+  for (const source of Object.values(state.homeFeed.sources || {})) {
+    const found = (source.items || []).find((item) => String(item.id) === String(id));
+    if (found) return found;
+  }
+  return state.homeFeedActivity[id]?.item || null;
+}
+function mergeHomeFeedActivity(localValue, remoteValue) {
+  const local = localValue && typeof localValue === 'object' && !Array.isArray(localValue) ? localValue : {};
+  const remote = remoteValue && typeof remoteValue === 'object' && !Array.isArray(remoteValue) ? remoteValue : {};
+  const merged = {};
+  [...new Set([...Object.keys(local), ...Object.keys(remote)])].forEach((id) => {
+    const left = local[id] && typeof local[id] === 'object' ? local[id] : {};
+    const right = remote[id] && typeof remote[id] === 'object' ? remote[id] : {};
+    const leftUpdatedAt = Number(left.updatedAt) || 0, rightUpdatedAt = Number(right.updatedAt) || 0;
+    const latest = rightUpdatedAt >= leftUpdatedAt ? right : left;
+    const other = latest === right ? left : right;
+    const leftReactionAt = Number(left.reactionAt) || 0, rightReactionAt = Number(right.reactionAt) || 0;
+    const reactionRecord = rightReactionAt >= leftReactionAt ? right : left;
+    const item = compactFeedActivityItem(latest.item) || compactFeedActivityItem(other.item);
+    merged[id] = {
+      ...(item ? { item } : {}),
+      readAt: Math.max(Number(left.readAt) || 0, Number(right.readAt) || 0),
+      reaction: String(reactionRecord.reaction || ''),
+      reactionAt: Math.max(leftReactionAt, rightReactionAt),
+      updatedAt: Math.max(leftUpdatedAt, rightUpdatedAt),
+    };
+  });
+  return merged;
+}
+function recordHomeFeedActivity(id, changes = {}, item = findHomeFeedItem(id)) {
+  if (!id) return;
+  const previous = state.homeFeedActivity[id] && typeof state.homeFeedActivity[id] === 'object' ? state.homeFeedActivity[id] : {};
+  const snapshot = compactFeedActivityItem(item) || compactFeedActivityItem(previous.item);
+  state.homeFeedActivity[id] = {
+    ...(snapshot ? { item: snapshot } : {}),
+    readAt: Math.max(Number(previous.readAt) || 0, Number(changes.readAt) || 0),
+    reaction: Object.prototype.hasOwnProperty.call(changes, 'reaction') ? String(changes.reaction || '') : String(previous.reaction || ''),
+    reactionAt: Object.prototype.hasOwnProperty.call(changes, 'reaction') ? Number(changes.reactionAt) || Date.now() : Number(previous.reactionAt) || 0,
+    updatedAt: Date.now(),
+  };
+  saveHomeFeedActivity();
+}
+function setHomeFeedReaction(id, reaction) {
+  if (!id || !['like', 'dislike', ''].includes(reaction)) return;
+  const current = state.homeFeedActivity[id]?.reaction || '';
+  recordHomeFeedActivity(id, { reaction: current === reaction ? '' : reaction, reactionAt: Date.now() });
+  if (state.section === 'home') {
+    const preservedPosition = captureHomeFeedPosition();
+    render();
+    restoreHomeFeedPosition(preservedPosition);
+  }
+}
 function markFeedRead(id) {
-  if (!id || state.homeFeedRead[id]) return;
-  state.homeFeedRead[id] = Date.now();
-  saveHomeFeedRead();
-  awardPetPoints(3, 'article', 'article:' + id);
+  if (!id) return;
+  const currentReadAt = Number(state.homeFeedRead[id]) || 0;
+  if (!currentReadAt) {
+    state.homeFeedRead[id] = Date.now();
+    saveHomeFeedRead();
+    awardPetPoints(3, 'article', 'article:' + id);
+  }
+  const activity = state.homeFeedActivity[id];
+  if (!Number(activity?.readAt) || !activity?.item) recordHomeFeedActivity(id, { readAt: currentReadAt || Date.now() });
 }
 function feedImageUrl(value) {
   const url = safeExternalUrl(value);
@@ -2320,19 +2393,24 @@ function loadHomeFeeds(force = false, sourceId = '') {
   const workers = Math.min(HOME_FEED_CONCURRENCY, sourcesToLoad.length);
   Array.from({ length: workers }, () => refreshWorker()).forEach((worker) => worker.catch(() => {}));
 }
+function feedReactionActionsMarkup(id) {
+  const reaction = state.homeFeedActivity[id]?.reaction || '';
+  return '<span class="feed-item-reactions" role="group" aria-label="' + escapeHtml(t('feedArticleFeedback')) + '"><button class="feed-reaction-button ' + (reaction === 'like' ? 'is-active is-like' : '') + '" type="button" data-feed-reaction="like" aria-label="' + escapeHtml(t('feedLike')) + '" title="' + escapeHtml(t('feedLike')) + '" aria-pressed="' + (reaction === 'like') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v10H4V10h3Zm3 10h7.2a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 18.6 9H14l.65-3.1A2.4 2.4 0 0 0 12.3 3L8 10v10Z"/></svg></button><button class="feed-reaction-button ' + (reaction === 'dislike' ? 'is-active is-dislike' : '') + '" type="button" data-feed-reaction="dislike" aria-label="' + escapeHtml(t('feedDislike')) + '" title="' + escapeHtml(t('feedDislike')) + '" aria-pressed="' + (reaction === 'dislike') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 14V4h3v10h-3Zm-3-10H6.8a2 2 0 0 0-1.96 1.6l-1.4 7A2 2 0 0 0 5.4 15H10l-.65 3.1A2.4 2.4 0 0 0 11.7 21l4.3-7V4Z"/></svg></button></span>';
+}
 function renderFeedItem(item) {
   const source = feedSource(item);
   const rawThumbnail = usableFeedImage(item.thumbnail, source);
   const thumbnail = feedImageUrl(rawThumbnail) || rawThumbnail;
   const image = rawThumbnail ? '<span class="feed-item-media"><img class="feed-item-image" src="' + escapeHtml(thumbnail) + '" data-fallback="' + escapeHtml(rawThumbnail) + '" alt="" loading="lazy" onerror="if(this.dataset.fallback&&this.getAttribute(\'src\')!==this.dataset.fallback){this.src=this.dataset.fallback;return;}var media=this.closest(\'.feed-item-media\');if(media)media.remove();var side=this.closest(\'.feed-item-side\');if(side&&!side.children.length)side.remove();"></span>' : '';
-  const meta = '<div class="feed-item-meta"><span class="feed-source-tag ' + source.className + '"><b><img src="' + escapeHtml(source.icon) + '" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display=\'inline\'"><span class="feed-source-fallback">' + escapeHtml(source.badge) + '</span></b>' + escapeHtml(source.name) + '</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time></div>';
+  const meta = '<div class="feed-item-meta"><span class="feed-source-tag ' + source.className + '"><b><img src="' + escapeHtml(source.icon) + '" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display=\'inline\'"><span class="feed-source-fallback">' + escapeHtml(source.badge) + '</span></b>' + escapeHtml(source.name) + '</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time>' + feedReactionActionsMarkup(item.id) + '</div>';
   const read = Boolean(state.homeFeedRead[item.id]);
   return '<article class="feed-item ' + (thumbnail ? 'has-media ' : '') + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" tabindex="0" role="link"><div class="feed-item-body"><h2>' + escapeHtml(item.title) + '</h2>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + meta + '</div>' + (image ? '<div class="feed-item-side">' + image + '</div>' : '') + '</article>';
 }
 function renderJiemianFlash(item) {
   if (!item) return '';
   const description = item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '';
-  return '<article class="jiemian-flash-card" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" data-feed-open-new-tab="true" tabindex="0" role="link"><div class="jiemian-flash-head"><span class="jiemian-flash-label"><span class="jiemian-flash-dot" aria-hidden="true"></span>界面快讯</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time></div><h2>' + escapeHtml(item.title) + '</h2>' + description + '<span class="jiemian-flash-action">新页签查看快讯 <span aria-hidden="true">→</span></span></article>';
+  const read = Boolean(state.homeFeedRead[item.id]);
+  return '<article class="jiemian-flash-card ' + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" data-feed-open-new-tab="true" tabindex="0" role="link"><div class="jiemian-flash-head"><span class="jiemian-flash-label"><span class="jiemian-flash-dot" aria-hidden="true"></span>界面快讯</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time></div><h2>' + escapeHtml(item.title) + '</h2>' + description + '<div class="jiemian-flash-footer"><span class="jiemian-flash-action">新页签查看快讯 <span aria-hidden="true">→</span></span>' + feedReactionActionsMarkup(item.id) + '</div></article>';
 }
 function isMobileSurface() {
   return Boolean(navigator.standalone || window.matchMedia?.('(display-mode: standalone)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia?.('(max-width: 760px)').matches);
@@ -3380,7 +3458,7 @@ function renderHome() {
   // Also clean the already-rendered cache. A previous build could have saved
   // a street-level local item, so waiting for another network refresh would
   // otherwise keep showing both the old and the city-level entry.
-  const allItems = sourceItems.filter((item) => !isStaleGeneratedLocalFeedItem(item)).filter((item) => { const timestamp = feedItemTimestamp(item); return !Number.isFinite(timestamp) || timestamp >= cutoff; });
+  const allItems = sourceItems.filter((item) => !isStaleGeneratedLocalFeedItem(item)).filter((item) => isFootprint || !Number.isFinite(feedItemTimestamp(item)) || feedItemTimestamp(item) >= cutoff);
   const pendingIds = homeFeedPendingIds(state.homeFeed.active);
   const newIds = homeFeedNewIds(state.homeFeed.active);
   const newCount = isFootprint ? 0 : homeFeedPendingCount(state.homeFeed.active, allItems);
@@ -3405,11 +3483,12 @@ function renderHome() {
     if (separator) separatorShown = true;
     return separator + renderFeedItem(item);
   }).join('');
-  const feedBody = state.homeFeed.loading && !hasItems && !isFootprint ? '<div class="feed-loading"><span></span><span></span><span></span></div>' : hasItems ? '<div class="feed-list">' + feedList + '</div>' : '<p class="empty feed-empty">' + (isFootprint ? (state.language === 'en' ? 'No articles read yet.' : '还没有阅读过首页消息。') : t('feedEmpty')) + '</p>';
+  const emptyActivityKey = state.homeFeed.activityFilter === 'like' ? 'feedFootprintEmptyLike' : state.homeFeed.activityFilter === 'dislike' ? 'feedFootprintEmptyDislike' : 'feedFootprintEmptyRead';
+  const feedBody = state.homeFeed.loading && !hasItems && !isFootprint ? '<div class="feed-loading"><span></span><span></span><span></span></div>' : hasItems ? '<div class="feed-list">' + feedList + '</div>' : '<p class="empty feed-empty">' + (isFootprint ? t(emptyActivityKey) : t('feedEmpty')) + '</p>';
   const refreshState = state.homeFeed.loading ? '<div class="feed-refresh-state" role="status" aria-label="' + escapeHtml(t('feedLoading')) + '"><span></span></div>' : '';
   const newContentAction = !state.homeFeed.loading && !homeFeedSourceRequesting() && newCount ? '<div class="feed-new-content-action-wrap"><button class="feed-new-content-action" type="button" data-feed-only-new>' + escapeHtml(homeFeedNewActionLabel(newCount)) + '</button></div>' : '';
   const loadMoreAction = hasMoreItems ? '<div class="feed-load-more-wrap"><button class="feed-load-more" type="button" data-feed-load-more>' + escapeHtml(t('feedLoadMore')) + '</button></div>' : '';
-  return '<div class="home-page feed-home">' + (featuredJiemianFlash ? renderJiemianFlash(featuredJiemianFlash) : '') + '<section class="feed-panel">' + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
+  return '<div class="home-page feed-home">' + (featuredJiemianFlash ? renderJiemianFlash(featuredJiemianFlash) : '') + '<section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
 }
 function navigationIconMarkup(site, extraClass = '') {
   const generatedSources = navigationIconSources(site?.url);
@@ -5176,13 +5255,43 @@ function renderPetDialog() {
 }
 function closePetDialog() { const dialog = $('#petDialog'); if (dialog) dialog.hidden = true; state.petDialogOpen = false; }
 
-function recentFeedItems() {
-  const items = new Map();
-  Object.values(state.homeFeed.sources || {}).forEach((source) => (source.items || []).forEach((item) => {
-    const readAt = Number(state.homeFeedRead[item.id] || 0);
-    if (readAt && !items.has(item.id)) items.set(item.id, { item, readAt });
-  }));
-  return [...items.values()].sort((a, b) => b.readAt - a.readAt).map(({ item }) => item);
+function recentFeedActivityRecords() {
+  const liveItems = new Map();
+  Object.values(state.homeFeed.sources || {}).forEach((source) => (source.items || []).forEach((item) => liveItems.set(String(item.id), item)));
+  const records = new Map();
+  const activity = state.homeFeedActivity && typeof state.homeFeedActivity === 'object' ? state.homeFeedActivity : {};
+  Object.entries(activity).forEach(([id, entry]) => {
+    const item = liveItems.get(id) || compactFeedActivityItem(entry?.item);
+    const readAt = Math.max(Number(entry?.readAt) || 0, Number(state.homeFeedRead[id]) || 0);
+    const reaction = ['like', 'dislike'].includes(entry?.reaction) ? entry.reaction : '';
+    if (item && (readAt || reaction)) records.set(id, { item, readAt, reaction, updatedAt: Number(entry?.updatedAt) || Number(entry?.reactionAt) || readAt });
+  });
+  Object.entries(state.homeFeedRead || {}).forEach(([id, value]) => {
+    const readAt = Number(value) || 0;
+    if (!readAt) return;
+    const existing = records.get(id);
+    const item = existing?.item || liveItems.get(id);
+    if (item) records.set(id, { ...existing, item, readAt: Math.max(readAt, Number(existing?.readAt) || 0), reaction: existing?.reaction || '', updatedAt: Math.max(Number(existing?.updatedAt) || 0, readAt) });
+  });
+  return [...records.values()].sort((a, b) => b.updatedAt - a.updatedAt);
+}
+function recentFeedItems(filter = state.homeFeed.activityFilter) {
+  return recentFeedActivityRecords().filter((record) => filter === 'like' ? record.reaction === 'like' : filter === 'dislike' ? record.reaction === 'dislike' : Boolean(record.readAt)).map((record) => record.item);
+}
+function homeFeedActivityCounts() {
+  return recentFeedActivityRecords().reduce((counts, record) => {
+    if (record.readAt) counts.read += 1;
+    if (record.reaction === 'like') counts.like += 1;
+    if (record.reaction === 'dislike') counts.dislike += 1;
+    return counts;
+  }, { read: 0, like: 0, dislike: 0 });
+}
+function renderHomeFeedActivityFilters() {
+  const counts = homeFeedActivityCounts();
+  const options = [
+    ['read', t('feedFootprintRead')], ['like', t('feedFootprintLike')], ['dislike', t('feedFootprintDislike')],
+  ];
+  return '<div class="feed-activity-filters" role="tablist" aria-label="' + escapeHtml(t('footprint')) + '">' + options.map(([id, label]) => '<button type="button" class="feed-activity-filter ' + (state.homeFeed.activityFilter === id ? 'active' : '') + '" data-feed-activity-filter="' + id + '" role="tab" aria-selected="' + (state.homeFeed.activityFilter === id) + '">' + escapeHtml(label) + '<span>' + counts[id] + '</span></button>').join('') + '</div>';
 }
 function renderRecentReading() {
   const dialog = $('#recentReadingDialog');
@@ -8837,7 +8946,7 @@ function syncPayload(readerFiles = null, library = syncLibraryMetadata(), ticket
     schema: 2, app: 'OneBox', version: APP_VERSION, savedAt: new Date().toISOString(), storage: syncStorageSnapshot(selection),
     ...(enabled('settings') ? { theme: state.theme, color: state.color, languageMode: state.languageMode, language: state.language, layoutMode: state.layoutMode, topDisplay: state.topDisplay, footprint: state.footprint, mascotVisible: state.mascotVisible, mascotDisplayMode: state.mascotDisplayMode, mascotPosition: parseStored(STORAGE.mascotPosition, null), petProfile: state.petProfile } : {}),
     ...(enabled('navigation') ? { toolOrder: state.toolOrder, homeFeedOrder: state.homeFeed.order, homeFeedVisibility: state.homeFeed.visible, navigation: state.navigation, navigationLocation: state.navigationLocation, openMode: state.openMode } : {}),
-    ...(enabled('reading') ? { library, readerPreferences: state.readerPreferences, readerLayout: state.readerLayout, homeFeedRead: state.homeFeedRead, readerFiles } : {}),
+    ...(enabled('reading') ? { library, readerPreferences: state.readerPreferences, readerLayout: state.readerLayout, homeFeedRead: state.homeFeedRead, homeFeedActivity: state.homeFeedActivity, readerFiles } : {}),
     ...(enabled('messages') ? { notifications: state.notifications, notificationPreference: state.notificationPreference } : {}),
     ...(selection.calendar ? { events: state.events } : {}),
     ...(selection.weather ? { weatherCards: state.weatherCards } : {}),
@@ -8883,6 +8992,7 @@ function mergeGithubUploadBundle(bundle, remote = null) {
     if (Object.prototype.hasOwnProperty.call(payload, key) && Object.prototype.hasOwnProperty.call(remote, key)) payload[key] = mergeGithubValue(remote[key], payload[key]);
   };
   ['events', 'weatherCards', 'translationHistory', 'notifications', 'library', 'homeFeedRead', 'navigation'].forEach(mergeField);
+  if (payload.homeFeedActivity && remote.homeFeedActivity) payload.homeFeedActivity = mergeHomeFeedActivity(payload.homeFeedActivity, remote.homeFeedActivity);
   if (selection.navigation && payload.navigation) {
     payload.navigation = mergeGithubNavigation(remoteGithubNavigation(remote), payload.navigation);
   }
@@ -9035,7 +9145,7 @@ function parseGithubSyncPayload(content) {
   if (remote?.storage && typeof remote.storage === 'string') {
     try { remote.storage = JSON.parse(remote.storage); } catch { throw Error(t('githubSyncInvalidData')); }
   }
-  const knownKeys = ['schema', 'version', 'theme', 'color', 'languageMode', 'language', 'toolOrder', 'calculator', 'events', 'weatherCards', 'translationHistory', 'notifications', 'library', 'readerPreferences', 'readerLayout', 'translationHistoryOpen', 'homeFeedRead', 'layoutMode', 'topDisplay', 'homeFeedOrder', 'homeFeedVisibility', 'navigation', 'footprint', 'mascotVisible', 'mascotDisplayMode', 'mascotPosition', 'petProfile', 'notificationPreference', 'openMode'];
+  const knownKeys = ['schema', 'version', 'theme', 'color', 'languageMode', 'language', 'toolOrder', 'calculator', 'events', 'weatherCards', 'translationHistory', 'notifications', 'library', 'readerPreferences', 'readerLayout', 'translationHistoryOpen', 'homeFeedRead', 'homeFeedActivity', 'layoutMode', 'topDisplay', 'homeFeedOrder', 'homeFeedVisibility', 'navigation', 'footprint', 'mascotVisible', 'mascotDisplayMode', 'mascotPosition', 'petProfile', 'notificationPreference', 'openMode'];
   const hasRecognizableData = remote && typeof remote === 'object' && !Array.isArray(remote) && (Object.prototype.hasOwnProperty.call(remote, 'storage') || knownKeys.some((key) => Object.prototype.hasOwnProperty.call(remote, key)));
   const hasValidStorage = remote?.storage === undefined || remote?.storage === null || (typeof remote.storage === 'object' && !Array.isArray(remote.storage));
   if (!hasRecognizableData || (remote.app !== undefined && remote.app !== 'OneBox') || !hasValidStorage) throw Error(t('githubSyncInvalidData'));
@@ -9369,13 +9479,13 @@ function remoteGithubNavigation(remote) {
   }
   return stored && typeof stored === 'object' ? stored : null;
 }
-const GITHUB_MERGE_STORAGE_KEYS = new Set([STORAGE.events, STORAGE.weatherCards, STORAGE.translationHistory, STORAGE.notifications]);
+const GITHUB_MERGE_STORAGE_KEYS = new Set([STORAGE.events, STORAGE.weatherCards, STORAGE.translationHistory, STORAGE.notifications, STORAGE.homeFeedActivity]);
 function mergeGithubStorageValue(key, localValue, remoteValue) {
   if (!GITHUB_MERGE_STORAGE_KEYS.has(key)) return remoteValue;
   try {
     const localParsed = localValue == null ? null : JSON.parse(localValue);
     const remoteParsed = JSON.parse(remoteValue);
-    return JSON.stringify(mergeGithubValue(localParsed, remoteParsed));
+    return JSON.stringify(key === STORAGE.homeFeedActivity ? mergeHomeFeedActivity(localParsed, remoteParsed) : mergeGithubValue(localParsed, remoteParsed));
   } catch { return remoteValue; }
 }
 function applyRemoteStorageSnapshot(remoteStorage) {
@@ -9420,6 +9530,7 @@ function hydrateGithubRuntimeState() {
   state.readerLayout = localStorage.getItem(STORAGE.readerLayout) === 'list' ? 'list' : 'grid';
   state.translationHistoryOpen = parseStored(STORAGE.translationHistoryOpen, false) === true;
   state.homeFeedRead = parseStored(STORAGE.homeFeedRead, {}) || {};
+  state.homeFeedActivity = mergeHomeFeedActivity(state.homeFeedActivity, parseStored(STORAGE.homeFeedActivity, {}));
   state.layoutMode = localStorage.getItem(STORAGE.layout) === 'classic' ? 'classic' : 'simple';
   const storedTopDisplay = parseStored(STORAGE.topDisplay, {}) || {};
   state.topDisplay = { theme: storedTopDisplay.theme !== false, language: storedTopDisplay.language !== false, messages: storedTopDisplay.messages !== false };
@@ -9982,7 +10093,7 @@ async function githubDownloadTask() {
     if (readingEnabled && newestReadingBackup && newestReadingBackup !== selectedBackup) {
       const readingRemote = newestReadingBackup.remote;
       remote = { ...remote, library: readerSyncLibrary(readingRemote) };
-      ['readerFiles', 'readerPreferences', 'readerLayout', 'homeFeedRead'].forEach((key) => {
+      ['readerFiles', 'readerPreferences', 'readerLayout', 'homeFeedRead', 'homeFeedActivity'].forEach((key) => {
         if (Object.prototype.hasOwnProperty.call(readingRemote, key)) remote[key] = readingRemote[key];
       });
     }
@@ -10050,6 +10161,7 @@ async function githubDownloadTask() {
     if (readingEnabled && (remote.readerLayout === 'list' || remote.readerLayout === 'grid')) { state.readerLayout = remote.readerLayout; saveReaderLayout(); }
     if (githubSyncCustomGroupEnabled('translation') && typeof remote.translationHistoryOpen === 'boolean') { state.translationHistoryOpen = remote.translationHistoryOpen; saveStored(STORAGE.translationHistoryOpen, state.translationHistoryOpen); }
     if (readingEnabled && remote.homeFeedRead && typeof remote.homeFeedRead === 'object') { state.homeFeedRead = mergeGithubValue(state.homeFeedRead, remote.homeFeedRead); saveHomeFeedRead(); }
+    if (readingEnabled && remote.homeFeedActivity && typeof remote.homeFeedActivity === 'object') { state.homeFeedActivity = mergeHomeFeedActivity(state.homeFeedActivity, remote.homeFeedActivity); saveHomeFeedActivity(); }
     if (settingsEnabled && (remote.layoutMode === 'simple' || remote.layoutMode === 'classic')) { state.layoutMode = remote.layoutMode; saveLayoutPreference(); }
     if (settingsEnabled && remote.topDisplay && typeof remote.topDisplay === 'object') { state.topDisplay = { theme: remote.topDisplay.theme !== false, language: remote.topDisplay.language !== false, messages: remote.topDisplay.messages !== false }; saveTopDisplay(); }
     if (navigationEnabled && Array.isArray(remote.homeFeedOrder)) { state.homeFeed.order = normalizeHomeFeedOrder(remote.homeFeedOrder); saveHomeFeedOrder(); }
@@ -12185,6 +12297,21 @@ workspace.addEventListener('contextmenu', (event) => {
 });
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
+  const feedReactionButton = event.target.closest('[data-feed-reaction]');
+  if (feedReactionButton) {
+    event.preventDefault(); event.stopPropagation();
+    const article = feedReactionButton.closest('[data-feed-id]');
+    return setHomeFeedReaction(article?.dataset.feedId, feedReactionButton.dataset.feedReaction);
+  }
+  const activityFilterButton = event.target.closest('[data-feed-activity-filter]');
+  if (activityFilterButton) {
+    event.preventDefault(); event.stopPropagation();
+    const preservedPosition = captureHomeFeedPosition();
+    state.homeFeed.activityFilter = ['read', 'like', 'dislike'].includes(activityFilterButton.dataset.feedActivityFilter) ? activityFilterButton.dataset.feedActivityFilter : 'read';
+    render();
+    restoreHomeFeedPosition(preservedPosition);
+    return;
+  }
   const walletPage = event.target.closest('.ticket-wallet-page');
   const blankWalletClick = walletPage && !event.target.closest('.ticket-wallet-swipe-row, button, a, input, textarea, select, [role="tab"]');
   if (ticketWalletReorderTargetRow && blankWalletClick) clearTicketWalletReorderTarget();
@@ -13231,6 +13358,12 @@ $('#agreementDialog').addEventListener('click', (event) => {
 });
 $('#recentReadingDialog').addEventListener('click', (event) => {
   if (event.target === $('#recentReadingDialog') || event.target.closest('[data-close-recent-reading]')) return closeRecentReading();
+  const reactionButton = event.target.closest('[data-feed-reaction]');
+  if (reactionButton) {
+    event.preventDefault(); event.stopPropagation();
+    setHomeFeedReaction(reactionButton.closest('[data-feed-id]')?.dataset.feedId, reactionButton.dataset.feedReaction);
+    return renderRecentReading();
+  }
   const feedItem = event.target.closest('[data-feed-link]');
   if (!feedItem) return;
   if (openFeedLink(feedItem.dataset.feedLink)) {

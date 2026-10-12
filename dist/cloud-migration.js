@@ -6,7 +6,7 @@
   const groups = [
     ['设置与偏好', ['onebox.theme','onebox.language','onebox.layout','onebox.color','onebox.color-explicit','onebox.top-display','onebox.footprint','onebox.open-mode','onebox.mascot-position','onebox.mascot-visible','onebox.mascot-display-mode','onebox.pet-profile']],
     ['导航与首页', ['onebox.tool-order','onebox.navigation','onebox.navigation-location','onebox.home-feed-order','onebox.home-feed-visibility','onebox.home-feed-active']],
-    ['阅读', ['onebox.home-feed-read','onebox.reader-progress','onebox.reader-preferences','onebox.reader-layout','onebox.library']],
+    ['阅读', ['onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-preferences','onebox.reader-layout','onebox.library']],
     ['日程与天气', ['onebox.events','onebox.weather-cards','onebox.weather']],
     ['消息与工具', ['onebox.notifications','onebox.notification-preference','onebox.translation-history','onebox.translation-history-open','onebox.calculator','onebox.dev-tools']],
     ['卡包', ['onebox.ticket-wallet','onebox.ticket-wallet-display-order','onebox.ticket-wallet-type-filter','onebox.ticket-wallet-memories','onebox.ticket-wallet-deleted']],
