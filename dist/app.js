@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.613';
+const APP_VERSION = '2.18.614';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -130,6 +130,17 @@ pageSwipeStage.parentNode.insertBefore(homeSourceNav, pageSwipeStage);
 const parseStored = (key, fallback) => {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 };
+function readOpenModePreference() {
+  const raw = localStorage.getItem(STORAGE.openMode);
+  if (raw === null) return 'current';
+  try {
+    const value = JSON.parse(raw);
+    return value === 'new-tab' ? 'new-tab' : 'current';
+  } catch {
+    // Older builds may have written the plain string without JSON quotes.
+    return raw === 'new-tab' ? 'new-tab' : 'current';
+  }
+}
 const GITHUB_CUSTOM_SYNC_DEFAULTS = Object.freeze({ settings: true, navigation: true, reading: true, messages: true, calendar: true, weather: true, translation: true, calculator: true, ticketWallet: true });
 function normalizeGithubSyncSelection(value) {
   const source = value && typeof value === 'object' ? value : {};
@@ -489,7 +500,7 @@ const storedNavigationLocation = localStorage.getItem(STORAGE.navigationLocation
 const storedNotificationPreference = parseStored(STORAGE.notificationPreference, 'allow');
 const storedTopDisplay = parseStored(STORAGE.topDisplay, {}) || {};
 const storedFootprint = parseStored(STORAGE.footprint, true) !== false;
-const storedOpenMode = localStorage.getItem(STORAGE.openMode) || 'current';
+const storedOpenMode = readOpenModePreference();
 const storedMascotVisible = localStorage.getItem(STORAGE.mascotVisible) !== 'false';
 const storedMascotDisplayMode = localStorage.getItem(STORAGE.mascotDisplayMode) === 'full' ? 'full' : 'half';
 const DEV_TOOL_IDS = ['json-format', 'json-compare', 'text-stats', 'timestamp'];
@@ -1341,7 +1352,7 @@ const state = {
   topDisplay: { theme: storedTopDisplay.theme !== false, language: storedTopDisplay.language !== false, messages: storedTopDisplay.messages !== false },
   footprint: storedFootprint,
   homeSourceDialogOpen: false,
-  openMode: storedOpenMode === 'new-tab' ? 'new-tab' : 'current',
+  openMode: storedOpenMode,
   mascotVisible: storedMascotVisible,
   mascotDisplayMode: storedMascotDisplayMode,
   petProfile: storedPetProfile,
@@ -9544,7 +9555,7 @@ function hydrateGithubRuntimeState() {
   state.mascotDisplayMode = localStorage.getItem(STORAGE.mascotDisplayMode) === 'full' ? 'full' : 'half';
   state.petProfile = normalizePetProfile(parseStored(STORAGE.petProfile, {}));
   state.notificationPreference = parseStored(STORAGE.notificationPreference, 'allow') === 'deny' ? 'deny' : 'allow';
-  state.openMode = localStorage.getItem(STORAGE.openMode) === 'new-tab' ? 'new-tab' : 'current';
+  state.openMode = readOpenModePreference();
   const activeTool = localStorage.getItem(STORAGE.toolActive);
   if (Object.keys(TOOL_DEFS).includes(activeTool)) state.tool = activeTool;
   const activeHomeFeed = localStorage.getItem(STORAGE.homeFeedActive);
