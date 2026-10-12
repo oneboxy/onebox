@@ -1255,8 +1255,8 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 .feed-source-mark.hupu, .feed-source-tag.hupu b { background: #d52b2b; color: #fff; }
 .feed-source-mark.thepaper, .feed-source-tag.thepaper b { background: #fff; color: #222; }
 .feed-source-mark.jiemian, .feed-source-tag.jiemian b { background: transparent; color: #fff; }
-.feed-source-mark.footprint { background: transparent; color: var(--muted); }
-.feed-source-mark.footprint svg { width: 16px; height: 16px; fill: currentColor; stroke: none; }
+.feed-source-mark.footprint { background: #000; color: #fff; border: 1px solid var(--line); overflow: hidden; }
+.feed-source-mark.footprint img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 @keyframes feed-spin { to { transform: rotate(360deg); } }
 .feed-panel { margin-top: 12px; overflow: hidden; border-radius: 20px; }
 .feed-period-tabs { display: flex; align-items: center; gap: 26px; padding: 0 18px; border-bottom: 1px solid var(--line); }
@@ -4956,7 +4956,7 @@ html[data-theme="dark"] .reader-theme-dot.theme-dark {
 #homeSourceNav .feed-source-mark.huxiu { background: #e39a35; color: #fff; border: 0; }
 #homeSourceNav .feed-source-mark.v2ex { background: #5c86a8; color: #fff; border: 0; }
 #homeSourceNav .feed-source-mark.guancha { background: transparent; color: #fff; border: 0; }
-#homeSourceNav .feed-source-mark.footprint svg { width: 16px; height: 16px; }
+html[data-theme="dark"] .feed-source-mark.footprint { border-color: #444; }
 #toolNav {
   position: fixed;
   top: var(--app-header-height);
@@ -7178,10 +7178,6 @@ html[data-theme-mode="dark-gray"] .key {
   height: 100%;
   object-fit: contain;
   border-radius: inherit;
-}
-#homeSourceDialog .home-source-option-mark .feed-source-mark.footprint svg {
-  width: 12px;
-  height: 12px;
 }
 #homeSourceDialog .home-source-option-copy {
   display: flex;

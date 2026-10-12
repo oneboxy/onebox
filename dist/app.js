@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.616';
+const APP_VERSION = '2.18.617';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1283,7 +1283,7 @@ function homeTabEntries() {
   return [{ id: 'footprint', name: t('footprint'), badge: '足', className: 'footprint', local: true }, ...sources];
 }
 function homeTabMarkMarkup(entry, extraClass = '') {
-  if (entry.id === 'footprint') return '<span class="feed-source-mark footprint' + (extraClass ? ' ' + extraClass : '') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.1 2.4c2 0 3.4 2.3 3.2 5-.1 1.6-.7 2.7-1.6 3.4-.7.6-1.2 1.2-1.2 2-.1 1.7-1.4 3.1-3.1 3.4-1.9.3-3.4-.7-3.6-2.1-.2-1.2.3-2.2 1.2-3.1.9-.9 1.3-1.8 1.2-3.2-.1-2.7 1.4-5.4 3.7-5.4Z"/><path d="M17.4 5c1.9.2 3 2.6 2.7 5.1-.2 1.5-.9 2.6-1.9 3.1-.9.5-1.4 1.1-1.2 1.9.3 1.3-.8 2.8-2.3 3.4-1.7.7-3.3.2-3.7-.9-.3-1 .1-2.1.9-3 .8-.9 1.1-1.8.8-3.1-.7-2.4.7-5.9 3-6.3.7-.2 1.2-.2 1.7-.2Z"/></svg></span>';
+  if (entry.id === 'footprint') return '<span class="feed-source-mark footprint' + (extraClass ? ' ' + extraClass : '') + '"><img src="icons/onebox-brand-v317-64.png?v=' + APP_VERSION + '" alt="" aria-hidden="true"></span>';
   return homeFeedSourceMarkMarkup(entry, extraClass);
 }
 function homeTabIds() {
