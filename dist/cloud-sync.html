@@ -1,36 +1,27 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f4f6fb">
-  <title>OneBox 云端数据</title>
+  <meta name="description" content="管理 OneBox 个人 GitHub Gist 同步">
+  <title>OneBox GitHub 同步</title>
   <link rel="stylesheet" href="cloud-sync.css">
 </head>
 <body>
   <main class="cloud-page">
-    <header><a href="./#mine" aria-label="返回 OneBox">‹</a><span>OneBox 云端同步</span><small>账号与数据迁移</small></header>
-    <section class="cloud-card" id="cloudCard">
+    <header><a href="./#mine" aria-label="返回 OneBox">‹</a><span>OneBox GitHub 同步</span><small>个人 Gist 存储</small></header>
+    <section class="cloud-card">
       <div class="cloud-mark">◈</div>
-      <h1>把 OneBox 数据带到云端</h1>
-      <p class="intro">仅在你明确同意后迁移本机数据。授权完成后，可以在其他设备登录同一 GitHub 账号并同步。</p>
-      <div id="cloudStatus" class="status-line">正在检查账号与云端配置…</div>
-      <div id="migrationDetails" hidden>
-        <div class="data-summary"><div><strong id="keyCount">0</strong><span>项数据</span></div><div><strong id="fileCount">0</strong><span>个附件</span></div><div><strong id="totalSize">0 B</strong><span>本机内容</span></div></div>
-        <div id="moduleSummary" class="module-summary"></div>
-        <div class="gist-note"><strong>已有 GitHub Gist 备份？</strong><span>先回到前台，在「我的 → GitHub」恢复到本机，再回来迁移；这样本机内容会包含最新备份。</span><a href="./#mine" target="_blank" rel="noopener">返回前台恢复备份</a></div>
-        <label class="consent"><input id="migrationConsent" type="checkbox"><span>我同意将以上 OneBox 数据与附件上传到 OneBox 云端，并了解管理员按授权角色可查看、编辑、导出或删除云端数据。</span></label>
-        <button id="migrateButton" class="primary" disabled>授权并开始迁移</button>
-        <div id="progressBox" class="progress-box" hidden><div><strong id="progressTitle">正在迁移</strong><span id="progressLabel">0%</span></div><div class="progress-track"><i id="progressBar"></i></div><small id="progressHint">请保持页面打开，完成后再关闭。</small></div>
-      </div>
-      <div id="cloudAlready" class="cloud-already" hidden><span class="check">✓</span><strong>此账号已开通云端数据</strong><small id="migratedAt"></small><small id="syncHint">首次在此设备同步时，云端同名数据优先；云端没有的本机数据会补充上传。</small><label class="consent auto-sync"><input type="checkbox" id="autoSync"><span>开启此设备自动同步。修改联网后上传，其他设备也会同步。</span></label><button id="syncNow" class="secondary">立即同步此设备</button></div>
-      <a id="loginLink" class="primary link-button" href="./#mine" target="_blank" rel="noopener" hidden>先连接 GitHub</a>
-      <button id="refreshCloud" class="secondary" hidden>重新检查</button>
-      <div class="privacy-note">GitHub 令牌保存在本机；连接云端时会经 HTTPS 发给 Worker 验证身份，不写入云端数据库。后台 PWA 不缓存个人数据，离线时不能查看或修改云端数据。</div>
+      <h1>数据保存在你的 GitHub Gist</h1>
+      <p class="intro">你选择同步的设置、导航、日程、消息、阅读数据、书籍原件和卡包附件保存在你自己的秘密 Gist。OneBox 不把这些数据写入 Cloudflare。</p>
+      <div id="cloudStatus" class="status-line">正在读取本机 GitHub 连接…</div>
+      <label class="consent auto-sync"><input id="autoSync" type="checkbox"><span>联网时自动同步到这个 GitHub 账号；关闭后保留现有 Gist 备份。</span></label>
+      <div class="gist-note"><strong>关于秘密 Gist</strong><span>秘密 Gist 不会公开列在个人主页上，但不是私有仓库。任何拿到 Gist 链接的人都可能读取内容，请勿同步敏感文件。</span></div>
+      <a class="primary link-button" href="./#mine">返回 OneBox 账号设置</a>
+      <p class="privacy-note">每个 GitHub 账号管理自己的 Gist。当前模式不支持后台跨用户查看、编辑或删除个人数据。</p>
     </section>
   </main>
-  <script src="reader-sync-config.js"></script>
-  <script src="cloud-sync.js"></script>
   <script src="cloud-migration.js" defer></script>
 </body>
 </html>
