@@ -16,11 +16,16 @@
       status({ state: 'idle', message: '登录 GitHub 后自动同步到个人 Gist' });
       return;
     }
-    if (handlers?.isEnabled && !handlers.isEnabled()) {
-      status({ state: 'disabled', message: '阅读内容未勾选同步' });
+    if (window.OneBoxGithubAutoSync?.enabled && !window.OneBoxGithubAutoSync.enabled()) {
+      status({ state: 'paused', message: '自动同步已暂停' });
       return;
     }
-    status({ state: navigator.onLine ? 'syncing' : 'offline', message: navigator.onLine ? '书籍与阅读进度同步到 GitHub Gist…' : '离线中，联网后同步到 GitHub Gist' });
+    const readingEnabled = !handlers?.isEnabled || handlers.isEnabled();
+    status(readingEnabled
+      ? { state: navigator.onLine ? 'syncing' : 'offline', message: navigator.onLine ? '书籍与阅读进度同步到 GitHub Gist…' : '离线中，联网后同步到 GitHub Gist' }
+      : { state: 'reading-disabled', message: '阅读内容未勾选同步' });
+    // The shared Gist can still contain other selected groups when reading is
+    // unchecked, so always let the account-wide sync queue run.
     window.OneBoxGithubAutoSync?.queue?.(delay);
   }
 
@@ -31,7 +36,17 @@
     },
     queueSync,
     syncNow: () => window.OneBoxGithubAutoSync?.syncNow?.({ restore: true }),
-    markDeleted: () => queueSync(700),
+    markDeleted(ids = []) {
+      try {
+        const deleted = JSON.parse(localStorage.getItem('onebox.reader-deleted') || '{}');
+        (Array.isArray(ids) ? ids : []).forEach((id) => {
+          const key = String(id || '').trim();
+          if (key) deleted[key] = Date.now();
+        });
+        localStorage.setItem('onebox.reader-deleted', JSON.stringify(deleted));
+      } catch { /* keep the library deletion usable if storage is unavailable */ }
+      queueSync(700);
+    },
     invalidateSession() {},
     status: () => lastStatus,
     isConfigured: connected,
