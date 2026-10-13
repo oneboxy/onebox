@@ -13,7 +13,7 @@
     status.textContent = connected
       ? '已连接 GitHub' + (account.user?.login ? '：' + account.user.login : '') + '。数据会保存到此账号自己的 Gist。'
       : '尚未连接 GitHub。返回 OneBox，在「我的 → 账号」连接 GitHub 后即可同步。';
-    toggle.checked = localStorage.getItem(AUTO_SYNC_KEY) !== 'false';
+    toggle.checked = localStorage.getItem(AUTO_SYNC_KEY) === 'true';
     toggle.disabled = !connected;
   }
 

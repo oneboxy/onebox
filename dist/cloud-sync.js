@@ -9,8 +9,10 @@
     'onebox.reader-progress','onebox.reader-preferences','onebox.reader-layout','onebox.reader-deleted','onebox.library','onebox.notifications','onebox.notification-preference','onebox.events','onebox.weather-cards','onebox.weather',
     'onebox.translation-history','onebox.translation-history-open','onebox.calculator','onebox.dev-tools','onebox.ticket-wallet','onebox.ticket-wallet-display-order','onebox.ticket-wallet-type-filter','onebox.ticket-wallet-memories','onebox.ticket-wallet-deleted'
   ]);
+  const PENDING_KEYS_STORAGE = 'onebox.github-pending-sync-keys';
   let timer = 0;
   let restorePending = false;
+  let remoteApplyDepth = 0;
 
   function account() {
     try { return JSON.parse(localStorage.getItem('onebox.github') || '{}'); } catch { return {}; }
@@ -28,23 +30,49 @@
       void window.OneBoxGithubAutoSync?.queueRun?.({ restore: shouldRestore });
     }, Math.max(700, Number(delay) || 3500));
   }
-  function changed(key) {
-    if (DATA_KEYS.has(String(key))) queue();
+  const nativeSetItem = Storage.prototype.setItem;
+  const nativeRemoveItem = Storage.prototype.removeItem;
+  function readPendingKeys() {
+    try {
+      const value = JSON.parse(localStorage.getItem(PENDING_KEYS_STORAGE) || '{}');
+      return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    } catch { return {}; }
+  }
+  function dirtySnapshot() { return { ...readPendingKeys() }; }
+  function markDirty(key) {
+    const pending = readPendingKeys();
+    const previous = Number(pending[key]) || 0;
+    pending[key] = Math.max(Date.now(), previous + 1);
+    nativeSetItem.call(window.localStorage, PENDING_KEYS_STORAGE, JSON.stringify(pending));
+  }
+  function clearDirtySnapshot(snapshot = {}) {
+    const pending = readPendingKeys();
+    Object.entries(snapshot || {}).forEach(([key, timestamp]) => {
+      if (Number(pending[key]) === Number(timestamp)) delete pending[key];
+    });
+    if (Object.keys(pending).length) nativeSetItem.call(window.localStorage, PENDING_KEYS_STORAGE, JSON.stringify(pending));
+    else nativeRemoveItem.call(window.localStorage, PENDING_KEYS_STORAGE);
+  }
+  function changed(key, fromAnotherTab = false) {
+    key = String(key);
+    if (DATA_KEYS.has(key)) {
+      if (!remoteApplyDepth || fromAnotherTab) markDirty(key);
+      queue();
+    }
   }
 
-  const nativeSetItem = Storage.prototype.setItem;
   Storage.prototype.setItem = function (key, value) {
     nativeSetItem.call(this, key, value);
     if (this === window.localStorage) changed(key);
   };
-  const nativeRemoveItem = Storage.prototype.removeItem;
   Storage.prototype.removeItem = function (key) {
     nativeRemoveItem.call(this, key);
     if (this === window.localStorage) changed(key);
   };
-  window.addEventListener('storage', (event) => changed(event.key));
+  window.addEventListener('storage', (event) => changed(event.key, true));
   window.addEventListener('onebox:indexeddb-changed', (event) => {
-    if (['books','book-covers','ticket-images'].includes(event.detail?.store)) queue();
+    const store = event.detail?.store;
+    if (['books','book-covers','ticket-images'].includes(store)) queue();
   });
   window.addEventListener('onebox:github-connected', () => queue(900));
   window.addEventListener('online', () => queue(900));
@@ -67,6 +95,10 @@
     syncNow: async () => window.OneBoxGithubAutoSync?.syncNow?.({ restore: true }),
     isReady: () => Boolean(account().token),
     snapshot: () => Object.fromEntries([...DATA_KEYS].map((key) => [key, localStorage.getItem(key)]).filter(([, value]) => value !== null)),
+    dirtySnapshot,
+    clearDirtySnapshot,
+    beginRemoteApply() { remoteApplyDepth += 1; },
+    endRemoteApply() { remoteApplyDepth = Math.max(0, remoteApplyDepth - 1); },
     markAnnouncementRead: async () => {},
   };
 })();

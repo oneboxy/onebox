@@ -54,6 +54,12 @@
   };
 
   window.addEventListener('onebox:github-connected', () => queueSync(700));
-  window.addEventListener('onebox:gist-sync-status', (event) => status(event.detail));
+  window.addEventListener('onebox:gist-sync-status', (event) => {
+    if (handlers?.isEnabled && !handlers.isEnabled()) {
+      status({ state: 'reading-disabled', message: '阅读内容未勾选同步' });
+      return;
+    }
+    status(event.detail);
+  });
   window.addEventListener('online', () => queueSync(700));
 })();
