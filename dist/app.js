@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.626';
+const APP_VERSION = '2.18.627';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -5561,13 +5561,15 @@ function readerBackupAnnotationMerge(current = [], incoming = []) {
   });
   return [...merged.values()];
 }
-function clearReaderDeletionMarkers(ids = []) {
+function clearReaderDeletionMarkers(importedBooks = []) {
   try {
     const deleted = parseStored(STORAGE.readerDeleted, {}) || {};
     let changed = false;
-    (Array.isArray(ids) ? ids : []).forEach((id) => {
-      const key = String(id || '').trim();
-      if (key && Object.prototype.hasOwnProperty.call(deleted, key)) {
+    (Array.isArray(importedBooks) ? importedBooks : []).forEach((book) => {
+      const key = String(book?.id || '').trim();
+      const importedAt = Number(book?.updatedAt) || 0;
+      const deletedAt = Number(deleted[key]) || 0;
+      if (key && importedAt > deletedAt) {
         delete deleted[key];
         changed = true;
       }
@@ -5586,6 +5588,7 @@ async function importReaderBackup(file) {
     const library = [...state.library];
     const bookWrites = [];
     const coverWrites = [];
+    const importedBookTimes = {};
     const restoredCheckpoints = { ...localCheckpoints };
     for (const item of imported) {
       const incoming = item.metadata;
@@ -5615,6 +5618,7 @@ async function importReaderBackup(file) {
       // Re-importing a book is an explicit restore action and must supersede
       // any older deletion marker that may still be present in a Gist.
       merged.updatedAt = readerImportUpdatedAt(merged, targetId);
+      importedBookTimes[targetId] = merged.updatedAt;
       if (merged.type === 'md') merged.content = readerDecodeText(item.sourceBytes);
       delete merged.syncFileMissing;
       bookWrites.push([targetId, item.sourceBytes.buffer.slice(item.sourceBytes.byteOffset, item.sourceBytes.byteOffset + item.sourceBytes.byteLength)]);
@@ -5628,7 +5632,7 @@ async function importReaderBackup(file) {
     if (library.length > 80) throw Error('backup-library-limit');
     const written = await oneBoxDbPutBatch({ books: bookWrites, 'book-covers': coverWrites });
     if (!written) throw Error('backup-write-failed');
-    clearReaderDeletionMarkers(bookWrites.map(([id]) => id));
+    clearReaderDeletionMarkers(Object.entries(importedBookTimes).map(([id, updatedAt]) => ({ id, updatedAt })));
     state.library = normalizeReaderLibrary(library);
     saveStored(STORAGE.readerProgress, restoredCheckpoints);
     saveLibrary({ preserveUpdatedAt: true, skipCloudSync: true });
@@ -5984,7 +5988,7 @@ async function importReaderFiles(fileList) {
         if (book.type === 'epub') cover = await epubCoverData(new Uint8Array(binary));
       }
       if (cover) { book.hasCover = true; readerDefineCover(book, cover); await oneBoxDbPut('book-covers', id, cover); }
-      clearReaderDeletionMarkers([id]);
+      clearReaderDeletionMarkers([{ id, updatedAt: book.updatedAt }]);
       if (duplicate) state.library = state.library.map((item) => item.id === duplicate.id ? book : item);
       else state.library.unshift(book);
       saveLibrary(); addedCount += 1;
@@ -9148,16 +9152,23 @@ function mergeGithubUploadBundle(bundle, remote = null, dirtySnapshot = null, ex
         const localBook = localBooks.get(id), remoteBook = remoteBooks.get(id);
         const localWins = localBook && (!remoteBook || Number(localBook.updatedAt || 0) > Number(remoteBook.updatedAt || 0));
         const remoteEntry = remoteManifest[id];
-        const remoteEntryAvailable = Array.isArray(remoteEntry?.files) && remoteEntry.files.length
+        const remoteFilesAvailable = Array.isArray(remoteEntry?.files) && remoteEntry.files.length
           && remoteEntry.files.every((name) => typeof name === 'string' && Boolean(existingGist?.files?.[name]));
+        const remoteCoverAvailable = Boolean(remoteEntry?.cover && existingGist?.files?.[remoteEntry.cover]);
+        const remoteEntryForWinner = remoteEntry ? {
+          ...Object.fromEntries(Object.entries(remoteEntry).filter(([key]) => key !== 'files' && key !== 'cover' && key !== 'coverSha256')),
+          ...(remoteFilesAvailable ? { files: remoteEntry.files } : {}),
+          ...(remoteCoverAvailable ? { cover: remoteEntry.cover, ...(remoteEntry.coverSha256 ? { coverSha256: remoteEntry.coverSha256 } : {}) } : {}),
+        } : null;
+        const remoteEntryUsable = Boolean(remoteFilesAvailable || remoteCoverAvailable);
         const localEntry = localManifest[id];
         const entry = localWins
           ? (localEntry || remoteEntry)
-          : (remoteEntryAvailable ? remoteEntry : (localEntry || remoteEntry));
-        if (!localWins && remoteEntryAvailable && localEntry) {
+          : (remoteEntryUsable ? remoteEntryForWinner : null);
+        if (!localWins && localEntry) {
           // buildReaderSyncAssets stages local files before this conflict is
-          // resolved. Keep the newer remote manifest authoritative by not
-          // uploading those local chunks over the filenames it references.
+          // resolved. Never pair newer remote metadata with an older local
+          // source, and don't upload stale chunks into its incomplete manifest.
           (Array.isArray(localEntry.files) ? localEntry.files : []).forEach((name) => { delete bundle.files[name]; });
           if (localEntry.cover) delete bundle.files[localEntry.cover];
         }
@@ -9166,11 +9177,6 @@ function mergeGithubUploadBundle(bundle, remote = null, dirtySnapshot = null, ex
       payload.readerFiles = { ...(payload.readerFiles || {}), books: { version: 1, ...books } };
     } else if (remote.readerFiles?.books && payload.readerFiles?.books) {
       payload.readerFiles = { ...payload.readerFiles, books: { ...remote.readerFiles.books, ...payload.readerFiles.books } };
-    }
-    if (selection.reading && Array.isArray(payload.library) && payload.storage) {
-      const deletedBooks = readerSyncDeletedMap({ storage: payload.storage });
-      pruneReaderSyncDeletedBooks(deletedBooks, payload.library);
-      payload.storage[STORAGE.readerDeleted] = JSON.stringify(deletedBooks);
     }
     preserveDisabledGithubPayloadGroups(payload, remote, selection);
   }
@@ -9200,6 +9206,11 @@ function mergeGithubUploadBundle(bundle, remote = null, dirtySnapshot = null, ex
       }
     });
   }
+  if (selection.reading && Array.isArray(payload.library) && payload.storage) {
+    const deletedBooks = readerSyncDeletedMap({ storage: payload.storage });
+    pruneReaderSyncDeletedBooks(deletedBooks, payload.library);
+    payload.storage[STORAGE.readerDeleted] = JSON.stringify(deletedBooks);
+  }
   topLevelFields.forEach(([, group, keys]) => {
     if (selection[group] === false) return;
     const localAt = localUpdateAt(keys);
@@ -9211,7 +9222,10 @@ function mergeGithubUploadBundle(bundle, remote = null, dirtySnapshot = null, ex
   });
   if (Object.keys(fieldUpdatedAt).length) payload.fieldUpdatedAt = fieldUpdatedAt;
   if (selection.reading) {
-    const deletedIds = new Set(Object.keys(readerSyncDeletedMap({ storage: payload.storage })));
+    const deletedBooks = readerSyncDeletedMap({ storage: payload.storage });
+    pruneReaderSyncDeletedBooks(deletedBooks, Array.isArray(payload.library) ? payload.library : []);
+    if (payload.storage) payload.storage[STORAGE.readerDeleted] = JSON.stringify(deletedBooks);
+    const deletedIds = new Set(Object.keys(deletedBooks));
     if (Array.isArray(payload.library)) payload.library = payload.library.filter((book) => !deletedIds.has(String(book?.id || '')));
     if (payload.readerFiles?.books) {
       const books = { ...payload.readerFiles.books };
@@ -9811,11 +9825,37 @@ function githubLocalFieldIsNewer(remote, keys) {
   const remoteAt = Math.max(0, ...keys.map((key) => Number(remote?.fieldUpdatedAt?.[key]) || Date.parse(remote?.savedAt || '') || 0));
   return localAt > remoteAt;
 }
-function mergeGithubRestoreCollection(remote, key, fallback, remoteValue) {
-  const localValue = parseStored(key, fallback);
-  return githubLocalFieldIsNewer(remote, [key])
+function captureGithubRestoreCollections() {
+  return {
+    [STORAGE.events]: parseStored(STORAGE.events, {}) || {},
+    [STORAGE.weatherCards]: parseStored(STORAGE.weatherCards, []),
+    [STORAGE.translationHistory]: parseStored(STORAGE.translationHistory, []),
+    [STORAGE.notifications]: parseStored(STORAGE.notifications, []),
+    [STORAGE.homeFeedRead]: parseStored(STORAGE.homeFeedRead, {}) || {},
+    [STORAGE.homeFeedActivity]: parseStored(STORAGE.homeFeedActivity, {}) || {},
+  };
+}
+function mergeGithubCollectionByFreshness(localValue, remoteValue, localPreferred) {
+  const primary = localPreferred ? localValue : remoteValue;
+  const secondary = localPreferred ? remoteValue : localValue;
+  const merged = localPreferred
     ? mergeGithubValue(remoteValue, localValue)
     : mergeGithubValue(localValue, remoteValue);
+  if (!Array.isArray(localValue) || !Array.isArray(remoteValue) || !Array.isArray(merged)) return merged;
+  const keyFor = (item) => item && typeof item === 'object' && item.id != null
+    ? 'id:' + String(item.id)
+    : 'value:' + JSON.stringify(item);
+  const values = new Map(merged.map((item) => [keyFor(item), item]));
+  const orderedKeys = [];
+  const seen = new Set();
+  [...(Array.isArray(primary) ? primary : []), ...(Array.isArray(secondary) ? secondary : [])].forEach((item) => {
+    const key = keyFor(item);
+    if (values.has(key) && !seen.has(key)) { seen.add(key); orderedKeys.push(key); }
+  });
+  return orderedKeys.map((key) => values.get(key));
+}
+function mergeGithubRestoreCollection(remote, key, localValue, remoteValue) {
+  return mergeGithubCollectionByFreshness(localValue, remoteValue, githubLocalFieldIsNewer(remote, [key]));
 }
 function applyRemoteStorageSnapshot(remoteStorage, remotePayload = null) {
   if (!remoteStorage || typeof remoteStorage !== 'object') return;
@@ -10553,6 +10593,7 @@ async function githubDownloadTask() {
       updateGithubSync(mode, 84, state.language === 'en' ? 'Restoring wallet originals…' : '正在恢复卡包原件…');
       ticketRestore = await restoreTicketWalletSyncAssets(remote, gist, (completed, total) => updateGithubSync(mode, 84 + Math.round(completed / Math.max(1, total) * 10), state.language === 'en' ? 'Restoring wallet originals…' : '正在恢复卡包原件…'));
     }
+    const localRestoreCollections = captureGithubRestoreCollections();
     window.OneBoxCloudSync?.beginRemoteApply?.();
     remoteApplyActive = true;
     applyRemoteStorageSnapshot(remote.storage, remote);
@@ -10563,15 +10604,15 @@ async function githubDownloadTask() {
     if (navigationEnabled && !githubLocalFieldIsNewer(remote, [STORAGE.toolOrder]) && Array.isArray(remote.toolOrder)) { state.toolOrder = normalizeToolOrder(remote.toolOrder, remoteNavigationLocation === 'tools', remoteNavigationLocation === 'tools'); saveToolOrder(); }
     if (githubSyncCustomGroupEnabled('calculator') && !githubLocalFieldIsNewer(remote, [STORAGE.calculator]) && remote.calculator) saveStored(STORAGE.calculator, mergeGithubValue(parseStored(STORAGE.calculator, {}), remote.calculator));
     hydrateCalculatorFromStorage();
-    if (githubSyncCustomGroupEnabled('calendar') && remote.events) { state.events = mergeGithubRestoreCollection(remote, STORAGE.events, {}, remote.events) || {}; saveEvents(); }
+    if (githubSyncCustomGroupEnabled('calendar') && remote.events) { state.events = mergeGithubRestoreCollection(remote, STORAGE.events, localRestoreCollections[STORAGE.events], remote.events) || {}; saveEvents(); }
     if (githubSyncCustomGroupEnabled('weather') && Array.isArray(remote.weatherCards)) {
-      const cards = mergeGithubRestoreCollection(remote, STORAGE.weatherCards, [], remote.weatherCards);
+      const cards = mergeGithubRestoreCollection(remote, STORAGE.weatherCards, localRestoreCollections[STORAGE.weatherCards], remote.weatherCards);
       state.weatherCards = normalizeWeatherCards((Array.isArray(cards) ? cards : []).map((item) => ({ ...item, loading: false })));
       state.activeWeatherId = state.weatherCards[0]?.id || null;
       saveWeatherCards();
     }
-    if (githubSyncCustomGroupEnabled('translation') && Array.isArray(remote.translationHistory)) { state.translationHistory = mergeGithubRestoreCollection(remote, STORAGE.translationHistory, [], remote.translationHistory); saveTranslationHistory(); }
-    if (messagesEnabled && Array.isArray(remote.notifications)) { state.notifications = mergeGithubRestoreCollection(remote, STORAGE.notifications, [], remote.notifications); saveNotifications(); }
+    if (githubSyncCustomGroupEnabled('translation') && Array.isArray(remote.translationHistory)) { state.translationHistory = mergeGithubRestoreCollection(remote, STORAGE.translationHistory, localRestoreCollections[STORAGE.translationHistory], remote.translationHistory); saveTranslationHistory(); }
+    if (messagesEnabled && Array.isArray(remote.notifications)) { state.notifications = mergeGithubRestoreCollection(remote, STORAGE.notifications, localRestoreCollections[STORAGE.notifications], remote.notifications); saveNotifications(); }
     if (readingEnabled && Array.isArray(readerRestore.library)) {
       const restoredIds = new Set(readerRestore.restoredIds || []);
       state.library = readerSyncLibrary({ library: mergeReaderLibraryByUpdatedAt(state.library, readerRestore.library) }).map((book) => {
@@ -10584,10 +10625,9 @@ async function githubDownloadTask() {
     if (readingEnabled && !githubLocalFieldIsNewer(remote, [STORAGE.readerPreferences]) && remote.readerPreferences && typeof remote.readerPreferences === 'object') { state.readerPreferences = { ...state.readerPreferences, ...remote.readerPreferences }; saveReaderPreferences(); }
     if (readingEnabled && !githubLocalFieldIsNewer(remote, [STORAGE.readerLayout]) && (remote.readerLayout === 'list' || remote.readerLayout === 'grid')) { state.readerLayout = remote.readerLayout; saveReaderLayout(); }
     if (githubSyncCustomGroupEnabled('translation') && !githubLocalFieldIsNewer(remote, [STORAGE.translationHistoryOpen]) && typeof remote.translationHistoryOpen === 'boolean') { state.translationHistoryOpen = remote.translationHistoryOpen; saveStored(STORAGE.translationHistoryOpen, state.translationHistoryOpen); }
-    if (readingEnabled && remote.homeFeedRead && typeof remote.homeFeedRead === 'object') { state.homeFeedRead = mergeGithubRestoreCollection(remote, STORAGE.homeFeedRead, {}, remote.homeFeedRead); saveHomeFeedRead(); }
+    if (readingEnabled && remote.homeFeedRead && typeof remote.homeFeedRead === 'object') { state.homeFeedRead = mergeGithubRestoreCollection(remote, STORAGE.homeFeedRead, localRestoreCollections[STORAGE.homeFeedRead], remote.homeFeedRead); saveHomeFeedRead(); }
     if (readingEnabled && remote.homeFeedActivity && typeof remote.homeFeedActivity === 'object') {
-      const storedActivity = parseStored(STORAGE.homeFeedActivity, {}) || {};
-      state.homeFeedActivity = mergeHomeFeedActivity(storedActivity, remote.homeFeedActivity);
+      state.homeFeedActivity = mergeHomeFeedActivity(localRestoreCollections[STORAGE.homeFeedActivity], remote.homeFeedActivity);
       saveHomeFeedActivity();
     }
     if (settingsEnabled && !githubLocalFieldIsNewer(remote, [STORAGE.layout]) && (remote.layoutMode === 'simple' || remote.layoutMode === 'classic')) { state.layoutMode = remote.layoutMode; saveLayoutPreference(); }
