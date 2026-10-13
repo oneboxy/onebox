@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.627';
+const APP_VERSION = '2.18.628';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -5581,6 +5581,12 @@ function readerImportUpdatedAt(book, id) {
   const deletedAt = Number(readerSyncDeletedMap()[String(id || '')]) || 0;
   return Math.max(Date.now(), Number(book?.updatedAt || 0) + 1, deletedAt + 1);
 }
+function readerBooksAfterDeletionMarkers(library, deleted = {}) {
+  return (Array.isArray(library) ? library : []).filter((book) => {
+    const deletedAt = Number(deleted[String(book?.id || '')]) || 0;
+    return !deletedAt || Number(book?.updatedAt || book?.createdAt || 0) > deletedAt;
+  });
+}
 async function importReaderBackup(file) {
   try {
     const imported = await parseReaderBackupFile(file);
@@ -5630,10 +5636,34 @@ async function importReaderBackup(file) {
       if (merged.progressUpdatedAt) restoredCheckpoints[targetId] = { progress: merged.progress, savedAt: merged.progressUpdatedAt };
     }
     if (library.length > 80) throw Error('backup-library-limit');
-    const written = await oneBoxDbPutBatch({ books: bookWrites, 'book-covers': coverWrites });
+    const deletedBeforeWrite = parseStored(STORAGE.readerDeleted, {}) || {};
+    const blockedBeforeWrite = new Set(Object.entries(importedBookTimes)
+      .filter(([id, updatedAt]) => (Number(deletedBeforeWrite[id]) || 0) >= Number(updatedAt))
+      .map(([id]) => id));
+    const pendingBookWrites = bookWrites.filter(([id]) => !blockedBeforeWrite.has(id));
+    const pendingCoverWrites = coverWrites.filter(([id]) => !blockedBeforeWrite.has(id));
+    const written = pendingBookWrites.length || pendingCoverWrites.length
+      ? await oneBoxDbPutBatch({ books: pendingBookWrites, 'book-covers': pendingCoverWrites })
+      : true;
     if (!written) throw Error('backup-write-failed');
     clearReaderDeletionMarkers(Object.entries(importedBookTimes).map(([id, updatedAt]) => ({ id, updatedAt })));
-    state.library = normalizeReaderLibrary(library);
+    const deletedAfterWrite = parseStored(STORAGE.readerDeleted, {}) || {};
+    const rejectedAfterWrite = new Set(Object.entries(importedBookTimes)
+      .filter(([id, updatedAt]) => (Number(deletedAfterWrite[id]) || 0) >= Number(updatedAt))
+      .map(([id]) => id));
+    const restoredAgainDuringImport = new Set(state.library
+      .filter((book) => Number(book?.updatedAt || 0) > (Number(deletedAfterWrite[String(book?.id || '')]) || 0))
+      .map((book) => String(book.id)));
+    await Promise.all([...rejectedAfterWrite].filter((id) => !restoredAgainDuringImport.has(id)).flatMap((id) => [
+      oneBoxDbDelete('books', id), oneBoxDbDelete('book-covers', id),
+    ]));
+    const latestDeleted = parseStored(STORAGE.readerDeleted, {}) || {};
+    const mergedLibrary = mergeReaderLibraryByUpdatedAt(state.library, library);
+    state.library = normalizeReaderLibrary(readerBooksAfterDeletionMarkers(mergedLibrary, latestDeleted).slice(0, 80));
+    const latestCheckpoints = parseStored(STORAGE.readerProgress, {}) || {};
+    Object.entries(latestCheckpoints).forEach(([id, checkpoint]) => {
+      if (!restoredCheckpoints[id] || Number(checkpoint?.savedAt || 0) > Number(restoredCheckpoints[id]?.savedAt || 0)) restoredCheckpoints[id] = checkpoint;
+    });
     saveStored(STORAGE.readerProgress, restoredCheckpoints);
     saveLibrary({ preserveUpdatedAt: true, skipCloudSync: true });
     queuePersistentSnapshot();
@@ -9150,7 +9180,7 @@ function mergeGithubUploadBundle(bundle, remote = null, dirtySnapshot = null, ex
         const id = String(book?.id || '');
         if (!id) return;
         const localBook = localBooks.get(id), remoteBook = remoteBooks.get(id);
-        const localWins = localBook && (!remoteBook || Number(localBook.updatedAt || 0) > Number(remoteBook.updatedAt || 0));
+        const localWins = localBook && (!remoteBook || Number(localBook.updatedAt || 0) >= Number(remoteBook.updatedAt || 0));
         const remoteEntry = remoteManifest[id];
         const remoteFilesAvailable = Array.isArray(remoteEntry?.files) && remoteEntry.files.length
           && remoteEntry.files.every((name) => typeof name === 'string' && Boolean(existingGist?.files?.[name]));
@@ -13312,7 +13342,13 @@ workspace.addEventListener('click', async (event) => {
     event.preventDefault();
     event.stopPropagation();
     if (!window.confirm(t('deleteConfirm'))) return;
-    state.library = state.library.filter((book) => book.id !== deleteBook.dataset.deleteBook); await oneBoxDbDelete('books', deleteBook.dataset.deleteBook); saveLibrary(); render(); return;
+    const deletedId = deleteBook.dataset.deleteBook;
+    state.library = state.library.filter((book) => book.id !== deletedId);
+    window.OneBoxReaderCloudSync?.markDeleted([deletedId]);
+    await oneBoxDbDelete('books', deletedId);
+    await oneBoxDbDelete('book-covers', deletedId);
+    state.library = state.library.filter((book) => book.id !== deletedId);
+    saveLibrary(); render(); return;
   }
   const bookCard = event.target.closest('[data-reader-book-card]');
   if (bookCard && handleReorderClick(bookCard, 'book', Number(bookCard.dataset.readerBookIndex))) { event.preventDefault(); return; }
