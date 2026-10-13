@@ -9034,15 +9034,31 @@ function mergeGithubUploadBundle(bundle, remote = null, dirtySnapshot = null, ex
     return localAt > 0 && localAt > remoteUpdateAt(keys);
   };
   const mergeableTopFields = new Set(['events', 'weatherCards', 'translationHistory', 'notifications', 'homeFeedRead', 'homeFeedActivity', 'navigation', 'calculator', 'library', 'readerFiles', 'ticketWalletFiles']);
+  const mergeFieldStorageKeys = {
+    events: [STORAGE.events], weatherCards: [STORAGE.weatherCards], translationHistory: [STORAGE.translationHistory],
+    notifications: [STORAGE.notifications], homeFeedRead: [STORAGE.homeFeedRead], navigation: [STORAGE.navigation],
+  };
   const mergeField = (key) => {
-    if (Object.prototype.hasOwnProperty.call(payload, key) && Object.prototype.hasOwnProperty.call(remote || {}, key)) payload[key] = mergeGithubValue(remote[key], payload[key]);
+    if (!Object.prototype.hasOwnProperty.call(payload, key) || !Object.prototype.hasOwnProperty.call(remote || {}, key)) return;
+    payload[key] = localIsNewer(mergeFieldStorageKeys[key] || [])
+      ? mergeGithubValue(remote[key], payload[key])
+      : mergeGithubValue(payload[key], remote[key]);
   };
 
   if (remote && typeof remote === 'object') {
     ['events', 'weatherCards', 'translationHistory', 'notifications', 'homeFeedRead', 'navigation'].forEach(mergeField);
     if (payload.homeFeedActivity && remote.homeFeedActivity) payload.homeFeedActivity = mergeHomeFeedActivity(payload.homeFeedActivity, remote.homeFeedActivity);
-    if (selection.navigation && payload.navigation) payload.navigation = mergeGithubNavigation(remoteGithubNavigation(remote), payload.navigation);
-    if (selection.calculator && remote.calculator && payload.calculator) payload.calculator = mergeGithubValue(remote.calculator, payload.calculator);
+    if (selection.navigation && payload.navigation) {
+      const remoteNavigation = remoteGithubNavigation(remote);
+      payload.navigation = localIsNewer([STORAGE.navigation])
+        ? mergeGithubNavigation(remoteNavigation, payload.navigation)
+        : mergeGithubNavigation(payload.navigation, remoteNavigation);
+    }
+    if (selection.calculator && remote.calculator && payload.calculator) {
+      payload.calculator = localIsNewer([STORAGE.calculator])
+        ? mergeGithubValue(remote.calculator, payload.calculator)
+        : mergeGithubValue(payload.calculator, remote.calculator);
+    }
     if (remote.storage && payload.storage) {
       const localStorage = { ...payload.storage };
       payload.storage = { ...remote.storage, ...localStorage };
@@ -9061,7 +9077,10 @@ function mergeGithubUploadBundle(bundle, remote = null, dirtySnapshot = null, ex
           const localAt = Number(dirty[key]) || 0;
           if (localAt > remoteUpdateAt([key])) fieldUpdatedAt[key] = localAt;
         } else if (GITHUB_MERGE_STORAGE_KEYS.has(key)) {
-          payload.storage[key] = mergeGithubStorageValue(key, remote.storage[key], value);
+          const localIsPreferred = localIsNewer([key]);
+          payload.storage[key] = localIsPreferred
+            ? mergeGithubStorageValue(key, remote.storage[key], value)
+            : mergeGithubStorageValue(key, value, remote.storage[key]);
           const localAt = Number(dirty[key]) || 0;
           if (localAt > remoteUpdateAt([key])) fieldUpdatedAt[key] = localAt;
         } else if (localIsNewer([key])) {
@@ -9734,8 +9753,13 @@ function applyRemoteStorageSnapshot(remoteStorage, remotePayload = null) {
         const current = localStorage.getItem(key);
         const localAt = Number(dirty[key]) || 0;
         const remoteAt = Number(remoteFieldUpdatedAt[key]) || remoteSavedAt;
-        if (key === STORAGE.readerDeleted || key === STORAGE.readerProgress || GITHUB_MERGE_STORAGE_KEYS.has(key) || GITHUB_CUSTOM_SYNC_STORAGE_KEYS.ticketWallet.has(key)) {
+        if (key === STORAGE.readerDeleted || key === STORAGE.readerProgress || GITHUB_CUSTOM_SYNC_STORAGE_KEYS.ticketWallet.has(key)) {
           localStorage.setItem(key, mergeGithubStorageValue(key, current, value));
+        } else if (GITHUB_MERGE_STORAGE_KEYS.has(key)) {
+          const preferCurrent = localAt > remoteAt;
+          localStorage.setItem(key, preferCurrent
+            ? mergeGithubStorageValue(key, value, current)
+            : mergeGithubStorageValue(key, current, value));
         } else if (!(localAt > remoteAt)) {
           localStorage.setItem(key, value);
         }
