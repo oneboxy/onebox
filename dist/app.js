@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.623';
+const APP_VERSION = '2.18.624';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -207,6 +207,7 @@ async function oneBoxDbGet(storeName, key) {
   });
 }
 async function oneBoxDbPut(storeName, key, value) {
+  if (window.OneBoxCloudSync?.accountScopeMatches && !window.OneBoxCloudSync.accountScopeMatches()) return false;
   const db = await openOneBoxDb();
   if (!db) return false;
   return new Promise((resolve) => {
@@ -220,6 +221,7 @@ async function oneBoxDbPut(storeName, key, value) {
   });
 }
 async function oneBoxDbPutBatch(entriesByStore) {
+  if (window.OneBoxCloudSync?.accountScopeMatches && !window.OneBoxCloudSync.accountScopeMatches()) return false;
   const db = await openOneBoxDb();
   if (!db) return false;
   const stores = Object.keys(entriesByStore || {}).filter((name) => db.objectStoreNames.contains(name));
@@ -238,6 +240,7 @@ async function oneBoxDbPutBatch(entriesByStore) {
   });
 }
 async function oneBoxDbDelete(storeName, key) {
+  if (window.OneBoxCloudSync?.accountScopeMatches && !window.OneBoxCloudSync.accountScopeMatches()) return false;
   const db = await openOneBoxDb();
   if (!db) return false;
   return new Promise((resolve) => {
@@ -8625,10 +8628,17 @@ function notificationPermissionText() {
 }
 
 // GitHub Device Flow and private Gist sync ----------------------------------
-function saveGithub() {
+function saveGithub(allowAccountChange = false) {
+  if (!allowAccountChange) {
+    const persisted = parseStored(STORAGE.github, {});
+    const persistedLogin = String(persisted?.user?.login || '').trim().toLowerCase();
+    const currentLogin = String(state.github.user?.login || '').trim().toLowerCase();
+    if (persisted?.token && persistedLogin && (currentLogin && persistedLogin !== currentLogin || !currentLogin && state.github.token !== persisted.token)) return false;
+  }
   saveStored(STORAGE.github, state.github);
   // Keep authorization independent of delayed full snapshots and asset caches.
   void oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
+  return true;
 }
 const githubResponseTokens = new WeakMap();
 const githubDetailedGists = new WeakSet();
@@ -8707,7 +8717,7 @@ async function githubApiFetch(url, options = {}) {
   throw lastError || Error(state.language === 'en' ? 'GitHub request failed' : 'GitHub 请求失败');
 }
 const GITHUB_SYNC_CHUNK_CHARS = 700000;
-const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.readerCloudAgreement, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive, 'onebox.github-pending-sync-keys', 'onebox.github-sync-v2-initialized']);
+const GITHUB_SYNC_EXCLUDED_STORAGE_KEYS = new Set([STORAGE.github, STORAGE.githubAgreement, STORAGE.githubSyncSelection, STORAGE.readerCloudAgreement, STORAGE.homeFeeds, STORAGE.library, STORAGE.devTools, STORAGE.homeFeedActive, STORAGE.homeFeedVisibilityMigration, STORAGE.toolActive, 'onebox.github-pending-sync-keys', 'onebox.github-sync-owner', 'onebox.github-sync-v2-initialized']);
 function isSyncableStorageKey(key) {
   return String(key || '').startsWith('onebox.')
     && !GITHUB_SYNC_EXCLUDED_STORAGE_KEYS.has(key)
@@ -8903,7 +8913,13 @@ async function readTicketWalletSyncAsset(entry, gist) {
 async function verifyTicketWalletSyncAssets(remote, gist) {
   const images = remote?.ticketWalletFiles?.images;
   if (!images) return; // Older backups contain ticket metadata only.
-  for (const id of ticketWalletRemoteImageIds(remote)) await readTicketWalletSyncAsset(images[id], gist);
+  for (const id of ticketWalletRemoteImageIds(remote)) {
+    const entry = images[id];
+    // Keep unrelated Gist data usable when an optional local image is missing.
+    // Entries that are present still receive full integrity checks.
+    if (!Array.isArray(entry?.files) || !entry.files.length || entry.files.some((name) => !gist?.files?.[name])) continue;
+    await readTicketWalletSyncAsset(entry, gist);
+  }
 }
 async function restoreTicketWalletSyncAssets(remote, gist, onProgress = null) {
   const images = remote?.ticketWalletFiles?.images;
@@ -9211,8 +9227,10 @@ async function hydrateGithubUser() {
     const user = await response.json();
     if (!user?.login || state.github.token !== requestedToken) return;
     const previousLogin = state.github.user?.login || '';
+    await window.OneBoxCloudSync?.switchAccount?.(user.login);
+    if (state.github.token !== requestedToken) return;
     state.github.user = { ...state.github.user, ...user };
-    saveGithub();
+    saveGithub(true);
     queueReaderCloudSync(500);
     if (previousLogin !== user.login) {
       bindPetProfileToCurrentUser();
@@ -9220,7 +9238,9 @@ async function hydrateGithubUser() {
       if ($('#petDialog') && !$('#petDialog').hidden) renderPetDialog();
     }
     if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
-  } catch { /* keep the last-known GitHub account when its profile cannot be refreshed */ }
+  } catch (error) {
+    setGithubAutoSyncStatus('error', githubBrowserError(error) || (state.language === 'en' ? 'Could not safely switch GitHub sync account' : '无法安全切换 GitHub 同步账号'));
+  }
 }
 async function githubFileContent(file) {
   if (!file) return null;
@@ -9585,12 +9605,11 @@ async function restoreReaderSyncAssets(remote, gist, onProgress = null) {
 async function verifyReaderSyncAssets(readerFiles, gist, library = []) {
   const manifest = readerFiles?.books;
   const requiredBooks = (Array.isArray(library) ? library : []).filter((book) => book?.id && ['md', 'txt', 'pdf', 'epub'].includes(book.type));
-  const needsManifest = requiredBooks.some((book) => !(book.type === 'md' && typeof book.content === 'string'));
-  if (needsManifest && (!manifest || typeof manifest !== 'object' || Array.isArray(manifest))) throw Error(state.language === 'en' ? 'GitHub book source manifest is missing' : 'GitHub 书籍原文件清单缺失');
+  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) return;
   for (const book of requiredBooks) {
     const entry = manifest?.[book.id];
     if ((!Array.isArray(entry?.files) || !entry.files.length) && book.type === 'md' && typeof book.content === 'string') continue;
-    if (!Array.isArray(entry?.files) || !entry.files.length) throw Error((state.language === 'en' ? 'GitHub book source is missing: ' : 'GitHub 书籍原文件缺失：') + book.name);
+    if (!Array.isArray(entry?.files) || !entry.files.length || entry.files.some((name) => !gist?.files?.[name])) continue;
     const chunks = await Promise.all(entry.files.map((name) => githubFileContent(gist?.files?.[name])));
     if (chunks.some((chunk) => typeof chunk !== 'string' || !chunk)) throw Error((state.language === 'en' ? 'GitHub book source is incomplete: ' : 'GitHub 书籍原文件不完整：') + book.name);
     const total = chunks.reduce((sum, chunk) => sum + syncBase64Bytes(chunk).length, 0);
@@ -9819,6 +9838,28 @@ let githubExternalStorageChanged = false;
 window.addEventListener('storage', (event) => {
   if (event.key && isSyncableStorageKey(event.key)) githubExternalStorageChanged = true;
 });
+window.addEventListener('onebox:github-account-switched', (event) => {
+  githubExternalStorageChanged = false;
+  const targetLogin = String(event.detail?.login || '').trim().toLowerCase();
+  const previousLogin = String(event.detail?.previousLogin || '').trim().toLowerCase();
+  const currentLogin = String(state.github.user?.login || '').trim().toLowerCase();
+  const savedGithub = parseStored(STORAGE.github, {});
+  const savedLogin = String(savedGithub?.user?.login || '').trim().toLowerCase();
+  if (targetLogin && savedLogin === targetLogin && (currentLogin === targetLogin || previousLogin && currentLogin === previousLogin)) {
+    state.github = { ...state.github, ...savedGithub };
+    saveGithub(true);
+  }
+  hydrateGithubSyncRuntimeFromStorage();
+  applyLanguage();
+  syncMascotDisplayMode(true);
+  syncMascotVisibility();
+  renderNav();
+  render();
+  if (targetLogin && String(state.github.user?.login || '').trim().toLowerCase() === targetLogin && state.github.token) queueReaderCloudSync(900);
+});
+window.addEventListener('onebox:github-account-switch-error', (event) => {
+  setGithubAutoSyncStatus('error', event.detail?.message || (state.language === 'en' ? 'Could not safely switch GitHub sync account' : '无法安全切换 GitHub 同步账号'));
+});
 function hydrateGithubSyncRuntimeFromStorage() {
   hydrateGithubRuntimeState();
   const theme = localStorage.getItem(STORAGE.theme);
@@ -9843,6 +9884,10 @@ function githubBrowserError(error) {
 function invalidateGithubToken(requestedToken = state.github.token) {
   if (requestedToken !== state.github.token) return;
   if (!state.github.token && !state.github.user) return;
+  const persisted = parseStored(STORAGE.github, {});
+  const currentLogin = String(state.github.user?.login || '').trim().toLowerCase();
+  const persistedLogin = String(persisted?.user?.login || '').trim().toLowerCase();
+  const ownsPersistedAccount = !persisted?.token || !persistedLogin || currentLogin === persistedLogin || requestedToken === persisted.token;
   state.github.token = '';
   state.github.user = null;
   state.github.deviceCode = '';
@@ -9851,7 +9896,7 @@ function invalidateGithubToken(requestedToken = state.github.token) {
   state.github.verificationUriComplete = '';
   state.github.expiresAt = 0;
   state.github.manualTokenOpen = false;
-  saveGithub();
+  saveGithub(ownsPersistedAccount);
   if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
 }
 async function githubApiError(response, fallback = '') {
@@ -10005,7 +10050,7 @@ function consumeGithubOAuthCallback() {
     state.github.userCode = '';
     state.github.verificationUri = '';
     state.github.verificationUriComplete = '';
-    saveGithub();
+    saveGithub(true);
   }
   return result;
 }
@@ -10030,10 +10075,12 @@ async function pollGithubLogin() {
       const response = await fetch('https://github.com/login/oauth/access_token', { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ client_id: state.github.clientId, device_code: state.github.deviceCode, grant_type: 'urn:ietf:params:oauth:grant-type:device_code' }) });
       const data = await response.json();
       if (data.access_token) {
-        state.github.token = data.access_token; state.github.deviceCode = ''; state.github.verificationUriComplete = '';
-        const userResponse = await githubApiFetch('https://api.github.com/user', { headers: githubHeaders() });
+        const userResponse = await githubApiFetch('https://api.github.com/user', { headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + data.access_token } });
         if (!userResponse.ok) throw await githubApiError(userResponse, t('githubAuthExpired'));
-        state.github.user = await userResponse.json(); saveGithub(); renderGithubDialog(); queueReaderCloudSync(500);
+        const user = await userResponse.json();
+        await window.OneBoxCloudSync?.switchAccount?.(user.login);
+        state.github.token = data.access_token; state.github.deviceCode = ''; state.github.verificationUriComplete = '';
+        state.github.user = user; saveGithub(true); renderGithubDialog(); queueReaderCloudSync(500);
         toast(state.language === 'en' ? 'GitHub connected' : 'GitHub 已连接'); return;
       }
       if (data.error === 'slow_down') state.github.interval = Math.max(state.github.interval + 5, Number(data.interval || 0));
@@ -10054,14 +10101,15 @@ async function githubUseAccessToken() {
   if (!token) return toast(t('githubTokenMissing'), 'error');
   const previousToken = state.github.token;
   const previousUser = state.github.user;
-  state.github.token = token;
   try {
-    const response = await githubApiFetch('https://api.github.com/user', { headers: githubHeaders() });
+    const response = await githubApiFetch('https://api.github.com/user', { headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token } });
     const data = await response.json();
     if (!response.ok || !data.login) throw Error(t('githubTokenInvalid'));
+    await window.OneBoxCloudSync?.switchAccount?.(data.login);
+    state.github.token = token;
     state.github.user = data;
     state.github.manualTokenOpen = false;
-    saveGithub(); renderGithubDialog();
+    saveGithub(true); renderGithubDialog();
     queueReaderCloudSync(500);
     toast(t('githubTokenConnected'));
   } catch (error) {
@@ -10268,6 +10316,9 @@ function githubFilesMissingField(error) {
 async function githubUpload(allowFreshGistRetry = true, forceNewGist = false) {
   if (!state.github.token) return toast(state.language === 'en' ? 'Connect GitHub first' : '请先连接 GitHub', 'error');
   if (state.githubSync.active) return;
+  if (!githubStateMatchesStoredAccount()) return toast(state.language === 'en' ? 'GitHub account changed in another tab. Refresh OneBox before syncing.' : 'GitHub 账号已在其他标签页切换，请刷新 OneBox 后再同步。', 'error');
+  try { await window.OneBoxCloudSync?.switchAccount?.(state.github.user?.login); }
+  catch (error) { return toast(githubBrowserError(error) || (state.language === 'en' ? 'Could not safely switch GitHub sync account' : '无法安全切换 GitHub 同步账号'), 'error'); }
   return withGithubSyncTabLock(() => githubUploadTask(allowFreshGistRetry, forceNewGist));
 }
 async function githubUploadTask(allowFreshGistRetry = true, forceNewGist = false) {
@@ -10337,6 +10388,9 @@ async function githubUploadTask(allowFreshGistRetry = true, forceNewGist = false
 async function githubDownload() {
   if (!state.github.token) return toast(state.language === 'en' ? 'Connect GitHub first' : '请先连接 GitHub', 'error');
   if (state.githubSync.active) return;
+  if (!githubStateMatchesStoredAccount()) return toast(state.language === 'en' ? 'GitHub account changed in another tab. Refresh OneBox before syncing.' : 'GitHub 账号已在其他标签页切换，请刷新 OneBox 后再同步。', 'error');
+  try { await window.OneBoxCloudSync?.switchAccount?.(state.github.user?.login); }
+  catch (error) { return toast(githubBrowserError(error) || (state.language === 'en' ? 'Could not safely switch GitHub sync account' : '无法安全切换 GitHub 同步账号'), 'error'); }
   return withGithubSyncTabLock(githubDownloadTask);
 }
 async function githubDownloadTask() {
@@ -10520,9 +10574,18 @@ async function githubDownloadTask() {
     if (remoteApplyActive) window.OneBoxCloudSync?.endRemoteApply?.();
   }
 }
-const GITHUB_AUTO_SYNC_STORAGE_KEY = 'onebox.github-auto-sync';
 let githubAutoSyncStatus = { state: 'idle', message: '' };
-function githubAutoSyncEnabled() { return localStorage.getItem(GITHUB_AUTO_SYNC_STORAGE_KEY) === 'true'; }
+function githubAutoSyncEnabled() { return Boolean(window.OneBoxCloudSync?.enabled?.()); }
+function githubStateMatchesStoredAccount() {
+  const persisted = parseStored(STORAGE.github, {});
+  const storedLogin = String(persisted?.user?.login || '').trim().toLowerCase();
+  const stateLogin = String(state.github.user?.login || '').trim().toLowerCase();
+  const activeLogin = String(window.OneBoxCloudSync?.accountOwner?.() || '').trim().toLowerCase();
+  if (persisted?.token && !stateLogin) return false;
+  if (storedLogin && stateLogin && storedLogin !== stateLogin) return false;
+  if (activeLogin && stateLogin && activeLogin !== stateLogin) return false;
+  return window.OneBoxCloudSync?.accountScopeMatches?.() !== false;
+}
 function setGithubAutoSyncStatus(stateName, message = '') {
   githubAutoSyncStatus = { state: stateName, message };
   window.dispatchEvent(new CustomEvent('onebox:gist-sync-status', { detail: githubAutoSyncStatus }));
@@ -10538,8 +10601,19 @@ function queueGithubAutoSync(delay = 1800, restore = false) {
 }
 async function runGithubAutoSync({ restore = false, manual = false } = {}) {
   if ((!manual && !githubAutoSyncEnabled()) || !state.github.token || !navigator.onLine) return { skipped: true };
+  if (!githubStateMatchesStoredAccount()) {
+    const message = state.language === 'en' ? 'GitHub account changed in another tab. Refresh OneBox before syncing.' : 'GitHub 账号已在其他标签页切换，请刷新 OneBox 后再同步。';
+    setGithubAutoSyncStatus('error', message);
+    return { error: message };
+  }
   if (githubAutoSyncRunning) { githubAutoSyncPending = true; return { pending: true }; }
   if (state.githubSync.active) { queueGithubAutoSync(2500, false); return { pending: true }; }
+  try { await window.OneBoxCloudSync?.switchAccount?.(state.github.user?.login); }
+  catch (error) {
+    const message = githubBrowserError(error) || (state.language === 'en' ? 'Could not safely switch GitHub sync account' : '无法安全切换 GitHub 同步账号');
+    setGithubAutoSyncStatus('error', message);
+    return { error: message };
+  }
   githubAutoSyncRunning = true;
   githubSyncQuiet = true;
   setGithubAutoSyncStatus('syncing', t('githubAutoSyncSyncing'));
@@ -10587,17 +10661,17 @@ window.OneBoxGithubAutoSync = {
   queueRun: (options = {}) => runGithubAutoSync({ restore: options.restore === true || !githubAutoSyncIsInitialized() }),
   syncNow: (options = {}) => runGithubAutoSync({ restore: options.restore !== false, manual: true }),
   setEnabled(value) {
-    localStorage.setItem(GITHUB_AUTO_SYNC_STORAGE_KEY, String(Boolean(value)));
-    if (value) queueGithubAutoSync(500, false);
-    else setGithubAutoSyncStatus('disabled', t('githubAutoSyncPaused'));
+    window.OneBoxCloudSync?.enable?.(Boolean(value));
+    if (!value) setGithubAutoSyncStatus('disabled', t('githubAutoSyncPaused'));
   },
   status: () => ({ ...githubAutoSyncStatus }),
 };
 
 function disconnectGithub() {
+  if (!githubStateMatchesStoredAccount()) return toast(state.language === 'en' ? 'GitHub account changed in another tab. Refresh OneBox before disconnecting.' : 'GitHub 账号已在其他标签页切换，请刷新 OneBox 后再退出。', 'error');
   state.github = { clientId: GITHUB_CLIENT_ID, token: '', user: null, gistId: '', deviceCode: '', userCode: '', verificationUri: '', verificationUriComplete: '', expiresAt: 0, interval: 5, manualTokenOpen: false };
   window.OneBoxReaderCloudSync?.invalidateSession();
-  saveGithub(); renderGithubDialog(); toast(state.language === 'en' ? 'GitHub disconnected' : '已退出 GitHub');
+  saveGithub(true); renderGithubDialog(); toast(state.language === 'en' ? 'GitHub disconnected' : '已退出 GitHub');
 }
 function renderAgreementDialog() {
   const dialog = $('#agreementDialog');
@@ -10848,10 +10922,13 @@ async function requestAppReload() {
   state.updateReloading = true;
   clearTimeout(persistenceTimer);
   await writePersistentSnapshot();
-  await oneBoxDbPut('snapshot', 'reader-library', { value: JSON.stringify(state.library.slice(0, 80)), savedAt: Date.now() });
+  const persistedLibrary = localStorage.getItem(STORAGE.library);
+  if (persistedLibrary) await oneBoxDbPut('snapshot', 'reader-library', { value: persistedLibrary, savedAt: Date.now() });
+  else await oneBoxDbDelete('snapshot', 'reader-library');
   const checkpoints = localStorage.getItem(STORAGE.readerProgress);
   if (checkpoints) await oneBoxDbPut('snapshot', 'reader-progress', { value: checkpoints, savedAt: Date.now() });
-  await oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
+  const persistedGithub = localStorage.getItem(STORAGE.github);
+  if (persistedGithub) await oneBoxDbPut('snapshot', 'github-auth', { value: persistedGithub, savedAt: Date.now() });
   window.location.reload();
 }
 async function applyUpdate() {
