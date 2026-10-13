@@ -5569,7 +5569,7 @@ function clearReaderDeletionMarkers(importedBooks = []) {
       const key = String(book?.id || '').trim();
       const importedAt = Number(book?.updatedAt) || 0;
       const deletedAt = Number(deleted[key]) || 0;
-      if (key && importedAt > deletedAt) {
+      if (key && Object.prototype.hasOwnProperty.call(deleted, key) && importedAt > deletedAt) {
         delete deleted[key];
         changed = true;
       }
