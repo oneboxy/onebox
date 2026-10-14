@@ -16434,3 +16434,55 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
   .ticket-wallet-luckin-footer > div > small { font-size: 7px; }
   .ticket-wallet-luckin-footer > b { max-width: 42%; font-size: 7px; }
 }
+
+
+/* Developer workbench: remove the desktop spacer left by the old second
+   navigation rail and keep empty states proportional to their content. */
+@media (min-width: 761px) {
+  body:has(#workspace[data-tool="dev"]):not(.dev-tools-fullscreen) { overflow: auto; }
+  main:has(#workspace[data-tool="dev"]) {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
+    overflow-x: clip;
+    overflow-y: visible;
+    padding-top: calc(var(--app-header-height) + 6px);
+    padding-bottom: 20px;
+  }
+  #pageSwipeStage:has(> #workspace[data-tool="dev"]) { height: auto; min-height: 0; }
+  #workspace[data-tool="dev"] {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    padding: 12px;
+  }
+  .dev-tools-page:not(.dev-is-fullscreen) .dev-mode-tabs {
+    display: flex;
+    width: max-content;
+    max-width: 100%;
+    margin-bottom: 10px;
+  }
+  .dev-tools-page:not(.dev-is-fullscreen) .dev-mode-tab { flex: 0 0 auto; min-width: 136px; }
+  .dev-fullscreen-button { order: 5; margin-left: 4px; position: static; }
+  .dev-code-editor, .dev-text-editor, .dev-json-tree { height: clamp(280px, 42vh, 420px); }
+  .dev-json-empty {
+    height: auto;
+    min-height: 86px;
+    padding: 14px;
+    align-content: center;
+  }
+  .dev-tools-page.dev-is-fullscreen {
+    top: calc(var(--app-header-height) + 4px);
+    padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tabs {
+    display: flex;
+    width: max-content;
+    max-width: 100%;
+    flex: 0 0 auto;
+    overflow-x: auto;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab { flex: 0 0 auto; min-width: 136px; }
+}
