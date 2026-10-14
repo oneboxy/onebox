@@ -17738,3 +17738,12 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   }
   .dev-tools-page.dev-is-fullscreen .dev-compare-diff-side code { font-size: 9px; }
 }
+
+
+/* 2.18.657: use a quiet underline for the selected Developer tool. */
+.dev-tools-page .dev-mode-tab.active,
+.dev-tools-page.dev-is-fullscreen .dev-mode-tab.active {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
