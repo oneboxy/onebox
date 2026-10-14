@@ -16857,3 +16857,87 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 13%, transparent);
   outline: 0;
 }
+
+
+/* 2.18.642: keep the home source picker compact and visually restrained. */
+#homeSourceDialog .home-source-options {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 8px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+#homeSourceDialog .home-source-option {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 38px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 4px 23px 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  box-shadow: none;
+}
+#homeSourceDialog .home-source-option.is-selected {
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: var(--soft) !important;
+  box-shadow: none;
+}
+#homeSourceDialog .home-source-option-mark .feed-source-mark {
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel) !important;
+  color: var(--muted) !important;
+  filter: grayscale(1);
+  opacity: .78;
+}
+#homeSourceDialog .home-source-option-mark .feed-source-mark img {
+  filter: grayscale(1);
+  opacity: .78;
+}
+#homeSourceDialog .home-source-option-mark .feed-source-fallback {
+  background: var(--panel) !important;
+  color: var(--muted) !important;
+}
+#homeSourceDialog .home-source-option-action {
+  top: 50%;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--muted);
+}
+#homeSourceDialog .home-source-option.is-selected .home-source-option-action {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--muted);
+}
+#homeSourceDialog .home-source-option-action:hover,
+#homeSourceDialog .home-source-option-action:focus-visible,
+#homeSourceDialog .home-source-option.is-selected .home-source-option-action:hover,
+#homeSourceDialog .home-source-option.is-selected .home-source-option-action:focus-visible {
+  border-color: var(--primary-2);
+  background: var(--soft);
+  color: var(--ink);
+}
+#homeSourceDialog .home-source-option-action svg {
+  width: 9px;
+  height: 9px;
+}
+@media (max-width: 420px) {
+  #homeSourceDialog .home-source-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 340px) {
+  #homeSourceDialog .home-source-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
