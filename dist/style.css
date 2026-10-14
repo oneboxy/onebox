@@ -16486,3 +16486,63 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
   }
   .dev-tools-page.dev-is-fullscreen .dev-mode-tab { flex: 0 0 auto; min-width: 136px; }
 }
+
+
+/* Developer desktop: use the screen width and height, without the retired
+   second navigation row or a full-width segmented background. */
+@media (min-width: 761px) {
+  body:has(#workspace[data-tool="dev"]) .shell {
+    width: min(1800px, 100%);
+    padding-inline: clamp(16px, 2vw, 32px);
+  }
+  main:has(#workspace[data-tool="dev"]) {
+    padding-top: 4px;
+    padding-bottom: 16px;
+  }
+  #workspace[data-tool="dev"] {
+    width: 100%;
+    max-width: none;
+    padding: 10px;
+  }
+  .dev-tools-page:not(.dev-is-fullscreen) .dev-mode-tabs,
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tabs {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+    gap: 4px;
+    margin: 0 0 10px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+  }
+  .dev-tools-page:not(.dev-is-fullscreen) .dev-mode-tab,
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab {
+    flex: 0 0 auto;
+    min-width: 0;
+    min-height: 34px;
+    padding: 6px 13px;
+    border-radius: 7px 7px 0 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .dev-mode-tab.active { background: transparent; box-shadow: inset 0 -2px var(--primary); }
+  .dev-fullscreen-button { order: 5; flex: 0 0 32px; width: 32px; height: 32px; margin-left: auto; position: static; }
+  .dev-code-editor, .dev-text-editor, .dev-json-tree {
+    height: clamp(380px, calc(100dvh - var(--app-header-height) - 230px), 760px);
+  }
+  .dev-editor-grid { align-items: stretch; }
+  .dev-output-pane { display: flex; min-height: 0; flex-direction: column; }
+  .dev-output-pane > .dev-live-output { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+  .dev-output-pane .dev-json-empty {
+    height: auto;
+    min-height: 86px;
+    flex: 1 1 auto;
+    padding: 14px;
+    border-style: dashed;
+    background: transparent;
+  }
+}
