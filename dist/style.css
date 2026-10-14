@@ -10019,7 +10019,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .dev-pane-actions, .dev-timestamp-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
 .dev-action { min-height: 28px; padding: 5px 8px; border-radius: 8px; font-size: 10px; }
 .dev-code-editor, .dev-text-editor { display: block; width: 100%; height: clamp(320px, calc(100dvh - 430px), 680px); min-height: 0; resize: vertical; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); color: var(--ink); font: 13px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; tab-size: 2; }
-.dev-code-editor:focus, .dev-text-editor:focus, .dev-plain-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 13%, transparent); outline: 0; }
+.dev-code-editor:focus, .dev-code-editor:focus-within, .dev-code-input:focus, .dev-text-editor:focus, .dev-plain-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 13%, transparent); outline: 0; }
 .dev-text-editor { font-family: inherit; line-height: 1.7; }
 .dev-check { display: inline-flex; align-items: center; gap: 5px; margin: 0 0 9px 2px; color: var(--muted); font-size: 11px; user-select: none; }
 .dev-check input { width: 14px; height: 14px; accent-color: var(--primary); }
@@ -16802,4 +16802,58 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
     height: 46px !important;
     border-radius: 13px !important;
   }
+}
+
+
+/* JSON editors use a synchronized gutter so source lines stay easy to track. */
+.dev-code-editor.dev-editor-with-lines {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: stretch;
+  overflow: hidden;
+  padding: 0;
+  resize: none;
+}
+.dev-line-numbers {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 8px 7px 8px 4px;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font: inherit;
+  line-height: inherit;
+  text-align: right;
+  user-select: none;
+  white-space: pre;
+  pointer-events: none;
+}
+.dev-code-input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 10px;
+  resize: none;
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  line-height: inherit;
+  tab-size: 2;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.dev-code-editor.dev-editor-with-lines:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 13%, transparent);
+  outline: 0;
 }

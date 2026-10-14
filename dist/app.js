@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.639';
+const APP_VERSION = '2.18.640';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8308,19 +8308,26 @@ function devHistoryContent(kind) {
 function devOutputPaneHead(kind, title, actions = '') {
   return '<div class="dev-pane-head dev-output-pane-head"><div class="dev-output-title"><h3>' + escapeHtml(title) + '</h3><div class="dev-history-anchor">' + devHistoryToggle(kind) + '</div></div><div class="dev-pane-actions">' + actions + '</div></div>';
 }
+function developerJsonLineNumbers(value) {
+  const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
+  return Array.from({ length: count }, (_, index) => index + 1).join('\n');
+}
+function developerJsonEditor(field, value, placeholder) {
+  return '<div class="dev-code-editor dev-editor-with-lines"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div>';
+}
 function renderDeveloperJsonFormat() {
   const dev = state.devTools;
   const outputActions = dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '';
   return '<div class="dev-workbench dev-json-format"><div class="dev-editor-grid">' +
-    '<section class="dev-pane">' + devPaneHead(t('devInput'), devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-example', t('devExample')) + devActionButton('json-clear', t('devClear'))) + '<textarea class="dev-code-editor" data-dev-field="formatInput" spellcheck="false" placeholder="{\n  &quot;name&quot;: &quot;OneBox&quot;\n}">' + escapeHtml(dev.formatInput) + '</textarea></section>' +
+    '<section class="dev-pane">' + devPaneHead(t('devInput'), devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-example', t('devExample')) + devActionButton('json-clear', t('devClear'))) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '</section>' +
     '<section class="dev-pane dev-output-pane">' + devOutputPaneHead('json-format', t('devOutput'), outputActions) + devHistoryContent('json-format') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + '</section>' +
     '</div></div>';
 }
 function renderDeveloperCompare() {
   const dev = state.devTools;
   return '<div class="dev-workbench dev-json-compare"><div class="dev-compare-grid">' +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + '<textarea class="dev-code-editor" data-dev-field="compareLeft" spellcheck="false" placeholder="{ &quot;version&quot;: 1 }">' + escapeHtml(dev.compareLeft) + '</textarea></section>' +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + '<textarea class="dev-code-editor" data-dev-field="compareRight" spellcheck="false" placeholder="{ &quot;version&quot;: 2 }">' + escapeHtml(dev.compareRight) + '</textarea></section>' +
+    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }') + '</section>' +
+    '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }') + '</section>' +
     '</div><section class="dev-pane dev-compare-result">' + devOutputPaneHead('json-compare', t('devOutput'), devActionButton('dev-copy-output', t('devCopy'))) + devHistoryContent('json-compare') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div></section></div>';
 }
 function renderDeveloperStatsCards(stats) {
@@ -8375,6 +8382,14 @@ function updateDeveloperLiveState(field) {
     syncDeveloperTimestampOutput();
   }
   saveDevTools(); refreshDeveloperLiveOutput();
+}
+function syncDeveloperJsonLineNumbers(editor) {
+  if (!editor?.matches?.('[data-dev-line-numbered]')) return;
+  const gutter = editor.parentElement?.querySelector('[data-dev-line-numbers]');
+  if (!gutter) return;
+  const numbers = developerJsonLineNumbers(editor.value);
+  if (gutter.textContent !== numbers) gutter.textContent = numbers;
+  gutter.scrollTop = editor.scrollTop;
 }
 function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
@@ -13669,6 +13684,7 @@ workspace.addEventListener('input', (event) => {
     if (field === 'cafeMood') workspace.querySelectorAll('[data-ticket-wallet-cafe-mood-preset]').forEach((button) => button.classList.toggle('active', button.dataset.ticketWalletCafeMoodPreset === event.target.value));
     updateTicketWalletCafeLabelPreview();
   }
+  if (event.target.matches?.('[data-dev-line-numbered]')) syncDeveloperJsonLineNumbers(event.target);
   if (event.target.dataset.devField) { const field = event.target.dataset.devField; state.devTools[field] = event.target.type === 'checkbox' ? event.target.checked : event.target.value; updateDeveloperLiveState(field); }
   if (event.target.id === 'conversionValue') { conversion.value = event.target.value; const output = $('.conversion-result strong'); if (output) output.textContent = formatNumber(convertedValue()); }
   if (event.target.id === 'translationInput') state.translation.input = event.target.value;
@@ -13682,6 +13698,9 @@ workspace.addEventListener('input', (event) => {
     }
   }
 });
+workspace.addEventListener('scroll', (event) => {
+  if (event.target.matches?.('[data-dev-line-numbered]')) syncDeveloperJsonLineNumbers(event.target);
+}, true);
 workspace.addEventListener('change', (event) => {
   if (event.target.dataset.ticketWalletCafeField && state.ticketWalletEditorOpen && state.ticketWalletDraft) {
     const field = event.target.dataset.ticketWalletCafeField;
