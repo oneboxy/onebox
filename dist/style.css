@@ -16622,3 +16622,90 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
     padding-inline: 2px;
   }
 }
+
+
+/* 2.18.637: comparison uses one compact, scrollable workbench on desktop. */
+@media (min-width: 761px) {
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr) minmax(120px, .42fr);
+    gap: 12px;
+    height: clamp(260px, calc(100dvh - var(--dev-fullscreen-top, 90px) - 110px), 620px);
+    min-height: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
+    display: contents;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-result {
+    grid-column: 1 / -1;
+    min-height: 0;
+    overflow: hidden;
+    flex: initial;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-pane {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare .dev-code-editor {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    resize: none;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare .dev-compare-result .dev-live-output {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: auto;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare .dev-result-pre {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+  }
+}
+@media (min-width: 1160px) {
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-result {
+    grid-column: auto;
+  }
+}
+
+/* The desktop launcher follows the compact 52px icon scale in the reference. */
+@media (min-width: 761px) {
+  #workspace[data-tool="navigation"] .navigation-grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 96px));
+    justify-content: start;
+    gap: 18px 8px;
+  }
+  #workspace[data-tool="navigation"] .navigation-card,
+  #workspace[data-tool="navigation"] .navigation-card-main,
+  #workspace[data-tool="navigation"] .navigation-add-card,
+  #workspace[data-tool="navigation"] .navigation-empty-add-card {
+    min-height: 88px;
+  }
+  #workspace[data-tool="navigation"] .navigation-card-main {
+    padding: 4px 2px;
+    gap: 7px;
+  }
+  #workspace[data-tool="navigation"] .navigation-site-icon,
+  #workspace[data-tool="navigation"] .navigation-folder-preview,
+  #workspace[data-tool="navigation"] .navigation-add-glyph {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+  }
+  #workspace[data-tool="navigation"] .navigation-card-main strong,
+  #workspace[data-tool="navigation"] .navigation-add-card strong,
+  #workspace[data-tool="navigation"] .navigation-empty-add-card strong {
+    max-width: 100%;
+    font-size: 12px;
+  }
+}
