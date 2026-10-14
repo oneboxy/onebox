@@ -17165,7 +17165,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.652: highlight changed JSON values and show paired source lines. */
+/* 2.18.653: highlight changed JSON values and show paired source lines. */
 .dev-code-editor.dev-compare-editor { grid-template-columns: 46px minmax(0, 1fr); }
 .dev-compare-editor .dev-code-input-wrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .dev-compare-editor .dev-code-highlight {
@@ -17250,7 +17250,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 .dev-compare-diff-list { min-height: 0; flex: 1 1 auto; }
 
 
-/* 2.18.652: lighten the folder editor and use concise icon actions. */
+/* 2.18.653: lighten the folder editor and use concise icon actions. */
 #navigationDialog .navigation-folder-dialog-card {
   padding: 14px 16px 16px;
   border-color: color-mix(in srgb, var(--line) 88%, transparent);
@@ -17364,4 +17364,78 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 @media (max-width: 600px) {
   #navigationDialog .navigation-folder-dialog-card { padding: 12px 14px 14px; }
   #navigationDialog .navigation-folder-sites { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); }
+}
+
+
+/* 2.18.653: align folder site icons and unify the folder action controls. */
+#navigationDialog .navigation-folder-name-field { margin-bottom: 10px; }
+#navigationDialog .navigation-folder-name-field input { margin: 0; }
+#navigationDialog .navigation-folder-sites .navigation-card {
+  min-height: 102px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main {
+  min-height: 100px;
+  gap: 5px;
+  padding: 8px 7px;
+}
+#navigationDialog .navigation-folder-sites .navigation-site-icon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-2);
+}
+#navigationDialog .navigation-folder-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 10px;
+}
+#navigationDialog .navigation-folder-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+#navigationDialog .navigation-folder-actions .primary {
+  grid-column: auto;
+  order: 0;
+  flex: initial;
+  background: var(--primary);
+  color: var(--primary-contrast, #fff);
+}
+#navigationDialog .navigation-folder-actions .secondary {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-dissolve-button { color: var(--danger); }
+#navigationDialog .navigation-folder-actions > button svg {
+  display: block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 420px) {
+  #navigationDialog .navigation-folder-sites .navigation-site-icon {
+    width: 44px;
+    height: 44px;
+  }
+  #navigationDialog .navigation-folder-actions { gap: 6px; }
+  #navigationDialog .navigation-folder-actions > button { gap: 5px; padding-inline: 5px; font-size: 11px; }
 }
