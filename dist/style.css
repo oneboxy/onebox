@@ -16601,3 +16601,24 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
     min-height: 0;
   }
 }
+
+
+/* Reduce nested desktop developer frames: the workbench card and editor fields
+   remain clear, while the two pane wrappers become transparent. */
+@media (min-width: 761px) {
+  .dev-tools-page.dev-is-fullscreen .dev-pane {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .dev-tools-page.dev-is-fullscreen .dev-editor-grid {
+    gap: 16px;
+  }
+
+  .dev-tools-page.dev-is-fullscreen .dev-pane-head {
+    padding-inline: 2px;
+  }
+}
