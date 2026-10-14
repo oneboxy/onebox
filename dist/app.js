@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.630';
+const APP_VERSION = '2.18.631';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -118,6 +118,9 @@ const DEFAULT_HOME_FEED_VISIBLE = RSS_SOURCES.filter((source) => source.visibleB
 const NAVIGATION_SESSION_KEY = 'onebox-navigation-position';
 const DEFAULT_TOOL_ORDER = Object.keys(TOOL_DEFS).filter((id) => id !== 'navigation');
 const nav = $('#toolNav');
+const desktopPageTabs = $('#desktopPageTabs');
+const toolNavPlaceholder = document.createComment('tool navigation position');
+nav.parentNode.insertBefore(toolNavPlaceholder, nav);
 const workspace = $('#workspace');
 const pageSwipeStage = document.createElement('div');
 pageSwipeStage.id = 'pageSwipeStage';
@@ -127,7 +130,25 @@ pageSwipeStage.appendChild(workspace);
 const homeSourceNav = document.createElement('nav');
 homeSourceNav.id = 'homeSourceNav';
 homeSourceNav.setAttribute('aria-label', '首页来源切换');
+const homeSourceNavPlaceholder = document.createComment('home source navigation position');
+pageSwipeStage.parentNode.insertBefore(homeSourceNavPlaceholder, pageSwipeStage);
 pageSwipeStage.parentNode.insertBefore(homeSourceNav, pageSwipeStage);
+function syncDesktopPageTabs() {
+  if (!desktopPageTabs) return;
+  if (window.matchMedia('(min-width: 761px)').matches) {
+    if (homeSourceNav.parentNode !== desktopPageTabs) desktopPageTabs.appendChild(homeSourceNav);
+    if (nav.parentNode !== desktopPageTabs) desktopPageTabs.appendChild(nav);
+    return;
+  }
+  if (homeSourceNavPlaceholder.parentNode && homeSourceNav.parentNode !== homeSourceNavPlaceholder.parentNode) {
+    homeSourceNavPlaceholder.parentNode.insertBefore(homeSourceNav, homeSourceNavPlaceholder.nextSibling);
+  }
+  if (toolNavPlaceholder.parentNode && nav.parentNode !== toolNavPlaceholder.parentNode) {
+    toolNavPlaceholder.parentNode.insertBefore(nav, toolNavPlaceholder.nextSibling);
+  }
+}
+syncDesktopPageTabs();
+window.addEventListener('resize', syncDesktopPageTabs, { passive: true });
 const parseStored = (key, fallback) => {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 };
@@ -1474,8 +1495,6 @@ function renderHeaderControls() {
   document.documentElement.classList.toggle('layout-classic', !simple);
   const layoutNav = $('#layoutNav');
   if (layoutNav) layoutNav.hidden = !simple;
-  const desktopMainNav = $('#desktopMainNav');
-  if (desktopMainNav) desktopMainNav.hidden = !simple;
   const topDisplay = state.topDisplay || { theme: true, language: true, messages: true };
   const visibility = { notifyBtn: false, themeBtn: !simple && topDisplay.theme, languageBtn: !simple && topDisplay.language, settingsBtn: !simple };
   Object.entries(visibility).forEach(([id, visible]) => {
@@ -1622,8 +1641,6 @@ function renderTopNav() {
   }).join('');
   const entries = mainSectionEntries();
   layoutNav.innerHTML = renderEntries(entries);
-  const desktopMainNav = $('#desktopMainNav');
-  if (desktopMainNav) desktopMainNav.innerHTML = renderEntries(entries.filter((item) => item.key === 'home' || item.key === 'tools'));
 }
 function renderBottomNav() {
   const bottomNav = $('#bottomNav');
@@ -13868,17 +13885,6 @@ $('#bottomNav').addEventListener('click', (event) => {
   selectSection(tab.dataset.section);
 });
 $('#layoutNav').addEventListener('click', (event) => {
-  const tab = event.target.closest('[data-section]');
-  if (!tab) return;
-  if (tab.dataset.section === 'home' && event.detail >= 2) {
-    if (state.section !== 'home') selectSection('home');
-    toast(state.language === 'en' ? 'Refreshing home…' : '正在刷新首页…');
-    loadHomeFeeds(true);
-    return;
-  }
-  selectSection(tab.dataset.section);
-});
-$('#desktopMainNav')?.addEventListener('click', (event) => {
   const tab = event.target.closest('[data-section]');
   if (!tab) return;
   if (tab.dataset.section === 'home' && event.detail >= 2) {

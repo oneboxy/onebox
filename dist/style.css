@@ -1955,7 +1955,6 @@ main:not(:has(#workspace[data-tool="home"])):not(:has(#workspace[data-tool="mess
   flex: 0 0 auto;
 }
 .layout-nav:not([hidden]) { display: inline-flex; }
-.desktop-main-nav { flex: 0 0 auto; }
 .layout-nav-button {
   position: relative;
   width: 32px;
@@ -2017,29 +2016,6 @@ html.layout-simple #languageControl { display: none !important; }
   .layout-nav { gap: 2px; }
   .layout-nav-button { width: 30px; min-width: 30px; height: 30px; border-radius: 9px; }
   .layout-nav-icon, .layout-nav-icon svg { width: 17px; height: 17px; }
-  .desktop-main-nav { display: none !important; }
-}
-
-/* On desktop, keep Home and Tools beside the brand while the secondary
-   destinations stay grouped with the account and notification controls. */
-@media (min-width: 761px) {
-  html.layout-simple .app-header { justify-content: flex-start; }
-  html.layout-simple .desktop-main-nav:not([hidden]) {
-    display: inline-flex;
-    gap: 8px;
-    margin-left: clamp(24px, 4vw, 52px);
-  }
-  html.layout-simple .desktop-main-nav .layout-nav-button {
-    width: 38px;
-    min-width: 38px;
-    height: 38px;
-    border-radius: 11px;
-  }
-  html.layout-simple .desktop-main-nav .layout-nav-icon,
-  html.layout-simple .desktop-main-nav .layout-nav-icon svg { width: 21px; height: 21px; }
-  html.layout-simple #layoutNav [data-section="home"],
-  html.layout-simple #layoutNav [data-section="tools"] { display: none; }
-  html.layout-simple .header-actions { margin-left: auto; }
 }
 
 /* 2.18.25 event dialog: centered, compact and safe for narrow date/time controls. */
@@ -16320,6 +16296,44 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
   .ticket-wallet-luckin-footer > div > strong { font-size: 8px; }
   .ticket-wallet-luckin-footer > div > small { font-size: 7px; }
   .ticket-wallet-luckin-footer > b { max-width: 42%; font-size: 7px; }
+}
+
+/* Desktop keeps the active homepage/tool tabs in the header's open center
+   space. The app moves these same nodes back to their mobile rails at 760px. */
+.desktop-page-tabs { display: none; }
+@media (min-width: 761px) {
+  .app-header { justify-content: flex-start; gap: 14px; }
+  .desktop-page-tabs {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: stretch;
+    min-width: 0;
+    height: 42px;
+    margin-inline: clamp(8px, 1.8vw, 26px);
+    overflow: hidden;
+  }
+  .desktop-page-tabs > #homeSourceNav,
+  .desktop-page-tabs > #toolNav {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    width: 100%;
+    max-width: none;
+    height: 42px;
+    min-width: 0;
+    flex: 1 1 auto;
+    margin: 0;
+    transform: none;
+  }
+  .desktop-page-tabs > #homeSourceNav .feed-source-panel { width: 100%; }
+  .desktop-page-tabs > #toolNav { padding: 0 8px; }
+  .app-header .header-actions { flex: 0 0 auto; min-width: 0; }
+  main:not(:has(#workspace[data-tool="home"])):not(:has(#workspace[data-tool="messages"])):not(:has(#workspace[data-tool="mine"])) {
+    padding-top: calc(var(--app-header-height) + 4px);
+  }
+  #workspace[data-tool="home"] .feed-home { padding-top: 0; }
+  #workspace[data-tool="home"] .feed-panel { min-height: calc(100dvh - var(--app-header-height)); }
+  #workspace { min-height: calc(100dvh - var(--app-header-height)); }
 }
 .onebox-public-ad { position: relative; display: grid; gap: 7px; margin: 12px 0; padding: 13px 42px 13px 15px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); color: var(--ink); font-size: 12px; line-height: 1.55; }
 .onebox-public-ad a { color: inherit; text-decoration: none; }
