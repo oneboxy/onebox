@@ -16860,7 +16860,8 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 
 
 
-/* 2.18.643: keep source icons colorful and distinguish added state with borders. */
+
+/* 2.18.644: use adaptive outlines and lighter plus/minus controls. */
 #homeSourceDialog .home-source-options {
   box-sizing: border-box;
   width: 100%;
@@ -16877,54 +16878,69 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   justify-content: flex-start;
   gap: 6px;
   padding: 4px 23px 4px 7px;
-  border: 1px dashed var(--line);
+  border: 0;
   border-radius: 10px;
-  background: var(--panel-2);
-  box-shadow: none;
-}
-#homeSourceDialog .home-source-option.is-selected {
-  border-style: solid;
-  border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
   background: transparent !important;
   box-shadow: none;
+}
+#homeSourceDialog .home-source-option::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(90deg, var(--line) 0 7px, transparent 7px 14px) top / 100% 1px repeat-x,
+    repeating-linear-gradient(90deg, var(--line) 0 7px, transparent 7px 14px) bottom / 100% 1px repeat-x,
+    repeating-linear-gradient(0deg, var(--line) 0 7px, transparent 7px 14px) left / 1px 100% repeat-y,
+    repeating-linear-gradient(0deg, var(--line) 0 7px, transparent 7px 14px) right / 1px 100% repeat-y;
+  pointer-events: none;
+}
+#homeSourceDialog .home-source-option.is-selected {
+  border: 1.5px solid color-mix(in srgb, var(--ink) 48%, var(--line));
+  background: transparent !important;
+  box-shadow: none;
+}
+#homeSourceDialog .home-source-option.is-selected::before {
+  display: none;
 }
 #homeSourceDialog .home-source-option-action {
   top: 50%;
   right: 4px;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
   transform: translateY(-50%);
-  border-color: color-mix(in srgb, var(--success) 52%, var(--line));
-  background: color-mix(in srgb, var(--success) 12%, var(--panel));
-  color: var(--success);
+  border: 0 !important;
+  border-radius: 5px;
+  background: transparent !important;
+  color: var(--success) !important;
+  opacity: .88;
+  transition: opacity .16s ease, transform .16s ease, background-color .16s ease;
 }
 #homeSourceDialog .home-source-option.is-selected .home-source-option-action {
-  border-color: color-mix(in srgb, var(--danger) 52%, var(--line));
-  background: color-mix(in srgb, var(--danger) 12%, var(--panel));
-  color: var(--danger);
+  color: var(--danger) !important;
+}
+#homeSourceDialog .home-source-option-action svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2;
 }
 #homeSourceDialog .home-source-option-action:hover,
 #homeSourceDialog .home-source-option-action:focus-visible {
-  border-color: color-mix(in srgb, var(--success) 80%, var(--line));
-  background: color-mix(in srgb, var(--success) 18%, var(--panel));
-  color: var(--success);
+  transform: translateY(-50%) scale(1.08);
+  background: color-mix(in srgb, var(--success) 10%, transparent) !important;
+  opacity: 1;
 }
 #homeSourceDialog .home-source-option.is-selected .home-source-option-action:hover,
 #homeSourceDialog .home-source-option.is-selected .home-source-option-action:focus-visible {
-  border-color: color-mix(in srgb, var(--danger) 80%, var(--line));
-  background: color-mix(in srgb, var(--danger) 18%, var(--panel));
-  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
 }
 #homeSourceDialog .home-source-option-action:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--success) 32%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--success) 38%, transparent);
   outline-offset: 2px;
 }
 #homeSourceDialog .home-source-option.is-selected .home-source-option-action:focus-visible {
-  outline-color: color-mix(in srgb, var(--danger) 32%, transparent);
-}
-#homeSourceDialog .home-source-option-action svg {
-  width: 9px;
-  height: 9px;
+  outline-color: color-mix(in srgb, var(--danger) 38%, transparent);
 }
 @media (max-width: 420px) {
   #homeSourceDialog .home-source-options {
