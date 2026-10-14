@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   let handlers = null;
-  let lastStatus = { state: 'idle', message: '书籍原件可同步到个人 GitHub Gist' };
+  let lastStatus = { state: 'idle', message: '' };
 
   function connected() {
     try { return Boolean(JSON.parse(localStorage.getItem('onebox.github') || '{}').token); } catch { return false; }
@@ -13,7 +13,7 @@
   }
   function queueSync(delay = 1800) {
     if (!connected()) {
-      status({ state: 'idle', message: '书籍原件可同步到个人 GitHub Gist' });
+      status({ state: 'idle', message: '' });
       return;
     }
     if (window.OneBoxGithubAutoSync?.enabled && !window.OneBoxGithubAutoSync.enabled()) {
@@ -32,7 +32,7 @@
   window.OneBoxReaderCloudSync = {
     configure(nextHandlers) {
       handlers = nextHandlers;
-      status({ state: 'idle', message: connected() ? '书籍原件可同步到个人 GitHub Gist' : '连接 GitHub 后可同步书籍原件' });
+      status({ state: 'idle', message: connected() ? '书籍原件可同步到个人 GitHub Gist' : '' });
     },
     queueSync,
     syncNow: () => window.OneBoxGithubAutoSync?.syncNow?.({ restore: true }),
