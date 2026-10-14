@@ -16861,7 +16861,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 
 
 
-/* 2.18.646: increase the contrast of unselected source outlines. */
+/* 2.18.647: use continuous native rounded dashes for unselected source cards. */
 #homeSourceDialog .home-source-options {
   box-sizing: border-box;
   width: 100%;
@@ -16878,23 +16878,13 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   justify-content: flex-start;
   gap: 6px;
   padding: 4px 23px 4px 7px;
-  border: 0;
+  border: 1px dashed color-mix(in srgb, var(--line) 58%, var(--muted));
   border-radius: 10px;
   background: transparent !important;
   box-shadow: none;
 }
 #homeSourceDialog .home-source-option::before {
-  --home-source-picker-dash: color-mix(in srgb, var(--line) 58%, var(--muted));
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:
-    repeating-linear-gradient(90deg, var(--home-source-picker-dash) 0 5px, transparent 5px 9px) top / 100% 1px repeat-x,
-    repeating-linear-gradient(90deg, var(--home-source-picker-dash) 0 5px, transparent 5px 9px) bottom / 100% 1px repeat-x,
-    repeating-linear-gradient(0deg, var(--home-source-picker-dash) 0 5px, transparent 5px 9px) left / 1px 100% repeat-y,
-    repeating-linear-gradient(0deg, var(--home-source-picker-dash) 0 5px, transparent 5px 9px) right / 1px 100% repeat-y;
-  pointer-events: none;
+  display: none;
 }
 #homeSourceDialog .home-source-option.is-selected {
   border: 1.5px solid color-mix(in srgb, var(--ink) 48%, var(--line));
