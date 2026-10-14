@@ -17165,7 +17165,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.653: highlight changed JSON values and show paired source lines. */
+/* 2.18.654: highlight changed JSON values and show paired source lines. */
 .dev-code-editor.dev-compare-editor { grid-template-columns: 46px minmax(0, 1fr); }
 .dev-compare-editor .dev-code-input-wrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .dev-compare-editor .dev-code-highlight {
@@ -17250,7 +17250,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 .dev-compare-diff-list { min-height: 0; flex: 1 1 auto; }
 
 
-/* 2.18.653: lighten the folder editor and use concise icon actions. */
+/* 2.18.654: lighten the folder editor and use concise icon actions. */
 #navigationDialog .navigation-folder-dialog-card {
   padding: 14px 16px 16px;
   border-color: color-mix(in srgb, var(--line) 88%, transparent);
@@ -17367,7 +17367,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.653: align folder site icons and unify the folder action controls. */
+/* 2.18.654: align folder site icons and unify the folder action controls. */
 #navigationDialog .navigation-folder-name-field { margin-bottom: 10px; }
 #navigationDialog .navigation-folder-name-field input { margin: 0; }
 #navigationDialog .navigation-folder-sites .navigation-card {
@@ -17438,4 +17438,57 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   }
   #navigationDialog .navigation-folder-actions { gap: 6px; }
   #navigationDialog .navigation-folder-actions > button { gap: 5px; padding-inline: 5px; font-size: 11px; }
+}
+
+
+/* 2.18.654: remove the extra frame around folder contents and soften actions. */
+#navigationDialog .navigation-folder-sites .navigation-card {
+  min-height: 98px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: none;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main {
+  min-height: 96px;
+  background: transparent;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main:hover,
+#navigationDialog .navigation-folder-sites .navigation-card-main:focus-visible {
+  background: transparent;
+}
+#navigationDialog .navigation-folder-sites .navigation-site-icon {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#navigationDialog .navigation-folder-actions {
+  gap: 8px;
+  padding-top: 10px;
+}
+#navigationDialog .navigation-folder-actions > button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink);
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-save-button {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--primary);
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-dissolve-button {
+  color: var(--danger);
+}
+#navigationDialog .navigation-folder-actions > button:hover,
+#navigationDialog .navigation-folder-actions > button:focus-visible {
+  border-color: color-mix(in srgb, var(--ink) 22%, var(--line));
+  background: var(--panel-2);
+  transform: none;
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-save-button:hover,
+#navigationDialog .navigation-folder-actions .navigation-folder-save-button:focus-visible {
+  color: var(--primary);
 }
