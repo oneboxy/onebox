@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.653';
+const APP_VERSION = '2.18.654';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3685,9 +3685,9 @@ function renderNavigationAddDialog(folderId = '', site = null) {
 function renderNavigationFolderDialog(folderId = '') {
   const dialog = $('#navigationDialog'); const folder = navigationFindFolder(folderId); if (!dialog || !folder) return;
   const children = folder.children.length ? folder.children.map((site, index) => navigationItemMarkup(site, index, folder.id)).join('') : '<p class="empty compact">' + escapeHtml(t('navigationFolderEmpty')) + '</p>';
-  const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l3 3v13H4V5a1 1 0 0 1 1-1Z"/><path d="M8 4v6h8V4M8 20v-7h8v7"/></svg>';
-  const addIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
-  const ungroupIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4h4l2 2H18a2 2 0 0 1 2 2v1"/><path d="M3 10h10.5a2 2 0 0 1 1.9 2.6l-.9 3A2 2 0 0 1 12.6 17H5a2 2 0 0 1-2-2v-5Z"/><path d="M16 13h5m-2.5-2.5L21 13l-2.5 2.5"/></svg>';
+  const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg>';
+  const addIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>';
+  const ungroupIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8V6.5A1.5 1.5 0 0 1 5 5h4l2 2h7.5A1.5 1.5 0 0 1 20 8.5V10M3.5 10.5h9.8a1.7 1.7 0 0 1 1.6 2.2l-.8 2.6a1.7 1.7 0 0 1-1.6 1.2H5a1.5 1.5 0 0 1-1.5-1.5v-4.5Z"/><path d="M16 14h5m-2.5-2.5L21 14l-2.5 2.5"/></svg>';
   dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-folder-dialog-card" role="dialog" aria-modal="true"><div class="navigation-folder-dialog-toolbar"><strong class="navigation-folder-dialog-title">' + escapeHtml(t('navigationFolderEdit')) + '</strong><button class="icon-btn small navigation-folder-close-button" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationFolderForm" class="navigation-folder-form"><div class="field navigation-folder-name-field"><input id="navigationFolderName" name="name" type="text" maxlength="30" value="' + escapeHtml(folder.name) + '" aria-label="' + escapeHtml(t('navigationFolderName')) + '" required></div><div class="navigation-folder-sites">' + children + '</div><div class="navigation-folder-actions"><button class="primary navigation-folder-save-button" type="submit">' + saveIcon + '<span>' + escapeHtml(t('navigationSaveShort')) + '</span></button><button class="secondary navigation-folder-add-button" type="button" data-navigation-add-in-folder aria-label="' + escapeHtml(t('navigationFolderAdd')) + '" title="' + escapeHtml(t('navigationFolderAdd')) + '">' + addIcon + '<span>' + escapeHtml(t('navigationFolderAddShort')) + '</span></button><button class="secondary navigation-folder-dissolve-button" type="button" data-navigation-delete-folder aria-label="' + escapeHtml(t('navigationFolderDelete')) + '" title="' + escapeHtml(t('navigationFolderDelete')) + '">' + ungroupIcon + '<span>' + escapeHtml(t('navigationFolderDeleteShort')) + '</span></button></div></form></div>';
   dialog.hidden = false;
 }
