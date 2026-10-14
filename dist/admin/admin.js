@@ -122,7 +122,7 @@
 
   function showSetupError(message) {
     $('#apiPanel').hidden = false;
-    $('#apiPanel').innerHTML = '<strong>当前使用个人 Gist 存储</strong><br>' + escape(message) + '<br><small>每个 GitHub 用户管理自己的 Gist，因此后台暂不提供跨用户查看、编辑、导出或删除。OneBox 不会把个人数据写入 Cloudflare。</small>';
+    $('#apiPanel').innerHTML = '<strong>Cloudflare 后台服务暂不可用</strong><br>' + escape(message) + '<br><small>完成 Worker 部署并在 reader-sync-config.js 配置 Worker 地址后，可使用 D1 管理账号数据、使用 R2 保存卡包图片。书籍原件和封面仍保存在用户自己的 GitHub Gist。</small>';
     $('#loginPanel').hidden = true;
     $('#appContent').hidden = true;
   }
@@ -156,7 +156,7 @@
     window.addEventListener('offline', setOnline);
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
     if (!navigator.onLine) return;
-    if (!API) return showSetupError('个人数据同步已改为保存到各自的 GitHub 秘密 Gist，当前没有集中式管理接口。请在 OneBox「我的 → 账号」管理自己的同步。');
+    if (!API) return showSetupError('Worker 地址为空。部署 Cloudflare Worker 后，把 workers.dev 地址写入 reader-sync-config.js。');
     try {
       const me = await api('/v1/admin/me');
       state.admin = me.admin;
