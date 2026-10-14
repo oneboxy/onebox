@@ -16983,3 +16983,76 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   cursor: not-allowed;
   opacity: .52;
 }
+
+
+/* 2.18.649: give the mascot briefing a clear speech-bubble shape and calmer content groups. */
+.onebox-mascot-cloud {
+  border-radius: 26px;
+  padding: 18px 17px 16px;
+}
+.onebox-mascot-cloud::before {
+  display: none;
+}
+.onebox-mascot-cloud::after {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 0;
+  right: 26px;
+  bottom: -8px;
+  width: 16px;
+  height: 16px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 4px 0;
+  background: inherit;
+  filter: drop-shadow(2px 3px 2px color-mix(in srgb, var(--ink) 8%, transparent));
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+#oneboxMascotRoot[data-panel-side="left"] .onebox-mascot-cloud::after {
+  right: auto;
+  left: 26px;
+}
+.onebox-mascot-cloud-head {
+  align-items: center;
+}
+.onebox-mascot-cloud-story {
+  display: grid;
+  gap: 10px;
+  margin-top: 15px;
+}
+.onebox-mascot-weather-inline {
+  padding: 0 0 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+}
+.onebox-mascot-poem {
+  margin: 0;
+}
+.onebox-mascot-poem-head {
+  margin-bottom: 3px;
+  font-size: 10px;
+  line-height: 1.3;
+}
+.onebox-mascot-poem blockquote {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.onebox-mascot-poem figcaption {
+  margin-top: 4px;
+  font-size: 9px;
+}
+.onebox-mascot-reading-line {
+  margin-top: 0;
+  padding-top: 10px;
+}
+.onebox-mascot-cloud-actions {
+  gap: 8px;
+  margin-top: 13px;
+}
+.onebox-mascot-action-row {
+  gap: 6px;
+}
+.onebox-mascot-action-row-interactions {
+  gap: 5px;
+}
