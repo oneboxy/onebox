@@ -17165,7 +17165,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.654: highlight changed JSON values and show paired source lines. */
+/* 2.18.655: highlight changed JSON values and show paired source lines. */
 .dev-code-editor.dev-compare-editor { grid-template-columns: 46px minmax(0, 1fr); }
 .dev-compare-editor .dev-code-input-wrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .dev-compare-editor .dev-code-highlight {
@@ -17250,7 +17250,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 .dev-compare-diff-list { min-height: 0; flex: 1 1 auto; }
 
 
-/* 2.18.654: lighten the folder editor and use concise icon actions. */
+/* 2.18.655: lighten the folder editor and use concise icon actions. */
 #navigationDialog .navigation-folder-dialog-card {
   padding: 14px 16px 16px;
   border-color: color-mix(in srgb, var(--line) 88%, transparent);
@@ -17367,7 +17367,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.654: align folder site icons and unify the folder action controls. */
+/* 2.18.655: align folder site icons and unify the folder action controls. */
 #navigationDialog .navigation-folder-name-field { margin-bottom: 10px; }
 #navigationDialog .navigation-folder-name-field input { margin: 0; }
 #navigationDialog .navigation-folder-sites .navigation-card {
@@ -17441,7 +17441,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.654: remove the extra frame around folder contents and soften actions. */
+/* 2.18.655: remove the extra frame around folder contents and soften actions. */
 #navigationDialog .navigation-folder-sites .navigation-card {
   min-height: 98px;
   border: 0;
@@ -17491,4 +17491,226 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 #navigationDialog .navigation-folder-actions .navigation-folder-save-button:hover,
 #navigationDialog .navigation-folder-actions .navigation-folder-save-button:focus-visible {
   color: var(--primary);
+}
+
+
+/* 2.18.655: make every developer tool usable in a narrow phone viewport. */
+@media (max-width: 760px) {
+  body.dev-tools-fullscreen { overflow: hidden; }
+  body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
+    position: fixed;
+    inset: var(--dev-fullscreen-top, calc(var(--app-header-height) + 4px)) 0 0;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    transform: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 10px calc(18px + env(safe-area-inset-bottom));
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    gap: 2px;
+    margin: 0 0 10px;
+    padding: 0 0 6px;
+    overflow: visible;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--panel);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 7px 2px;
+    border-radius: 8px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab.active {
+    background: color-mix(in srgb, var(--primary) 7%, var(--panel));
+    box-shadow: none;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-fullscreen-button { display: none; }
+
+  .dev-tools-page.dev-is-fullscreen .dev-tools-body,
+  .dev-tools-page.dev-is-fullscreen .dev-current-tool {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-editor-grid,
+  .dev-tools-page.dev-is-fullscreen .dev-compare-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-pane {
+    width: 100%;
+    min-width: 0;
+    padding: 10px;
+    border-radius: 12px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-pane-head {
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-pane-actions {
+    max-width: calc(100% - 44px);
+    gap: 5px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-action {
+    min-height: 32px;
+    padding-inline: 8px;
+    font-size: 11px;
+  }
+
+  .dev-tools-page.dev-is-fullscreen .dev-code-editor,
+  .dev-tools-page.dev-is-fullscreen .dev-text-editor,
+  .dev-tools-page.dev-is-fullscreen .dev-json-tree,
+  .dev-tools-page.dev-is-fullscreen .dev-json-empty {
+    width: 100%;
+    height: clamp(220px, 38dvh, 320px);
+    min-height: 220px;
+    max-height: 320px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-code-editor {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-code-editor.dev-editor-with-lines,
+  .dev-tools-page.dev-is-fullscreen .dev-code-input,
+  .dev-tools-page.dev-is-fullscreen .dev-text-editor,
+  .dev-tools-page.dev-is-fullscreen .dev-plain-input,
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp input,
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp select {
+    font-size: 16px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-line-numbers {
+    padding-inline: 3px 5px;
+    font-size: 16px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-json-tree,
+  .dev-tools-page.dev-is-fullscreen .dev-json-empty {
+    height: auto;
+    min-height: 170px;
+    max-height: 38dvh;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-json-empty {
+    display: grid;
+    align-content: center;
+    padding: 16px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-output-pane,
+  .dev-tools-page.dev-is-fullscreen .dev-live-output {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-result-pre {
+    width: 100%;
+    max-height: 38dvh;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-result {
+    grid-column: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-result .dev-live-output {
+    display: block;
+    max-height: 32dvh;
+    overflow: auto;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-list { overflow-x: hidden; }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-row {
+    grid-template-columns: minmax(58px, .72fr) minmax(0, 1fr) 12px minmax(0, 1fr);
+    gap: 4px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-path { font-size: 9px; }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-side { gap: 0; }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-side small { display: none; }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-side code { font-size: 10px; }
+
+  .dev-tools-page.dev-is-fullscreen .dev-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    align-content: start;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-card,
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-output-card {
+    width: 100%;
+    min-width: 0;
+    padding: 10px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-mode {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+    margin: 0 0 12px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-mode button {
+    min-width: 0;
+    min-height: 38px;
+    white-space: normal;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) 100px;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .dev-tools-page.dev-is-fullscreen { padding-inline: 8px; }
+  .dev-tools-page.dev-is-fullscreen .dev-pane { padding: 8px; }
+  .dev-tools-page.dev-is-fullscreen .dev-code-editor { grid-template-columns: 32px minmax(0, 1fr); }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-row {
+    grid-template-columns: minmax(50px, .7fr) minmax(0, 1fr) 10px minmax(0, 1fr);
+    gap: 3px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-compare-diff-side code { font-size: 9px; }
 }
