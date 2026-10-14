@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.641';
+const APP_VERSION = '2.18.642';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3454,7 +3454,12 @@ function homeSourceTabsMarkup() {
   return footprintTab + sourceTabs;
 }
 function homeSourcePickerMarkup() {
-  const options = homeTabEntries().map((entry) => {
+  const entries = homeTabEntries();
+  const orderedEntries = [
+    ...entries.filter((entry) => !homeTabIsVisible(entry.id)),
+    ...entries.filter((entry) => homeTabIsVisible(entry.id))
+  ];
+  const options = orderedEntries.map((entry) => {
     const selected = homeTabIsVisible(entry.id);
     const actionLabel = selected ? t('homeSourceRemove') : t('homeSourceAdd');
     const actionIcon = selected ? '<path d="M6 12h12"/>' : '<path d="M12 6v12M6 12h12"/>';
