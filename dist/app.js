@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.655';
+const APP_VERSION = '2.18.656';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -11571,7 +11571,7 @@ function render() {
   applyLanguage();
   if (state.section === 'home') loadHomeFeeds();
   const developerFullscreen = state.section === 'tools' && state.tool === 'dev';
-  nav.hidden = state.section !== 'tools' || (developerFullscreen && (!desktopPageTabs || !window.matchMedia('(min-width: 761px)').matches));
+  nav.hidden = state.section !== 'tools';
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
   workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
