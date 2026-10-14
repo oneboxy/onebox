@@ -17056,3 +17056,110 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 .onebox-mascot-action-row-interactions {
   gap: 5px;
 }
+
+
+/* 2.18.650: make the timestamp converter compact, complete, and easy to scan. */
+.dev-workbench.dev-timestamp {
+  display: grid;
+  grid-template-columns: minmax(300px, .9fr) minmax(0, 1.35fr);
+  align-items: start;
+  align-content: start;
+  gap: clamp(16px, 2vw, 28px);
+}
+.dev-workbench.dev-timestamp > .dev-pane {
+  height: auto !important;
+  min-height: 0;
+  align-self: start;
+}
+.dev-timestamp-card,
+.dev-timestamp-output-card { padding: 16px 18px; }
+.dev-timestamp .dev-pane-head { margin-bottom: 14px; }
+.dev-timestamp .dev-pane-head h3 { font-size: 13px; }
+.dev-timestamp .dev-pane-actions { gap: 7px; }
+.dev-timestamp-mode {
+  width: min(100%, 380px);
+  margin: 0 0 18px;
+  padding: 3px;
+  border-radius: 11px;
+}
+.dev-timestamp-mode button { min-height: 34px; font-size: 11px; }
+.dev-timestamp-field { display: grid; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 700; }
+.dev-timestamp-field > span { padding-left: 1px; }
+.dev-timestamp-field small { color: var(--muted); font-size: 11px; font-weight: 400; line-height: 1.55; }
+.dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) minmax(120px, 150px); gap: 8px; }
+.dev-timestamp-input-row .dev-plain-input,
+.dev-timestamp-field > .dev-plain-input { min-height: 44px; font-size: 13px; }
+.dev-timestamp-field .dev-date-input { margin: 0; }
+.dev-timestamp-results { display: grid; }
+.dev-timestamp-result-row {
+  display: grid;
+  grid-template-columns: minmax(145px, .36fr) minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 12px;
+  min-height: 45px;
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.dev-timestamp-result-row:last-child { border-bottom: 0; }
+.dev-timestamp-result-label { color: var(--muted); font-size: 11px; }
+.dev-timestamp-result-row code {
+  min-width: 0;
+  color: var(--ink);
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+.dev-timestamp-result-row.is-primary code { color: var(--primary); font-size: 13px; font-weight: 700; }
+.dev-timestamp-row-copy {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.dev-timestamp-row-copy:hover,
+.dev-timestamp-row-copy:focus-visible { border-color: var(--line); background: var(--soft); color: var(--primary); outline: none; }
+.dev-timestamp-row-copy svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.dev-timestamp-row-spacer { width: 28px; height: 1px; }
+.dev-timestamp-empty,
+.dev-timestamp-error {
+  display: grid;
+  min-height: 132px;
+  align-content: center;
+  justify-items: start;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--soft) 35%, var(--panel));
+}
+.dev-timestamp-empty strong { color: var(--ink); font-size: 13px; }
+.dev-timestamp-empty span { max-width: 52ch; color: var(--muted); font-size: 11px; }
+.dev-timestamp-error { min-height: 72px; border-style: solid; border-color: color-mix(in srgb, #cc4b4b 28%, var(--line)); color: #c34444; font-size: 12px; }
+@media (min-width: 761px) {
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-timestamp {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    grid-template-rows: auto;
+    align-content: start;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-card,
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-output-card {
+    height: auto !important;
+    min-height: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp .dev-live-output { flex: 0 0 auto; min-height: 0; }
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .dev-timestamp-card, .dev-timestamp-output-card { padding: 14px; }
+  .dev-timestamp-mode { width: 100%; margin-bottom: 14px; }
+  .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 118px; }
+  .dev-timestamp-result-row { grid-template-columns: minmax(92px, .34fr) minmax(0, 1fr) 28px; gap: 7px; }
+  .dev-timestamp-result-label { font-size: 10px; }
+  .dev-timestamp-result-row code { font-size: 11px; }
+}
