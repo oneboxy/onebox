@@ -1955,6 +1955,7 @@ main:not(:has(#workspace[data-tool="home"])):not(:has(#workspace[data-tool="mess
   flex: 0 0 auto;
 }
 .layout-nav:not([hidden]) { display: inline-flex; }
+.desktop-main-nav { flex: 0 0 auto; }
 .layout-nav-button {
   position: relative;
   width: 32px;
@@ -2016,6 +2017,29 @@ html.layout-simple #languageControl { display: none !important; }
   .layout-nav { gap: 2px; }
   .layout-nav-button { width: 30px; min-width: 30px; height: 30px; border-radius: 9px; }
   .layout-nav-icon, .layout-nav-icon svg { width: 17px; height: 17px; }
+  .desktop-main-nav { display: none !important; }
+}
+
+/* On desktop, keep Home and Tools beside the brand while the secondary
+   destinations stay grouped with the account and notification controls. */
+@media (min-width: 761px) {
+  html.layout-simple .app-header { justify-content: flex-start; }
+  html.layout-simple .desktop-main-nav:not([hidden]) {
+    display: inline-flex;
+    gap: 8px;
+    margin-left: clamp(24px, 4vw, 52px);
+  }
+  html.layout-simple .desktop-main-nav .layout-nav-button {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    border-radius: 11px;
+  }
+  html.layout-simple .desktop-main-nav .layout-nav-icon,
+  html.layout-simple .desktop-main-nav .layout-nav-icon svg { width: 21px; height: 21px; }
+  html.layout-simple #layoutNav [data-section="home"],
+  html.layout-simple #layoutNav [data-section="tools"] { display: none; }
+  html.layout-simple .header-actions { margin-left: auto; }
 }
 
 /* 2.18.25 event dialog: centered, compact and safe for narrow date/time controls. */

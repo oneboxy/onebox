@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   let handlers = null;
-  let lastStatus = { state: 'idle', message: '登录 GitHub 后自动同步到个人 Gist' };
+  let lastStatus = { state: 'idle', message: '书籍原件可同步到个人 GitHub Gist' };
 
   function connected() {
     try { return Boolean(JSON.parse(localStorage.getItem('onebox.github') || '{}').token); } catch { return false; }
@@ -13,7 +13,7 @@
   }
   function queueSync(delay = 1800) {
     if (!connected()) {
-      status({ state: 'idle', message: '登录 GitHub 后自动同步到个人 Gist' });
+      status({ state: 'idle', message: '书籍原件可同步到个人 GitHub Gist' });
       return;
     }
     if (window.OneBoxGithubAutoSync?.enabled && !window.OneBoxGithubAutoSync.enabled()) {
@@ -22,7 +22,7 @@
     }
     const readingEnabled = !handlers?.isEnabled || handlers.isEnabled();
     status(readingEnabled
-      ? { state: navigator.onLine ? 'syncing' : 'offline', message: navigator.onLine ? '书籍与阅读进度同步到 GitHub Gist…' : '离线中，联网后同步到 GitHub Gist' }
+      ? { state: navigator.onLine ? 'syncing' : 'offline', message: navigator.onLine ? '正在同步书籍原件到个人 GitHub Gist…' : '离线中，联网后同步书籍原件' }
       : { state: 'reading-disabled', message: '阅读内容未勾选同步' });
     // The shared Gist can still contain other selected groups when reading is
     // unchecked, so always let the account-wide sync queue run.
@@ -32,7 +32,7 @@
   window.OneBoxReaderCloudSync = {
     configure(nextHandlers) {
       handlers = nextHandlers;
-      status({ state: connected() ? 'idle' : 'idle', message: connected() ? '已连接 GitHub Gist' : '登录 GitHub 后自动同步到个人 Gist' });
+      status({ state: 'idle', message: connected() ? '书籍原件可同步到个人 GitHub Gist' : '连接 GitHub 后可同步书籍原件' });
     },
     queueSync,
     syncNow: () => window.OneBoxGithubAutoSync?.syncNow?.({ restore: true }),
