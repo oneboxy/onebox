@@ -16546,3 +16546,10 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
     background: transparent;
   }
 }
+
+
+/* Fullscreen developer pages begin below the live app header and hide an empty reader sync hint. */
+body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
+  top: var(--dev-fullscreen-top, calc(var(--app-header-height) + 4px));
+}
+.reader-cloud-sync-status:empty { display: none !important; }

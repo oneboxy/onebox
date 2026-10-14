@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.633';
+const APP_VERSION = '2.18.634';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -5349,11 +5349,12 @@ function closeRecentReading() {
 // Reader --------------------------------------------------------------------
 let readerCloudReady = false;
 function readerCloudStatusLabel(status = {}) {
+  if (!state.github.token && (!status.state || status.state === 'idle')) return '';
   const message = String(status.message || '');
-  if (state.language !== 'en') return message || (state.github.token ? '书籍原件同步已开启' : '连接 GitHub 后可同步书籍原件');
-  const labels = { unconfigured: 'Cloud storage is not configured', idle: 'Connect GitHub to sync book originals', syncing: 'Syncing book originals…', success: 'Book originals are synced', offline: 'Offline · will sync when you reconnect', paused: 'Book sync is paused', 'reading-disabled': 'Reading sync is turned off' };
+  if (state.language !== 'en') return message || (state.github.token ? '书籍原件同步已开启' : '');
+  const labels = { unconfigured: 'Cloud storage is not configured', idle: 'Book originals sync is ready', syncing: 'Syncing book originals…', success: 'Book originals are synced', offline: 'Offline · will sync when you reconnect', paused: 'Book sync is paused', 'reading-disabled': 'Reading sync is turned off' };
   if (status.state === 'disabled') return state.language === 'en' ? 'Book sync is paused' : '书籍同步已暂停';
-  return status.state === 'error' ? message : (labels[status.state] || 'Connect GitHub to sync book originals');
+  return status.state === 'error' ? message : (labels[status.state] || '');
 }
 function updateReaderCloudStatus(status) {
   const node = $('#readerCloudSyncStatus');
@@ -8383,12 +8384,47 @@ function developerTool() {
   const fullscreen = '<button type="button" class="dev-fullscreen-button ' + (isFullscreen ? 'active' : '') + '" data-dev-fullscreen aria-pressed="' + String(isFullscreen) + '" aria-label="' + escapeHtml(t(isFullscreen ? 'devExitFullscreen' : 'devFullscreen')) + '" title="' + escapeHtml(t(isFullscreen ? 'devExitFullscreen' : 'devFullscreen')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (isFullscreen ? 'M9 4H4v5M20 9V4h-5M15 20h5v-5M4 15v5h5' : 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5') + '"/></svg></button>';
   return '<section class="dev-tools-page ' + (isFullscreen ? 'dev-is-fullscreen' : '') + '"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + fullscreen + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
 }
+let developerFullscreenScrollSnapshot = null;
+function syncDeveloperFullscreenFrame() {
+  if (!document.body.classList.contains('dev-tools-fullscreen')) {
+    document.body.style.removeProperty('--dev-fullscreen-top');
+    return;
+  }
+  const header = document.querySelector('.app-header');
+  if (!header) return;
+  const headerBottom = Math.max(0, header.getBoundingClientRect().bottom);
+  document.body.style.setProperty('--dev-fullscreen-top', Math.ceil(headerBottom + 4) + 'px');
+}
 function toggleDeveloperFullscreen(force) {
   const active = typeof force === 'boolean' ? force : !state.devTools.fullscreen;
+  if (active === state.devTools.fullscreen) return;
+  const main = document.querySelector('main');
+  const restore = active ? null : developerFullscreenScrollSnapshot;
+  if (active) {
+    developerFullscreenScrollSnapshot = { x: window.scrollX || 0, y: window.scrollY || 0, mainTop: main?.scrollTop || 0 };
+    window.scrollTo(0, 0);
+    if (main) main.scrollTop = 0;
+  } else {
+    developerFullscreenScrollSnapshot = null;
+    document.body.style.removeProperty('--dev-fullscreen-top');
+  }
   state.devTools.fullscreen = active;
   saveDevTools();
   render();
+  requestAnimationFrame(() => {
+    const currentMain = document.querySelector('main');
+    if (active) {
+      window.scrollTo(0, 0);
+      if (currentMain) currentMain.scrollTop = 0;
+      syncDeveloperFullscreenFrame();
+    } else if (restore) {
+      if (currentMain) currentMain.scrollTop = restore.mainTop;
+      window.scrollTo(restore.x, restore.y);
+    }
+  });
 }
+window.addEventListener('resize', syncDeveloperFullscreenFrame, { passive: true });
+window.visualViewport?.addEventListener('resize', syncDeveloperFullscreenFrame, { passive: true });
 function runDeveloperAction(action, sourceEvent = null) {
   const dev = state.devTools;
   if (action === 'json-example' || action === 'json-a-example' || action === 'json-b-example') {
@@ -11300,7 +11336,7 @@ function render() {
   }
   if (state.section === 'tools' && state.tool === 'calendar') ensureHolidayYear(state.month.getFullYear());
   renderBottomNav();
-  requestAnimationFrame(() => { updateToolTabOverflowControls(); focusActiveToolTab(false); });
+  requestAnimationFrame(() => { updateToolTabOverflowControls(); focusActiveToolTab(false); syncDeveloperFullscreenFrame(); });
   updateNotificationBadge();
   syncMascotContext();
   if (state.recentReadingOpen) renderRecentReading();
