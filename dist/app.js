@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.631';
+const APP_VERSION = '2.18.632';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8234,7 +8234,7 @@ function devJsonTreeNode(value, path = '$', label = '', depth = 0, trailingComma
   return '<div class="dev-json-node">' + openLine + '<div class="dev-json-children">' + children + '</div><div class="dev-json-line dev-json-close" style="--dev-depth:' + depth + '"><span class="dev-json-toggle-placeholder"></span><span class="dev-json-bracket">' + close + comma + '</span></div></div>';
 }
 function renderDeveloperJsonTree() {
-  if (!state.devTools.formatOutput) return '<div class="dev-json-empty">' + escapeHtml(t('devOutput')) + '</div>';
+  if (!state.devTools.formatOutput) return '<div class="dev-json-empty">' + (state.language === 'en' ? 'Formatted JSON will appear here' : '格式化结果会显示在这里') + '</div>';
   try { return '<div class="dev-json-tree" role="tree">' + devJsonTreeNode(JSON.parse(state.devTools.formatOutput)) + '</div>'; } catch { return '<pre class="dev-result-pre">' + escapeHtml(state.devTools.formatOutput) + '</pre>'; }
 }
 function collectDeveloperJsonPaths(value, path = '$', output = []) {
@@ -8293,11 +8293,13 @@ function devRecordDetail(kind, item) {
 }
 function devHistoryToggle(kind) {
   const records = state.devTools.records[kind] || [];
+  if (!records.length) return '';
   const open = state.devTools.historyOpen === true;
   return '<div class="dev-history-toggle-wrap"><button class="display-history-toggle dev-history-toggle" type="button" data-toggle-dev-history aria-expanded="' + String(open) + '" aria-label="' + escapeHtml(t('devRecords')) + '" title="' + escapeHtml(t('devRecords')) + '">' + devHistoryIcon() + '</button><span class="dev-history-count">' + records.length + '</span></div>';
 }
 function devHistoryContent(kind) {
   const records = state.devTools.records[kind] || [];
+  if (!records.length) return '';
   const list = records.length ? records.map((item) => '<div class="swipe-row dev-history-swipe-row" data-swipe-row><button class="dev-record history-item swipe-content" type="button" data-dev-record-kind="' + kind + '" data-dev-record="' + escapeHtml(item.id) + '" title="' + escapeHtml(devRecordDetail(kind, item)) + '"><strong>' + escapeHtml(devRecordLabel(kind, item)) + '</strong><small>' + escapeHtml(devRecordPreview(kind, item)) + '</small></button><button class="swipe-delete" data-delete-dev-record-kind="' + kind + '" data-delete-dev-record="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>').join('') : '<p class="dev-history-empty">' + t('devNoRecords') + '</p>';
   const open = state.devTools.historyOpen === true;
   return '<div class="dev-history-content" ' + (open ? '' : 'hidden') + '><div class="dev-history-head"><strong>' + t('recentCalculations') + '</strong><button class="text-btn" data-clear-dev-records data-dev-record-kind="' + kind + '" ' + (records.length ? '' : 'disabled') + '>' + t('clear') + '</button></div><div class="dev-record-list">' + list + '</div></div>';
@@ -8307,9 +8309,10 @@ function devOutputPaneHead(kind, title, actions = '') {
 }
 function renderDeveloperJsonFormat() {
   const dev = state.devTools;
+  const outputActions = dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '';
   return '<div class="dev-workbench dev-json-format"><div class="dev-editor-grid">' +
     '<section class="dev-pane">' + devPaneHead(t('devInput'), devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-example', t('devExample')) + devActionButton('json-clear', t('devClear'))) + '<textarea class="dev-code-editor" data-dev-field="formatInput" spellcheck="false" placeholder="{\n  &quot;name&quot;: &quot;OneBox&quot;\n}">' + escapeHtml(dev.formatInput) + '</textarea></section>' +
-    '<section class="dev-pane dev-output-pane">' + devOutputPaneHead('json-format', t('devOutput'), devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy'))) + devHistoryContent('json-format') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + '</section>' +
+    '<section class="dev-pane dev-output-pane">' + devOutputPaneHead('json-format', t('devOutput'), outputActions) + devHistoryContent('json-format') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + '</section>' +
     '</div></div>';
 }
 function renderDeveloperCompare() {
@@ -8348,7 +8351,7 @@ function syncDeveloperTimestampOutput() {
 }
 function developerLiveOutputMarkup() {
   const dev = state.devTools;
-  if (dev.active === 'json-format') return renderDeveloperJsonTree() + devStatus(dev.formatStatus, dev.formatStatus.startsWith(t('devInvalid')));
+  if (dev.active === 'json-format') return renderDeveloperJsonTree() + (String(dev.formatInput || '').trim() ? devStatus(dev.formatStatus, dev.formatStatus.startsWith(t('devInvalid'))) : '');
   if (dev.active === 'json-compare') return '<pre class="dev-result-pre">' + escapeHtml(dev.compareOutput || t('devCompare')) + '</pre>' + devStatus(dev.compareStatus, dev.compareStatus.startsWith(t('devInvalid')));
   if (dev.active === 'text-stats') return '<div class="dev-stat-grid">' + renderDeveloperStatsCards(dev.textOutput || developerTextStats(dev.textInput)) + '</div>';
   return '<pre class="dev-result-pre">' + escapeHtml(dev.timestampOutput || t('devOutput')) + '</pre>' + devStatus(dev.timestampStatus, dev.timestampStatus.includes(state.language === 'en' ? 'valid' : '有效'));
@@ -11276,7 +11279,7 @@ function render() {
   applyLanguage();
   if (state.section === 'home') loadHomeFeeds();
   const developerFullscreen = state.section === 'tools' && state.tool === 'dev' && state.devTools.fullscreen === true;
-  nav.hidden = state.section !== 'tools' || developerFullscreen;
+  nav.hidden = state.section !== 'tools' || (developerFullscreen && (!desktopPageTabs || !window.matchMedia('(min-width: 761px)').matches));
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
   workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
