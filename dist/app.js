@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.650';
+const APP_VERSION = '2.18.651';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8356,9 +8356,48 @@ function developerJsonLineNumbers(value) {
   const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
   return Array.from({ length: count }, (_, index) => index + 1).join('\n');
 }
-function developerJsonEditor(field, value, placeholder) {
-  return '<div class="dev-code-editor dev-editor-with-lines"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div>';
+function developerJsonLineNumberMarkup(value, highlightedLines = new Set()) {
+  const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
+  return Array.from({ length: count }, (_, index) => '<span class="dev-line-number ' + (highlightedLines.has(index + 1) ? 'is-diff' : '') + '">' + (index + 1) + '</span>').join('\n');
 }
+function developerJsonHighlightMarkup(value, ranges = []) {
+  const source = String(value ?? '');
+  const merged = ranges.filter((item) => item && item.end > item.start).map((item) => [item.start, item.end]).sort((a, b) => a[0] - b[0]).reduce((output, range) => {
+    const previous = output[output.length - 1];
+    if (previous && range[0] <= previous[1]) previous[1] = Math.max(previous[1], range[1]);
+    else output.push(range);
+    return output;
+  }, []);
+  let cursor = 0;
+  let markup = '';
+  merged.forEach(([rangeStart, rangeEnd]) => {
+    markup += escapeHtml(source.slice(cursor, rangeStart)) + '<span class="dev-json-diff-mark">' + escapeHtml(source.slice(rangeStart, rangeEnd)) + '</span>';
+    cursor = rangeEnd;
+  });
+  return markup + escapeHtml(source.slice(cursor)) + (source.endsWith('\n') ? ' ' : '');
+}
+function developerJsonEditor(field, value, placeholder, compareResult = null) {
+  const isCompare = field === 'compareLeft' || field === 'compareRight';
+  if (!isCompare) return '<div class="dev-code-editor dev-editor-with-lines"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div>';
+  const side = field === 'compareLeft' ? 'left' : 'right';
+  const result = compareResult || developerCompareResult();
+  return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
+}
+function syncDeveloperCompareEditor(editor, result = developerCompareResult(), refreshMarkup = true) {
+  if (!editor?.matches?.('[data-dev-field="compareLeft"], [data-dev-field="compareRight"]')) return;
+  const side = editor.dataset.devField === 'compareLeft' ? 'left' : 'right';
+  const host = editor.closest('.dev-code-editor');
+  const gutter = host?.querySelector('[data-dev-line-numbers]');
+  const highlight = host?.querySelector('[data-dev-code-highlight]');
+  if (refreshMarkup && gutter) gutter.innerHTML = developerJsonLineNumberMarkup(editor.value, result.lines[side]);
+  if (refreshMarkup && highlight) highlight.innerHTML = developerJsonHighlightMarkup(editor.value, result.ranges[side]);
+  if (highlight) highlight.style.transform = 'translate(' + (-editor.scrollLeft) + 'px, ' + (-editor.scrollTop) + 'px)';
+  if (gutter) gutter.scrollTop = editor.scrollTop;
+}
+function syncDeveloperCompareEditors(result = developerCompareResult()) {
+  workspace.querySelectorAll('[data-dev-field="compareLeft"], [data-dev-field="compareRight"]').forEach((editor) => syncDeveloperCompareEditor(editor, result));
+}
+
 function renderDeveloperJsonFormat() {
   const dev = state.devTools;
   const outputActions = dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '';
@@ -8369,11 +8408,15 @@ function renderDeveloperJsonFormat() {
 }
 function renderDeveloperCompare() {
   const dev = state.devTools;
+  const comparison = developerCompareResult();
+  dev.compareOutput = comparison.output;
+  dev.compareStatus = comparison.status;
   return '<div class="dev-workbench dev-json-compare"><div class="dev-compare-grid">' +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }') + '</section>' +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }') + '</section>' +
-    '</div><section class="dev-pane dev-compare-result">' + devOutputPaneHead('json-compare', t('devOutput'), devActionButton('dev-copy-output', t('devCopy'))) + devHistoryContent('json-compare') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div></section></div>';
+    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' +
+    '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }', comparison) + '</section>' +
+    '</div><section class="dev-pane dev-compare-result">' + devOutputPaneHead('json-compare', t('devOutput'), devActionButton('dev-copy-output', t('devCopy'))) + devHistoryContent('json-compare') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup(comparison) + '</div></section></div>';
 }
+
 function renderDeveloperStatsCards(stats) {
   return [['characters', t('devCharacters')], ['nonSpace', t('devNonSpace')], ['lines', t('devLines')], ['chinese', t('devChinese')], ['words', t('devWords')], ['paragraphs', t('devParagraphs')]].map(([key, label]) => '<div class="dev-stat-card"><strong>' + Number(stats[key] || 0).toLocaleString() + '</strong><span>' + label + '</span></div>').join('');
 }
@@ -8394,24 +8437,183 @@ function renderDeveloperTimestamp() {
 }
 function developerCompareResult() {
   const dev = state.devTools;
-  if (!String(dev.compareLeft || '').trim() || !String(dev.compareRight || '').trim()) return { output: '', status: '' };
+  const leftSource = String(dev.compareLeft || '');
+  const rightSource = String(dev.compareRight || '');
+  if (!leftSource.trim() || !rightSource.trim()) return { output: '', status: '', changes: [], lines: { left: new Set(), right: new Set() }, ranges: { left: [], right: [] } };
   try {
-    const left = parseDeveloperJson(dev.compareLeft).value; const right = parseDeveloperJson(dev.compareRight).value; const changes = compareDeveloperJson(left, right);
-    return { output: changes.length ? changes.map((item) => item.path + '\n− ' + item.before + '\n+ ' + item.after).join('\n\n') : '✓ ' + t('devSame'), status: changes.length ? t('devDifferent').replace('{count}', changes.length) : t('devSame') };
-  } catch (error) { return { output: '', status: t('devInvalid') + (error?.message ? '：' + error.message : '') }; }
+    const left = parseDeveloperJson(leftSource).value;
+    const right = parseDeveloperJson(rightSource).value;
+    const changes = compareDeveloperJson(left, right);
+    const leftRanges = developerJsonPathRanges(leftSource);
+    const rightRanges = developerJsonPathRanges(rightSource);
+    const lines = { left: new Set(), right: new Set() };
+    const ranges = { left: [], right: [] };
+    changes.forEach((item) => {
+      const leftRange = developerJsonFindPathRange(leftRanges, item.path);
+      const rightRange = developerJsonFindPathRange(rightRanges, item.path);
+      item.leftLine = leftRange?.line || 1;
+      item.rightLine = rightRange?.line || 1;
+      [leftRange, rightRange].forEach((range, sideIndex) => {
+        if (!range) return;
+        const side = sideIndex === 0 ? 'left' : 'right';
+        ranges[side].push(range);
+        for (let line = range.line; line <= range.endLine; line += 1) lines[side].add(line);
+      });
+    });
+    const output = changes.length
+      ? changes.map((item) => item.path + '  A:L' + item.leftLine + ' ' + item.before + '  →  B:L' + item.rightLine + ' ' + item.after).join('\n')
+      : '✓ ' + t('devSame');
+    return { output, status: changes.length ? t('devDifferent').replace('{count}', changes.length) : t('devSame'), changes, lines, ranges };
+  } catch (error) {
+    return { output: '', status: t('devInvalid') + (error?.message ? '：' + error.message : ''), changes: [], lines: { left: new Set(), right: new Set() }, ranges: { left: [], right: [] } };
+  }
 }
+function developerJsonPathRanges(rawSource) {
+  const original = String(rawSource ?? '');
+  let source = original;
+  let offsetBase = 0;
+  const fence = source.match(/^\s*```(?:json)?[ \t]*(?:\r?\n)?/i);
+  if (fence) { offsetBase = fence[0].length; source = source.slice(offsetBase); }
+  const trailingFence = source.match(/\s*```\s*$/);
+  if (trailingFence) source = source.slice(0, source.length - trailingFence[0].length);
+  const callback = source.match(/^[\w$]+\s*\(([\s\S]*)\)\s*;?$/);
+  if (callback) {
+    const bodyOffset = source.indexOf(callback[1]);
+    offsetBase += bodyOffset;
+    source = callback[1];
+  }
+  const ranges = new Map();
+  let index = 0;
+  const skipSpace = () => { while (index < source.length && /\s/.test(source[index])) index += 1; };
+  const lineAt = (position) => original.slice(0, Math.max(0, position)).split(/\r\n|\r|\n/).length;
+  const readString = () => {
+    const start = index;
+    if (source[index] !== '"') throw new Error('Expected a JSON key');
+    index += 1;
+    while (index < source.length) {
+      if (source[index] === '\\') { index += 2; continue; }
+      if (source[index++] === '"') break;
+    }
+    return JSON.parse(source.slice(start, index));
+  };
+  const parseValue = (path, keyRange = null) => {
+    skipSpace();
+    const start = index;
+    const char = source[index];
+    let closeStart = start;
+    if (char === '{') {
+      index += 1; skipSpace();
+      while (index < source.length && source[index] !== '}') {
+        const keyStart = index;
+        const key = readString();
+        const keyEnd = index;
+        skipSpace();
+        if (source[index] !== ':') throw new Error('Expected colon');
+        index += 1;
+        parseValue(path + '.' + key, { start: keyStart, end: keyEnd });
+        skipSpace();
+        if (source[index] === ',') { index += 1; skipSpace(); }
+        else if (source[index] !== '}') throw new Error('Expected object separator');
+      }
+      if (source[index] !== '}') throw new Error('Unclosed object');
+      closeStart = index;
+      index += 1;
+    } else if (char === '[') {
+      index += 1; skipSpace();
+      let itemIndex = 0;
+      while (index < source.length && source[index] !== ']') {
+        parseValue(path + '[' + itemIndex + ']');
+        itemIndex += 1;
+        skipSpace();
+        if (source[index] === ',') { index += 1; skipSpace(); }
+        else if (source[index] !== ']') throw new Error('Expected array separator');
+      }
+      if (source[index] !== ']') throw new Error('Unclosed array');
+      closeStart = index;
+      index += 1;
+    } else if (char === '"') {
+      readString();
+    } else {
+      while (index < source.length && !/\s/.test(source[index]) && source[index] !== ',' && source[index] !== ']' && source[index] !== '}') index += 1;
+      if (index === start) throw new Error('Expected JSON value');
+    }
+    const end = index;
+    const absoluteStart = offsetBase + start;
+    const absoluteEnd = offsetBase + end;
+    const absoluteClose = offsetBase + closeStart;
+    const keyStart = offsetBase + (keyRange?.start ?? start);
+    ranges.set(path, { start: absoluteStart, end: absoluteEnd, line: lineAt(absoluteStart), endLine: lineAt(Math.max(absoluteStart, absoluteEnd - 1)), closeStart: absoluteClose, closeLine: lineAt(absoluteClose), keyStart, keyEnd: offsetBase + (keyRange?.end ?? end) });
+  };
+  try { skipSpace(); parseValue('$'); } catch { return ranges; }
+  return ranges;
+}
+
+function developerJsonFindPathRange(pathRanges, path) {
+  let candidate = path;
+  while (candidate && candidate !== '$') {
+    const found = pathRanges.get(candidate);
+    if (found) {
+      if (candidate === path) return found;
+      const point = found.closeStart ?? Math.max(found.start, found.end - 1);
+      return { ...found, start: point, end: point + 1, line: found.closeLine || found.endLine, endLine: found.closeLine || found.endLine };
+    }
+    const arrayStart = candidate.lastIndexOf('[');
+    if (candidate.endsWith(']') && arrayStart >= 0 && /^\d+$/.test(candidate.slice(arrayStart + 1, -1))) candidate = candidate.slice(0, arrayStart);
+    else {
+      const separator = candidate.lastIndexOf('.');
+      candidate = separator > 0 ? candidate.slice(0, separator) : '$';
+    }
+  }
+  const root = pathRanges.get('$');
+  if (!root) return null;
+  const point = root.closeStart ?? Math.max(root.start, root.end - 1);
+  return { ...root, start: point, end: point + 1, line: root.closeLine || root.endLine, endLine: root.closeLine || root.endLine };
+}
+
 function syncDeveloperTimestampOutput() {
   const dev = state.devTools;
   const hasInput = dev.timestampMode === 'date' ? Boolean(dev.timestampDate) : Boolean(String(dev.timestampValue || '').trim());
   if (!hasInput) { dev.timestampOutput = ''; dev.timestampStatus = ''; return; }
   const result = developerTimestampResult(); dev.timestampOutput = result.output; dev.timestampStatus = result.message;
 }
-function developerLiveOutputMarkup() {
+function developerLiveOutputMarkup(comparison = null) {
   const dev = state.devTools;
   if (dev.active === 'json-format') return renderDeveloperJsonTree() + (String(dev.formatInput || '').trim() ? devStatus(dev.formatStatus, dev.formatStatus.startsWith(t('devInvalid'))) : '');
-  if (dev.active === 'json-compare') return '<pre class="dev-result-pre">' + escapeHtml(dev.compareOutput || t('devCompare')) + '</pre>' + devStatus(dev.compareStatus, dev.compareStatus.startsWith(t('devInvalid')));
+  if (dev.active === 'json-compare') return renderDeveloperCompareResult(comparison);
   if (dev.active === 'text-stats') return '<div class="dev-stat-grid">' + renderDeveloperStatsCards(dev.textOutput || developerTextStats(dev.textInput)) + '</div>';
   return renderDeveloperTimestampResult();
+}
+function renderDeveloperCompareResult(comparison = null) {
+  const result = comparison || developerCompareResult();
+  const english = state.language === 'en';
+  if (!result.changes.length) {
+    if (result.status.startsWith(t('devInvalid'))) return '<div class="dev-compare-message is-error" role="alert">' + escapeHtml(result.status) + '</div>';
+    return '<div class="dev-compare-message">' + escapeHtml(result.status || t('devCompare')) + '</div>';
+  }
+  const rows = result.changes.map((item) => {
+    const before = item.before === '∅' ? (english ? 'missing' : '缺失') : item.before;
+    const after = item.after === '∅' ? (english ? 'missing' : '缺失') : item.after;
+    const leftLabel = english ? 'A · line ' + item.leftLine : 'A · 第 ' + item.leftLine + ' 行';
+    const rightLabel = english ? 'B · line ' + item.rightLine : 'B · 第 ' + item.rightLine + ' 行';
+    return '<div class="dev-compare-diff-row"><code class="dev-compare-diff-path" title="' + escapeHtml(item.path) + '">' + escapeHtml(item.path) + '</code><span class="dev-compare-diff-side is-left" title="' + escapeHtml(leftLabel + ': ' + before) + '"><small>' + escapeHtml(leftLabel) + '</small><code>' + escapeHtml(before) + '</code></span><span class="dev-compare-diff-arrow" aria-hidden="true">→</span><span class="dev-compare-diff-side is-right" title="' + escapeHtml(rightLabel + ': ' + after) + '"><small>' + escapeHtml(rightLabel) + '</small><code>' + escapeHtml(after) + '</code></span></div>';
+  }).join('');
+  return '<div class="dev-compare-summary">' + escapeHtml(result.status) + '</div><div class="dev-compare-diff-list">' + rows + '</div>';
+}
+function renderDeveloperCompareResult(comparison = null) {
+  const result = comparison || developerCompareResult();
+  const english = state.language === 'en';
+  if (!result.changes.length) {
+    if (result.status.startsWith(t('devInvalid'))) return '<div class="dev-compare-message is-error" role="alert">' + escapeHtml(result.status) + '</div>';
+    return '<div class="dev-compare-message">' + escapeHtml(result.status || t('devCompare')) + '</div>';
+  }
+  const rows = result.changes.map((item) => {
+    const before = item.before === '∅' ? (english ? 'missing' : '缺失') : item.before;
+    const after = item.after === '∅' ? (english ? 'missing' : '缺失') : item.after;
+    const leftLabel = english ? 'A · line ' + item.leftLine : 'A · 第 ' + item.leftLine + ' 行';
+    const rightLabel = english ? 'B · line ' + item.rightLine : 'B · 第 ' + item.rightLine + ' 行';
+    return '<div class="dev-compare-diff-row"><code class="dev-compare-diff-path" title="' + escapeHtml(item.path) + '">' + escapeHtml(item.path) + '</code><span class="dev-compare-diff-side is-left" title="' + escapeHtml(leftLabel + ': ' + before) + '"><small>' + escapeHtml(leftLabel) + '</small><code>' + escapeHtml(before) + '</code></span><span class="dev-compare-diff-arrow" aria-hidden="true">→</span><span class="dev-compare-diff-side is-right" title="' + escapeHtml(rightLabel + ': ' + after) + '"><small>' + escapeHtml(rightLabel) + '</small><code>' + escapeHtml(after) + '</code></span></div>';
+  }).join('');
+  return '<div class="dev-compare-summary">' + escapeHtml(result.status) + '</div><div class="dev-compare-diff-list">' + rows + '</div>';
 }
 function renderDeveloperTimestampResult() {
   const dev = state.devTools;
@@ -8429,33 +8631,39 @@ function renderDeveloperTimestampResult() {
   }).join('');
   return '<div class="dev-timestamp-results">' + rows + '</div>';
 }
-function refreshDeveloperLiveOutput() {
+function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
   const host = workspace.querySelector('[data-dev-live-output]');
-  if (host) host.innerHTML = developerLiveOutputMarkup();
+  if (host) host.innerHTML = developerLiveOutputMarkup(comparison);
 }
 function updateDeveloperLiveState(field) {
   const dev = state.devTools;
+  let comparison = null;
   if (dev.active === 'json-format' && (field === 'formatInput' || field === 'formatUnescape')) {
     if (!String(dev.formatInput || '').trim()) { dev.formatOutput = ''; dev.formatStatus = ''; dev.formatCollapsed = []; }
     else { const result = formatDeveloperJson(dev.formatInput, dev.formatCompact); dev.formatOutput = result.output; dev.formatStatus = result.message; dev.formatCollapsed = []; }
   } else if (dev.active === 'json-compare' && (field === 'compareLeft' || field === 'compareRight')) {
-    const result = developerCompareResult(); dev.compareOutput = result.output; dev.compareStatus = result.status;
+    const result = developerCompareResult(); comparison = result; dev.compareOutput = result.output; dev.compareStatus = result.status; syncDeveloperCompareEditors(result);
   } else if (dev.active === 'text-stats' && field === 'textInput') {
     dev.textOutput = developerTextStats(dev.textInput);
   } else if (dev.active === 'timestamp' && ['timestampValue', 'timestampUnit', 'timestampDate'].includes(field)) {
     syncDeveloperTimestampOutput();
   }
-  saveDevTools(); refreshDeveloperLiveOutput();
+  saveDevTools(); refreshDeveloperLiveOutput(comparison);
 }
 function syncDeveloperJsonLineNumbers(editor) {
   if (!editor?.matches?.('[data-dev-line-numbered]')) return;
-  const gutter = editor.parentElement?.querySelector('[data-dev-line-numbers]');
+  if (editor.dataset.devField === 'compareLeft' || editor.dataset.devField === 'compareRight') {
+    syncDeveloperCompareEditor(editor, null, false);
+    return;
+  }
+  const gutter = editor.closest('.dev-code-editor')?.querySelector('[data-dev-line-numbers]');
   if (!gutter) return;
   const numbers = developerJsonLineNumbers(editor.value);
   if (gutter.textContent !== numbers) gutter.textContent = numbers;
   gutter.scrollTop = editor.scrollTop;
 }
+
 function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
   const mode = state.devTools.active;
