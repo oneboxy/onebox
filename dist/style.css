@@ -16943,3 +16943,43 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* 2.18.648: soften the mascot panel and remove filled action chips. */
+.onebox-mascot-cloud {
+  border-radius: 24px;
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+.onebox-mascot-cloud::before,
+.onebox-mascot-cloud::after {
+  display: none;
+}
+.onebox-mascot-cloud-actions {
+  gap: 8px;
+  margin-top: 15px;
+}
+.onebox-mascot-cloud-actions button {
+  border-color: color-mix(in srgb, var(--line) 88%, transparent);
+  border-radius: 10px;
+  background: transparent !important;
+  transition: color .16s ease, border-color .16s ease, transform .16s ease;
+}
+.onebox-mascot-cloud-actions button:hover,
+.onebox-mascot-cloud-actions button:focus-visible {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
+  background: transparent !important;
+  color: var(--primary);
+}
+.onebox-mascot-cloud-actions button:hover .onebox-mascot-action-icon,
+.onebox-mascot-cloud-actions button:focus-visible .onebox-mascot-action-icon {
+  color: var(--primary);
+}
+.onebox-mascot-cloud-actions button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: 2px;
+}
+.onebox-mascot-cloud-actions button:disabled {
+  background: transparent !important;
+  cursor: not-allowed;
+  opacity: .52;
+}
