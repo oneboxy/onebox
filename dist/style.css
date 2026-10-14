@@ -17165,7 +17165,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.651: highlight changed JSON values and show paired source lines. */
+/* 2.18.652: highlight changed JSON values and show paired source lines. */
 .dev-code-editor.dev-compare-editor { grid-template-columns: 46px minmax(0, 1fr); }
 .dev-compare-editor .dev-code-input-wrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .dev-compare-editor .dev-code-highlight {
@@ -17248,3 +17248,120 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 @media (max-width: 760px) { .dev-compare-diff-row { min-width: 390px; } }
 
 .dev-compare-diff-list { min-height: 0; flex: 1 1 auto; }
+
+
+/* 2.18.652: lighten the folder editor and use concise icon actions. */
+#navigationDialog .navigation-folder-dialog-card {
+  padding: 14px 16px 16px;
+  border-color: color-mix(in srgb, var(--line) 88%, transparent);
+  border-radius: 20px;
+  box-shadow: 0 18px 52px rgba(18, 24, 38, .2);
+}
+#navigationDialog .navigation-folder-dialog-toolbar {
+  min-height: 34px;
+  margin: -2px -2px 10px;
+}
+#navigationDialog .navigation-folder-dialog-title {
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -.02em;
+}
+#navigationDialog .navigation-folder-name-field { margin-bottom: 12px; }
+#navigationDialog .navigation-folder-name-field label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+#navigationDialog .navigation-folder-name-field input {
+  min-height: 46px;
+  padding: 10px 13px;
+  border-radius: 12px;
+  background: var(--panel);
+}
+#navigationDialog .navigation-folder-sites {
+  grid-template-columns: repeat(auto-fill, minmax(104px, 132px));
+  gap: 10px;
+  margin: 2px 0 12px;
+  padding: 1px;
+}
+#navigationDialog .navigation-folder-sites .navigation-card {
+  min-height: 88px;
+  border-color: color-mix(in srgb, var(--line) 88%, transparent);
+  border-radius: 15px;
+  box-shadow: none;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main {
+  min-height: 86px;
+  gap: 5px;
+  padding: 10px 7px;
+}
+#navigationDialog .navigation-folder-sites .navigation-site-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+#navigationDialog .navigation-folder-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top-color: color-mix(in srgb, var(--line) 78%, transparent);
+}
+#navigationDialog .navigation-folder-actions .primary {
+  display: inline-flex;
+  grid-column: auto;
+  order: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: auto;
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  background: var(--primary);
+  box-shadow: none;
+}
+#navigationDialog .navigation-folder-actions .primary svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-icon-action {
+  display: inline-grid;
+  flex: 0 0 42px;
+  place-items: center;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  padding: 0;
+  border-color: color-mix(in srgb, var(--ink) 15%, var(--line));
+  border-radius: 11px;
+  background: transparent;
+  color: var(--muted);
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-icon-action:hover {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+#navigationDialog .navigation-folder-actions .navigation-danger-button {
+  color: var(--danger);
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-icon-action svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+@media (max-width: 600px) {
+  #navigationDialog .navigation-folder-dialog-card { padding: 12px 14px 14px; }
+  #navigationDialog .navigation-folder-sites { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); }
+}
