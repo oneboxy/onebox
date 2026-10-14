@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.636';
+const APP_VERSION = '2.18.637';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8380,11 +8380,8 @@ function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
   const mode = state.devTools.active;
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : renderDeveloperTimestamp();
-  const isFullscreen = state.devTools.fullscreen === true;
-  const fullscreen = '<button type="button" class="dev-fullscreen-button ' + (isFullscreen ? 'active' : '') + '" data-dev-fullscreen aria-pressed="' + String(isFullscreen) + '" aria-label="' + escapeHtml(t(isFullscreen ? 'devExitFullscreen' : 'devFullscreen')) + '" title="' + escapeHtml(t(isFullscreen ? 'devExitFullscreen' : 'devFullscreen')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (isFullscreen ? 'M9 4H4v5M20 9V4h-5M15 20h5v-5M4 15v5h5' : 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5') + '"/></svg></button>';
-  return '<section class="dev-tools-page ' + (isFullscreen ? 'dev-is-fullscreen' : '') + '"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + fullscreen + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
+  return '<section class="dev-tools-page dev-is-fullscreen"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
 }
-let developerFullscreenScrollSnapshot = null;
 function syncDeveloperFullscreenFrame() {
   if (!document.body.classList.contains('dev-tools-fullscreen')) {
     document.body.style.removeProperty('--dev-fullscreen-top');
@@ -8395,36 +8392,6 @@ function syncDeveloperFullscreenFrame() {
   const headerBottom = Math.max(0, header.getBoundingClientRect().bottom);
   document.body.style.setProperty('--dev-fullscreen-top', Math.ceil(headerBottom + 4) + 'px');
 }
-function toggleDeveloperFullscreen(force) {
-  const active = typeof force === 'boolean' ? force : !state.devTools.fullscreen;
-  if (active === state.devTools.fullscreen) return;
-  const main = document.querySelector('main');
-  const restore = active ? null : developerFullscreenScrollSnapshot;
-  if (active) {
-    developerFullscreenScrollSnapshot = { x: window.scrollX || 0, y: window.scrollY || 0, mainTop: main?.scrollTop || 0 };
-    window.scrollTo(0, 0);
-    if (main) main.scrollTop = 0;
-  } else {
-    developerFullscreenScrollSnapshot = null;
-    document.body.style.removeProperty('--dev-fullscreen-top');
-  }
-  state.devTools.fullscreen = active;
-  saveDevTools();
-  render();
-  requestAnimationFrame(() => {
-    const currentMain = document.querySelector('main');
-    if (active) {
-      window.scrollTo(0, 0);
-      if (currentMain) currentMain.scrollTop = 0;
-      syncDeveloperFullscreenFrame();
-    } else if (restore) {
-      if (currentMain) currentMain.scrollTop = restore.mainTop;
-      window.scrollTo(restore.x, restore.y);
-    }
-  });
-}
-window.addEventListener('resize', syncDeveloperFullscreenFrame, { passive: true });
-window.visualViewport?.addEventListener('resize', syncDeveloperFullscreenFrame, { passive: true });
 function runDeveloperAction(action, sourceEvent = null) {
   const dev = state.devTools;
   if (action === 'json-example' || action === 'json-a-example' || action === 'json-b-example') {
@@ -11314,7 +11281,7 @@ function render() {
   syncHomeFeedLoading();
   applyLanguage();
   if (state.section === 'home') loadHomeFeeds();
-  const developerFullscreen = state.section === 'tools' && state.tool === 'dev' && state.devTools.fullscreen === true;
+  const developerFullscreen = state.section === 'tools' && state.tool === 'dev';
   nav.hidden = state.section !== 'tools' || (developerFullscreen && (!desktopPageTabs || !window.matchMedia('(min-width: 761px)').matches));
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
@@ -13300,7 +13267,6 @@ workspace.addEventListener('click', async (event) => {
     if (collapsed.has(path)) collapsed.delete(path); else collapsed.add(path);
     state.devTools.formatCollapsed = [...collapsed]; saveDevTools(); return render();
   }
-  if (event.target.closest('[data-dev-fullscreen]')) return toggleDeveloperFullscreen();
   if (event.target.closest('[data-toggle-dev-history]')) { state.devTools.historyOpen = !state.devTools.historyOpen; saveDevTools(); return render(); }
   const deleteDevRecord = event.target.closest('[data-delete-dev-record]');
   if (deleteDevRecord) {
