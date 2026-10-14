@@ -17494,21 +17494,45 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.655: make every developer tool usable in a narrow phone viewport. */
+/* 2.18.656: keep the mobile tool rail and app navigation visible on Developer. */
 @media (max-width: 760px) {
   body.dev-tools-fullscreen { overflow: hidden; }
-  body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
-    position: fixed;
-    inset: var(--dev-fullscreen-top, calc(var(--app-header-height) + 4px)) 0 0;
-    width: auto;
+  body.dev-tools-fullscreen main:has(#workspace[data-tool="dev"]) {
+    height: calc(100dvh - 112px);
+    max-height: calc(100dvh - 112px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(94px + env(safe-area-inset-bottom));
+  }
+  body.dev-tools-fullscreen #pageSwipeStage:has(> #workspace[data-tool="dev"]) {
     height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  body.dev-tools-fullscreen #workspace[data-tool="dev"] {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
     max-width: none;
     max-height: none;
     transform: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
+    overscroll-behavior: auto;
+    -webkit-overflow-scrolling: auto;
     padding: 8px 10px calc(18px + env(safe-area-inset-bottom));
     border: 0;
     border-radius: 0;
@@ -17516,9 +17540,9 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   }
 
   .dev-tools-page.dev-is-fullscreen .dev-mode-tabs {
-    position: sticky;
-    top: 0;
-    z-index: 5;
+    position: relative;
+    top: auto;
+    z-index: auto;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     width: 100%;
