@@ -18100,3 +18100,66 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   .ticket-wallet-map-toolbar { gap: 8px; }
   .ticket-wallet-map-count { font-size: 10px; }
 }
+
+
+/* Keep the ticket wallet controls on one compact row on desktop. */
+@media (min-width: 761px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "breadcrumb filters actions";
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb { grid-area: breadcrumb; }
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+    grid-area: filters;
+    display: block;
+    min-width: 0;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll {
+    width: 100%;
+    height: 100%;
+    padding: 0 2px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar { height: 100%; gap: 4px; }
+  body:has(.ticket-wallet-page) .ticket-wallet-head-actions {
+    grid-area: actions;
+    margin-left: 0;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "breadcrumb actions" "filters filters";
+    align-items: center;
+    gap: 8px 10px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb { grid-area: breadcrumb; }
+  body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+    grid-area: filters;
+    width: auto;
+    margin: 0 -14px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-head-actions {
+    grid-area: actions;
+    justify-self: end;
+    margin-left: 0;
+  }
+}
