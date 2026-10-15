@@ -17912,3 +17912,32 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 #toast .toast-close:focus-visible {
   color: var(--ink);
 }
+
+/* 2.18.668: use a reliable typographic close mark for the global toast. */
+#toast .toast-close {
+  position: relative;
+  display: grid !important;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0;
+}
+#toast .toast-close svg { display: none !important; }
+#toast .toast-close::before {
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  content: '×';
+  transform: none;
+  font-family: Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1;
+}
+#toast .toast-close::after { content: none !important; }
