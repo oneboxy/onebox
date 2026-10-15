@@ -17880,3 +17880,35 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 #toast[data-kind="error"] .toast-close:focus-visible {
   color: var(--danger);
 }
+
+/* 2.18.667: keep the toast dismiss icon visible across cached app markup. */
+#toast .toast-close {
+  position: relative;
+  display: grid !important;
+  place-items: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  visibility: visible;
+  opacity: 1;
+  color: var(--muted);
+  font-size: 0;
+}
+#toast .toast-close svg {
+  display: none !important;
+}
+#toast .toast-close::before,
+#toast .toast-close::after {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+}
+#toast .toast-close::before { transform: rotate(45deg); }
+#toast .toast-close::after { transform: rotate(-45deg); }
+#toast .toast-close:hover,
+#toast .toast-close:focus-visible {
+  color: var(--ink);
+}
