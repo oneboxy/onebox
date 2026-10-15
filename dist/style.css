@@ -17760,3 +17760,19 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   background: var(--primary);
   transform: translateX(-50%);
 }
+
+
+/* 2.18.659: keep the native date-time control inside the phone input card. */
+@media (max-width: 760px) {
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-field {
+    width: 100%;
+    min-width: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-field > .dev-date-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
