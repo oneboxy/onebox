@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.657';
+const APP_VERSION = '2.18.658';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4513,6 +4513,7 @@ function ticketWalletCategoryMarkup(records) {
 function selectTicketWalletFilter(type) {
   if (!Object.prototype.hasOwnProperty.call(TICKET_WALLET_CATEGORIES, type)) return;
   ticketWalletMapFocusId = '';
+  ticketWalletMapTypeFilter = '';
   const previousFilterScrollLeft = document.querySelector('.ticket-wallet-filter-scroll')?.scrollLeft || 0;
   state.ticketWalletTypeFilter = type;
   saveTicketWalletTypeFilter();
@@ -4731,8 +4732,15 @@ function ticketWalletFilteredRecords(records) {
   const category = normalizeTicketWalletFilter(state.ticketWalletTypeFilter);
   return category === 'all' ? records : records.filter((record) => ticketWalletCategoryForType(record.type) === category);
 }
+function ticketWalletMapFilteredRecords(records) {
+  return ticketWalletFilteredRecords(records).filter((record) => {
+    if (!ticketWalletMapTypeFilter) return true;
+    if (ticketWalletMapTypeFilter === 'dining' || ticketWalletMapTypeFilter === 'entertainment') return ticketWalletCategoryForType(record.type) === ticketWalletMapTypeFilter;
+    return record.type === ticketWalletMapTypeFilter;
+  });
+}
 function ticketWalletMapRecords(records) {
-  return ticketWalletFilteredRecords(records).filter((record) => TICKET_WALLET_TRAVEL_TYPES.includes(record.type) && record.from && record.to);
+  return ticketWalletMapFilteredRecords(records).filter((record) => TICKET_WALLET_TRAVEL_TYPES.includes(record.type) && record.from && record.to);
 }
 function ticketWalletMapJourneys(records) {
   return ticketWalletJourneys(ticketWalletMapRecords(records)).flatMap((group) => {
@@ -4752,7 +4760,7 @@ function ticketWalletMapPlaceEntry(record) {
   return { key: 'place|' + record.id, location, type: category, group: { key: 'place|' + record.id, from: location, to: '', records: [record] } };
 }
 function ticketWalletMapPlaceEntries(records) {
-  return ticketWalletFilteredRecords(records).map(ticketWalletMapPlaceEntry).filter(Boolean);
+  return ticketWalletMapFilteredRecords(records).map(ticketWalletMapPlaceEntry).filter(Boolean);
 }
 function ticketWalletDisplayRecords(records) {
   const available = new Map(records.map((record) => [record.id, record]));
@@ -4831,7 +4839,101 @@ const TICKET_WALLET_LEAFLET_ASSETS = Object.freeze([
   { css: 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.css', js: 'https://unpkg.com/leaflet@' + TICKET_WALLET_LEAFLET_VERSION + '/dist/leaflet.js' }
 ]);
 const TICKET_WALLET_CITY_COORDINATES = Object.freeze({ 北京: [39.9042, 116.4074], 上海: [31.2304, 121.4737], 苏州: [31.2989, 120.5853], 南京: [32.0603, 118.7969], 杭州: [30.2741, 120.1551], 广州: [23.1291, 113.2644], 深圳: [22.5431, 114.0579], 西安: [34.3416, 108.9398], 成都: [30.5728, 104.0668], 武汉: [30.5928, 114.3055], 青岛: [36.0671, 120.3826], 厦门: [24.4798, 118.0894], 天津: [39.3434, 117.3616], 重庆: [29.5630, 106.5516], 郑州: [34.7466, 113.6254], 济南: [36.6512, 117.1201], 合肥: [31.8206, 117.2272], 福州: [26.0745, 119.2965], 昆明: [25.0389, 102.7183], 长沙: [28.2282, 112.9388], 南昌: [28.6820, 115.8579], 沈阳: [41.8057, 123.4315], 大连: [38.9140, 121.6147], 哈尔滨: [45.8038, 126.5349], 石家庄: [38.0428, 114.5149], 太原: [37.8706, 112.5489], 兰州: [36.0611, 103.8343], 乌鲁木齐: [43.8256, 87.6168], 贵阳: [26.6470, 106.6302], 桂林: [25.2742, 110.2900], 宁波: [29.8683, 121.5440], 无锡: [31.4912, 120.3119], 常州: [31.8107, 119.9737], 嘉兴: [30.7461, 120.7555], 温州: [27.9949, 120.6994], 金华: [29.0895, 119.6495], 徐州: [34.2044, 117.2858], 洛阳: [34.6197, 112.4540], 珠海: [22.2710, 113.5767], 惠州: [23.1115, 114.4152], 海口: [20.0442, 110.1999], 三亚: [18.2528, 109.5119], 拉萨: [29.6500, 91.1000], 呼和浩特: [40.8426, 111.7492], 银川: [38.4872, 106.2309], 西宁: [36.6171, 101.7782] });
-let ticketWalletLeafletPromise = null; let ticketWalletLeafletMap = null; let ticketWalletLeafletMapElement = null; let ticketWalletLeafletPendingElement = null; let ticketWalletLeafletRenderToken = 0; let ticketWalletGeocodeNextAt = 0; let ticketWalletMapViewportContext = null; let ticketWalletMapFocusId = '';
+let ticketWalletLeafletPromise = null; let ticketWalletLeafletMap = null; let ticketWalletLeafletMapElement = null; let ticketWalletLeafletPendingElement = null; let ticketWalletLeafletRenderToken = 0; let ticketWalletGeocodeNextAt = 0; let ticketWalletMapViewportContext = null; let ticketWalletMapFocusId = ''; let ticketWalletMapTypeFilter = '';
+function ticketWalletReadMapMode() {
+  try { return localStorage.getItem('onebox.ticket-wallet-map-mode') === 'simplified' ? 'simplified' : 'standard'; } catch { return 'standard'; }
+}
+let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
+function ticketWalletMapIsDark() { return document.documentElement.dataset.theme === 'dark'; }
+function ticketWalletMapTileUrl() {
+  if (ticketWalletMapMode === 'standard') return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  return ticketWalletMapIsDark()
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+}
+function ticketWalletMapTileAttribution() {
+  return ticketWalletMapMode === 'standard'
+    ? '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
+    : '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noreferrer">CARTO</a>';
+}
+function ticketWalletMapControlMarkup() {
+  const labels = state.language === 'en'
+    ? { zoomIn: 'Zoom in', zoomOut: 'Zoom out', all: 'Show all journeys', locate: 'Locate me', fullscreen: 'Toggle fullscreen' }
+    : { zoomIn: '放大地图', zoomOut: '缩小地图', all: '显示全部旅迹', locate: '定位到当前位置', fullscreen: '切换全屏' };
+  const icons = {
+    'zoom-in': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+    'zoom-out': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>',
+    all: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16M4 12h16M4 18.5h16"/><circle cx="7" cy="5.5" r="1.5"/><circle cx="17" cy="12" r="1.5"/></svg>',
+    locate: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.2"/><circle cx="12" cy="12" r="1.7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>',
+    fullscreen: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h-5v5M15.5 3.5h5v5M20.5 15.5v5h-5M8.5 20.5h-5v-5"/></svg>',
+  };
+  const actions = [
+    ['zoom-in', labels.zoomIn], ['zoom-out', labels.zoomOut], ['locate', labels.locate], ['fullscreen', labels.fullscreen], ['all', labels.all],
+  ];
+  return '<div class="ticket-wallet-map-controls" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Map controls' : '地图控件') + '">' + actions.map(([action, label]) => '<button type="button" data-ticket-wallet-map-action="' + action + '" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '">' + icons[action] + '</button>').join('') + '</div>';
+}
+function ticketWalletMapControlFeedback(button, message, originalLabel) {
+  if (!button) return;
+  button.title = message;
+  button.setAttribute('aria-label', message);
+  window.setTimeout(() => {
+    if (!button.isConnected) return;
+    button.title = originalLabel;
+    button.setAttribute('aria-label', originalLabel);
+  }, 4000);
+}
+function ticketWalletHandleMapControl(action, element, button) {
+  const map = ticketWalletLeafletMapElement === element ? ticketWalletLeafletMap : null;
+  const fallback = element?.__ticketWalletFallbackMap;
+  if (action === 'zoom-in' || action === 'zoom-out') {
+    const direction = action === 'zoom-in' ? 1 : -1;
+    if (map) direction > 0 ? map.zoomIn() : map.zoomOut();
+    else fallback?.zoomBy?.(direction);
+    return;
+  }
+  if (action === 'all') {
+    selectTicketWalletFilter('all');
+    return;
+  }
+  if (action === 'fullscreen') {
+    const canvas = element?.closest('.ticket-wallet-route-map-canvas');
+    if (!canvas) return;
+    const sync = () => requestAnimationFrame(() => {
+      if (ticketWalletLeafletMapElement === element && ticketWalletLeafletMap) ticketWalletLeafletMap.invalidateSize();
+    });
+    if (document.fullscreenElement === canvas) {
+      document.exitFullscreen?.().then(sync).catch(() => {});
+    } else if (canvas.classList.contains('is-fullscreen')) {
+      canvas.classList.remove('is-fullscreen');
+      sync();
+    } else if (canvas.requestFullscreen) {
+      canvas.requestFullscreen().then(sync).catch(() => { canvas.classList.add('is-fullscreen'); sync(); });
+    } else {
+      canvas.classList.add('is-fullscreen');
+      sync();
+    }
+    return;
+  }
+  if (action !== 'locate') return;
+  const label = state.language === 'en' ? 'Locate me' : '定位到当前位置';
+  const unavailable = state.language === 'en' ? 'Location is unavailable in this browser' : '当前浏览器不支持定位';
+  const failed = state.language === 'en' ? 'Could not get your location; check location permission' : '无法获取位置，请检查定位权限';
+  if (!navigator.geolocation) { ticketWalletMapControlFeedback(button, unavailable, label); return; }
+  button?.setAttribute('aria-busy', 'true');
+  navigator.geolocation.getCurrentPosition((position) => {
+    button?.removeAttribute('aria-busy');
+    const latlng = [position.coords.latitude, position.coords.longitude];
+    if (map && element.__ticketWalletLeaflet) {
+      const L = element.__ticketWalletLeaflet;
+      map.setView(latlng, Math.max(map.getZoom(), 13), { animate: true });
+      if (element.__ticketWalletLocationLayer) map.removeLayer(element.__ticketWalletLocationLayer);
+      element.__ticketWalletLocationLayer = L.circleMarker(latlng, { radius: 8, color: '#fff', weight: 3, fillColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#4863ee', fillOpacity: 1 }).addTo(map);
+    } else fallback?.setLocation?.(latlng);
+  }, () => {
+    button?.removeAttribute('aria-busy');
+    ticketWalletMapControlFeedback(button, failed, label);
+  }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 12000 });
+}
 const ticketWalletGeocodePromises = new Map();
 function ticketWalletMapPlaceKey(value) {
   const text = String(value || '').trim().replace(/[（(].*?[）)]/g, '').replace(/\s+/g, '');
@@ -4855,12 +4957,16 @@ function ticketWalletMapRouteType(group) { return group.records.find((record) =>
 function ticketWalletMapLegendMarkup() {
   const category = normalizeTicketWalletFilter(state.ticketWalletTypeFilter);
   const entries = [];
+  const addEntry = (type, label, icon, place = false) => {
+    const active = ticketWalletMapTypeFilter === type;
+    entries.push('<button type="button" class="ticket-wallet-map-legend-item ticket-wallet-map-legend-' + escapeHtml(type) + (active ? ' is-active' : '') + '" data-ticket-wallet-map-filter="' + escapeHtml(type) + '" aria-pressed="' + (active ? 'true' : 'false') + '"><span class="ticket-wallet-map-legend-icon" aria-hidden="true">' + icon + '</span><span>' + escapeHtml(label) + '</span>' + (place ? '<b aria-hidden="true"></b>' : '<i aria-hidden="true"></i>') + '</button>');
+  };
   if (category === 'all' || category === 'travel') TICKET_WALLET_TRAVEL_TYPES.forEach((type) => {
-    entries.push('<span class="ticket-wallet-map-legend-item ticket-wallet-map-legend-' + type + '"><span class="ticket-wallet-map-legend-icon" aria-hidden="true">' + TICKET_TYPES[type].icon + '</span><span>' + escapeHtml(TICKET_WALLET_ROUTE_LABELS[type][state.language === 'en' ? 1 : 0]) + '</span><i aria-hidden="true"></i></span>');
+    addEntry(type, TICKET_WALLET_ROUTE_LABELS[type][state.language === 'en' ? 1 : 0], TICKET_TYPES[type].icon);
   });
-  if (category === 'all' || category === 'entertainment') entries.push('<span class="ticket-wallet-map-legend-item ticket-wallet-map-legend-entertainment"><span class="ticket-wallet-map-legend-icon" aria-hidden="true">' + TICKET_WALLET_PLACE_STYLES.entertainment.icon + '</span><span>' + escapeHtml(state.language === 'en' ? 'Entertainment venues' : '娱乐地点') + '</span><b aria-hidden="true"></b></span>');
-  if (category === 'all' || category === 'dining') entries.push('<span class="ticket-wallet-map-legend-item ticket-wallet-map-legend-dining"><span class="ticket-wallet-map-legend-icon" aria-hidden="true">' + TICKET_WALLET_PLACE_STYLES.dining.icon + '</span><span>' + escapeHtml(state.language === 'en' ? 'Dining venues' : '餐饮地点') + '</span><b aria-hidden="true"></b></span>');
-  return entries.length ? '<div class="ticket-wallet-map-legend" aria-label="' + escapeHtml(state.language === 'en' ? 'Map legend' : '地图图例') + '">' + entries.join('') + '</div>' : '';
+  if (category === 'all' || category === 'entertainment') addEntry('entertainment', state.language === 'en' ? 'Entertainment venues' : '娱乐地点', TICKET_WALLET_PLACE_STYLES.entertainment.icon, true);
+  if (category === 'all' || category === 'dining') addEntry('dining', state.language === 'en' ? 'Dining venues' : '餐饮地点', TICKET_WALLET_PLACE_STYLES.dining.icon, true);
+  return entries.length ? '<div class="ticket-wallet-map-legend" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Filter map by type' : '按类型筛选地图') + '">' + entries.join('') + '</div>' : '';
 }
 function ticketWalletMapPopupElement(group, label) {
   const groups = (Array.isArray(group) ? group : [group]).filter(Boolean);
@@ -4963,8 +5069,9 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       const focusedPlace = ticketWalletMapFocusId ? geocodedPlaces.find(({ entry }) => entry.group.records.some((record) => record.id === ticketWalletMapFocusId)) : null;
       const focusPoints = focused ? [focused.from, focused.to].filter(Boolean) : focusedPlace?.point ? [focusedPlace.point] : [];
       const viewPoints = focusPoints.length ? focusPoints : contextPoints.length ? contextPoints : allPoints;
-      const viewport = viewPoints.length ? ticketWalletMapViewport(viewPoints, width, height) : ticketWalletMapViewportContext || ticketWalletMapViewport([], width, height);
+      const viewport = ticketWalletMapPendingView || (viewPoints.length ? ticketWalletMapViewport(viewPoints, width, height) : ticketWalletMapViewportContext || ticketWalletMapViewport([], width, height));
       if (viewPoints.length) ticketWalletMapViewportContext = viewport;
+      if (ticketWalletMapPendingView) ticketWalletMapPendingView = null;
       controller.zoom = viewport.zoom;
       controller.center = [...viewport.center];
       if (focused || focusedPlace) ticketWalletMapFocusId = '';
@@ -4985,7 +5092,10 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       for (let tileY = firstY; tileY <= lastY; tileY += 1) {
         if (tileY < 0 || tileY >= tileCount) continue;
         const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
-        tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="https://tile.openstreetmap.org/' + tileZoom + '/' + wrappedX + '/' + tileY + '.png" style="width:' + tileSize + 'px!important;height:' + tileSize + 'px!important;left:' + (tileX * tileSize - topLeft.x).toFixed(1) + 'px;top:' + (tileY * tileSize - topLeft.y).toFixed(1) + 'px">');
+        const tileBase = ticketWalletMapMode === 'standard'
+          ? 'https://tile.openstreetmap.org'
+          : 'https://a.basemaps.cartocdn.com/' + (ticketWalletMapIsDark() ? 'dark_all' : 'light_all');
+        tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="' + tileBase + '/' + tileZoom + '/' + wrappedX + '/' + tileY + '.png" style="width:' + tileSize + 'px!important;height:' + tileSize + 'px!important;left:' + (tileX * tileSize - topLeft.x).toFixed(1) + 'px;top:' + (tileY * tileSize - topLeft.y).toFixed(1) + 'px">');
       }
     }
     const projectOnScreen = (point) => {
@@ -4997,7 +5107,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       const id = model.group.records[0]?.id || '';
       const title = [model.group.from, model.group.to].filter(Boolean).join(' → ');
       const dash = model.dash ? ' stroke-dasharray="' + model.dash + '"' : '';
-      return '<g class="ticket-wallet-fallback-route" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(title) + '"><title>' + escapeHtml(title) + '</title><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline></g>';
+      return '<g class="ticket-wallet-fallback-route" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(title) + '"><title>' + escapeHtml(title) + '</title><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline></g>';
     }).join('');
     const markers = [...markerGroups.values()].map((marker) => {
       const screen = projectOnScreen(marker.point);
@@ -5007,8 +5117,13 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       const typeStyle = ticketWalletMapItemStyle(marker.type);
       return '<g class="ticket-wallet-fallback-marker" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(label) + '"><title>' + escapeHtml(label) + '</title><circle cx="' + screen.x.toFixed(1) + '" cy="' + screen.y.toFixed(1) + '" r="' + (records.length > 1 ? 11 : 8) + '" fill="var(--panel)" stroke="' + typeStyle.color + '" stroke-width="3"></circle>' + (records.length > 1 ? '<text x="' + screen.x.toFixed(1) + '" y="' + (screen.y + 3.5).toFixed(1) + '" text-anchor="middle">' + records.length + '</text>' : '') + '</g>';
     }).join('');
-    const overlayMarkup = routes + markers;
-    element.innerHTML = '<div class="ticket-wallet-fallback-map"><div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div><svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls" aria-label="地图缩放"><button type="button" data-ticket-wallet-fallback-zoom="in" aria-label="放大地图">+</button><button type="button" data-ticket-wallet-fallback-zoom="out" aria-label="缩小地图">−</button></div><div class="ticket-wallet-fallback-attribution">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors</div></div>';
+    const currentLocation = controller.currentLocation ? projectOnScreen(controller.currentLocation) : null;
+    const locationMarkup = currentLocation ? '<g class="ticket-wallet-fallback-location" aria-label="' + escapeHtml(state.language === 'en' ? 'Current location' : '当前位置') + '"><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="12"></circle><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="5"></circle></g>' : '';
+    const overlayMarkup = routes + markers + locationMarkup;
+    const attribution = ticketWalletMapMode === 'standard'
+      ? '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
+      : '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · <a href="https://carto.com/attributions" target="_blank" rel="noreferrer">CARTO</a>';
+    element.innerHTML = '<div class="ticket-wallet-fallback-map"><div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div><svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls">' + ticketWalletMapControlMarkup() + '</div><div class="ticket-wallet-fallback-attribution">' + attribution + '</div></div>';
     const overlay = element.querySelector('.ticket-wallet-fallback-overlay');
     overlay?.addEventListener('pointerdown', (event) => { if (event.target.closest('[data-ticket-wallet-map-ticket]')) event.stopPropagation(); });
     overlay?.addEventListener('keydown', (event) => {
@@ -5017,8 +5132,9 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       if (!target) return;
       event.preventDefault(); target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
-    element.querySelectorAll('[data-ticket-wallet-fallback-zoom]').forEach((button) => button.addEventListener('click', (event) => {
-      event.stopPropagation(); zoomAround(width / 2, height / 2, button.dataset.ticketWalletFallbackZoom === 'in' ? 1 : -1);
+    element.querySelectorAll('[data-ticket-wallet-map-action]').forEach((button) => button.addEventListener('click', (event) => {
+      event.preventDefault(); event.stopPropagation();
+      ticketWalletHandleMapControl(button.dataset.ticketWalletMapAction, element, button);
     }));
   };
   const zoomAround = (screenX, screenY, direction) => {
@@ -5034,6 +5150,8 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
     controller.center = ticketWalletMapUnproject({ x: nextPixel.x - screenX + width / 2, y: nextPixel.y - screenY + height / 2 }, nextZoom);
     render();
   };
+  controller.zoomBy = (direction) => { const { width, height } = mapSize(); zoomAround(width / 2, height / 2, direction); };
+  controller.setLocation = (latlng) => { controller.center = [...latlng]; controller.zoom = 13; controller.currentLocation = [...latlng]; render(); };
   let drag = null;
   const pointers = new Map();
   let pinch = null;
@@ -5100,6 +5218,9 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
   element.addEventListener('pointerup', stopDragging, { signal: interactionAbort.signal });
   element.addEventListener('pointercancel', stopDragging, { signal: interactionAbort.signal });
   render();
+  const themeObserver = new MutationObserver(() => render());
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  interactionAbort.signal.addEventListener('abort', () => themeObserver.disconnect(), { once: true });
   element.__ticketWalletFallbackMap = controller;
 }
 function ticketWalletMapError(element, geocoded = [], contextGeocoded = geocoded, geocodedPlaces = [], contextGeocodedPlaces = geocodedPlaces) { ticketWalletFallbackMap(element, geocoded, contextGeocoded, geocodedPlaces, contextGeocodedPlaces); }
@@ -5143,8 +5264,29 @@ async function hydrateTicketWalletMap() {
     if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
     element.innerHTML = '';
     const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true });
-    L.control.zoom({ position: 'topleft' }).addTo(map);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, detectRetina: true, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' }).addTo(map);
+    element.__ticketWalletLeaflet = L;
+    const tileLayer = L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
+    element.__ticketWalletTileLayer = tileLayer;
+    const themeObserver = new MutationObserver(() => tileLayer.setUrl(ticketWalletMapTileUrl()));
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const mapListeners = new AbortController();
+    map.once('unload', () => { themeObserver.disconnect(); mapListeners.abort(); });
+    const mapControls = L.control({ position: 'bottomright' });
+    mapControls.onAdd = () => {
+      const container = L.DomUtil.create('div', 'leaflet-control ticket-wallet-map-controls-wrap');
+      container.innerHTML = ticketWalletMapControlMarkup();
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.disableScrollPropagation(container);
+      container.querySelectorAll('[data-ticket-wallet-map-action]').forEach((button) => {
+        L.DomEvent.on(button, 'click', (event) => {
+          L.DomEvent.stop(event);
+          ticketWalletHandleMapControl(button.dataset.ticketWalletMapAction, element, button);
+        });
+      });
+      return container;
+    };
+    mapControls.addTo(map);
+    document.addEventListener('fullscreenchange', () => requestAnimationFrame(() => map.invalidateSize()), { signal: mapListeners.signal });
 
     const bounds = [];
     const duplicateRoutes = new Map();
@@ -5178,8 +5320,8 @@ async function hydrateTicketWalletMap() {
         : [fromPoint, toPoint];
       const route = L.polyline(routePoints, {
         color: routeStyle.color,
-        weight: 4,
-        opacity: .92,
+        weight: 2.5,
+        opacity: .78,
         dashArray: routeStyle.dash || null,
         lineCap: 'round',
         lineJoin: 'round',
@@ -5197,9 +5339,10 @@ async function hydrateTicketWalletMap() {
       const records = [...new Map(cluster.groups.flatMap((group) => group.records).map((record) => [record.id, record])).values()];
       const type = cluster.type;
       const label = cluster.groups.map((group) => [group.from, group.to].filter(Boolean).join(' → ')).filter(Boolean).slice(0, 2).join(' · ') || cluster.label;
+      const hasVenueLabel = cluster.groups.some((group) => group.records.some((record) => ['dining', 'entertainment'].includes(ticketWalletCategoryForType(record.type))));
       const marker = L.marker(cluster.point, { icon: ticketWalletMapMarkerIcon(L, type, records.length), keyboard: true, riseOnHover: true })
         .addTo(map)
-        .bindTooltip(label, { direction: 'top', offset: [0, -12] })
+        .bindTooltip(label, { permanent: hasVenueLabel, direction: 'top', offset: [0, -12], className: hasVenueLabel ? 'ticket-wallet-place-label' : '' })
         .bindPopup(ticketWalletMapPopupElement(cluster.groups, cluster.label));
       pointLayers.push({ layer: marker, groups: cluster.groups });
     });
@@ -5228,7 +5371,9 @@ async function hydrateTicketWalletMap() {
       pointLayers.find(({ groups }) => groups.some((group) => group.key === focusedPlace.entry.group.key))?.layer.openPopup();
       ticketWalletMapFocusId = '';
     } else {
-      map.setView(viewport.center, viewport.zoom);
+      const pendingView = ticketWalletMapPendingView;
+      map.setView(pendingView?.center || viewport.center, pendingView?.zoom || viewport.zoom);
+      ticketWalletMapPendingView = null;
     }
     ticketWalletLeafletMap = map;
     ticketWalletLeafletMapElement = element;
@@ -5251,7 +5396,11 @@ function ticketWalletJourneyMapMarkup(journeys, places = []) {
       : (state.language === 'en' ? 'This category has no travel routes. Choose Travel or All to view routes.' : '当前大类没有出行路线；选择“出行”或“全部”可查看路线。'));
   const countLabel = [journeys.length ? journeys.length + (state.language === 'en' ? (journeys.length === 1 ? ' route' : ' routes') : ' 条路线') : '', places.length ? places.length + (state.language === 'en' ? (places.length === 1 ? ' place' : ' places') : ' 个票面地点') : ''].filter(Boolean).join(state.language === 'en' ? ' · ' : ' · ') || (state.language === 'en' ? 'No map items' : '暂无地图内容');
   const hasMapItems = journeys.length || places.length;
-  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div><h2>' + escapeHtml(state.language === 'en' ? 'Journey map' : '旅迹地图') + '</h2></div><span>' + escapeHtml(countLabel) + '</span></div>' + ticketWalletMapLegendMarkup() + '<div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map' + (hasMapItems ? '' : ' is-empty') + '" data-ticket-wallet-real-map role="region" aria-label="' + escapeHtml(state.language === 'en' ? 'Tickets and venues on the map' : '票据路线与地点地图') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载真实地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(note) + '</div></section>';
+  const modeLabel = state.language === 'en' ? 'Map style' : '地图样式';
+  const standardLabel = state.language === 'en' ? 'Standard' : '标准';
+  const simplifiedLabel = state.language === 'en' ? 'Simplified' : '简化';
+  const modeSelector = '<div class="ticket-wallet-map-mode" role="group" aria-label="' + modeLabel + '"><button type="button" data-ticket-wallet-map-mode="standard" aria-pressed="' + (ticketWalletMapMode === 'standard' ? 'true' : 'false') + '">' + standardLabel + '</button><button type="button" data-ticket-wallet-map-mode="simplified" aria-pressed="' + (ticketWalletMapMode === 'simplified' ? 'true' : 'false') + '">' + simplifiedLabel + '</button></div>';
+  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div class="ticket-wallet-route-map-title"><h2>' + escapeHtml(state.language === 'en' ? 'Journey map' : '旅迹地图') + '</h2>' + modeSelector + '</div><span>' + escapeHtml(countLabel) + '</span></div>' + ticketWalletMapLegendMarkup() + '<div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map' + (hasMapItems ? '' : ' is-empty') + '" data-ticket-wallet-real-map role="region" aria-label="' + escapeHtml(state.language === 'en' ? 'Tickets and venues on the map' : '票据路线与地点地图') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(note) + '</div></section>';
 }
 function renderTicketWalletJourneysLegacy() {
   const journeys = ticketWalletJourneys();
@@ -13453,6 +13602,31 @@ workspace.addEventListener('click', async (event) => {
     });
     render();
     requestAnimationFrame(() => { const rail = workspace.querySelector('.ticket-wallet-airline-rail .ticket-wallet-template-options'); if (rail) rail.scrollLeft = railLeft; });
+    return;
+  }
+  const ticketWalletMapModeButton = event.target.closest('[data-ticket-wallet-map-mode]');
+  if (ticketWalletMapModeButton) {
+    const nextMode = ticketWalletMapModeButton.dataset.ticketWalletMapMode;
+    if (nextMode === 'standard' || nextMode === 'simplified') {
+      if (ticketWalletLeafletMap && ticketWalletLeafletMapElement) {
+        const center = ticketWalletLeafletMap.getCenter();
+        ticketWalletMapPendingView = { center: [center.lat, center.lng], zoom: ticketWalletLeafletMap.getZoom() };
+      } else {
+        const currentMapElement = $('[data-ticket-wallet-real-map]');
+        const fallbackView = currentMapElement?.__ticketWalletFallbackMap;
+        if (fallbackView?.center && Number.isFinite(fallbackView.zoom)) ticketWalletMapPendingView = { center: [...fallbackView.center], zoom: fallbackView.zoom };
+      }
+      ticketWalletMapMode = nextMode;
+      try { localStorage.setItem('onebox.ticket-wallet-map-mode', nextMode); } catch {}
+      render();
+    }
+    return;
+  }
+  const ticketWalletMapFilterButton = event.target.closest('[data-ticket-wallet-map-filter]');
+  if (ticketWalletMapFilterButton) {
+    const nextType = ticketWalletMapFilterButton.dataset.ticketWalletMapFilter;
+    ticketWalletMapTypeFilter = ticketWalletMapTypeFilter === nextType ? '' : nextType;
+    render();
     return;
   }
   const ticketWalletFilter = event.target.closest('[data-ticket-wallet-filter]');

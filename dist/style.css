@@ -17941,3 +17941,52 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   line-height: 1;
 }
 #toast .toast-close::after { content: none !important; }
+
+/* Journey map controls, selectable map styles, and clearer type filters */
+.ticket-wallet-route-map-head { align-items: center; }
+.ticket-wallet-route-map-title { display: flex; min-width: 0; align-items: center; gap: 14px; }
+.ticket-wallet-map-mode { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); }
+.ticket-wallet-map-mode button { min-height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; transition: background .16s ease, color .16s ease, box-shadow .16s ease; }
+.ticket-wallet-map-mode button[aria-pressed="true"] { background: var(--panel); color: var(--primary); box-shadow: 0 1px 4px color-mix(in srgb, var(--ink) 12%, transparent); }
+.ticket-wallet-map-mode button:hover { color: var(--primary); }
+.ticket-wallet-map-mode button:focus-visible, .ticket-wallet-map-legend-item:focus-visible, .ticket-wallet-map-controls button:focus-visible { outline: 2px solid color-mix(in srgb, var(--primary) 72%, transparent); outline-offset: 2px; }
+.ticket-wallet-map-legend-item { appearance: none; font: inherit; cursor: pointer; transition: border-color .16s ease, color .16s ease, background .16s ease, box-shadow .16s ease; }
+.ticket-wallet-map-legend-item:hover { border-color: color-mix(in srgb, var(--route-color) 46%, var(--line)); color: var(--ink); }
+.ticket-wallet-map-legend-item.is-active { border-color: color-mix(in srgb, var(--route-color) 72%, var(--line)); background: color-mix(in srgb, var(--route-color) 10%, var(--panel)); color: var(--ink); box-shadow: 0 2px 8px color-mix(in srgb, var(--route-color) 12%, transparent); }
+.ticket-wallet-map-controls-wrap { margin: 12px; }
+.ticket-wallet-map-controls { display: flex; flex-direction: column; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 13%, var(--line)); border-radius: 13px; background: color-mix(in srgb, var(--panel) 94%, transparent); box-shadow: 0 5px 18px color-mix(in srgb, var(--ink) 18%, transparent); backdrop-filter: blur(12px); }
+.ticket-wallet-map-controls button { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border: 0; background: transparent; color: var(--ink); cursor: pointer; transition: background .15s ease, color .15s ease; }
+.ticket-wallet-map-controls button + button { border-top: 1px solid color-mix(in srgb, var(--line) 82%, transparent); }
+.ticket-wallet-map-controls button:hover { background: color-mix(in srgb, var(--primary) 10%, var(--panel)); color: var(--primary); }
+.ticket-wallet-map-controls button[aria-busy="true"] { color: var(--primary); opacity: .68; }
+.ticket-wallet-map-controls svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.ticket-wallet-real-map .leaflet-control-attribution { background: color-mix(in srgb, var(--panel) 90%, transparent); color: var(--muted); }
+.ticket-wallet-real-map .leaflet-control-attribution a { color: var(--primary); }
+.ticket-wallet-real-map .ticket-wallet-place-label { padding: 4px 7px; border: 1px solid color-mix(in srgb, var(--ink) 15%, var(--line)); border-radius: 8px; background: color-mix(in srgb, var(--panel) 96%, transparent); box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 18%, transparent); color: var(--ink); font-size: 10px; font-weight: 750; white-space: nowrap; }
+.ticket-wallet-real-map .ticket-wallet-place-label::before { border-top-color: var(--panel); }
+.ticket-wallet-route-map-canvas:fullscreen { width: 100vw; height: 100vh; border: 0; border-radius: 0; background: var(--panel); }
+.ticket-wallet-route-map-canvas:fullscreen .ticket-wallet-real-map { height: 100vh; min-height: 100vh; }
+.ticket-wallet-route-map-canvas.is-fullscreen { position: fixed; inset: 0; z-index: 10000; width: 100vw; height: 100vh; border: 0; border-radius: 0; background: var(--panel); }
+.ticket-wallet-route-map-canvas.is-fullscreen .ticket-wallet-real-map { height: 100vh; min-height: 100vh; }
+.ticket-wallet-fallback-controls { top: auto; right: 12px; bottom: 12px; left: auto; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ticket-wallet-fallback-controls .ticket-wallet-map-controls { overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 13%, var(--line)); border-radius: 13px; background: color-mix(in srgb, var(--panel) 94%, transparent); box-shadow: 0 5px 18px color-mix(in srgb, var(--ink) 18%, transparent); backdrop-filter: blur(12px); }
+.ticket-wallet-fallback-location circle:first-child { fill: color-mix(in srgb, var(--primary) 20%, transparent); stroke: var(--panel); stroke-width: 3; }
+.ticket-wallet-fallback-location circle:last-child { fill: var(--primary); stroke: #fff; stroke-width: 2; }
+.ticket-wallet-route-map-canvas:fullscreen .ticket-wallet-map-controls-wrap { margin: 18px; }
+.ticket-wallet-route-map-canvas.is-fullscreen .ticket-wallet-map-controls-wrap { margin: 18px; }
+@media (max-width: 760px) {
+  .ticket-wallet-route-map-head { align-items: flex-start; }
+  .ticket-wallet-route-map-title { flex-wrap: wrap; gap: 8px; }
+  .ticket-wallet-route-map-title h2 { font-size: 17px; }
+  .ticket-wallet-map-mode button { min-height: 26px; padding: 0 9px; font-size: 10px; }
+  .ticket-wallet-map-legend { gap: 6px; margin-top: 9px; }
+  .ticket-wallet-map-legend-item { min-height: 27px; padding: 4px 7px; }
+  .ticket-wallet-map-controls-wrap { margin: 10px; }
+  .ticket-wallet-map-controls button { width: 36px; height: 36px; flex-basis: 36px; }
+  .ticket-wallet-fallback-controls { right: 10px; bottom: 10px; }
+  .ticket-wallet-route-map-canvas:fullscreen .ticket-wallet-map-controls-wrap, .ticket-wallet-route-map-canvas.is-fullscreen .ticket-wallet-map-controls-wrap { margin: 12px; }
+}
+
+.ticket-wallet-map-legend-item { font-family: inherit; font-size: 10px; font-weight: 700; line-height: 1.2; }
+.ticket-wallet-fallback-controls { display: block; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ticket-wallet-fallback-attribution { background: color-mix(in srgb, var(--panel) 90%, transparent); color: var(--muted); }
