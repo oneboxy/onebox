@@ -11640,8 +11640,6 @@ let readerBookDrag = null;
 let readerBookSuppressClickUntil = 0;
 let navigationPressTimer = null;
 let navigationDrag = null;
-let navigationDialogPressTimer = null;
-let navigationDialogPress = null;
 let navigationSuppressClickUntil = 0;
 const NAVIGATION_LONG_PRESS_MS = 390;
 const NAVIGATION_MOVE_TOLERANCE = 16;
@@ -11659,9 +11657,10 @@ function clearNavigationDragClasses() {
   $$('.navigation-card.navigation-dragging, .navigation-card.navigation-long-pressed').forEach((card) => card.classList.remove('navigation-dragging', 'navigation-long-pressed'));
   $$('.navigation-card.navigation-drop-target, .navigation-card.navigation-combine-ready').forEach((card) => card.classList.remove('navigation-drop-target', 'navigation-combine-ready'));
 }
-function startNavigationLongPress(target, event) {
+function startNavigationLongPress(target, event, scope = 'root') {
   clearTimeout(navigationPressTimer);
-  navigationDrag = { target, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, longPressed: false, active: false, over: null, folderTarget: null, combineOver: null, combineTarget: null, combineTimer: null, placeholder: null, ghost: null, parent: null, reordered: false };
+  const folderId = scope === 'folder' ? target.dataset.navigationFolderId || '' : '';
+  navigationDrag = { target, scope, folderId, container: scope === 'folder' ? target.closest('.navigation-folder-sites') : null, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, longPressed: false, active: false, over: null, folderTarget: null, combineOver: null, combineTarget: null, combineTimer: null, placeholder: null, ghost: null, parent: null, reordered: false };
   navigationPressTimer = setTimeout(() => {
     if (!navigationDrag || navigationDrag.target !== target) return;
     navigationDrag.longPressed = true;
@@ -11669,32 +11668,6 @@ function startNavigationLongPress(target, event) {
   }, NAVIGATION_LONG_PRESS_MS);
 }
 function endNavigationLongPress() { clearTimeout(navigationPressTimer); navigationPressTimer = null; }
-function startNavigationDialogLongPress(target, event) {
-  clearTimeout(navigationDialogPressTimer);
-  navigationDialogPress = { target, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, longPressed: false };
-  navigationDialogPressTimer = setTimeout(() => {
-    if (!navigationDialogPress || navigationDialogPress.target !== target) return;
-    navigationDialogPress.longPressed = true;
-  }, NAVIGATION_LONG_PRESS_MS);
-}
-function updateNavigationDialogLongPress(event) {
-  const press = navigationDialogPress;
-  if (!press || (press.pointerId != null && event.pointerId !== press.pointerId)) return;
-  if (Math.hypot(event.clientX - press.startX, event.clientY - press.startY) > NAVIGATION_MOVE_TOLERANCE && !press.longPressed) {
-    clearTimeout(navigationDialogPressTimer); navigationDialogPressTimer = null; navigationDialogPress = null;
-  }
-}
-function finishNavigationDialogLongPress(event = null) {
-  const press = navigationDialogPress;
-  if (!press || (event?.pointerId != null && press.pointerId != null && event.pointerId !== press.pointerId)) return false;
-  clearTimeout(navigationDialogPressTimer); navigationDialogPressTimer = null; navigationDialogPress = null;
-  if (!press.longPressed) return false;
-  navigationSuppressClickUntil = Date.now() + 550;
-  const card = press.target;
-  openNavigationActionsDialog(card.dataset.navigationId, card.dataset.navigationFolderId || '');
-  return true;
-}
-function cancelNavigationDialogLongPress() { clearTimeout(navigationDialogPressTimer); navigationDialogPressTimer = null; navigationDialogPress = null; }
 function animateNavigationReorder(container, mutate) {
   const before = new Map([...container.querySelectorAll('[data-navigation-item]')].map((card) => [card.dataset.navigationId, card.getBoundingClientRect()]));
   mutate();
@@ -11711,6 +11684,11 @@ function createNavigationDragOverlay(drag, event) {
   const target = drag.target; const rect = target.getBoundingClientRect(); const parent = target.parentElement;
   if (!parent) return;
   drag.parent = parent;
+  const captureTarget = drag.scope === 'folder' ? target.closest('#navigationDialog') : workspace;
+  try {
+    captureTarget?.setPointerCapture?.(drag.pointerId);
+    if (captureTarget?.hasPointerCapture?.(drag.pointerId)) drag.captureTarget = captureTarget;
+  } catch {}
   const placeholder = document.createElement('article');
   placeholder.className = 'navigation-card navigation-drag-placeholder';
   placeholder.style.width = rect.width + 'px'; placeholder.style.height = rect.height + 'px';
@@ -11721,7 +11699,6 @@ function createNavigationDragOverlay(drag, event) {
   ghost.style.width = rect.width + 'px'; ghost.style.height = rect.height + 'px';
   ghost.style.left = event.clientX + 'px'; ghost.style.top = event.clientY + 'px';
   document.body.appendChild(ghost); drag.ghost = ghost;
-  try { workspace.setPointerCapture?.(drag.pointerId); drag.captureTarget = workspace; } catch {}
 }
 function restoreNavigationDrag(drag) {
   clearNavigationCombineTimer(drag);
@@ -11734,7 +11711,9 @@ function restoreNavigationDrag(drag) {
 }
 function positionNavigationPlaceholder(drag, over, clientX, clientY) {
   const placeholder = drag.placeholder; const parent = over?.parentElement;
-  if (!placeholder || !over || !parent || over === placeholder || over.dataset.navigationFolderId) return false;
+  if (!placeholder || !over || !parent || over === placeholder) return false;
+  if (drag.scope === 'folder' && !drag.container?.contains(over)) return false;
+  if (drag.scope !== 'folder' && over.dataset.navigationFolderId) return false;
   const rect = over.getBoundingClientRect();
   const horizontal = Math.abs(clientX - (rect.left + rect.width / 2)) >= Math.abs(clientY - (rect.top + rect.height / 2));
   const centered = Math.abs(clientX - (rect.left + rect.width / 2)) < rect.width * .22 && Math.abs(clientY - (rect.top + rect.height / 2)) < rect.height * .22;
@@ -11752,6 +11731,18 @@ function persistNavigationDomOrder(drag) {
   if (ids.length !== state.navigation.items.length) return;
   state.navigation.items = ids.map((id) => byId.get(id)).filter(Boolean);
   saveNavigation(); render(); toast(t('navigationOrderSaved'));
+}
+function persistNavigationFolderDomOrder(drag) {
+  const folder = navigationFindFolder(drag.folderId);
+  const parent = drag.parent;
+  if (!folder || !parent) return;
+  const ids = [...parent.querySelectorAll('[data-navigation-item]')].map((card) => card.dataset.navigationId);
+  const byId = new Map(folder.children.map((site) => [site.id, site]));
+  if (ids.length !== folder.children.length || ids.some((id) => !byId.has(id))) return;
+  folder.children = ids.map((id) => byId.get(id));
+  saveNavigation();
+  renderNavigationFolderDialog(folder.id);
+  toast(t('navigationOrderSaved'));
 }
 function updateNavigationDrag(event) {
   const drag = navigationDrag;
@@ -11772,9 +11763,19 @@ function updateNavigationDrag(event) {
   }
   if (drag.ghost) { drag.ghost.style.left = event.clientX + 'px'; drag.ghost.style.top = event.clientY + 'px'; }
   const hit = document.elementFromPoint?.(event.clientX, event.clientY) || event.target;
-  const over = hit?.closest?.('[data-navigation-item]');
+  let over = hit?.closest?.('[data-navigation-item]');
+  if (drag.scope === 'folder' && over && !drag.container?.contains(over)) over = null;
   if (drag.over && drag.over !== over) drag.over.classList.remove('navigation-drop-target', 'navigation-combine-ready');
   drag.over = over && over !== drag.target ? over : null;
+  if (drag.scope === 'folder') {
+    clearNavigationCombineTimer(drag);
+    if (drag.over) {
+      drag.over.classList.add('navigation-drop-target');
+      positionNavigationPlaceholder(drag, drag.over, event.clientX, event.clientY);
+    }
+    if (event.cancelable) event.preventDefault();
+    return;
+  }
   if (!drag.over) { clearNavigationCombineTimer(drag); drag.folderTarget = null; }
   else if (drag.over.dataset.navigationFolderId || drag.over.dataset.navigationType === 'folder') {
     clearNavigationCombineTimer(drag); drag.folderTarget = drag.over; drag.over.classList.add('navigation-drop-target');
@@ -11807,6 +11808,12 @@ function finishNavigationDrag(event = null) {
     restoreNavigationDrag(drag);
     if (wasLongPressed) openNavigationActionsDialog(targetId, drag.target.dataset.navigationFolderId || '');
     return wasLongPressed;
+  }
+  if (drag.scope === 'folder') {
+    if (over && drag.container?.contains(over)) positionNavigationPlaceholder(drag, over, event?.clientX ?? drag.startX, event?.clientY ?? drag.startY);
+    restoreNavigationDrag(drag);
+    if (drag.reordered) persistNavigationFolderDomOrder(drag);
+    return true;
   }
   if (over && over.dataset.navigationType === 'site' && !combineTarget && !folderTarget) positionNavigationPlaceholder(drag, over, event?.clientX ?? drag.startX, event?.clientY ?? drag.startY);
   const overId = over?.dataset.navigationId;
@@ -12999,7 +13006,7 @@ workspace.addEventListener('pointerdown', (event) => {
 });
 $('#navigationDialog').addEventListener('pointerdown', (event) => {
   const card = event.target.closest('.navigation-folder-sites [data-navigation-item]');
-  if (card && !event.target.closest('[data-navigation-open-action], [data-navigation-delete], [data-navigation-edit]')) startNavigationDialogLongPress(card, event);
+  if (card && !event.target.closest('[data-navigation-open-action], [data-navigation-delete], [data-navigation-edit]')) startNavigationLongPress(card, event, 'folder');
 });
 workspace.addEventListener('pointerdown', (event) => {
   const book = event.target.closest('[data-reader-book-card]');
@@ -13018,10 +13025,8 @@ document.addEventListener('pointercancel', cancelTicketWalletReorder, { passive:
 document.addEventListener('pointermove', updateReorderDrag, { passive: false });
 document.addEventListener('pointermove', updateReaderBookDrag, { passive: false });
 document.addEventListener('pointermove', updateNavigationDrag, { passive: false });
-document.addEventListener('pointermove', updateNavigationDialogLongPress, { passive: true });
 document.addEventListener('pointerup', (event) => { if (finishReorderDrag(event) || finishReaderBookDrag(event)) endLongPress(); }, { passive: false });
 document.addEventListener('pointerup', (event) => { finishNavigationDrag(event); }, { passive: false });
-document.addEventListener('pointerup', (event) => { finishNavigationDialogLongPress(event); }, { passive: false });
 document.addEventListener('pointerdown', (event) => {
   if (state.tool !== 'reader' || state.readerMode !== 'library') return;
   if (event.target.closest('[data-reader-book-card], [data-reader-layout-toggle], [data-open-reader-file]')) return;
@@ -13043,7 +13048,7 @@ document.addEventListener('pointercancel', () => {
   readerSurfaceGesture = null;
   endLongPress(); cancelReorderDrag();
   if (navigationDrag) { restoreNavigationDrag(navigationDrag); navigationDrag = null; }
-  endNavigationLongPress(); cancelNavigationDialogLongPress(); clearNavigationDragClasses(); if (!cancelledSwipeGesture?.ticketWalletId) swipeGesture = null; resetPageSwipeTransform();
+  endNavigationLongPress(); clearNavigationDragClasses(); if (!cancelledSwipeGesture?.ticketWalletId) swipeGesture = null; resetPageSwipeTransform();
   if (readerBookDrag) {
     releaseReaderBookPointer(readerBookDrag);
     readerBookDrag.over?.classList.remove('reorder-over');
