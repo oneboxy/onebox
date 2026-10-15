@@ -17835,49 +17835,45 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 
 
-/* 2.18.665: soften global toast surfaces and simplify dismissal. */
+/* 2.18.666: make global toasts lighter and more compact. */
 #toast {
-  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
   color: var(--ink);
-  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
-  border-radius: 14px;
-  padding: 8px 8px 8px 14px;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 12%, transparent);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  font-weight: 500;
+  border: 1px solid color-mix(in srgb, var(--line) 48%, transparent);
+  border-radius: 12px;
+  padding: 6px 7px 6px 12px;
+  gap: 8px;
+  box-shadow: 0 3px 12px color-mix(in srgb, #000 7%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  font-weight: 450;
 }
 #toast[data-kind="error"] {
   color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 24%, var(--line));
-  background: color-mix(in srgb, var(--danger) 7%, var(--panel));
+  border-color: color-mix(in srgb, var(--danger) 16%, var(--line));
+  background: color-mix(in srgb, var(--danger) 4%, var(--panel));
 }
 .toast-close {
-  flex-basis: 28px;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 0;
+  flex-basis: 24px;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  color: color-mix(in srgb, var(--muted) 82%, transparent);
   transition: color .16s ease, background .16s ease;
 }
 .toast-close svg {
-  display: block;
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.7;
 }
 .toast-close:hover,
 .toast-close:focus-visible {
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--ink);
 }
 .toast-close:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--primary) 48%, transparent);
   outline-offset: 1px;
 }
 #toast[data-kind="error"] .toast-close:hover,
