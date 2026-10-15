@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.666';
+const APP_VERSION = '2.18.667';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4858,21 +4858,53 @@ function ticketWalletComicFilterMarkup() {
 const TICKET_WALLET_MAPLIBRE_VERSION = '5.12.0';
 let ticketWalletComicVectorLayerPromise = null;
 function ticketWalletLoadComicVectorLayer(L) {
-  if (typeof window.maplibregl !== 'undefined' && typeof L.maplibreGL === 'function') return Promise.resolve(L.maplibreGL);
+  const getLayerFactory = () => {
+    const adapter = window.MaplibreGLLeaflet;
+    if (adapter && typeof adapter.maplibreGL === 'function') return adapter.maplibreGL;
+    if (adapter && typeof adapter.default === 'function') return adapter.default;
+    if (typeof L.maplibreGL === 'function') return L.maplibreGL;
+    return null;
+  };
+  if (typeof window.maplibregl !== 'undefined' && getLayerFactory()) return Promise.resolve(getLayerFactory());
   if (ticketWalletComicVectorLayerPromise) return ticketWalletComicVectorLayerPromise;
   ticketWalletComicVectorLayerPromise = (async () => {
     const providers = [
       {
         css: 'https://cdn.jsdelivr.net/npm/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.css',
         map: 'https://cdn.jsdelivr.net/npm/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.js',
-        adapter: 'https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js',
+        adapter: 'https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.js',
       },
       {
         css: 'https://unpkg.com/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.css',
         map: 'https://unpkg.com/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.js',
-        adapter: 'https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js',
+        adapter: 'https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.js',
       },
     ];
+    const loadStylesheet = (id, href) => {
+      const existing = document.getElementById(id);
+      if (existing?.sheet) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const link = existing || document.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.href = href;
+        let timer = 0;
+        const cleanup = () => {
+          window.clearTimeout(timer);
+          link.removeEventListener('load', onLoad);
+          link.removeEventListener('error', onError);
+        };
+        const onLoad = () => { cleanup(); resolve(); };
+        const onError = () => { cleanup(); reject(Error('MapLibre stylesheet unavailable')); };
+        link.addEventListener('load', onLoad, { once: true });
+        link.addEventListener('error', onError, { once: true });
+        if (!existing) document.head.appendChild(link);
+        timer = window.setTimeout(() => {
+          if (link.sheet) { cleanup(); resolve(); }
+          else { cleanup(); reject(Error('MapLibre stylesheet timed out')); }
+        }, 12000);
+      });
+    };
     const loadScript = (id, src, ready) => {
       if (ready()) return Promise.resolve();
       return new Promise((resolve, reject) => {
@@ -4888,21 +4920,18 @@ function ticketWalletLoadComicVectorLayer(L) {
     let lastError = null;
     for (const [index, provider] of providers.entries()) {
       const cssId = 'ticketWalletMapLibreCss' + index;
-      if (!document.getElementById(cssId)) {
-        const link = document.createElement('link');
-        link.id = cssId;
-        link.rel = 'stylesheet';
-        link.href = provider.css;
-        document.head.appendChild(link);
-      }
       try {
+        await loadStylesheet(cssId, provider.css);
         await loadScript('map-' + index, provider.map, () => typeof window.maplibregl !== 'undefined');
-        await loadScript('leaflet-adapter-' + index, provider.adapter, () => typeof L.maplibreGL === 'function');
-        if (typeof L.maplibreGL === 'function') return L.maplibreGL;
+        await loadScript('leaflet-adapter-' + index, provider.adapter, () => Boolean(getLayerFactory()));
+        const layerFactory = getLayerFactory();
+        if (layerFactory) return layerFactory;
+        throw Error('MapLibre Leaflet adapter did not expose maplibreGL');
       } catch (error) {
         lastError = error;
         document.querySelector('script[data-ticket-wallet-vector-map="map-' + index + '"]')?.remove();
         document.querySelector('script[data-ticket-wallet-vector-map="leaflet-adapter-' + index + '"]')?.remove();
+        document.getElementById(cssId)?.remove();
       }
     }
     ticketWalletComicVectorLayerPromise = null;
@@ -5500,7 +5529,7 @@ async function hydrateTicketWalletMap() {
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
     let comicLayerFactory = null;
     if (isSimplifiedMap) {
-      try { comicLayerFactory = await ticketWalletLoadComicVectorLayer(L); } catch {}
+      try { comicLayerFactory = await ticketWalletLoadComicVectorLayer(L); } catch (error) { console.warn('Comic map unavailable; keeping the simplified fallback map.', error); }
       if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
     }
     element.innerHTML = '';
@@ -5532,7 +5561,7 @@ async function hydrateTicketWalletMap() {
         const comicThemeObserver = new MutationObserver(() => applyComicStyle());
         comicThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
         map.once('unload', () => comicThemeObserver.disconnect());
-      } catch {}
+      } catch (error) { console.warn('Comic map style could not be initialized; keeping the simplified fallback map.', error); }
     }
     const mapListeners = new AbortController();
     map.once('unload', () => mapListeners.abort());
