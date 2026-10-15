@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.658';
+const APP_VERSION = '2.18.659';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4844,33 +4844,45 @@ function ticketWalletReadMapMode() {
   try { return localStorage.getItem('onebox.ticket-wallet-map-mode') === 'simplified' ? 'simplified' : 'standard'; } catch { return 'standard'; }
 }
 let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
-function ticketWalletMapIsDark() { return document.documentElement.dataset.theme === 'dark'; }
 function ticketWalletMapTileUrl() {
   if (ticketWalletMapMode === 'standard') return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-  return ticketWalletMapIsDark()
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
 }
 function ticketWalletMapTileAttribution() {
   return ticketWalletMapMode === 'standard'
     ? '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-    : '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noreferrer">CARTO</a>';
+    : '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>';
 }
 function ticketWalletMapControlMarkup() {
   const labels = state.language === 'en'
-    ? { zoomIn: 'Zoom in', zoomOut: 'Zoom out', all: 'Show all journeys', locate: 'Locate me', fullscreen: 'Toggle fullscreen' }
-    : { zoomIn: '放大地图', zoomOut: '缩小地图', all: '显示全部旅迹', locate: '定位到当前位置', fullscreen: '切换全屏' };
+    ? { zoomIn: 'Zoom in', zoomOut: 'Zoom out', locate: 'Locate me', fullscreen: 'Toggle fullscreen', style: 'Map style', standard: 'Standard', simplified: 'Simple' }
+    : { zoomIn: '放大地图', zoomOut: '缩小地图', locate: '定位到当前位置', fullscreen: '切换全屏', style: '地图样式', standard: '标准', simplified: '简化' };
   const icons = {
     'zoom-in': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     'zoom-out': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>',
-    all: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16M4 12h16M4 18.5h16"/><circle cx="7" cy="5.5" r="1.5"/><circle cx="17" cy="12" r="1.5"/></svg>',
     locate: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.2"/><circle cx="12" cy="12" r="1.7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>',
     fullscreen: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h-5v5M15.5 3.5h5v5M20.5 15.5v5h-5M8.5 20.5h-5v-5"/></svg>',
   };
   const actions = [
-    ['zoom-in', labels.zoomIn], ['zoom-out', labels.zoomOut], ['locate', labels.locate], ['fullscreen', labels.fullscreen], ['all', labels.all],
+    ['zoom-in', labels.zoomIn], ['zoom-out', labels.zoomOut], ['locate', labels.locate], ['fullscreen', labels.fullscreen],
   ];
-  return '<div class="ticket-wallet-map-controls" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Map controls' : '地图控件') + '">' + actions.map(([action, label]) => '<button type="button" data-ticket-wallet-map-action="' + action + '" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '">' + icons[action] + '</button>').join('') + '</div>';
+  const modeButtons = [['standard', labels.standard], ['simplified', labels.simplified]].map(([mode, label]) =>
+    '<button type="button" data-ticket-wallet-map-mode="' + mode + '" aria-pressed="' + (ticketWalletMapMode === mode ? 'true' : 'false') + '" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '">' + label + '</button>'
+  ).join('');
+  return '<div class="ticket-wallet-map-controls" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Map controls' : '地图控件') + '">' + actions.map(([action, label]) => '<button type="button" data-ticket-wallet-map-action="' + action + '" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '">' + icons[action] + '</button>').join('') + '<div class="ticket-wallet-map-control-mode" role="group" aria-label="' + escapeHtml(labels.style) + '">' + modeButtons + '</div></div>';
+}
+function ticketWalletChangeMapMode(nextMode, element = $('[data-ticket-wallet-real-map]')) {
+  if (nextMode !== 'standard' && nextMode !== 'simplified' || nextMode === ticketWalletMapMode) return;
+  if (ticketWalletLeafletMap && ticketWalletLeafletMapElement) {
+    const center = ticketWalletLeafletMap.getCenter();
+    ticketWalletMapPendingView = { center: [center.lat, center.lng], zoom: ticketWalletLeafletMap.getZoom() };
+  } else {
+    const fallbackView = element?.__ticketWalletFallbackMap;
+    if (fallbackView?.center && Number.isFinite(fallbackView.zoom)) ticketWalletMapPendingView = { center: [...fallbackView.center], zoom: fallbackView.zoom };
+  }
+  ticketWalletMapMode = nextMode;
+  try { localStorage.setItem('onebox.ticket-wallet-map-mode', nextMode); } catch {}
+  render();
 }
 function ticketWalletMapControlFeedback(button, message, originalLabel) {
   if (!button) return;
@@ -4889,10 +4901,6 @@ function ticketWalletHandleMapControl(action, element, button) {
     const direction = action === 'zoom-in' ? 1 : -1;
     if (map) direction > 0 ? map.zoomIn() : map.zoomOut();
     else fallback?.zoomBy?.(direction);
-    return;
-  }
-  if (action === 'all') {
-    selectTicketWalletFilter('all');
     return;
   }
   if (action === 'fullscreen') {
@@ -5094,7 +5102,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
         const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
         const tileBase = ticketWalletMapMode === 'standard'
           ? 'https://tile.openstreetmap.org'
-          : 'https://a.basemaps.cartocdn.com/' + (ticketWalletMapIsDark() ? 'dark_all' : 'light_all');
+          : 'https://a.tile.openstreetmap.fr/hot';
         tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="' + tileBase + '/' + tileZoom + '/' + wrappedX + '/' + tileY + '.png" style="width:' + tileSize + 'px!important;height:' + tileSize + 'px!important;left:' + (tileX * tileSize - topLeft.x).toFixed(1) + 'px;top:' + (tileY * tileSize - topLeft.y).toFixed(1) + 'px">');
       }
     }
@@ -5122,8 +5130,8 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
     const overlayMarkup = routes + markers + locationMarkup;
     const attribution = ticketWalletMapMode === 'standard'
       ? '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-      : '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · <a href="https://carto.com/attributions" target="_blank" rel="noreferrer">CARTO</a>';
-    element.innerHTML = '<div class="ticket-wallet-fallback-map"><div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div><svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls">' + ticketWalletMapControlMarkup() + '</div><div class="ticket-wallet-fallback-attribution">' + attribution + '</div></div>';
+      : '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>';
+    element.innerHTML = '<div class="ticket-wallet-fallback-map' + (ticketWalletMapMode === 'simplified' ? ' is-simplified-map' : '') + '"><div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div><svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls">' + ticketWalletMapControlMarkup() + '</div><div class="ticket-wallet-fallback-attribution">' + attribution + '</div></div>';
     const overlay = element.querySelector('.ticket-wallet-fallback-overlay');
     overlay?.addEventListener('pointerdown', (event) => { if (event.target.closest('[data-ticket-wallet-map-ticket]')) event.stopPropagation(); });
     overlay?.addEventListener('keydown', (event) => {
@@ -5218,9 +5226,6 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
   element.addEventListener('pointerup', stopDragging, { signal: interactionAbort.signal });
   element.addEventListener('pointercancel', stopDragging, { signal: interactionAbort.signal });
   render();
-  const themeObserver = new MutationObserver(() => render());
-  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  interactionAbort.signal.addEventListener('abort', () => themeObserver.disconnect(), { once: true });
   element.__ticketWalletFallbackMap = controller;
 }
 function ticketWalletMapError(element, geocoded = [], contextGeocoded = geocoded, geocodedPlaces = [], contextGeocodedPlaces = geocodedPlaces) { ticketWalletFallbackMap(element, geocoded, contextGeocoded, geocodedPlaces, contextGeocodedPlaces); }
@@ -5263,14 +5268,12 @@ async function hydrateTicketWalletMap() {
     const L = await ticketWalletLoadLeaflet();
     if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
     element.innerHTML = '';
+    element.classList.toggle('is-simplified-map', ticketWalletMapMode === 'simplified');
     const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true });
     element.__ticketWalletLeaflet = L;
-    const tileLayer = L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
-    element.__ticketWalletTileLayer = tileLayer;
-    const themeObserver = new MutationObserver(() => tileLayer.setUrl(ticketWalletMapTileUrl()));
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
     const mapListeners = new AbortController();
-    map.once('unload', () => { themeObserver.disconnect(); mapListeners.abort(); });
+    map.once('unload', () => mapListeners.abort());
     const mapControls = L.control({ position: 'bottomright' });
     mapControls.onAdd = () => {
       const container = L.DomUtil.create('div', 'leaflet-control ticket-wallet-map-controls-wrap');
@@ -5281,6 +5284,12 @@ async function hydrateTicketWalletMap() {
         L.DomEvent.on(button, 'click', (event) => {
           L.DomEvent.stop(event);
           ticketWalletHandleMapControl(button.dataset.ticketWalletMapAction, element, button);
+        });
+      });
+      container.querySelectorAll('[data-ticket-wallet-map-mode]').forEach((button) => {
+        L.DomEvent.on(button, 'click', (event) => {
+          L.DomEvent.stop(event);
+          ticketWalletChangeMapMode(button.dataset.ticketWalletMapMode, element);
         });
       });
       return container;
@@ -5396,11 +5405,7 @@ function ticketWalletJourneyMapMarkup(journeys, places = []) {
       : (state.language === 'en' ? 'This category has no travel routes. Choose Travel or All to view routes.' : '当前大类没有出行路线；选择“出行”或“全部”可查看路线。'));
   const countLabel = [journeys.length ? journeys.length + (state.language === 'en' ? (journeys.length === 1 ? ' route' : ' routes') : ' 条路线') : '', places.length ? places.length + (state.language === 'en' ? (places.length === 1 ? ' place' : ' places') : ' 个票面地点') : ''].filter(Boolean).join(state.language === 'en' ? ' · ' : ' · ') || (state.language === 'en' ? 'No map items' : '暂无地图内容');
   const hasMapItems = journeys.length || places.length;
-  const modeLabel = state.language === 'en' ? 'Map style' : '地图样式';
-  const standardLabel = state.language === 'en' ? 'Standard' : '标准';
-  const simplifiedLabel = state.language === 'en' ? 'Simplified' : '简化';
-  const modeSelector = '<div class="ticket-wallet-map-mode" role="group" aria-label="' + modeLabel + '"><button type="button" data-ticket-wallet-map-mode="standard" aria-pressed="' + (ticketWalletMapMode === 'standard' ? 'true' : 'false') + '">' + standardLabel + '</button><button type="button" data-ticket-wallet-map-mode="simplified" aria-pressed="' + (ticketWalletMapMode === 'simplified' ? 'true' : 'false') + '">' + simplifiedLabel + '</button></div>';
-  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div class="ticket-wallet-route-map-title"><h2>' + escapeHtml(state.language === 'en' ? 'Journey map' : '旅迹地图') + '</h2>' + modeSelector + '</div><span>' + escapeHtml(countLabel) + '</span></div>' + ticketWalletMapLegendMarkup() + '<div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map' + (hasMapItems ? '' : ' is-empty') + '" data-ticket-wallet-real-map role="region" aria-label="' + escapeHtml(state.language === 'en' ? 'Tickets and venues on the map' : '票据路线与地点地图') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(note) + '</div></section>';
+  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div class="ticket-wallet-route-map-title"><h2>' + escapeHtml(state.language === 'en' ? 'Journey map' : '旅迹地图') + '</h2></div><span>' + escapeHtml(countLabel) + '</span></div>' + ticketWalletMapLegendMarkup() + '<div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map' + (hasMapItems ? '' : ' is-empty') + '" data-ticket-wallet-real-map role="region" aria-label="' + escapeHtml(state.language === 'en' ? 'Tickets and venues on the map' : '票据路线与地点地图') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(note) + '</div></section>';
 }
 function renderTicketWalletJourneysLegacy() {
   const journeys = ticketWalletJourneys();
@@ -13606,20 +13611,7 @@ workspace.addEventListener('click', async (event) => {
   }
   const ticketWalletMapModeButton = event.target.closest('[data-ticket-wallet-map-mode]');
   if (ticketWalletMapModeButton) {
-    const nextMode = ticketWalletMapModeButton.dataset.ticketWalletMapMode;
-    if (nextMode === 'standard' || nextMode === 'simplified') {
-      if (ticketWalletLeafletMap && ticketWalletLeafletMapElement) {
-        const center = ticketWalletLeafletMap.getCenter();
-        ticketWalletMapPendingView = { center: [center.lat, center.lng], zoom: ticketWalletLeafletMap.getZoom() };
-      } else {
-        const currentMapElement = $('[data-ticket-wallet-real-map]');
-        const fallbackView = currentMapElement?.__ticketWalletFallbackMap;
-        if (fallbackView?.center && Number.isFinite(fallbackView.zoom)) ticketWalletMapPendingView = { center: [...fallbackView.center], zoom: fallbackView.zoom };
-      }
-      ticketWalletMapMode = nextMode;
-      try { localStorage.setItem('onebox.ticket-wallet-map-mode', nextMode); } catch {}
-      render();
-    }
+    ticketWalletChangeMapMode(ticketWalletMapModeButton.dataset.ticketWalletMapMode);
     return;
   }
   const ticketWalletMapFilterButton = event.target.closest('[data-ticket-wallet-map-filter]');

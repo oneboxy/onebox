@@ -17990,3 +17990,20 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 .ticket-wallet-map-legend-item { font-family: inherit; font-size: 10px; font-weight: 700; line-height: 1.2; }
 .ticket-wallet-fallback-controls { display: block; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .ticket-wallet-fallback-attribution { background: color-mix(in srgb, var(--panel) 90%, transparent); color: var(--muted); }
+
+/* Keep the map style switch with the map controls */
+.ticket-wallet-map-controls { min-width: 92px; }
+.ticket-wallet-map-control-mode { display: flex; min-height: 30px; border-top: 1px solid color-mix(in srgb, var(--line) 82%, transparent); }
+.ticket-wallet-map-control-mode button { width: auto; min-width: 0; height: 30px; flex: 1 1 0; padding: 0 6px; border: 0; border-radius: 0; background: transparent; color: var(--muted); font: inherit; font-size: 10px; font-weight: 750; white-space: nowrap; cursor: pointer; }
+.ticket-wallet-map-control-mode button + button { border-top: 0; border-left: 1px solid color-mix(in srgb, var(--line) 82%, transparent); }
+.ticket-wallet-map-control-mode button[aria-pressed="true"] { background: color-mix(in srgb, var(--primary) 10%, var(--panel)); color: var(--primary); }
+.ticket-wallet-map-control-mode button:hover { background: color-mix(in srgb, var(--primary) 12%, var(--panel)); color: var(--primary); }
+.ticket-wallet-fallback-controls .ticket-wallet-map-controls { min-width: 92px; }
+@media (max-width: 760px) {
+  .ticket-wallet-map-controls { min-width: 84px; }
+  .ticket-wallet-map-control-mode button { padding: 0 4px; font-size: 9px; }
+  .ticket-wallet-fallback-controls .ticket-wallet-map-controls { min-width: 84px; }
+}
+
+html[data-theme="dark"] .ticket-wallet-real-map.is-simplified-map .leaflet-tile,
+html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tile { filter: invert(.88) hue-rotate(180deg) brightness(.76) saturate(.68); }
