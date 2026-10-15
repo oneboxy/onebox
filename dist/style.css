@@ -17833,3 +17833,54 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
     gap: 7px;
   }
 }
+
+
+/* 2.18.665: soften global toast surfaces and simplify dismissal. */
+#toast {
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 14px;
+  padding: 8px 8px 8px 14px;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 12%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-weight: 500;
+}
+#toast[data-kind="error"] {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 24%, var(--line));
+  background: color-mix(in srgb, var(--danger) 7%, var(--panel));
+}
+.toast-close {
+  flex-basis: 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0;
+  transition: color .16s ease, background .16s ease;
+}
+.toast-close svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.toast-close:hover,
+.toast-close:focus-visible {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink);
+}
+.toast-close:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 1px;
+}
+#toast[data-kind="error"] .toast-close:hover,
+#toast[data-kind="error"] .toast-close:focus-visible {
+  color: var(--danger);
+}
