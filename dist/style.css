@@ -18000,18 +18000,26 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 .ticket-wallet-fallback-controls .ticket-wallet-map-controls { min-width: 42px; }
 .ticket-wallet-real-map.is-simplified-map .leaflet-container,
 .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: var(--panel-2);
+  background-color: #d9eee8;
   background-image:
     linear-gradient(to right, color-mix(in srgb, var(--line) 68%, transparent) 1px, transparent 1px),
     linear-gradient(to bottom, color-mix(in srgb, var(--line) 68%, transparent) 1px, transparent 1px);
   background-size: 72px 72px;
 }
 .ticket-wallet-real-map.is-simplified-map .ticket-wallet-place-label { border-color: transparent; background: color-mix(in srgb, var(--panel) 76%, transparent); box-shadow: none; color: var(--muted); }
-.ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles { display: none; }
+.ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane {
+  opacity: .82;
+  filter: saturate(.68) contrast(.94);
+}
+.ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
+  display: block;
+  opacity: .82;
+  filter: saturate(.68) contrast(.94);
+}
 .ticket-wallet-fallback-place-label { fill: var(--muted); font-size: 11px; font-weight: 700; paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 html[data-theme="dark"] .ticket-wallet-real-map.is-simplified-map .leaflet-container,
 html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: var(--panel);
+  background-color: #26383a;
   background-image:
     linear-gradient(to right, color-mix(in srgb, var(--line) 34%, transparent) 1px, transparent 1px),
     linear-gradient(to bottom, color-mix(in srgb, var(--line) 34%, transparent) 1px, transparent 1px);
@@ -18020,3 +18028,22 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   .ticket-wallet-map-controls { min-width: 42px; }
   .ticket-wallet-fallback-controls .ticket-wallet-map-controls { min-width: 42px; }
 }
+
+.ticket-wallet-map-marker { position: relative; }
+.ticket-wallet-map-marker-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  z-index: 1;
+  display: grid;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  place-items: center;
+  border: 1.5px solid var(--panel);
+  border-radius: 50%;
+  background: var(--map-badge-color);
+  color: #fff;
+  font-style: normal;
+}
+.ticket-wallet-map-marker-badge svg { width: 8px; height: 8px; stroke: currentColor; }

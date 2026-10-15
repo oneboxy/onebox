@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.660';
+const APP_VERSION = '2.18.661';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4755,9 +4755,16 @@ function ticketWalletMapJourneys(records) {
 function ticketWalletMapPlaceEntry(record) {
   const category = ticketWalletCategoryForType(record.type);
   if (category !== 'entertainment' && category !== 'dining') return null;
-  const location = String(category === 'dining' ? record.cafeLocation || record.carrier || record.from : record.carrier || '').trim();
+  const candidates = (category === 'dining'
+    ? [record.cafeLocation, record.from, record.to, record.carrier]
+    : [record.carrier, record.cafeLocation, record.from, record.to])
+    .map((value) => String(value || '').trim()).filter((value, index, all) => value && all.indexOf(value) === index);
+  const location = candidates[0] || '';
   if (!location) return null;
-  return { key: 'place|' + record.id, location, type: category, group: { key: 'place|' + record.id, from: location, to: '', records: [record] } };
+  return {
+    key: 'place|' + record.id, location, fallbackLocations: candidates.slice(1), type: category,
+    group: { key: 'place|' + record.id, from: location, to: '', records: [record] },
+  };
 }
 function ticketWalletMapPlaceEntries(records) {
   return ticketWalletMapFilteredRecords(records).map(ticketWalletMapPlaceEntry).filter(Boolean);
@@ -4844,9 +4851,16 @@ function ticketWalletReadMapMode() {
   try { return localStorage.getItem('onebox.ticket-wallet-map-mode') === 'simplified' ? 'simplified' : 'standard'; } catch { return 'standard'; }
 }
 let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
-function ticketWalletMapTileUrl() { return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'; }
+function ticketWalletMapTileUrl() {
+  return ticketWalletMapMode === 'simplified'
+    ? 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
+    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+}
 function ticketWalletMapTileAttribution() {
-  return '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+  const openStreetMap = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+  return ticketWalletMapMode === 'simplified'
+    ? openStreetMap + ' · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>'
+    : openStreetMap;
 }
 function ticketWalletMapControlMarkup() {
   const labels = state.language === 'en'
@@ -5084,7 +5098,6 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
     const center = ticketWalletMapProject(controller.center, controller.zoom);
     const topLeft = { x: center.x - width / 2, y: center.y - height / 2 };
     const tiles = [];
-    if (ticketWalletMapMode !== 'simplified') {
     const retina = window.devicePixelRatio > 1 && controller.zoom < 19;
     const tileZoom = controller.zoom + (retina ? 1 : 0);
     const tileSize = TICKET_WALLET_MAP_TILE_SIZE / (retina ? 2 : 1);
@@ -5097,10 +5110,9 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       for (let tileY = firstY; tileY <= lastY; tileY += 1) {
         if (tileY < 0 || tileY >= tileCount) continue;
         const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
-        const tileBase = 'https://tile.openstreetmap.org';
+        const tileBase = ticketWalletMapMode === 'simplified' ? 'https://a.tile.openstreetmap.fr/hot' : 'https://tile.openstreetmap.org';
         tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="' + tileBase + '/' + tileZoom + '/' + wrappedX + '/' + tileY + '.png" style="width:' + tileSize + 'px!important;height:' + tileSize + 'px!important;left:' + (tileX * tileSize - topLeft.x).toFixed(1) + 'px;top:' + (tileY * tileSize - topLeft.y).toFixed(1) + 'px">');
       }
-    }
     }
     const projectOnScreen = (point) => {
       const projected = ticketWalletMapProject(point, controller.zoom);
@@ -5118,15 +5130,27 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       const records = [...new Map(marker.groups.flatMap((group) => group.records).map((record) => [record.id, record])).values()];
       const id = records[0]?.id || '';
       const label = marker.groups.map((group) => [group.from, group.to].filter(Boolean).join(' → ')).filter(Boolean).slice(0, 2).join(' · ') || marker.label;
-      const visibleLabel = ticketWalletMapMode === 'simplified' ? marker.label : label;
+      const venueGroup = marker.groups.find((group) => group.records.some((record) => ['dining', 'entertainment'].includes(ticketWalletCategoryForType(record.type))));
+      const venueLabel = venueGroup?.from || '';
+      const visibleLabel = ticketWalletMapMode === 'simplified' ? venueLabel || marker.label : label;
       const typeStyle = ticketWalletMapItemStyle(marker.type);
+      const placeTypes = [...new Set(records.map((record) => ticketWalletCategoryForType(record.type)).filter((type) => ['dining', 'entertainment'].includes(type)))];
+      const placeBadges = (records.length > 1 ? placeTypes : []).map((type, index) => {
+        const color = ticketWalletMapItemStyle(type).color;
+        const x = screen.x + 7 + index * 9;
+        const y = screen.y + 7;
+        const symbol = type === 'dining'
+          ? 'M-1.8 -2.7v2M0 -2.7v2M1.8 -2.7v2M-1.8 -.6h3.6M0 -.6v3.5'
+          : 'M0 -3l.8 2.1L3 0l-2.2.7L0 3l-.8-2.3L-3 0l2.2-.9z';
+        return '<g fill="none" stroke="var(--panel)" stroke-width="1.5"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="5.2" fill="' + color + '"></circle><path d="' + symbol + '" transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></g>';
+      }).join('');
       const placeLabel = ticketWalletMapMode === 'simplified' ? '<text class="ticket-wallet-fallback-place-label" x="' + (screen.x + 13).toFixed(1) + '" y="' + (screen.y - 10).toFixed(1) + '">' + escapeHtml(visibleLabel) + '</text>' : '';
-      return '<g class="ticket-wallet-fallback-marker" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(visibleLabel) + '"><title>' + escapeHtml(visibleLabel) + '</title><circle cx="' + screen.x.toFixed(1) + '" cy="' + screen.y.toFixed(1) + '" r="' + (records.length > 1 ? 11 : 8) + '" fill="var(--panel)" stroke="' + typeStyle.color + '" stroke-width="3"></circle>' + (records.length > 1 ? '<text x="' + screen.x.toFixed(1) + '" y="' + (screen.y + 3.5).toFixed(1) + '" text-anchor="middle">' + records.length + '</text>' : '') + placeLabel + '</g>';
+      return '<g class="ticket-wallet-fallback-marker" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(visibleLabel) + '"><title>' + escapeHtml(visibleLabel) + '</title><circle cx="' + screen.x.toFixed(1) + '" cy="' + screen.y.toFixed(1) + '" r="' + (records.length > 1 ? 11 : 8) + '" fill="var(--panel)" stroke="' + typeStyle.color + '" stroke-width="3"></circle>' + (records.length > 1 ? '<text x="' + screen.x.toFixed(1) + '" y="' + (screen.y + 3.5).toFixed(1) + '" text-anchor="middle">' + records.length + '</text>' : '') + placeBadges + placeLabel + '</g>';
     }).join('');
     const currentLocation = controller.currentLocation ? projectOnScreen(controller.currentLocation) : null;
     const locationMarkup = currentLocation ? '<g class="ticket-wallet-fallback-location" aria-label="' + escapeHtml(state.language === 'en' ? 'Current location' : '当前位置') + '"><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="12"></circle><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="5"></circle></g>' : '';
     const overlayMarkup = routes + markers + locationMarkup;
-    const attribution = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+    const attribution = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' + (ticketWalletMapMode === 'simplified' ? ' · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>' : '');
     element.innerHTML = '<div class="ticket-wallet-fallback-map' + (ticketWalletMapMode === 'simplified' ? ' is-simplified-map' : '') + '"><div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div><svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls">' + ticketWalletMapControlMarkup() + '</div><div class="ticket-wallet-fallback-attribution">' + attribution + '</div></div>';
     const overlay = element.querySelector('.ticket-wallet-fallback-overlay');
     overlay?.addEventListener('pointerdown', (event) => { if (event.target.closest('[data-ticket-wallet-map-ticket]')) event.stopPropagation(); });
@@ -5225,12 +5249,16 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
   element.__ticketWalletFallbackMap = controller;
 }
 function ticketWalletMapError(element, geocoded = [], contextGeocoded = geocoded, geocodedPlaces = [], contextGeocodedPlaces = geocodedPlaces) { ticketWalletFallbackMap(element, geocoded, contextGeocoded, geocodedPlaces, contextGeocodedPlaces); }
-function ticketWalletMapMarkerIcon(L, type, count) {
+function ticketWalletMapMarkerIcon(L, type, count, placeTypes = []) {
   const style = ticketWalletMapItemStyle(type);
   const content = count > 1 ? '<b>' + count + '</b>' : ticketWalletMapItemIcon(type);
+  const badges = placeTypes.map((placeType) => {
+    const placeStyle = ticketWalletMapItemStyle(placeType);
+    return '<i class="ticket-wallet-map-marker-badge" style="--map-badge-color:' + placeStyle.color + '">' + ticketWalletMapItemIcon(placeType) + '</i>';
+  }).join('');
   return L.divIcon({
     className: 'ticket-wallet-map-div-icon',
-    html: '<span class="ticket-wallet-map-marker" style="--map-point-color:' + style.color + '">' + content + '</span>',
+    html: '<span class="ticket-wallet-map-marker" style="--map-point-color:' + style.color + '">' + content + badges + '</span>',
     iconSize: [32, 32],
     iconAnchor: [16, 16],
   });
@@ -5258,7 +5286,14 @@ async function hydrateTicketWalletMap() {
   const geocodedPlaces = [];
   try {
     for (const group of journeys) geocoded.push({ group, from: await ticketWalletGeocodePlace(group.from), to: await ticketWalletGeocodePlace(group.to) });
-    for (const entry of placeEntries) geocodedPlaces.push({ entry, point: await ticketWalletGeocodePlace(entry.location) });
+    for (const entry of placeEntries) {
+      let point = null;
+      for (const location of [entry.location, ...(entry.fallbackLocations || [])]) {
+        point = await ticketWalletGeocodePlace(location);
+        if (point) break;
+      }
+      geocodedPlaces.push({ entry, point });
+    }
     if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
 
     const L = await ticketWalletLoadLeaflet();
@@ -5268,8 +5303,7 @@ async function hydrateTicketWalletMap() {
     element.classList.toggle('is-simplified-map', isSimplifiedMap);
     const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true });
     element.__ticketWalletLeaflet = L;
-    if (isSimplifiedMap) map.attributionControl?.addAttribution(ticketWalletMapTileAttribution());
-    else L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
+    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
     const mapListeners = new AbortController();
     map.once('unload', () => mapListeners.abort());
     const mapControls = L.control({ position: 'bottomright' });
@@ -5346,10 +5380,14 @@ async function hydrateTicketWalletMap() {
       const records = [...new Map(cluster.groups.flatMap((group) => group.records).map((record) => [record.id, record])).values()];
       const type = cluster.type;
       const label = cluster.groups.map((group) => [group.from, group.to].filter(Boolean).join(' → ')).filter(Boolean).slice(0, 2).join(' · ') || cluster.label;
-      const hasVenueLabel = cluster.groups.some((group) => group.records.some((record) => ['dining', 'entertainment'].includes(ticketWalletCategoryForType(record.type))));
+      const venueGroup = cluster.groups.find((group) => group.records.some((record) => ['dining', 'entertainment'].includes(ticketWalletCategoryForType(record.type))));
+      const venueLabel = venueGroup?.from || '';
+      const hasVenueLabel = Boolean(venueGroup);
       const usePermanentLabel = hasVenueLabel || ticketWalletMapMode === 'simplified';
-      const visibleLabel = ticketWalletMapMode === 'simplified' ? cluster.label : label;
-      const marker = L.marker(cluster.point, { icon: ticketWalletMapMarkerIcon(L, type, records.length), keyboard: true, riseOnHover: true })
+      const visibleLabel = ticketWalletMapMode === 'simplified' ? venueLabel || cluster.label : label;
+      const placeTypes = [...new Set(records.map((record) => ticketWalletCategoryForType(record.type)).filter((placeType) => ['dining', 'entertainment'].includes(placeType)))];
+      const placeBadges = records.length > 1 ? placeTypes : [];
+      const marker = L.marker(cluster.point, { icon: ticketWalletMapMarkerIcon(L, type, records.length, placeBadges), keyboard: true, riseOnHover: true })
         .addTo(map)
         .bindTooltip(visibleLabel, { permanent: usePermanentLabel, direction: 'top', offset: [0, -12], className: usePermanentLabel ? 'ticket-wallet-place-label' : '' })
         .bindPopup(ticketWalletMapPopupElement(cluster.groups, cluster.label));
