@@ -17559,8 +17559,8 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   .dev-tools-page.dev-is-fullscreen .dev-mode-tab {
     width: 100%;
     min-width: 0;
-    min-height: 34px;
-    padding: 5px 2px;
+    min-height: 32px;
+    padding: 3px 2px;
     border-radius: 7px;
     font-size: 11px;
     white-space: nowrap;
@@ -17779,3 +17779,6 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 
 
 /* 2.18.660: align the mobile Developer underline with its divider. */
+
+
+/* 2.18.661: compact the mobile Developer tab row. */
