@@ -354,7 +354,7 @@ const toast = (message, kind = 'info', options = {}) => {
     node.setAttribute('role', 'status');
     document.body.append(node);
   }
-  node.innerHTML = '<span class="toast-copy">' + escapeHtml(message) + '</span><button type="button" class="toast-close" aria-label="Close">×</button>';
+  node.innerHTML = '<span class="toast-copy">' + escapeHtml(message) + '</span><button type="button" class="toast-close" aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg></button>';
   node.dataset.kind = kind;
   node.classList.add('visible');
   node.onclick = (event) => { if (event.target.closest('.toast-close')) node.classList.remove('visible'); };
