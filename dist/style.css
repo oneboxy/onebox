@@ -17549,7 +17549,7 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
     min-width: 0;
     gap: 2px;
     margin: 0 0 10px;
-    padding: 0 0 6px;
+    padding: 0;
     overflow: visible;
     border: 0;
     border-bottom: 1px solid var(--line);
@@ -17559,9 +17559,9 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   .dev-tools-page.dev-is-fullscreen .dev-mode-tab {
     width: 100%;
     min-width: 0;
-    min-height: 40px;
-    padding: 7px 2px;
-    border-radius: 8px;
+    min-height: 34px;
+    padding: 5px 2px;
+    border-radius: 7px;
     font-size: 11px;
     white-space: nowrap;
   }
@@ -17776,3 +17776,6 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
     box-sizing: border-box;
   }
 }
+
+
+/* 2.18.660: align the mobile Developer underline with its divider. */
