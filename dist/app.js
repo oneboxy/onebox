@@ -5109,7 +5109,7 @@ function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
     });
   };
   const resize = () => comicMap.resize();
-  map.on('move', syncCamera);
+  map.on('moveend zoomend', syncCamera);
   map.on('resize', resize);
   const themeObserver = new MutationObserver(applyStyle);
   themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -5117,7 +5117,7 @@ function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
     disposed = true;
     if (syncFrame) cancelAnimationFrame(syncFrame);
     themeObserver.disconnect();
-    map.off('move', syncCamera);
+    map.off('moveend zoomend', syncCamera);
     map.off('resize', resize);
     comicMap.remove();
   });
