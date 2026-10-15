@@ -18164,22 +18164,48 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   }
 }
 
-/* Simplified mode uses Stamen's archival watercolor tiles as a hand-drawn map. */
-body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-container {
-  background-color: #f2ecdf;
-  background-image: radial-gradient(circle, rgb(118 96 67 / 7%) .55px, transparent .7px);
-  background-size: 7px 7px;
+/* Simplified map: inked edges, flat color bands, and a light comic halftone. */
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container {
+  background-color: #fbf3e3;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane {
-  opacity: 1;
-  filter: none;
+body:has(.ticket-wallet-page) .ticket-wallet-comic-filter-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane .leaflet-tile {
+  filter: url(#ticket-wallet-comic-map-filter) saturate(1.08) contrast(1.06);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container::after {
+  position: absolute;
+  z-index: 350;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgb(34 43 58 / 18%) .65px, transparent .9px);
+  background-size: 7px 7px;
+  opacity: .2;
+  mix-blend-mode: multiply;
+  content: "";
 }
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: #f2ecdf;
-  background-image: radial-gradient(circle, rgb(118 96 67 / 7%) .55px, transparent .7px);
-  background-size: 7px 7px;
+  background-color: #fbf3e3;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
-  opacity: .9;
-  filter: sepia(.08) saturate(.88);
+  filter: saturate(1.16) contrast(1.08);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgb(34 43 58 / 18%) .65px, transparent .9px);
+  background-size: 7px 7px;
+  opacity: .2;
+  mix-blend-mode: multiply;
+  content: "";
+}
+body:has(.ticket-wallet-page) .ticket-wallet-fallback-map .ticket-wallet-fallback-overlay {
+  z-index: 2;
 }

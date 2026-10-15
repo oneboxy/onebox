@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.664';
+const APP_VERSION = '2.18.665';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4851,15 +4851,14 @@ function ticketWalletReadMapMode() {
   try { return localStorage.getItem('onebox.ticket-wallet-map-mode') === 'simplified' ? 'simplified' : 'standard'; } catch { return 'standard'; }
 }
 let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
+function ticketWalletComicFilterMarkup() {
+  return '<svg class="ticket-wallet-comic-filter-defs" aria-hidden="true" focusable="false"><defs><filter id="ticket-wallet-comic-map-filter" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="saturate" values="1.28" result="comic-colors"/><feComponentTransfer in="comic-colors" result="comic-flats"><feFuncR type="discrete" tableValues="0 .12 .27 .44 .62 .81 1"/><feFuncG type="discrete" tableValues="0 .1 .23 .4 .59 .78 1"/><feFuncB type="discrete" tableValues="0 .12 .28 .47 .66 .84 1"/></feComponentTransfer><feConvolveMatrix in="comic-flats" order="3" kernelMatrix="0 -.25 0 -.25 2 -.25 0 -.25 0" divisor="1" bias="0"/></filter></defs></svg>';
+}
 function ticketWalletMapTileUrl() {
-  return ticketWalletMapMode === 'simplified'
-    ? 'https://watercolormaps.collection.cooperhewitt.org/tile/watercolor/{z}/{x}/{y}.jpg'
-    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
 function ticketWalletMapTileAttribution() {
-  const openStreetMap = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
-  const watercolor = '<a href="https://stamen.com/" target="_blank" rel="noreferrer">Map tiles by Stamen Design</a> (CC BY 3.0) · Data by ' + openStreetMap + ' (CC BY-SA 2.0) · <a href="https://watercolormaps.collection.cooperhewitt.org/" target="_blank" rel="noreferrer">Cooper Hewitt</a>';
-  return ticketWalletMapMode === 'simplified' ? watercolor : openStreetMap;
+  return '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
 }
 function ticketWalletMapControlMarkup() {
   const labels = state.language === 'en'
@@ -5136,7 +5135,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       for (let tileY = firstY; tileY <= lastY; tileY += 1) {
         if (tileY < 0 || tileY >= tileCount) continue;
         const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
-        const tileBase = ticketWalletMapMode === 'simplified' ? 'https://a.tile.openstreetmap.fr/hot' : 'https://tile.openstreetmap.org';
+        const tileBase = 'https://tile.openstreetmap.org';
         tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="' + tileBase + '/' + tileZoom + '/' + wrappedX + '/' + tileY + '.png" style="width:' + tileSize + 'px!important;height:' + tileSize + 'px!important;left:' + (tileX * tileSize - topLeft.x).toFixed(1) + 'px;top:' + (tileY * tileSize - topLeft.y).toFixed(1) + 'px">');
       }
     }
@@ -5176,7 +5175,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
     const currentLocation = controller.currentLocation ? projectOnScreen(controller.currentLocation) : null;
     const locationMarkup = currentLocation ? '<g class="ticket-wallet-fallback-location" aria-label="' + escapeHtml(state.language === 'en' ? 'Current location' : '当前位置') + '"><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="12"></circle><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="5"></circle></g>' : '';
     const overlayMarkup = routes + markers + locationMarkup;
-    const attribution = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' + (ticketWalletMapMode === 'simplified' ? ' · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>' : '');
+    const attribution = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
     element.innerHTML = '<div class="ticket-wallet-fallback-map' + (ticketWalletMapMode === 'simplified' ? ' is-simplified-map' : '') + '"><div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div><svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls">' + ticketWalletMapControlMarkup() + '</div><div class="ticket-wallet-fallback-attribution">' + attribution + '</div></div>';
     const overlay = element.querySelector('.ticket-wallet-fallback-overlay');
     overlay?.addEventListener('pointerdown', (event) => { if (event.target.closest('[data-ticket-wallet-map-ticket]')) event.stopPropagation(); });
@@ -5327,11 +5326,12 @@ async function hydrateTicketWalletMap() {
     element.innerHTML = '';
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
     element.classList.toggle('is-simplified-map', isSimplifiedMap);
-    const mapMaxZoom = isSimplifiedMap ? 16 : 19;
+    const mapMaxZoom = 19;
     const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true, maxZoom: mapMaxZoom });
     element.__ticketWalletMap = map;
     element.__ticketWalletLeaflet = L;
-    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: mapMaxZoom, detectRetina: !isSimplifiedMap, attribution: ticketWalletMapTileAttribution() }).addTo(map);
+    if (isSimplifiedMap) element.insertAdjacentHTML('afterbegin', ticketWalletComicFilterMarkup());
+    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: mapMaxZoom, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
     const mapListeners = new AbortController();
     map.once('unload', () => mapListeners.abort());
     const mapControls = L.control({ position: 'bottomright' });
