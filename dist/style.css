@@ -18163,3 +18163,23 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
     margin-left: 0;
   }
 }
+
+/* Simplified mode uses Stamen's archival watercolor tiles as a hand-drawn map. */
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-container {
+  background-color: #f2ecdf;
+  background-image: radial-gradient(circle, rgb(118 96 67 / 7%) .55px, transparent .7px);
+  background-size: 7px 7px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane {
+  opacity: 1;
+  filter: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
+  background-color: #f2ecdf;
+  background-image: radial-gradient(circle, rgb(118 96 67 / 7%) .55px, transparent .7px);
+  background-size: 7px 7px;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
+  opacity: .9;
+  filter: sepia(.08) saturate(.88);
+}

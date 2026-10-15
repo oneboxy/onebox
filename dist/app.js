@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.663';
+const APP_VERSION = '2.18.664';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4853,14 +4853,13 @@ function ticketWalletReadMapMode() {
 let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
 function ticketWalletMapTileUrl() {
   return ticketWalletMapMode === 'simplified'
-    ? 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
+    ? 'https://watercolormaps.collection.cooperhewitt.org/tile/watercolor/{z}/{x}/{y}.jpg'
     : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
 function ticketWalletMapTileAttribution() {
   const openStreetMap = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
-  return ticketWalletMapMode === 'simplified'
-    ? openStreetMap + ' · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>'
-    : openStreetMap;
+  const watercolor = '<a href="https://stamen.com/" target="_blank" rel="noreferrer">Map tiles by Stamen Design</a> (CC BY 3.0) · Data by ' + openStreetMap + ' (CC BY-SA 2.0) · <a href="https://watercolormaps.collection.cooperhewitt.org/" target="_blank" rel="noreferrer">Cooper Hewitt</a>';
+  return ticketWalletMapMode === 'simplified' ? watercolor : openStreetMap;
 }
 function ticketWalletMapControlMarkup() {
   const labels = state.language === 'en'
@@ -5328,10 +5327,11 @@ async function hydrateTicketWalletMap() {
     element.innerHTML = '';
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
     element.classList.toggle('is-simplified-map', isSimplifiedMap);
-    const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true });
+    const mapMaxZoom = isSimplifiedMap ? 16 : 19;
+    const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true, maxZoom: mapMaxZoom });
     element.__ticketWalletMap = map;
     element.__ticketWalletLeaflet = L;
-    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
+    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: mapMaxZoom, detectRetina: !isSimplifiedMap, attribution: ticketWalletMapTileAttribution() }).addTo(map);
     const mapListeners = new AbortController();
     map.once('unload', () => mapListeners.abort());
     const mapControls = L.control({ position: 'bottomright' });
