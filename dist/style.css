@@ -18164,7 +18164,7 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   }
 }
 
-/* Simplified map: inked edges, flat color bands, and a light comic halftone. */
+/* Comic map texture sits above the vector tiles while route overlays remain crisp. */
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
   background-color: #fbf3e3;

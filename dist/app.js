@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.665';
+const APP_VERSION = '2.18.666';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4854,6 +4854,180 @@ let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingV
 function ticketWalletComicFilterMarkup() {
   return '<svg class="ticket-wallet-comic-filter-defs" aria-hidden="true" focusable="false"><defs><filter id="ticket-wallet-comic-map-filter" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="saturate" values="1.28" result="comic-colors"/><feComponentTransfer in="comic-colors" result="comic-flats"><feFuncR type="discrete" tableValues="0 .12 .27 .44 .62 .81 1"/><feFuncG type="discrete" tableValues="0 .1 .23 .4 .59 .78 1"/><feFuncB type="discrete" tableValues="0 .12 .28 .47 .66 .84 1"/></feComponentTransfer><feConvolveMatrix in="comic-flats" order="3" kernelMatrix="0 -.25 0 -.25 2 -.25 0 -.25 0" divisor="1" bias="0"/></filter></defs></svg>';
 }
+
+const TICKET_WALLET_MAPLIBRE_VERSION = '5.12.0';
+let ticketWalletComicVectorLayerPromise = null;
+function ticketWalletLoadComicVectorLayer(L) {
+  if (typeof window.maplibregl !== 'undefined' && typeof L.maplibreGL === 'function') return Promise.resolve(L.maplibreGL);
+  if (ticketWalletComicVectorLayerPromise) return ticketWalletComicVectorLayerPromise;
+  ticketWalletComicVectorLayerPromise = (async () => {
+    const providers = [
+      {
+        css: 'https://cdn.jsdelivr.net/npm/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.css',
+        map: 'https://cdn.jsdelivr.net/npm/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.js',
+        adapter: 'https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js',
+      },
+      {
+        css: 'https://unpkg.com/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.css',
+        map: 'https://unpkg.com/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.js',
+        adapter: 'https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js',
+      },
+    ];
+    const loadScript = (id, src, ready) => {
+      if (ready()) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.async = true;
+        script.dataset.ticketWalletVectorMap = id;
+        script.src = src;
+        script.onload = () => ready() ? resolve() : reject(Error('MapLibre script did not initialize'));
+        script.onerror = () => reject(Error('MapLibre CDN unavailable'));
+        document.head.appendChild(script);
+      });
+    };
+    let lastError = null;
+    for (const [index, provider] of providers.entries()) {
+      const cssId = 'ticketWalletMapLibreCss' + index;
+      if (!document.getElementById(cssId)) {
+        const link = document.createElement('link');
+        link.id = cssId;
+        link.rel = 'stylesheet';
+        link.href = provider.css;
+        document.head.appendChild(link);
+      }
+      try {
+        await loadScript('map-' + index, provider.map, () => typeof window.maplibregl !== 'undefined');
+        await loadScript('leaflet-adapter-' + index, provider.adapter, () => typeof L.maplibreGL === 'function');
+        if (typeof L.maplibreGL === 'function') return L.maplibreGL;
+      } catch (error) {
+        lastError = error;
+        document.querySelector('script[data-ticket-wallet-vector-map="map-' + index + '"]')?.remove();
+        document.querySelector('script[data-ticket-wallet-vector-map="leaflet-adapter-' + index + '"]')?.remove();
+      }
+    }
+    ticketWalletComicVectorLayerPromise = null;
+    throw lastError || Error('MapLibre Leaflet adapter unavailable');
+  })();
+  return ticketWalletComicVectorLayerPromise;
+}
+function ticketWalletApplyComicMapStyle(map) {
+  if (!map || !map.isStyleLoaded()) return;
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const palette = dark ? {
+    paper: '#26343d', land: '#293944', water: '#246175', waterEdge: '#68bed0',
+    park: '#45684f', woodland: '#4b7050', grass: '#56734e',
+    residential: '#2b3a43', commercial: '#554c45', industrial: '#62564a',
+    building: '#a07a55', ink: '#2a3540', roadMajor: '#f5a84b',
+    roadPrimary: '#e4b858', roadSecondary: '#b9ad7e', roadMinor: '#526570',
+    waterway: '#65c1d2', label: '#f7efd9', labelHalo: '#273842',
+    waterLabel: '#a8dce4', boundary: '#9c8293', rail: '#c19bcd',
+  } : {
+    paper: '#fff2d6', land: '#fff2d6', water: '#78d8e9', waterEdge: '#286f82',
+    park: '#a5d97b', woodland: '#79bd76', grass: '#c5e88b',
+    residential: '#f8edd5', commercial: '#f2d29d', industrial: '#edc58d',
+    building: '#efc48b', ink: '#344452', roadMajor: '#ffb44c',
+    roadPrimary: '#f4c85e', roadSecondary: '#fff0bd', roadMinor: '#fff9e7',
+    waterway: '#42b8d0', label: '#293c49', labelHalo: '#fff8e6',
+    waterLabel: '#276e83', boundary: '#a87c91', rail: '#725785',
+  };
+  const layers = map.getStyle()?.layers || [];
+  const findLayer = (id) => layers.find((layer) => layer.id === id);
+  const setPaint = (id, property, value) => {
+    if (findLayer(id)) { try { map.setPaintProperty(id, property, value); } catch {} }
+  };
+  const setLayout = (id, property, value) => {
+    if (findLayer(id)) { try { map.setLayoutProperty(id, property, value); } catch {} }
+  };
+  const majorRoadWidth = ['interpolate', ['linear'], ['zoom'], 4, 1, 7, 1.8, 10, 3.4, 14, 6, 18, 10];
+  const secondaryRoadWidth = ['interpolate', ['linear'], ['zoom'], 6, .65, 9, 1.2, 12, 2.5, 16, 5, 18, 8];
+  const localRoadWidth = ['interpolate', ['linear'], ['zoom'], 10, .1, 12, .45, 14, 1.4, 16, 2.8, 18, 4.5];
+  const roadWidth = (id, casing) => {
+    const base = /motorway|trunk|primary/.test(id) ? majorRoadWidth : /secondary|tertiary/.test(id) ? secondaryRoadWidth : localRoadWidth;
+    return casing ? ['+', base, 1.3] : base;
+  };
+  for (const layer of layers) {
+    const id = layer.id;
+    if (/^(poi_|poi-|road_oneway|highway-name-|highway-shield-|road_shield|waterway_line_label|airport$|label_village$|label_other$)/.test(id)) {
+      setLayout(id, 'visibility', 'none');
+      continue;
+    }
+    if (id === 'background') {
+      setPaint(id, 'background-color', palette.paper);
+      continue;
+    }
+    if (layer.type === 'fill') {
+      if (id === 'water' || id === 'water-intermittent') {
+        setPaint(id, 'fill-color', palette.water);
+        setPaint(id, 'fill-outline-color', palette.waterEdge);
+      } else if (id.includes('park') || id.includes('grass')) {
+        setPaint(id, 'fill-color', palette.park);
+        setPaint(id, 'fill-outline-color', dark ? '#54785b' : '#5a9c63');
+      } else if (id.includes('wood')) {
+        setPaint(id, 'fill-color', palette.woodland);
+      } else if (id.includes('residential') || id.includes('suburb')) {
+        setPaint(id, 'fill-color', palette.residential);
+      } else if (id.includes('commercial') || id.includes('school') || id.includes('hospital')) {
+        setPaint(id, 'fill-color', palette.commercial);
+      } else if (id.includes('industrial') || id.includes('railway')) {
+        setPaint(id, 'fill-color', palette.industrial);
+      } else if (id.includes('building')) {
+        setPaint(id, 'fill-color', palette.building);
+        setPaint(id, 'fill-outline-color', dark ? '#d3aa7e' : '#a77148');
+      } else if (id.includes('sand')) {
+        setPaint(id, 'fill-color', dark ? '#7c6850' : '#f5d79d');
+      } else if (id.includes('aeroway')) {
+        setPaint(id, 'fill-color', dark ? '#495762' : '#edcf9e');
+      }
+      continue;
+    }
+    if (layer.type === 'line') {
+      setLayout(id, 'line-cap', 'round');
+      setLayout(id, 'line-join', 'round');
+      if (id.includes('waterway')) {
+        setPaint(id, 'line-color', palette.waterway);
+        setPaint(id, 'line-width', ['interpolate', ['linear'], ['zoom'], 8, .7, 12, 1.6, 16, 3.4]);
+      } else if (id.includes('railway')) {
+        setPaint(id, 'line-color', palette.rail);
+        setPaint(id, 'line-width', ['interpolate', ['linear'], ['zoom'], 8, .7, 12, 1.2, 16, 2.2]);
+        if (id.includes('hatching')) setPaint(id, 'line-dasharray', [1.5, 1.5]);
+      } else if (id.includes('boundary')) {
+        setPaint(id, 'line-color', palette.boundary);
+        setPaint(id, 'line-width', ['interpolate', ['linear'], ['zoom'], 4, .6, 10, 1.2, 16, 2]);
+        setPaint(id, 'line-dasharray', [2, 2.4]);
+        setPaint(id, 'line-opacity', .72);
+      } else if (/highway|bridge|tunnel|road_pier/.test(id)) {
+        const casing = id.includes('casing');
+        setPaint(id, 'line-color', casing ? palette.ink : /motorway/.test(id) ? palette.roadMajor : /trunk|primary/.test(id) ? palette.roadPrimary : /secondary|tertiary/.test(id) ? palette.roadSecondary : palette.roadMinor);
+        setPaint(id, 'line-width', roadWidth(id, casing));
+        if (/minor|service|track|path/.test(id) && !casing) {
+          setPaint(id, 'line-opacity', ['interpolate', ['linear'], ['zoom'], 10, 0, 12, .5, 14, .86, 16, 1]);
+        } else {
+          setPaint(id, 'line-opacity', 1);
+        }
+      } else if (id.includes('aeroway')) {
+        setPaint(id, 'line-color', dark ? '#d7a45a' : '#dda85e');
+      }
+      continue;
+    }
+    if (layer.type === 'symbol' && layer.layout?.['text-field']) {
+      if (id.startsWith('water_name')) {
+        setPaint(id, 'text-color', palette.waterLabel);
+        setPaint(id, 'text-halo-color', palette.labelHalo);
+        setPaint(id, 'text-halo-width', 2.5);
+      } else if (id.startsWith('label_')) {
+        setLayout(id, 'text-font', ['Noto Sans Bold']);
+        setPaint(id, 'text-color', palette.label);
+        setPaint(id, 'text-halo-color', palette.labelHalo);
+        setPaint(id, 'text-halo-width', 3);
+        setPaint(id, 'text-halo-blur', .25);
+        if (/label_city|label_town/.test(id)) {
+          setLayout(id, 'text-size', ['interpolate', ['linear'], ['zoom'], 5, 13, 9, 16, 13, 19]);
+        }
+      }
+    }
+  }
+}
+
 function ticketWalletMapTileUrl() {
   return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
@@ -5323,15 +5497,43 @@ async function hydrateTicketWalletMap() {
 
     const L = await ticketWalletLoadLeaflet();
     if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
-    element.innerHTML = '';
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
+    let comicLayerFactory = null;
+    if (isSimplifiedMap) {
+      try { comicLayerFactory = await ticketWalletLoadComicVectorLayer(L); } catch {}
+      if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
+    }
+    element.innerHTML = '';
     element.classList.toggle('is-simplified-map', isSimplifiedMap);
     const mapMaxZoom = 19;
-    const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true, maxZoom: mapMaxZoom });
+    const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true, maxZoom: mapMaxZoom, minZoom: 1, maxBounds: [[180, -Infinity], [-180, Infinity]], maxBoundsViscosity: 1 });
     element.__ticketWalletMap = map;
     element.__ticketWalletLeaflet = L;
     if (isSimplifiedMap) element.insertAdjacentHTML('afterbegin', ticketWalletComicFilterMarkup());
-    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: mapMaxZoom, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
+    const fallbackTileLayer = L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: mapMaxZoom, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
+    if (isSimplifiedMap && comicLayerFactory) {
+      try {
+        const comicLayer = comicLayerFactory({ style: 'https://tiles.openfreemap.org/styles/bright', interactive: false, attributionControl: false });
+        comicLayer.addTo(map);
+        const comicMap = comicLayer.getMaplibreMap();
+        let comicReady = false;
+        const applyComicStyle = () => {
+          if (!comicMap.isStyleLoaded()) return;
+          ticketWalletApplyComicMapStyle(comicMap);
+          if (!comicReady) {
+            comicReady = true;
+            if (map.hasLayer(fallbackTileLayer)) map.removeLayer(fallbackTileLayer);
+            map.attributionControl.addAttribution('<a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a> · <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>');
+          }
+        };
+        comicMap.on('style.load', applyComicStyle);
+        comicMap.once('idle', applyComicStyle);
+        if (comicMap.isStyleLoaded()) applyComicStyle();
+        const comicThemeObserver = new MutationObserver(() => applyComicStyle());
+        comicThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        map.once('unload', () => comicThemeObserver.disconnect());
+      } catch {}
+    }
     const mapListeners = new AbortController();
     map.once('unload', () => mapListeners.abort());
     const mapControls = L.control({ position: 'bottomright' });
