@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.659';
+const APP_VERSION = '2.18.660';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4844,32 +4844,28 @@ function ticketWalletReadMapMode() {
   try { return localStorage.getItem('onebox.ticket-wallet-map-mode') === 'simplified' ? 'simplified' : 'standard'; } catch { return 'standard'; }
 }
 let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
-function ticketWalletMapTileUrl() {
-  if (ticketWalletMapMode === 'standard') return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-  return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
-}
+function ticketWalletMapTileUrl() { return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'; }
 function ticketWalletMapTileAttribution() {
-  return ticketWalletMapMode === 'standard'
-    ? '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-    : '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>';
+  return '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
 }
 function ticketWalletMapControlMarkup() {
   const labels = state.language === 'en'
-    ? { zoomIn: 'Zoom in', zoomOut: 'Zoom out', locate: 'Locate me', fullscreen: 'Toggle fullscreen', style: 'Map style', standard: 'Standard', simplified: 'Simple' }
-    : { zoomIn: '放大地图', zoomOut: '缩小地图', locate: '定位到当前位置', fullscreen: '切换全屏', style: '地图样式', standard: '标准', simplified: '简化' };
+    ? { zoomIn: 'Zoom in', zoomOut: 'Zoom out', locate: 'Locate me', fullscreen: 'Toggle fullscreen', toStandard: 'Switch to standard map', toSimplified: 'Switch to simplified map' }
+    : { zoomIn: '放大地图', zoomOut: '缩小地图', locate: '定位到当前位置', fullscreen: '切换全屏', toStandard: '切换为标准地图', toSimplified: '切换为简化地图' };
   const icons = {
     'zoom-in': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     'zoom-out': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>',
     locate: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.2"/><circle cx="12" cy="12" r="1.7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>',
     fullscreen: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h-5v5M15.5 3.5h5v5M20.5 15.5v5h-5M8.5 20.5h-5v-5"/></svg>',
+    'map-mode': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 4.7-9 4.8-9-4.8L12 3Z"/><path d="m4 12 8 4.2 8-4.2M4 16.5l8 4.2 8-4.2"/></svg>',
   };
   const actions = [
     ['zoom-in', labels.zoomIn], ['zoom-out', labels.zoomOut], ['locate', labels.locate], ['fullscreen', labels.fullscreen],
   ];
-  const modeButtons = [['standard', labels.standard], ['simplified', labels.simplified]].map(([mode, label]) =>
-    '<button type="button" data-ticket-wallet-map-mode="' + mode + '" aria-pressed="' + (ticketWalletMapMode === mode ? 'true' : 'false') + '" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '">' + label + '</button>'
-  ).join('');
-  return '<div class="ticket-wallet-map-controls" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Map controls' : '地图控件') + '">' + actions.map(([action, label]) => '<button type="button" data-ticket-wallet-map-action="' + action + '" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '">' + icons[action] + '</button>').join('') + '<div class="ticket-wallet-map-control-mode" role="group" aria-label="' + escapeHtml(labels.style) + '">' + modeButtons + '</div></div>';
+  const nextMode = ticketWalletMapMode === 'standard' ? 'simplified' : 'standard';
+  const modeLabel = ticketWalletMapMode === 'standard' ? labels.toSimplified : labels.toStandard;
+  const modeButton = '<button type="button" class="ticket-wallet-map-style-button" data-ticket-wallet-map-mode="' + nextMode + '" aria-pressed="' + (ticketWalletMapMode === 'simplified' ? 'true' : 'false') + '" aria-label="' + escapeHtml(modeLabel) + '" title="' + escapeHtml(modeLabel) + '">' + icons['map-mode'] + '</button>';
+  return '<div class="ticket-wallet-map-controls" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Map controls' : '地图控件') + '">' + actions.map(([action, label]) => '<button type="button" data-ticket-wallet-map-action="' + action + '" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '">' + icons[action] + '</button>').join('') + modeButton + '</div>';
 }
 function ticketWalletChangeMapMode(nextMode, element = $('[data-ticket-wallet-real-map]')) {
   if (nextMode !== 'standard' && nextMode !== 'simplified' || nextMode === ticketWalletMapMode) return;
@@ -5088,6 +5084,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
     const center = ticketWalletMapProject(controller.center, controller.zoom);
     const topLeft = { x: center.x - width / 2, y: center.y - height / 2 };
     const tiles = [];
+    if (ticketWalletMapMode !== 'simplified') {
     const retina = window.devicePixelRatio > 1 && controller.zoom < 19;
     const tileZoom = controller.zoom + (retina ? 1 : 0);
     const tileSize = TICKET_WALLET_MAP_TILE_SIZE / (retina ? 2 : 1);
@@ -5100,11 +5097,10 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       for (let tileY = firstY; tileY <= lastY; tileY += 1) {
         if (tileY < 0 || tileY >= tileCount) continue;
         const wrappedX = ((tileX % tileCount) + tileCount) % tileCount;
-        const tileBase = ticketWalletMapMode === 'standard'
-          ? 'https://tile.openstreetmap.org'
-          : 'https://a.tile.openstreetmap.fr/hot';
+        const tileBase = 'https://tile.openstreetmap.org';
         tiles.push('<img class="ticket-wallet-fallback-tile" alt="" src="' + tileBase + '/' + tileZoom + '/' + wrappedX + '/' + tileY + '.png" style="width:' + tileSize + 'px!important;height:' + tileSize + 'px!important;left:' + (tileX * tileSize - topLeft.x).toFixed(1) + 'px;top:' + (tileY * tileSize - topLeft.y).toFixed(1) + 'px">');
       }
+    }
     }
     const projectOnScreen = (point) => {
       const projected = ticketWalletMapProject(point, controller.zoom);
@@ -5122,15 +5118,15 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       const records = [...new Map(marker.groups.flatMap((group) => group.records).map((record) => [record.id, record])).values()];
       const id = records[0]?.id || '';
       const label = marker.groups.map((group) => [group.from, group.to].filter(Boolean).join(' → ')).filter(Boolean).slice(0, 2).join(' · ') || marker.label;
+      const visibleLabel = ticketWalletMapMode === 'simplified' ? marker.label : label;
       const typeStyle = ticketWalletMapItemStyle(marker.type);
-      return '<g class="ticket-wallet-fallback-marker" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(label) + '"><title>' + escapeHtml(label) + '</title><circle cx="' + screen.x.toFixed(1) + '" cy="' + screen.y.toFixed(1) + '" r="' + (records.length > 1 ? 11 : 8) + '" fill="var(--panel)" stroke="' + typeStyle.color + '" stroke-width="3"></circle>' + (records.length > 1 ? '<text x="' + screen.x.toFixed(1) + '" y="' + (screen.y + 3.5).toFixed(1) + '" text-anchor="middle">' + records.length + '</text>' : '') + '</g>';
+      const placeLabel = ticketWalletMapMode === 'simplified' ? '<text class="ticket-wallet-fallback-place-label" x="' + (screen.x + 13).toFixed(1) + '" y="' + (screen.y - 10).toFixed(1) + '">' + escapeHtml(visibleLabel) + '</text>' : '';
+      return '<g class="ticket-wallet-fallback-marker" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(visibleLabel) + '"><title>' + escapeHtml(visibleLabel) + '</title><circle cx="' + screen.x.toFixed(1) + '" cy="' + screen.y.toFixed(1) + '" r="' + (records.length > 1 ? 11 : 8) + '" fill="var(--panel)" stroke="' + typeStyle.color + '" stroke-width="3"></circle>' + (records.length > 1 ? '<text x="' + screen.x.toFixed(1) + '" y="' + (screen.y + 3.5).toFixed(1) + '" text-anchor="middle">' + records.length + '</text>' : '') + placeLabel + '</g>';
     }).join('');
     const currentLocation = controller.currentLocation ? projectOnScreen(controller.currentLocation) : null;
     const locationMarkup = currentLocation ? '<g class="ticket-wallet-fallback-location" aria-label="' + escapeHtml(state.language === 'en' ? 'Current location' : '当前位置') + '"><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="12"></circle><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="5"></circle></g>' : '';
     const overlayMarkup = routes + markers + locationMarkup;
-    const attribution = ticketWalletMapMode === 'standard'
-      ? '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-      : '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">HOT</a>';
+    const attribution = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
     element.innerHTML = '<div class="ticket-wallet-fallback-map' + (ticketWalletMapMode === 'simplified' ? ' is-simplified-map' : '') + '"><div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div><svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls">' + ticketWalletMapControlMarkup() + '</div><div class="ticket-wallet-fallback-attribution">' + attribution + '</div></div>';
     const overlay = element.querySelector('.ticket-wallet-fallback-overlay');
     overlay?.addEventListener('pointerdown', (event) => { if (event.target.closest('[data-ticket-wallet-map-ticket]')) event.stopPropagation(); });
@@ -5268,10 +5264,12 @@ async function hydrateTicketWalletMap() {
     const L = await ticketWalletLoadLeaflet();
     if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
     element.innerHTML = '';
-    element.classList.toggle('is-simplified-map', ticketWalletMapMode === 'simplified');
+    const isSimplifiedMap = ticketWalletMapMode === 'simplified';
+    element.classList.toggle('is-simplified-map', isSimplifiedMap);
     const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true });
     element.__ticketWalletLeaflet = L;
-    L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
+    if (isSimplifiedMap) map.attributionControl?.addAttribution(ticketWalletMapTileAttribution());
+    else L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
     const mapListeners = new AbortController();
     map.once('unload', () => mapListeners.abort());
     const mapControls = L.control({ position: 'bottomright' });
@@ -5349,9 +5347,11 @@ async function hydrateTicketWalletMap() {
       const type = cluster.type;
       const label = cluster.groups.map((group) => [group.from, group.to].filter(Boolean).join(' → ')).filter(Boolean).slice(0, 2).join(' · ') || cluster.label;
       const hasVenueLabel = cluster.groups.some((group) => group.records.some((record) => ['dining', 'entertainment'].includes(ticketWalletCategoryForType(record.type))));
+      const usePermanentLabel = hasVenueLabel || ticketWalletMapMode === 'simplified';
+      const visibleLabel = ticketWalletMapMode === 'simplified' ? cluster.label : label;
       const marker = L.marker(cluster.point, { icon: ticketWalletMapMarkerIcon(L, type, records.length), keyboard: true, riseOnHover: true })
         .addTo(map)
-        .bindTooltip(label, { permanent: hasVenueLabel, direction: 'top', offset: [0, -12], className: hasVenueLabel ? 'ticket-wallet-place-label' : '' })
+        .bindTooltip(visibleLabel, { permanent: usePermanentLabel, direction: 'top', offset: [0, -12], className: usePermanentLabel ? 'ticket-wallet-place-label' : '' })
         .bindPopup(ticketWalletMapPopupElement(cluster.groups, cluster.label));
       pointLayers.push({ layer: marker, groups: cluster.groups });
     });
