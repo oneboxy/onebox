@@ -18182,7 +18182,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet
   filter: none;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane .leaflet-tile {
-  filter: url(#ticket-wallet-comic-map-filter) saturate(1.08) contrast(1.06);
+  filter: sepia(.32) saturate(.96) contrast(1.22) brightness(1.03);
 }
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container::after,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::after {
@@ -18190,9 +18190,9 @@ body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::aft
   z-index: 350;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, rgb(34 43 58 / 18%) .65px, transparent .9px);
+  background-image: radial-gradient(circle, rgb(34 43 58 / 24%) .8px, transparent 1.2px);
   background-size: 7px 7px;
-  opacity: .2;
+  opacity: .3;
   mix-blend-mode: multiply;
   content: "";
 }
@@ -18201,7 +18201,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::aft
 }
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
   opacity: 1;
-  filter: url(#ticket-wallet-comic-map-filter) saturate(1.08) contrast(1.06);
+  filter: sepia(.32) saturate(.96) contrast(1.22) brightness(1.03);
 }
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map .ticket-wallet-fallback-overlay {
   z-index: 2;
@@ -18212,7 +18212,7 @@ html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-ma
 }
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane .leaflet-tile,
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
-  filter: url(#ticket-wallet-comic-map-filter) saturate(1.12) brightness(.76) contrast(1.12);
+  filter: saturate(.82) brightness(.74) contrast(1.24) sepia(.16);
 }
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container::after,
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::after {

@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.667';
+const APP_VERSION = '2.18.668';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4856,28 +4856,19 @@ function ticketWalletComicFilterMarkup() {
 }
 
 const TICKET_WALLET_MAPLIBRE_VERSION = '5.12.0';
-let ticketWalletComicVectorLayerPromise = null;
-function ticketWalletLoadComicVectorLayer(L) {
-  const getLayerFactory = () => {
-    const adapter = window.MaplibreGLLeaflet;
-    if (adapter && typeof adapter.maplibreGL === 'function') return adapter.maplibreGL;
-    if (adapter && typeof adapter.default === 'function') return adapter.default;
-    if (typeof L.maplibreGL === 'function') return L.maplibreGL;
-    return null;
-  };
-  if (typeof window.maplibregl !== 'undefined' && getLayerFactory()) return Promise.resolve(getLayerFactory());
-  if (ticketWalletComicVectorLayerPromise) return ticketWalletComicVectorLayerPromise;
-  ticketWalletComicVectorLayerPromise = (async () => {
+let ticketWalletComicMapLibrePromise = null;
+function ticketWalletLoadComicMapLibre() {
+  if (window.maplibregl?.Map) return Promise.resolve(window.maplibregl);
+  if (ticketWalletComicMapLibrePromise) return ticketWalletComicMapLibrePromise;
+  ticketWalletComicMapLibrePromise = (async () => {
     const providers = [
       {
         css: 'https://cdn.jsdelivr.net/npm/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.css',
         map: 'https://cdn.jsdelivr.net/npm/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.js',
-        adapter: 'https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.js',
       },
       {
         css: 'https://unpkg.com/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.css',
         map: 'https://unpkg.com/maplibre-gl@' + TICKET_WALLET_MAPLIBRE_VERSION + '/dist/maplibre-gl.js',
-        adapter: 'https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/dist/leaflet-maplibre-gl.js',
       },
     ];
     const loadStylesheet = (id, href) => {
@@ -4905,39 +4896,34 @@ function ticketWalletLoadComicVectorLayer(L) {
         }, 12000);
       });
     };
-    const loadScript = (id, src, ready) => {
-      if (ready()) return Promise.resolve();
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.async = true;
-        script.dataset.ticketWalletVectorMap = id;
-        script.src = src;
-        script.onload = () => ready() ? resolve() : reject(Error('MapLibre script did not initialize'));
-        script.onerror = () => reject(Error('MapLibre CDN unavailable'));
-        document.head.appendChild(script);
-      });
-    };
+    const loadScript = (id, src) => new Promise((resolve, reject) => {
+      if (window.maplibregl?.Map) { resolve(); return; }
+      const script = document.createElement('script');
+      script.async = true;
+      script.dataset.ticketWalletVectorMap = id;
+      script.src = src;
+      script.onload = () => window.maplibregl?.Map ? resolve() : reject(Error('MapLibre script did not initialize'));
+      script.onerror = () => reject(Error('MapLibre CDN unavailable'));
+      document.head.appendChild(script);
+    });
     let lastError = null;
     for (const [index, provider] of providers.entries()) {
       const cssId = 'ticketWalletMapLibreCss' + index;
       try {
         await loadStylesheet(cssId, provider.css);
-        await loadScript('map-' + index, provider.map, () => typeof window.maplibregl !== 'undefined');
-        await loadScript('leaflet-adapter-' + index, provider.adapter, () => Boolean(getLayerFactory()));
-        const layerFactory = getLayerFactory();
-        if (layerFactory) return layerFactory;
-        throw Error('MapLibre Leaflet adapter did not expose maplibreGL');
+        await loadScript('map-' + index, provider.map);
+        if (window.maplibregl?.Map) return window.maplibregl;
+        throw Error('MapLibre GL did not expose its browser API');
       } catch (error) {
         lastError = error;
         document.querySelector('script[data-ticket-wallet-vector-map="map-' + index + '"]')?.remove();
-        document.querySelector('script[data-ticket-wallet-vector-map="leaflet-adapter-' + index + '"]')?.remove();
         document.getElementById(cssId)?.remove();
       }
     }
-    ticketWalletComicVectorLayerPromise = null;
-    throw lastError || Error('MapLibre Leaflet adapter unavailable');
+    ticketWalletComicMapLibrePromise = null;
+    throw lastError || Error('MapLibre GL unavailable');
   })();
-  return ticketWalletComicVectorLayerPromise;
+  return ticketWalletComicMapLibrePromise;
 }
 function ticketWalletApplyComicMapStyle(map) {
   if (!map || !map.isStyleLoaded()) return;
@@ -5055,6 +5041,87 @@ function ticketWalletApplyComicMapStyle(map) {
       }
     }
   }
+}
+ 
+function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
+  if (!maplibre?.Map) throw Error('MapLibre GL is unavailable');
+  const host = L.DomUtil.create('div', 'ticket-wallet-comic-vector-layer');
+  Object.assign(host.style, {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+    zIndex: '1',
+  });
+  map.getPane('tilePane').appendChild(host);
+  const center = map.getCenter();
+  const comicMap = new maplibre.Map({
+    container: host,
+    style: 'https://tiles.openfreemap.org/styles/bright',
+    center: [center.lng, center.lat],
+    zoom: Math.max(0, map.getZoom() - 1),
+    minZoom: 0,
+    maxZoom: 18,
+    interactive: false,
+    attributionControl: false,
+    fadeDuration: 0,
+    renderWorldCopies: false,
+    maxPitch: 0,
+    dragRotate: false,
+    pitchWithRotate: false,
+    preserveDrawingBuffer: false,
+  });
+  let disposed = false;
+  let fallbackRemoved = false;
+  let syncFrame = 0;
+  const applyStyle = () => {
+    if (comicMap.isStyleLoaded()) ticketWalletApplyComicMapStyle(comicMap);
+  };
+  const revealVectorMap = () => {
+    if (disposed || fallbackRemoved || !comicMap.isStyleLoaded()) return;
+    if (typeof comicMap.areTilesLoaded === 'function' && !comicMap.areTilesLoaded()) return;
+    applyStyle();
+    if (map.hasLayer(fallbackTileLayer)) map.removeLayer(fallbackTileLayer);
+    map.attributionControl.addAttribution('<a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a> · <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>');
+    fallbackRemoved = true;
+  };
+  comicMap.on('style.load', applyStyle);
+  comicMap.once('load', () => requestAnimationFrame(revealVectorMap));
+  comicMap.on('idle', revealVectorMap);
+  comicMap.on('error', (event) => console.warn('Comic vector map request failed.', event?.error || event));
+  if (comicMap.isStyleLoaded()) applyStyle();
+  const syncCamera = () => {
+    if (disposed) return;
+    if (syncFrame) cancelAnimationFrame(syncFrame);
+    syncFrame = requestAnimationFrame(() => {
+      syncFrame = 0;
+      if (disposed) return;
+      const current = map.getCenter();
+      const targetZoom = Math.max(0, map.getZoom() - 1);
+      const currentCenter = comicMap.getCenter();
+      if (Math.abs(current.lat - currentCenter.lat) > 0.00001
+        || Math.abs(current.lng - currentCenter.lng) > 0.00001
+        || Math.abs(targetZoom - comicMap.getZoom()) > 0.001) {
+        comicMap.jumpTo({ center: [current.lng, current.lat], zoom: targetZoom });
+      }
+    });
+  };
+  const resize = () => comicMap.resize();
+  map.on('move', syncCamera);
+  map.on('resize', resize);
+  const themeObserver = new MutationObserver(applyStyle);
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  map.once('unload', () => {
+    disposed = true;
+    if (syncFrame) cancelAnimationFrame(syncFrame);
+    themeObserver.disconnect();
+    map.off('move', syncCamera);
+    map.off('resize', resize);
+    comicMap.remove();
+  });
+  return comicMap;
 }
 
 function ticketWalletMapTileUrl() {
@@ -5527,9 +5594,10 @@ async function hydrateTicketWalletMap() {
     const L = await ticketWalletLoadLeaflet();
     if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
-    let comicLayerFactory = null;
+    let comicMapLibre = null;
     if (isSimplifiedMap) {
-      try { comicLayerFactory = await ticketWalletLoadComicVectorLayer(L); } catch (error) { console.warn('Comic map unavailable; keeping the simplified fallback map.', error); }
+      try { comicMapLibre = await ticketWalletLoadComicMapLibre(); }
+      catch (error) { console.warn('Comic map engine unavailable; keeping the simplified fallback map.', error); }
       if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
     }
     element.innerHTML = '';
@@ -5540,29 +5608,6 @@ async function hydrateTicketWalletMap() {
     element.__ticketWalletLeaflet = L;
     if (isSimplifiedMap) element.insertAdjacentHTML('afterbegin', ticketWalletComicFilterMarkup());
     const fallbackTileLayer = L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: mapMaxZoom, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
-    if (isSimplifiedMap && comicLayerFactory) {
-      try {
-        const comicLayer = comicLayerFactory({ style: 'https://tiles.openfreemap.org/styles/bright', interactive: false, attributionControl: false });
-        comicLayer.addTo(map);
-        const comicMap = comicLayer.getMaplibreMap();
-        let comicReady = false;
-        const applyComicStyle = () => {
-          if (!comicMap.isStyleLoaded()) return;
-          ticketWalletApplyComicMapStyle(comicMap);
-          if (!comicReady) {
-            comicReady = true;
-            if (map.hasLayer(fallbackTileLayer)) map.removeLayer(fallbackTileLayer);
-            map.attributionControl.addAttribution('<a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a> · <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>');
-          }
-        };
-        comicMap.on('style.load', applyComicStyle);
-        comicMap.once('idle', applyComicStyle);
-        if (comicMap.isStyleLoaded()) applyComicStyle();
-        const comicThemeObserver = new MutationObserver(() => applyComicStyle());
-        comicThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        map.once('unload', () => comicThemeObserver.disconnect());
-      } catch (error) { console.warn('Comic map style could not be initialized; keeping the simplified fallback map.', error); }
-    }
     const mapListeners = new AbortController();
     map.once('unload', () => mapListeners.abort());
     const mapControls = L.control({ position: 'bottomright' });
@@ -5680,6 +5725,10 @@ async function hydrateTicketWalletMap() {
       const pendingView = ticketWalletMapPendingView;
       map.setView(pendingView?.center || viewport.center, pendingView?.zoom || viewport.zoom);
       ticketWalletMapPendingView = null;
+    }
+    if (isSimplifiedMap && comicMapLibre?.Map) {
+      try { ticketWalletMountComicMap(L, map, comicMapLibre, fallbackTileLayer); }
+      catch (error) { console.warn('Comic vector map could not be mounted; keeping the simplified fallback map.', error); }
     }
     ticketWalletLeafletMap = map;
     ticketWalletLeafletMapElement = element;
