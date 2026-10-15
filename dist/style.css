@@ -17782,3 +17782,100 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 
 
 /* 2.18.661: compact the mobile Developer tab row. */
+
+
+/* 2.18.662: organize the folder editor as a compact, responsive workspace. */
+#navigationDialog .navigation-folder-dialog-card {
+  width: min(540px, 100%);
+  padding: 16px 18px 18px;
+  border-radius: 20px;
+}
+#navigationDialog .navigation-folder-dialog-toolbar {
+  min-height: 36px;
+  margin: -2px 0 12px;
+}
+#navigationDialog .navigation-folder-name-field {
+  margin: 0 0 14px;
+}
+#navigationDialog .navigation-folder-name-field input {
+  min-height: 44px;
+  padding: 9px 12px;
+}
+#navigationDialog .navigation-folder-sites {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 0;
+}
+#navigationDialog .navigation-folder-sites .navigation-card {
+  min-width: 0;
+  min-height: 72px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel-2) 58%, var(--panel));
+  box-shadow: none;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 70px;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: inherit;
+  background: transparent;
+  text-align: left;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main:hover,
+#navigationDialog .navigation-folder-sites .navigation-card-main:focus-visible {
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main strong {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+#navigationDialog .navigation-folder-actions {
+  grid-template-columns: minmax(0, 1.12fr) repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding-top: 14px;
+}
+#navigationDialog .navigation-folder-actions > button {
+  min-height: 44px;
+  border-radius: 12px;
+}
+#navigationDialog .navigation-folder-actions .navigation-folder-save-button {
+  background: transparent;
+  color: var(--primary);
+}
+@media (max-width: 600px) {
+  #navigationDialog .navigation-folder-dialog-card {
+    padding: 14px 16px 16px;
+  }
+  #navigationDialog .navigation-folder-sites {
+    grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+    gap: 8px;
+  }
+  #navigationDialog .navigation-folder-sites .navigation-card-main {
+    gap: 10px;
+    padding-inline: 10px;
+  }
+  #navigationDialog .navigation-folder-actions {
+    gap: 7px;
+  }
+}
+@media (max-width: 360px) {
+  #navigationDialog .navigation-folder-sites {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #navigationDialog .navigation-folder-actions > button {
+    gap: 4px;
+    padding-inline: 4px;
+    font-size: 10px;
+  }
+}
