@@ -18047,3 +18047,56 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   font-style: normal;
 }
 .ticket-wallet-map-marker-badge svg { width: 8px; height: 8px; stroke: currentColor; }
+
+.ticket-wallet-map-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  margin-bottom: 12px;
+}
+.ticket-wallet-map-toolbar .ticket-wallet-map-legend {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin: 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ticket-wallet-map-toolbar .ticket-wallet-map-legend::-webkit-scrollbar { display: none; }
+.ticket-wallet-map-count {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.ticket-wallet-map-controls button { position: relative; }
+.ticket-wallet-map-controls-wrap { position: relative; overflow: visible; }
+.ticket-wallet-map-feedback {
+  position: absolute;
+  right: calc(100% + 8px);
+  bottom: 0;
+  z-index: 1200;
+  width: max-content;
+  max-width: min(240px, 68vw);
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
+  box-shadow: 0 5px 18px color-mix(in srgb, var(--ink) 14%, transparent);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+  white-space: normal;
+  pointer-events: none;
+}
+.ticket-wallet-fallback-map > .ticket-wallet-map-feedback { right: 58px; bottom: 12px; }
+
+.ticket-wallet-map-controls button[aria-busy="true"] { color: var(--primary) !important; }
+@media (max-width: 760px) {
+  .ticket-wallet-map-toolbar { gap: 8px; }
+  .ticket-wallet-map-count { font-size: 10px; }
+}

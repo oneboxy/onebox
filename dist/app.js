@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.661';
+const APP_VERSION = '2.18.662';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4894,18 +4894,31 @@ function ticketWalletChangeMapMode(nextMode, element = $('[data-ticket-wallet-re
   try { localStorage.setItem('onebox.ticket-wallet-map-mode', nextMode); } catch {}
   render();
 }
-function ticketWalletMapControlFeedback(button, message, originalLabel) {
+function ticketWalletMapControlFeedback(button, message, originalLabel, duration = 4000) {
   if (!button) return;
   button.title = message;
   button.setAttribute('aria-label', message);
-  window.setTimeout(() => {
+  const host = button.closest('.ticket-wallet-fallback-map') || button.closest('.ticket-wallet-map-controls-wrap');
+  let status = host?.querySelector('.ticket-wallet-map-feedback');
+  if (host && !status) {
+    status = document.createElement('span');
+    status.className = 'ticket-wallet-map-feedback';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    host.appendChild(status);
+  }
+  if (status) { status.textContent = message; status.hidden = false; }
+  if (button.__ticketWalletFeedbackTimer) window.clearTimeout(button.__ticketWalletFeedbackTimer);
+  button.__ticketWalletFeedbackTimer = window.setTimeout(() => {
     if (!button.isConnected) return;
     button.title = originalLabel;
     button.setAttribute('aria-label', originalLabel);
-  }, 4000);
+    if (status) status.hidden = true;
+    delete button.__ticketWalletFeedbackTimer;
+  }, duration);
 }
 function ticketWalletHandleMapControl(action, element, button) {
-  const map = ticketWalletLeafletMapElement === element ? ticketWalletLeafletMap : null;
+  const map = element?.__ticketWalletMap || (ticketWalletLeafletMapElement === element ? ticketWalletLeafletMap : null);
   const fallback = element?.__ticketWalletFallbackMap;
   if (action === 'zoom-in' || action === 'zoom-out') {
     const direction = action === 'zoom-in' ? 1 : -1;
@@ -4917,7 +4930,8 @@ function ticketWalletHandleMapControl(action, element, button) {
     const canvas = element?.closest('.ticket-wallet-route-map-canvas');
     if (!canvas) return;
     const sync = () => requestAnimationFrame(() => {
-      if (ticketWalletLeafletMapElement === element && ticketWalletLeafletMap) ticketWalletLeafletMap.invalidateSize();
+      const activeMap = element?.__ticketWalletMap || (ticketWalletLeafletMapElement === element ? ticketWalletLeafletMap : null);
+      if (activeMap) activeMap.invalidateSize();
     });
     if (document.fullscreenElement === canvas) {
       document.exitFullscreen?.().then(sync).catch(() => {});
@@ -4935,24 +4949,37 @@ function ticketWalletHandleMapControl(action, element, button) {
   if (action !== 'locate') return;
   const label = state.language === 'en' ? 'Locate me' : '定位到当前位置';
   const unavailable = state.language === 'en' ? 'Location is unavailable in this browser' : '当前浏览器不支持定位';
-  const failed = state.language === 'en' ? 'Could not get your location; check location permission' : '无法获取位置，请检查定位权限';
+  const locating = state.language === 'en' ? 'Finding your location…' : '正在获取当前位置…';
+  const located = state.language === 'en' ? 'Location updated' : '已定位到当前位置';
+  const permissionError = state.language === 'en' ? 'Allow location access for this site in browser settings' : '请在浏览器设置中允许此网站使用定位';
+  const unavailableError = state.language === 'en' ? 'Current location is unavailable' : '暂时无法获取当前位置';
+  const timeoutError = state.language === 'en' ? 'Location timed out; try again' : '定位超时，请重试';
   if (!navigator.geolocation) { ticketWalletMapControlFeedback(button, unavailable, label); return; }
   button?.setAttribute('aria-busy', 'true');
+  ticketWalletMapControlFeedback(button, locating, label, 20000);
   navigator.geolocation.getCurrentPosition((position) => {
     button?.removeAttribute('aria-busy');
     const latlng = [position.coords.latitude, position.coords.longitude];
-    if (map && element.__ticketWalletLeaflet) {
+    const activeMap = element?.__ticketWalletMap || (ticketWalletLeafletMapElement === element ? ticketWalletLeafletMap : null);
+    if (activeMap && element.__ticketWalletLeaflet) {
       const L = element.__ticketWalletLeaflet;
-      map.setView(latlng, Math.max(map.getZoom(), 13), { animate: true });
-      if (element.__ticketWalletLocationLayer) map.removeLayer(element.__ticketWalletLocationLayer);
-      element.__ticketWalletLocationLayer = L.circleMarker(latlng, { radius: 8, color: '#fff', weight: 3, fillColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#4863ee', fillOpacity: 1 }).addTo(map);
-    } else fallback?.setLocation?.(latlng);
-  }, () => {
+      activeMap.setView(latlng, Math.max(activeMap.getZoom(), 13), { animate: true });
+      if (element.__ticketWalletLocationLayer) activeMap.removeLayer(element.__ticketWalletLocationLayer);
+      element.__ticketWalletLocationLayer = L.circleMarker(latlng, { radius: 8, color: '#fff', weight: 3, fillColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#4863ee', fillOpacity: 1 }).addTo(activeMap);
+    } else if (fallback?.setLocation) {
+      fallback.setLocation(latlng);
+    } else {
+      ticketWalletMapControlFeedback(button, unavailableError, label);
+      return;
+    }
+    ticketWalletMapControlFeedback(button, located, label, 2500);
+  }, (error) => {
     button?.removeAttribute('aria-busy');
-    ticketWalletMapControlFeedback(button, failed, label);
+    const message = error?.code === 1 ? permissionError : error?.code === 3 ? timeoutError : unavailableError;
+    ticketWalletMapControlFeedback(button, message, label, 5000);
   }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 12000 });
 }
-const ticketWalletGeocodePromises = new Map();
+
 function ticketWalletMapPlaceKey(value) {
   const text = String(value || '').trim().replace(/[（(].*?[）)]/g, '').replace(/\s+/g, '');
   const aliases = [['上海虹桥', '上海'], ['杭州东', '杭州'], ['南京南', '南京'], ['北京南', '北京'], ['广州南', '广州'], ['深圳北', '深圳']];
@@ -5302,6 +5329,7 @@ async function hydrateTicketWalletMap() {
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
     element.classList.toggle('is-simplified-map', isSimplifiedMap);
     const map = L.map(element, { zoomControl: false, scrollWheelZoom: true, touchZoom: true, dragging: true, doubleClickZoom: true, attributionControl: true });
+    element.__ticketWalletMap = map;
     element.__ticketWalletLeaflet = L;
     L.tileLayer(ticketWalletMapTileUrl(), { maxZoom: 19, detectRetina: true, attribution: ticketWalletMapTileAttribution() }).addTo(map);
     const mapListeners = new AbortController();
@@ -5443,7 +5471,7 @@ function ticketWalletJourneyMapMarkup(journeys, places = []) {
       : (state.language === 'en' ? 'This category has no travel routes. Choose Travel or All to view routes.' : '当前大类没有出行路线；选择“出行”或“全部”可查看路线。'));
   const countLabel = [journeys.length ? journeys.length + (state.language === 'en' ? (journeys.length === 1 ? ' route' : ' routes') : ' 条路线') : '', places.length ? places.length + (state.language === 'en' ? (places.length === 1 ? ' place' : ' places') : ' 个票面地点') : ''].filter(Boolean).join(state.language === 'en' ? ' · ' : ' · ') || (state.language === 'en' ? 'No map items' : '暂无地图内容');
   const hasMapItems = journeys.length || places.length;
-  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-route-map-head"><div class="ticket-wallet-route-map-title"><h2>' + escapeHtml(state.language === 'en' ? 'Journey map' : '旅迹地图') + '</h2></div><span>' + escapeHtml(countLabel) + '</span></div>' + ticketWalletMapLegendMarkup() + '<div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map' + (hasMapItems ? '' : ' is-empty') + '" data-ticket-wallet-real-map role="region" aria-label="' + escapeHtml(state.language === 'en' ? 'Tickets and venues on the map' : '票据路线与地点地图') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(note) + '</div></section>';
+  return '<section class="ticket-wallet-route-map"><div class="ticket-wallet-map-toolbar">' + ticketWalletMapLegendMarkup() + '<span class="ticket-wallet-map-count" aria-live="polite">' + escapeHtml(countLabel) + '</span></div><div class="ticket-wallet-route-map-canvas"><div class="ticket-wallet-real-map' + (hasMapItems ? '' : ' is-empty') + '" data-ticket-wallet-real-map role="region" aria-label="' + escapeHtml(state.language === 'en' ? 'Tickets and venues on the map' : '票据路线与地点地图') + '"><div class="ticket-wallet-map-loading">' + escapeHtml(state.language === 'en' ? 'Loading map…' : '正在加载地图…') + '</div></div></div><div class="ticket-wallet-route-map-note">' + escapeHtml(note) + '</div></section>';
 }
 function renderTicketWalletJourneysLegacy() {
   const journeys = ticketWalletJourneys();
