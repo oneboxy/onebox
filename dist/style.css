@@ -18164,11 +18164,11 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   }
 }
 
-/* Light ink-and-paper finish for the simplified map. */
+/* Quiet paper ground keeps the project's route lines and points in focus. */
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: #f8f6ef;
-  background-image: linear-gradient(145deg, #faf9f4 0%, #f6f3eb 100%);
+  background-color: #faf8f2;
+  background-image: linear-gradient(145deg, #fcfbf8 0%, #f8f6ef 100%);
 }
 body:has(.ticket-wallet-page) .ticket-wallet-comic-filter-defs {
   position: absolute;
@@ -18181,41 +18181,40 @@ body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
   display: none !important;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-comic-vector-layer canvas,
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-route-comic,
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-div-icon-comic .ticket-wallet-map-marker,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-overlay {
   filter: url("#ticket-wallet-comic-map-filter");
 }
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-route-comic {
+  stroke-width: 3.1px !important;
   stroke-linecap: round;
   stroke-linejoin: round;
+  opacity: .92 !important;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-marker {
-  border-width: 1.5px;
-  background: #faf8f1;
-  box-shadow: 0 1px 3px rgb(63 57 47 / 14%);
+  width: 32px;
+  height: 32px;
+  border-width: 2.2px;
+  background: #fcfbf8;
+  box-shadow: 0 2px 5px rgb(63 57 47 / 18%);
 }
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-place-label {
   transform: rotate(-1deg);
   border: 1px solid #b9b1a4;
   border-radius: 4px;
-  background: #faf8f1;
+  background: #fcfbf8;
   box-shadow: 1px 1px 0 rgb(70 65 58 / 10%);
   color: #77736a;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane {
-  opacity: 1;
-  filter: none;
-}
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: #21272a;
-  background-image: linear-gradient(145deg, #252c2f 0%, #1e2427 100%);
+  background-color: #202529;
+  background-image: linear-gradient(145deg, #252a2c 0%, #1e2326 100%);
 }
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-marker {
   background: #303639;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 24%);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 26%);
 }
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-place-label {
   border-color: #59605e;
