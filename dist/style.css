@@ -18219,3 +18219,26 @@ html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-ma
   background-image: radial-gradient(circle, rgb(255 255 255 / 24%) .65px, transparent .9px);
   mix-blend-mode: screen;
 }
+
+
+/* 2.18.669: make the global toast dismiss control quiet and consistent. */
+#toast .toast-close {
+  flex-basis: 28px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: color-mix(in srgb, var(--muted) 94%, var(--ink));
+  box-shadow: none;
+  transition: color .16s ease, background-color .16s ease;
+}
+#toast .toast-close:hover,
+#toast .toast-close:focus-visible {
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--ink);
+}
+#toast .toast-close:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 48%, transparent);
+  outline-offset: 1px;
+}
