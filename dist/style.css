@@ -18164,7 +18164,7 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   }
 }
 
-/* Quiet paper ground keeps the project's route lines and points in focus. */
+/* Pale drawn geography stays behind the project's routes and points. */
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
   background-color: #faf8f2;
@@ -18181,6 +18181,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
   display: none !important;
 }
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-comic-vector-layer canvas,
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-route-comic,
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-div-icon-comic .ticket-wallet-map-marker,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-overlay {
