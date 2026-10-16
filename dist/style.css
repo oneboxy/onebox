@@ -18164,60 +18164,37 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   }
 }
 
-/* Comic map texture sits above the vector tiles while route overlays remain crisp. */
+/* Simplified mode keeps only map context; no textured overlay or raster tiles. */
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: #fbf3e3;
+  background-color: #f6f4ee;
   background-image: none;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-comic-filter-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  pointer-events: none;
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane > .leaflet-tile-container,
+body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
+  display: none !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container::after,
+body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::after {
+  display: none;
+  content: none;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane {
   opacity: 1;
   filter: none;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane .leaflet-tile {
-  filter: sepia(.32) saturate(.96) contrast(1.22) brightness(1.03);
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-place-label {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--panel) 76%, transparent);
+  box-shadow: none;
+  color: var(--muted);
 }
-body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container::after,
-body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::after {
-  position: absolute;
-  z-index: 350;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, rgb(34 43 58 / 24%) .8px, transparent 1.2px);
-  background-size: 7px 7px;
-  opacity: .3;
-  mix-blend-mode: multiply;
-  content: "";
-}
-body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::after {
-  z-index: 1;
-}
-body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
-  opacity: 1;
-  filter: sepia(.32) saturate(.96) contrast(1.22) brightness(1.03);
-}
-body:has(.ticket-wallet-page) .ticket-wallet-fallback-map .ticket-wallet-fallback-overlay {
-  z-index: 2;
+body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
+  background-color: #f6f4ee;
 }
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: #222b35;
-}
-html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane .leaflet-tile,
-html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map .ticket-wallet-fallback-tiles {
-  filter: saturate(.82) brightness(.74) contrast(1.24) sepia(.16);
-}
-html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container::after,
-html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map::after {
-  background-image: radial-gradient(circle, rgb(255 255 255 / 24%) .65px, transparent .9px);
-  mix-blend-mode: screen;
+  background-color: #1e2932;
 }
 
 
