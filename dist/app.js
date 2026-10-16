@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.672';
+const APP_VERSION = '2.18.673';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4852,7 +4852,7 @@ function ticketWalletReadMapMode() {
 }
 let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
 function ticketWalletComicFilterMarkup() {
-  return '<svg class="ticket-wallet-comic-filter-defs" aria-hidden="true" focusable="false"><defs><filter id="ticket-wallet-comic-map-filter" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="saturate" values=".48" result="muted-ink"/><feTurbulence type="fractalNoise" baseFrequency=".01 .016" numOctaves="2" seed="13" result="line-wobble"/><feDisplacementMap in="muted-ink" in2="line-wobble" scale=".62" xChannelSelector="R" yChannelSelector="G" result="wobbled"/><feTurbulence type="fractalNoise" baseFrequency=".68" numOctaves="2" seed="5" result="paper-grain"/><feColorMatrix in="paper-grain" type="saturate" values="0" result="mono-grain"/><feComponentTransfer in="mono-grain" result="soft-grain"><feFuncA type="table" tableValues="0 .018"/></feComponentTransfer><feBlend in="wobbled" in2="soft-grain" mode="multiply"/></filter></defs></svg>';
+  return '<svg class="ticket-wallet-comic-filter-defs" aria-hidden="true" focusable="false"><defs><filter id="ticket-wallet-comic-map-filter" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="saturate" values=".48" result="muted-ink"/><feTurbulence type="fractalNoise" baseFrequency=".008 .012" numOctaves="2" seed="13" result="line-wobble"/><feDisplacementMap in="muted-ink" in2="line-wobble" scale=".42" xChannelSelector="R" yChannelSelector="G" result="wobbled"/><feTurbulence type="fractalNoise" baseFrequency=".62" numOctaves="2" seed="5" result="paper-grain"/><feColorMatrix in="paper-grain" type="saturate" values="0" result="mono-grain"/><feComponentTransfer in="mono-grain" result="soft-grain"><feFuncA type="table" tableValues="0 .012"/></feComponentTransfer><feBlend in="wobbled" in2="soft-grain" mode="multiply"/></filter></defs></svg>';
 }
 
 const TICKET_WALLET_MAPLIBRE_VERSION = '5.12.0';
@@ -4928,73 +4928,12 @@ function ticketWalletLoadComicMapLibre() {
 function ticketWalletApplyComicMapStyle(map) {
   if (!map || !map.isStyleLoaded()) return;
   const dark = document.documentElement.dataset.theme === 'dark';
-  const colors = dark ? {
-    land: '#21272a', water: '#2c3737', waterEdge: '#3b4542',
-    green: '#29302b', ink: '#c3bcae', halo: '#21272a',
-    roadCase: '#514d46', road: '#353a38',
-  } : {
-    land: '#f8f6ef', water: '#e8efeb', waterEdge: '#d9e2dc',
-    green: '#ecefe6', ink: '#77736a', halo: '#faf8f2',
-    roadCase: '#c9c0b1', road: '#f6f3eb',
-  };
-  // Sparse map layers, with low-contrast ink and paper colors.
-  const visibleLayers = new Set([
-    'background',
-    'water',
-    'water-intermittent',
-    'park',
-    'highway-motorway-casing',
-    'highway-trunk-casing',
-    'highway-primary-casing',
-    'highway-motorway',
-    'highway-trunk',
-    'highway-primary',
-    'bridge-motorway-casing',
-    'bridge-trunk-primary-casing',
-    'bridge-motorway',
-    'bridge-trunk-primary',
-    'label_city',
-    'label_city_capital',
-  ]);
+  const background = dark ? '#202529' : '#faf8f2';
   const layers = map.getStyle()?.layers || [];
-  const hasLayer = (id) => layers.some((layer) => layer.id === id);
-  const setPaint = (id, property, value) => {
-    if (hasLayer(id)) { try { map.setPaintProperty(id, property, value); } catch {} }
-  };
-  const setLayout = (id, property, value) => {
-    if (hasLayer(id)) { try { map.setLayoutProperty(id, property, value); } catch {} }
-  };
-  const roadWidth = ['interpolate', ['linear'], ['zoom'], 4, .45, 6, .7, 9, 1.05, 12, 1.55, 16, 2.2];
   for (const layer of layers) {
-    const { id } = layer;
-    const visible = visibleLayers.has(id);
-    setLayout(id, 'visibility', visible ? 'visible' : 'none');
-    if (!visible) continue;
-    if (id === 'background') {
-      setPaint(id, 'background-color', colors.land);
-    } else if (id === 'water' || id === 'water-intermittent') {
-      setPaint(id, 'fill-color', colors.water);
-      setPaint(id, 'fill-outline-color', colors.waterEdge);
-    } else if (id === 'park') {
-      setPaint(id, 'fill-color', colors.green);
-      setPaint(id, 'fill-outline-color', colors.green);
-      setPaint(id, 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 4, .1, 7, .2, 12, .28]);
-    } else if (/^(highway|bridge)-/.test(id)) {
-      const casing = id.includes('casing');
-      setLayout(id, 'line-cap', 'round');
-      setLayout(id, 'line-join', 'round');
-      setPaint(id, 'line-color', casing ? colors.roadCase : colors.road);
-      setPaint(id, 'line-width', casing ? ['+', roadWidth, .65] : roadWidth);
-      setPaint(id, 'line-opacity', .68);
-    } else if (id === 'label_city' || id === 'label_city_capital') {
-      setLayout(id, 'text-font', ['Noto Sans Bold']);
-      setLayout(id, 'text-size', ['interpolate', ['linear'], ['zoom'], 5, 10, 8, 12, 12, 13]);
-      setPaint(id, 'text-color', colors.ink);
-      setPaint(id, 'text-halo-color', colors.halo);
-      setPaint(id, 'text-halo-width', 1.5);
-      setPaint(id, 'text-halo-blur', .25);
-    }
+    try { map.setLayoutProperty(layer.id, 'visibility', layer.id === 'background' ? 'visible' : 'none'); } catch {}
   }
+  try { map.setPaintProperty('background', 'background-color', background); } catch {}
 }
 
 function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
@@ -5398,7 +5337,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
       const id = model.group.records[0]?.id || '';
       const title = [model.group.from, model.group.to].filter(Boolean).join(' → ');
       const dash = model.dash ? ' stroke-dasharray="' + model.dash + '"' : '';
-      return '<g class="ticket-wallet-fallback-route" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(title) + '"><title>' + escapeHtml(title) + '</title><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline></g>';
+      return '<g class="ticket-wallet-fallback-route" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(title) + '"><title>' + escapeHtml(title) + '</title><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="' + (ticketWalletMapMode === 'simplified' ? '3.2' : '5') + '" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline><polyline points="' + route.map((point) => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ') + '" fill="none" stroke="' + model.color + '" stroke-width="' + (ticketWalletMapMode === 'simplified' ? '1.8' : '2') + '" stroke-linecap="round" stroke-linejoin="round"' + dash + '></polyline></g>';
     }).join('');
     const markers = [...markerGroups.values()].map((marker) => {
       const screen = projectOnScreen(marker.point);
@@ -5419,7 +5358,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
           : 'M0 -3l.8 2.1L3 0l-2.2.7L0 3l-.8-2.3L-3 0l2.2-.9z';
         return '<g fill="none" stroke="var(--panel)" stroke-width="1.5"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="5.2" fill="' + color + '"></circle><path d="' + symbol + '" transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></g>';
       }).join('');
-      const placeLabel = ticketWalletMapMode === 'simplified' ? '<text class="ticket-wallet-fallback-place-label" x="' + (screen.x + 13).toFixed(1) + '" y="' + (screen.y - 10).toFixed(1) + '">' + escapeHtml(visibleLabel) + '</text>' : '';
+      const placeLabel = ticketWalletMapMode === 'simplified' && venueGroup ? '<text class="ticket-wallet-fallback-place-label" x="' + (screen.x + 13).toFixed(1) + '" y="' + (screen.y - 10).toFixed(1) + '">' + escapeHtml(visibleLabel) + '</text>' : '';
       return '<g class="ticket-wallet-fallback-marker" role="button" tabindex="0" data-ticket-wallet-map-ticket="' + escapeHtml(id) + '" aria-label="' + escapeHtml(visibleLabel) + '"><title>' + escapeHtml(visibleLabel) + '</title><circle cx="' + screen.x.toFixed(1) + '" cy="' + screen.y.toFixed(1) + '" r="' + (records.length > 1 ? 11 : 8) + '" fill="var(--panel)" stroke="' + typeStyle.color + '" stroke-width="3"></circle>' + (records.length > 1 ? '<text x="' + screen.x.toFixed(1) + '" y="' + (screen.y + 3.5).toFixed(1) + '" text-anchor="middle">' + records.length + '</text>' : '') + placeBadges + placeLabel + '</g>';
     }).join('');
     const currentLocation = controller.currentLocation ? projectOnScreen(controller.currentLocation) : null;
@@ -5576,12 +5515,6 @@ async function hydrateTicketWalletMap() {
     const L = await ticketWalletLoadLeaflet();
     if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
-    let comicMapLibre = null;
-    if (isSimplifiedMap) {
-      try { comicMapLibre = await ticketWalletLoadComicMapLibre(); }
-      catch (error) { console.warn('Comic map engine unavailable; keeping the simplified fallback map.', error); }
-      if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
-    }
     element.innerHTML = '';
     element.classList.toggle('is-simplified-map', isSimplifiedMap);
     const mapMaxZoom = 19;
@@ -5647,8 +5580,8 @@ async function hydrateTicketWalletMap() {
         : [fromPoint, toPoint];
       const route = L.polyline(routePoints, {
         color: routeStyle.color,
-        weight: ticketWalletMapMode === 'simplified' ? 2.2 : 2.5,
-        opacity: ticketWalletMapMode === 'simplified' ? .72 : .78,
+        weight: ticketWalletMapMode === 'simplified' ? 3.1 : 2.5,
+        opacity: ticketWalletMapMode === 'simplified' ? .92 : .78,
         className: ticketWalletMapMode === 'simplified' ? 'ticket-wallet-map-route-comic' : '',
         dashArray: routeStyle.dash || null,
         lineCap: 'round',
@@ -5708,10 +5641,6 @@ async function hydrateTicketWalletMap() {
       const pendingView = ticketWalletMapPendingView;
       map.setView(pendingView?.center || viewport.center, pendingView?.zoom || viewport.zoom);
       ticketWalletMapPendingView = null;
-    }
-    if (isSimplifiedMap && comicMapLibre?.Map) {
-      try { ticketWalletMountComicMap(L, map, comicMapLibre, fallbackTileLayer); }
-      catch (error) { console.warn('Comic vector map could not be mounted; keeping the simplified fallback map.', error); }
     }
     ticketWalletLeafletMap = map;
     ticketWalletLeafletMapElement = element;
