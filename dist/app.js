@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.671';
+const APP_VERSION = '2.18.672';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4852,7 +4852,7 @@ function ticketWalletReadMapMode() {
 }
 let ticketWalletMapMode = ticketWalletReadMapMode(); let ticketWalletMapPendingView = null;
 function ticketWalletComicFilterMarkup() {
-  return '<svg class="ticket-wallet-comic-filter-defs" aria-hidden="true" focusable="false"><defs><filter id="ticket-wallet-comic-map-filter" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".012 .018" numOctaves="2" seed="13" result="line-wobble"/><feDisplacementMap in="SourceGraphic" in2="line-wobble" scale="1.25" xChannelSelector="R" yChannelSelector="G" result="wobbled"/><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="5" result="paper-grain"/><feColorMatrix in="paper-grain" type="saturate" values="0" result="mono-grain"/><feComponentTransfer in="mono-grain" result="soft-grain"><feFuncA type="table" tableValues="0 .035"/></feComponentTransfer><feBlend in="wobbled" in2="soft-grain" mode="multiply"/></filter></defs></svg>';
+  return '<svg class="ticket-wallet-comic-filter-defs" aria-hidden="true" focusable="false"><defs><filter id="ticket-wallet-comic-map-filter" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="saturate" values=".48" result="muted-ink"/><feTurbulence type="fractalNoise" baseFrequency=".01 .016" numOctaves="2" seed="13" result="line-wobble"/><feDisplacementMap in="muted-ink" in2="line-wobble" scale=".62" xChannelSelector="R" yChannelSelector="G" result="wobbled"/><feTurbulence type="fractalNoise" baseFrequency=".68" numOctaves="2" seed="5" result="paper-grain"/><feColorMatrix in="paper-grain" type="saturate" values="0" result="mono-grain"/><feComponentTransfer in="mono-grain" result="soft-grain"><feFuncA type="table" tableValues="0 .018"/></feComponentTransfer><feBlend in="wobbled" in2="soft-grain" mode="multiply"/></filter></defs></svg>';
 }
 
 const TICKET_WALLET_MAPLIBRE_VERSION = '5.12.0';
@@ -4929,22 +4929,20 @@ function ticketWalletApplyComicMapStyle(map) {
   if (!map || !map.isStyleLoaded()) return;
   const dark = document.documentElement.dataset.theme === 'dark';
   const colors = dark ? {
-    land: '#202b31', water: '#355f68', waterEdge: '#497780',
-    green: '#465e48', ink: '#d5c5a7', halo: '#202b31',
-    roadCase: '#443c34', road: '#d2a969',
+    land: '#21272a', water: '#2c3737', waterEdge: '#3b4542',
+    green: '#29302b', ink: '#c3bcae', halo: '#21272a',
+    roadCase: '#514d46', road: '#353a38',
   } : {
-    land: '#f5efdf', water: '#b9e0e3', waterEdge: '#558b91',
-    green: '#d5e3c0', ink: '#665646', halo: '#f8f2e5',
-    roadCase: '#846a50', road: '#f2cb7c',
+    land: '#f8f6ef', water: '#e8efeb', waterEdge: '#d9e2dc',
+    green: '#ecefe6', ink: '#77736a', halo: '#faf8f2',
+    roadCase: '#c9c0b1', road: '#f6f3eb',
   };
-  // Keep the map readable while giving its coast, green areas and major roads
-  // the restrained ink-and-paper palette of an illustrated travel map.
+  // Sparse map layers, with low-contrast ink and paper colors.
   const visibleLayers = new Set([
     'background',
     'water',
     'water-intermittent',
     'park',
-    'landcover-wood',
     'highway-motorway-casing',
     'highway-trunk-casing',
     'highway-primary-casing',
@@ -4966,7 +4964,7 @@ function ticketWalletApplyComicMapStyle(map) {
   const setLayout = (id, property, value) => {
     if (hasLayer(id)) { try { map.setLayoutProperty(id, property, value); } catch {} }
   };
-  const roadWidth = ['interpolate', ['linear'], ['zoom'], 4, .7, 6, 1.1, 9, 1.8, 12, 2.8, 16, 4.5];
+  const roadWidth = ['interpolate', ['linear'], ['zoom'], 4, .45, 6, .7, 9, 1.05, 12, 1.55, 16, 2.2];
   for (const layer of layers) {
     const { id } = layer;
     const visible = visibleLayers.has(id);
@@ -4977,24 +4975,24 @@ function ticketWalletApplyComicMapStyle(map) {
     } else if (id === 'water' || id === 'water-intermittent') {
       setPaint(id, 'fill-color', colors.water);
       setPaint(id, 'fill-outline-color', colors.waterEdge);
-    } else if (id === 'park' || id === 'landcover-wood') {
+    } else if (id === 'park') {
       setPaint(id, 'fill-color', colors.green);
       setPaint(id, 'fill-outline-color', colors.green);
-      setPaint(id, 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 4, .25, 7, .55, 12, .68]);
+      setPaint(id, 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 4, .1, 7, .2, 12, .28]);
     } else if (/^(highway|bridge)-/.test(id)) {
       const casing = id.includes('casing');
       setLayout(id, 'line-cap', 'round');
       setLayout(id, 'line-join', 'round');
       setPaint(id, 'line-color', casing ? colors.roadCase : colors.road);
-      setPaint(id, 'line-width', casing ? ['+', roadWidth, 1.15] : roadWidth);
-      setPaint(id, 'line-opacity', .9);
+      setPaint(id, 'line-width', casing ? ['+', roadWidth, .65] : roadWidth);
+      setPaint(id, 'line-opacity', .68);
     } else if (id === 'label_city' || id === 'label_city_capital') {
       setLayout(id, 'text-font', ['Noto Sans Bold']);
-      setLayout(id, 'text-size', ['interpolate', ['linear'], ['zoom'], 5, 11, 8, 13, 12, 15]);
+      setLayout(id, 'text-size', ['interpolate', ['linear'], ['zoom'], 5, 10, 8, 12, 12, 13]);
       setPaint(id, 'text-color', colors.ink);
       setPaint(id, 'text-halo-color', colors.halo);
-      setPaint(id, 'text-halo-width', 2);
-      setPaint(id, 'text-halo-blur', .2);
+      setPaint(id, 'text-halo-width', 1.5);
+      setPaint(id, 'text-halo-blur', .25);
     }
   }
 }
@@ -5649,8 +5647,8 @@ async function hydrateTicketWalletMap() {
         : [fromPoint, toPoint];
       const route = L.polyline(routePoints, {
         color: routeStyle.color,
-        weight: ticketWalletMapMode === 'simplified' ? 3 : 2.5,
-        opacity: ticketWalletMapMode === 'simplified' ? .9 : .78,
+        weight: ticketWalletMapMode === 'simplified' ? 2.2 : 2.5,
+        opacity: ticketWalletMapMode === 'simplified' ? .72 : .78,
         className: ticketWalletMapMode === 'simplified' ? 'ticket-wallet-map-route-comic' : '',
         dashArray: routeStyle.dash || null,
         lineCap: 'round',
