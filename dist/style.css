@@ -18164,11 +18164,11 @@ html[data-theme="dark"] .ticket-wallet-fallback-map.is-simplified-map {
   }
 }
 
-/* Hand-ink treatment for the deliberately sparse illustrated map. */
+/* Light ink-and-paper finish for the simplified map. */
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: #f5efdf;
-  background-image: linear-gradient(145deg, #f8f3e7 0%, #f3ebd9 100%);
+  background-color: #f8f6ef;
+  background-image: linear-gradient(145deg, #faf9f4 0%, #f6f3eb 100%);
 }
 body:has(.ticket-wallet-page) .ticket-wallet-comic-filter-defs {
   position: absolute;
@@ -18191,13 +18191,18 @@ body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-marker {
+  border-width: 1.5px;
+  background: #faf8f1;
+  box-shadow: 0 1px 3px rgb(63 57 47 / 14%);
+}
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-place-label {
   transform: rotate(-1deg);
-  border: 1px solid #9b8464;
+  border: 1px solid #b9b1a4;
   border-radius: 4px;
-  background: #fff8e9;
-  box-shadow: 1px 2px 0 rgb(105 82 53 / 16%);
-  color: #665646;
+  background: #faf8f1;
+  box-shadow: 1px 1px 0 rgb(70 65 58 / 10%);
+  color: #77736a;
 }
 body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet-tile-pane {
   opacity: 1;
@@ -18205,13 +18210,17 @@ body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .leaflet
 }
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map.leaflet-container,
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-fallback-map.is-simplified-map {
-  background-color: #202b31;
-  background-image: linear-gradient(145deg, #25343a 0%, #1c262c 100%);
+  background-color: #21272a;
+  background-image: linear-gradient(145deg, #252c2f 0%, #1e2427 100%);
+}
+html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-map-marker {
+  background: #303639;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 24%);
 }
 html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is-simplified-map .ticket-wallet-place-label {
-  border-color: #607078;
-  background: #314148;
-  color: #e0d5bf;
+  border-color: #59605e;
+  background: #303639;
+  color: #c3bcae;
 }
 
 
