@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.673';
+const APP_VERSION = '2.18.674';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4928,12 +4928,23 @@ function ticketWalletLoadComicMapLibre() {
 function ticketWalletApplyComicMapStyle(map) {
   if (!map || !map.isStyleLoaded()) return;
   const dark = document.documentElement.dataset.theme === 'dark';
-  const background = dark ? '#202529' : '#faf8f2';
+  const colors = dark
+    ? { land: '#202529', water: '#2b3435', waterEdge: '#3b4544' }
+    : { land: '#faf8f2', water: '#e8efec', waterEdge: '#d3ded8' };
+  const visibleLayers = new Set(['background', 'water', 'water-intermittent']);
   const layers = map.getStyle()?.layers || [];
   for (const layer of layers) {
-    try { map.setLayoutProperty(layer.id, 'visibility', layer.id === 'background' ? 'visible' : 'none'); } catch {}
+    const visible = visibleLayers.has(layer.id);
+    try { map.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none'); } catch {}
+    if (!visible) continue;
+    if (layer.id === 'background') {
+      try { map.setPaintProperty(layer.id, 'background-color', colors.land); } catch {}
+    } else {
+      try { map.setPaintProperty(layer.id, 'fill-color', colors.water); } catch {}
+      try { map.setPaintProperty(layer.id, 'fill-outline-color', colors.waterEdge); } catch {}
+      try { map.setPaintProperty(layer.id, 'fill-opacity', layer.id === 'water' ? .88 : .66); } catch {}
+    }
   }
-  try { map.setPaintProperty('background', 'background-color', background); } catch {}
 }
 
 function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
@@ -5026,7 +5037,7 @@ function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
   settlementTimer = window.setTimeout(() => {
     if (disposed || settled) return;
     settled = true;
-    console.warn('Comic vector map timed out; retaining the OpenStreetMap fallback.');
+    console.warn('Comic vector map timed out; retaining the paper background.');
     removeComicMap();
     host.remove();
   }, 8000);
@@ -5365,6 +5376,12 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
     const locationMarkup = currentLocation ? '<g class="ticket-wallet-fallback-location" aria-label="' + escapeHtml(state.language === 'en' ? 'Current location' : '当前位置') + '"><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="12"></circle><circle cx="' + currentLocation.x.toFixed(1) + '" cy="' + currentLocation.y.toFixed(1) + '" r="5"></circle></g>' : '';
     const overlayMarkup = routes + markers + locationMarkup;
     const isSimplifiedMap = ticketWalletMapMode === 'simplified';
+    let comicMapLibre = null;
+    if (isSimplifiedMap) {
+      try { comicMapLibre = await ticketWalletLoadComicMapLibre(); }
+      catch (error) { console.warn('Comic map engine unavailable; keeping the illustrated paper background.', error); }
+      if (token !== ticketWalletLeafletRenderToken || !element.isConnected) return;
+    }
     const attribution = isSimplifiedMap ? '' : '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
     const tileMarkup = isSimplifiedMap ? '' : '<div class="ticket-wallet-fallback-tiles">' + tiles.join('') + '</div>';
     element.innerHTML = '<div class="ticket-wallet-fallback-map' + (isSimplifiedMap ? ' is-simplified-map' : '') + '">' + (isSimplifiedMap ? ticketWalletComicFilterMarkup() : '') + tileMarkup + '<svg class="ticket-wallet-fallback-overlay" viewBox="0 0 ' + width + ' ' + height + '" role="group" aria-label="' + escapeHtml(state.language === 'en' ? 'Selectable travel routes' : '可点选的出行路线') + '">' + overlayMarkup + '</svg><div class="ticket-wallet-fallback-controls">' + ticketWalletMapControlMarkup() + '</div>' + (attribution ? '<div class="ticket-wallet-fallback-attribution">' + attribution + '</div>' : '') + '</div>';
@@ -5641,6 +5658,10 @@ async function hydrateTicketWalletMap() {
       const pendingView = ticketWalletMapPendingView;
       map.setView(pendingView?.center || viewport.center, pendingView?.zoom || viewport.zoom);
       ticketWalletMapPendingView = null;
+    }
+    if (isSimplifiedMap && comicMapLibre?.Map) {
+      try { ticketWalletMountComicMap(L, map, comicMapLibre, fallbackTileLayer); }
+      catch (error) { console.warn('Illustrated map could not be mounted; keeping the paper background.', error); }
     }
     ticketWalletLeafletMap = map;
     ticketWalletLeafletMapElement = element;
