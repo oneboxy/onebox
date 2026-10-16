@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.668';
+const APP_VERSION = '2.18.669';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -5046,12 +5046,13 @@ function ticketWalletApplyComicMapStyle(map) {
 function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
   if (!maplibre?.Map) throw Error('MapLibre GL is unavailable');
   const host = L.DomUtil.create('div', 'ticket-wallet-comic-vector-layer');
+  const initialSize = map.getSize();
   Object.assign(host.style, {
     position: 'absolute',
     top: '0',
     left: '0',
-    width: '100%',
-    height: '100%',
+    width: Math.max(1, Math.round(initialSize.x)) + 'px',
+    height: Math.max(1, Math.round(initialSize.y)) + 'px',
     pointerEvents: 'none',
     zIndex: '1',
   });
@@ -5074,21 +5075,41 @@ function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
     preserveDrawingBuffer: false,
   });
   let disposed = false;
-  let fallbackRemoved = false;
+  let settled = false;
+  let comicMapRemoved = false;
   let syncFrame = 0;
+  let settlementTimer = 0;
+  const removeComicMap = () => {
+    if (comicMapRemoved) return;
+    comicMapRemoved = true;
+    comicMap.remove();
+  };
   const applyStyle = () => {
     if (comicMap.isStyleLoaded()) ticketWalletApplyComicMapStyle(comicMap);
   };
   const revealVectorMap = () => {
-    if (disposed || fallbackRemoved || !comicMap.isStyleLoaded()) return;
+    if (disposed || settled || !comicMap.isStyleLoaded()) return;
     if (typeof comicMap.areTilesLoaded === 'function' && !comicMap.areTilesLoaded()) return;
     applyStyle();
+    let hasRenderedFeatures = false;
+    try { hasRenderedFeatures = comicMap.queryRenderedFeatures().length > 0; } catch {}
+    if (!hasRenderedFeatures) {
+      settled = true;
+      window.clearTimeout(settlementTimer);
+      console.warn('Comic vector map has no rendered features; retaining the OpenStreetMap fallback.');
+      removeComicMap();
+      host.remove();
+      return;
+    }
     if (map.hasLayer(fallbackTileLayer)) map.removeLayer(fallbackTileLayer);
     map.attributionControl.addAttribution('<a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a> · <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>');
-    fallbackRemoved = true;
+    settled = true;
+    window.clearTimeout(settlementTimer);
   };
   comicMap.on('style.load', applyStyle);
-  comicMap.once('load', () => requestAnimationFrame(revealVectorMap));
+  comicMap.once('load', () => {
+    requestAnimationFrame(() => requestAnimationFrame(revealVectorMap));
+  });
   comicMap.on('idle', revealVectorMap);
   comicMap.on('error', (event) => console.warn('Comic vector map request failed.', event?.error || event));
   if (comicMap.isStyleLoaded()) applyStyle();
@@ -5108,22 +5129,35 @@ function ticketWalletMountComicMap(L, map, maplibre, fallbackTileLayer) {
       }
     });
   };
-  const resize = () => comicMap.resize();
+  const resize = () => {
+    const size = map.getSize();
+    host.style.width = Math.max(1, Math.round(size.x)) + 'px';
+    host.style.height = Math.max(1, Math.round(size.y)) + 'px';
+    comicMap.resize();
+  };
   map.on('moveend zoomend', syncCamera);
   map.on('resize', resize);
+  requestAnimationFrame(resize);
+  settlementTimer = window.setTimeout(() => {
+    if (disposed || settled) return;
+    settled = true;
+    console.warn('Comic vector map timed out; retaining the OpenStreetMap fallback.');
+    removeComicMap();
+    host.remove();
+  }, 8000);
   const themeObserver = new MutationObserver(applyStyle);
   themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   map.once('unload', () => {
     disposed = true;
+    window.clearTimeout(settlementTimer);
     if (syncFrame) cancelAnimationFrame(syncFrame);
     themeObserver.disconnect();
     map.off('moveend zoomend', syncCamera);
     map.off('resize', resize);
-    comicMap.remove();
+    removeComicMap();
   });
   return comicMap;
 }
-
 function ticketWalletMapTileUrl() {
   return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
