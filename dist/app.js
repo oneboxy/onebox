@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.674';
+const APP_VERSION = '2.18.675';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -5305,7 +5305,7 @@ function ticketWalletFallbackMap(element, geocoded, contextGeocoded = geocoded, 
   const interactionAbort = new AbortController();
   const controller = { zoom: null, center: null, cleanup: () => interactionAbort.abort() };
   const mapSize = () => ({ width: Math.max(320, element.clientWidth || 680), height: Math.max(240, element.clientHeight || 360) });
-  const render = () => {
+  const render = async () => {
     const { width, height } = mapSize();
     if (!controller.zoom || !controller.center) {
       const focused = ticketWalletMapFocusId ? models.find((model) => model.group.records.some((record) => record.id === ticketWalletMapFocusId)) : null;
