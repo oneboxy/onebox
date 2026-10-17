@@ -18245,3 +18245,45 @@ html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is
   outline: 2px solid color-mix(in srgb, var(--primary) 48%, transparent);
   outline-offset: 1px;
 }
+
+/* Train ticket style switcher shown in the selected ticket editor. */
+.ticket-wallet-detail-template-picker {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 6px 0 2px;
+  padding: 10px 0 2px;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.ticket-wallet-detail-template-picker legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 8px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+}
+.ticket-wallet-detail-template-picker legend small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 450;
+}
+.ticket-wallet-detail-template-picker .ticket-wallet-template-options { gap: 8px; }
+.ticket-wallet-detail-template-picker .ticket-wallet-template-option {
+  gap: 9px;
+  padding: 7px 30px 7px 8px;
+  border-radius: 12px;
+}
+.ticket-wallet-detail-template-picker .ticket-wallet-template-option.active { padding: 6px 29px 6px 7px; }
+.ticket-wallet-detail-template-picker .ticket-wallet-template-swatch { width: 48px; height: 32px; border-radius: 7px; }
+.ticket-wallet-detail-template-picker .ticket-wallet-template-option strong { font-size: 11px; }
+.ticket-wallet-detail-template-picker .ticket-wallet-template-option small { font-size: 9px; }
+@media (max-width: 420px) {
+  .ticket-wallet-detail-template-picker .ticket-wallet-template-options { gap: 6px; }
+  .ticket-wallet-detail-template-picker .ticket-wallet-template-option { gap: 7px; padding-right: 26px; }
+  .ticket-wallet-detail-template-picker .ticket-wallet-template-option.active { padding-right: 25px; }
+  .ticket-wallet-detail-template-picker .ticket-wallet-template-swatch { width: 40px; height: 28px; }
+}
