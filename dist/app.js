@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.676';
+const APP_VERSION = '2.18.677';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4944,20 +4944,44 @@ function ticketWalletApplyComicMapStyle(map) {
   if (!map || !map.isStyleLoaded()) return;
   const dark = document.documentElement.dataset.theme === 'dark';
   const colors = dark
-    ? { land: '#202529', water: '#2b3435', waterEdge: '#3b4544' }
-    : { land: '#faf8f2', water: '#e8efec', waterEdge: '#d3ded8' };
-  const visibleLayers = new Set(['background', 'water', 'water-intermittent']);
+    ? { land: '#202529', water: '#2b383c', waterEdge: '#3a4a4b', landcover: '#2b3731', label: '#aab8b3' }
+    : { land: '#faf8f2', water: '#deeaec', waterEdge: '#c7d8da', landcover: '#e7ece3', label: '#707d78' };
   const layers = map.getStyle()?.layers || [];
+  const transportPattern = /rail|railway|transit|subway|tram|transport|road|street|highway|motorway|bridge|tunnel|route|aeroway|ferry|cycleway|footway|path|parking|station/i;
+  const featureNoisePattern = /poi|amenity|shop|housenumber|address|building/i;
   for (const layer of layers) {
-    const visible = visibleLayers.has(layer.id);
+    const sourceLayer = String(layer['source-layer'] || '');
+    const key = layer.id + ' ' + sourceLayer;
+    const isBackground = layer.type === 'background' || layer.id === 'background';
+    const isWaterFill = layer.type === 'fill' && /water/i.test(key);
+    const isWaterwayLine = layer.type === 'line' && /waterway/i.test(key);
+    const isLandcover = layer.type === 'fill' && /landcover|land_cover|park|forest|wood|grass/i.test(key);
+    const isPlaceLabel = layer.type === 'symbol' && /place|settlement|city|town|village|country|state|region/i.test(key);
+    const isWaterLabel = layer.type === 'symbol' && /water_name|waterway_name|waterway_label|water_label/i.test(key);
+    const hasTransportNoise = transportPattern.test(key);
+    const hasFeatureNoise = featureNoisePattern.test(key);
+    const visible = isBackground || ((!hasTransportNoise && !hasFeatureNoise) && (isWaterFill || isWaterwayLine || isLandcover || isPlaceLabel || isWaterLabel));
     try { map.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none'); } catch {}
     if (!visible) continue;
-    if (layer.id === 'background') {
+    if (isBackground) {
       try { map.setPaintProperty(layer.id, 'background-color', colors.land); } catch {}
-    } else {
+    } else if (isWaterFill) {
       try { map.setPaintProperty(layer.id, 'fill-color', colors.water); } catch {}
       try { map.setPaintProperty(layer.id, 'fill-outline-color', colors.waterEdge); } catch {}
-      try { map.setPaintProperty(layer.id, 'fill-opacity', layer.id === 'water' ? .88 : .66); } catch {}
+      try { map.setPaintProperty(layer.id, 'fill-opacity', .9); } catch {}
+    } else if (isWaterwayLine) {
+      try { map.setPaintProperty(layer.id, 'line-color', colors.waterEdge); } catch {}
+      try { map.setPaintProperty(layer.id, 'line-opacity', .38); } catch {}
+      try { map.setPaintProperty(layer.id, 'line-width', 1); } catch {}
+    } else if (isLandcover) {
+      try { map.setPaintProperty(layer.id, 'fill-color', colors.landcover); } catch {}
+      try { map.setPaintProperty(layer.id, 'fill-opacity', .34); } catch {}
+    } else if (isPlaceLabel || isWaterLabel) {
+      try { map.setPaintProperty(layer.id, 'text-color', colors.label); } catch {}
+      try { map.setPaintProperty(layer.id, 'text-halo-color', colors.land); } catch {}
+      try { map.setPaintProperty(layer.id, 'text-halo-width', 1.2); } catch {}
+      try { map.setPaintProperty(layer.id, 'text-halo-blur', .35); } catch {}
+      try { map.setPaintProperty(layer.id, 'text-opacity', .82); } catch {}
     }
   }
 }
