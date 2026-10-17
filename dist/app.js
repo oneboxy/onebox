@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.675';
+const APP_VERSION = '2.18.676';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -4658,6 +4658,20 @@ function returnFromTicketWalletMap() {
   render();
   return true;
 }
+function ticketWalletDetailTrainStylePickerMarkup(record) {
+  if (record.type !== 'train') return '';
+  const english = state.language === 'en';
+  const current = ticketWalletNormalizeTemplate('train', record.template);
+  const options = [
+    { id: 'crh-blue-v1', swatch: 'blue', title: english ? 'Fresh blue' : '清爽蓝', note: english ? 'Light blue ticket' : '浅蓝票面' },
+    { id: 'pink-physical-v1', swatch: 'pink', title: english ? 'Classic paper' : '经典纸票', note: english ? 'Traditional ticket' : '传统纸票面' },
+  ];
+  const cards = options.map((item) => {
+    const selected = current === item.id;
+    return '<button type="button" class="ticket-wallet-template-option' + (selected ? ' active' : '') + '" aria-pressed="' + (selected ? 'true' : 'false') + '" data-ticket-wallet-detail-template="' + item.id + '" data-ticket-wallet-id="' + escapeHtml(record.id) + '"><span class="ticket-wallet-template-swatch ticket-wallet-template-swatch-' + item.swatch + '" aria-hidden="true"></span><span><strong>' + escapeHtml(item.title) + '</strong><small>' + escapeHtml(item.note) + '</small></span></button>';
+  }).join('');
+  return '<fieldset class="ticket-wallet-template-picker ticket-wallet-detail-template-picker"><legend><span>' + (english ? 'Ticket style' : '票面风格') + '</span><small>' + (english ? 'Saved when selected' : '切换后自动保存') + '</small></legend><div class="ticket-wallet-template-options">' + cards + '</div></fieldset>';
+}
 function ticketWalletDetailInfoMarkup(record) {
   const english = state.language === 'en';
   const id = escapeHtml(record.id);
@@ -4665,12 +4679,13 @@ function ticketWalletDetailInfoMarkup(record) {
   const icon = (paths) => '<svg viewBox="0 0 24 24" aria-hidden="true">' + paths + '</svg>';
   const action = (label, attr, paths, enabled = true, extra = '', hint = '') => '<button type="button" class="ticket-wallet-detail-tool ' + extra + '" ' + (enabled ? attr + '="' + id + '"' : 'disabled aria-disabled="true" title="' + escapeHtml(hint) + '"') + '>' + icon(paths) + '<span>' + label + '</span></button>';
   const notes = String(record.notes || '').trim();
+  const trainStylePicker = ticketWalletDetailTrainStylePickerMarkup(record);
   return '<section class="ticket-wallet-detail-info ticket-wallet-detail-utilities" aria-label="' + (english ? 'Ticket actions' : '票据操作') + '"><div class="ticket-wallet-detail-toolbar ticket-wallet-detail-toolbar-all">'
     + action(english ? 'Attachment' : '附件', 'data-ticket-wallet-original', '<rect x="3.5" y="4" width="17" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 4-4 3 3 2-2 7 5"></path>', Boolean(record.sourceImageId))
     + action(english ? 'Map' : '地图', 'data-ticket-wallet-map-locate', '<circle cx="12" cy="12" r="8.5"></circle><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"></path>', hasLocation)
     + action(english ? 'Apple Wallet' : '苹果钱包', 'data-ticket-wallet-apple', '<rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect><path d="M3.5 9h17M16 14h2"></path>', false, '', t('ticketWalletAppleHint'))
     + action(english ? 'Delete' : '删除', 'data-ticket-wallet-delete', '<path d="M5 7h14M9 7V4h6v3M7.5 7l.8 13h7.4l-.8-13M10 11v5M14 11v5"></path>', true, 'danger')
-    + '</div>' + '<section class="ticket-wallet-notes-panel" aria-label="' + (english ? 'Notes' : '备注') + '"><div class="ticket-wallet-notes-heading"><strong>' + (english ? 'Notes' : '备注') + '</strong><button type="button" data-ticket-wallet-notes="' + id + '" aria-label="' + (english ? 'Edit notes' : '编辑备注') + '">' + icon('<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path>') + '<span>' + (english ? (notes ? 'Edit' : 'Add') : (notes ? '编辑' : '添加')) + '</span></button></div><div class="ticket-wallet-notes-content">' + escapeHtml(notes || (english ? 'No notes yet' : '暂无备注')) + '</div></section>' + '</section>';
+    + '</div>' + trainStylePicker + '<section class="ticket-wallet-notes-panel" aria-label="' + (english ? 'Notes' : '备注') + '"><div class="ticket-wallet-notes-heading"><strong>' + (english ? 'Notes' : '备注') + '</strong><button type="button" data-ticket-wallet-notes="' + id + '" aria-label="' + (english ? 'Edit notes' : '编辑备注') + '">' + icon('<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z"></path>') + '<span>' + (english ? (notes ? 'Edit' : 'Add') : (notes ? '编辑' : '添加')) + '</span></button></div><div class="ticket-wallet-notes-content">' + escapeHtml(notes || (english ? 'No notes yet' : '暂无备注')) + '</div></section>' + '</section>';
 }
 function ticketWalletStackDensity(count) {
   const size = Math.max(1, Number(count) || 1);
@@ -13868,6 +13883,19 @@ workspace.addEventListener('click', async (event) => {
   if (templateScroll && state.ticketWalletEditorOpen && state.ticketWalletDraft?.type === 'flight') {
     const rail = templateScroll.closest('.ticket-wallet-airline-rail')?.querySelector('.ticket-wallet-template-options.is-airlines');
     rail?.scrollBy({ left: Number(templateScroll.dataset.ticketWalletTemplateScroll) * Math.max(190, rail.clientWidth * 0.72), behavior: 'smooth' });
+    return;
+  }
+  const detailTrainTemplate = event.target.closest('[data-ticket-wallet-detail-template]');
+  if (detailTrainTemplate) {
+    const record = state.ticketWallet.find((item) => item.id === detailTrainTemplate.dataset.ticketWalletId);
+    if (record?.type === 'train' && record.id === state.ticketWalletSelectedId) {
+      const template = ticketWalletNormalizeTemplate('train', detailTrainTemplate.dataset.ticketWalletDetailTemplate);
+      if (record.template !== template) {
+        record.template = template;
+        saveTicketWallet();
+        return render();
+      }
+    }
     return;
   }
   const ticketWalletTemplate = event.target.closest('[data-ticket-wallet-template]');
