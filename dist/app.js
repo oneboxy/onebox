@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.690';
+const APP_VERSION = '2.18.691';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -90,8 +90,8 @@ const FEED_SOURCE_REGISTRY = [
   { id: 'bilibili', name: 'B站', badge: 'B', icon: 'icons/bilibili.ico?v=2.18.124', className: 'bilibili', mobileHost: 'm.bilibili.com', visibleByDefault: false, siteUrl: 'https://search.bilibili.com/all', fetchers: [{ kind: 'bilibili-hot', url: 'https://api.bilibili.com/x/web-interface/search/square?limit=30&platform=web' }, { kind: 'bilibili-hotword', url: 'https://s.search.bilibili.com/main/hotword' }] },
   // Guancha and Hupu currently need the reader proxy to bypass cross-origin and anti-bot responses.
   // Keep their longer source-specific budget so a healthy fallback is not discarded at 4.5 seconds.
-  { id: 'guancha', name: '风闻', badge: '风', icon: 'icons/guancha.png?v=2.18.124', className: 'guancha', mobileHost: 'user.guancha.cn', visibleByDefault: true, siteUrl: 'https://user.guancha.cn/main/index?s=fwdhsy', fetchers: [{ kind: 'guancha-fengwen', url: 'https://user.guancha.cn/main/index-list.json?page=1&order=1', timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'guancha-fengwen', url: 'https://rsshub.app/guancha/topic/0/1', timeoutMs: 20000, deadlineMs: 24000 }] },
-  { id: 'hupu', name: '虎扑', badge: '虎', icon: 'icons/hupu.ico?v=2.18.124', className: 'hupu', mobileHost: 'm.hupu.com', visibleByDefault: true, siteUrl: 'https://bbs.hupu.com/bxj', fetchers: [{ kind: 'hupu-bbs', url: 'https://bbs.hupu.com/bxj', timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'hupu-bbs', url: 'https://bbs.hupu.com/topic-daily', timeoutMs: 20000, deadlineMs: 24000 }] },
+  { id: 'guancha', name: '风闻', badge: '风', icon: 'icons/guancha.png?v=2.18.124', className: 'guancha', mobileHost: 'user.guancha.cn', visibleByDefault: true, siteUrl: 'https://user.guancha.cn/main/index?s=fwdhsy', fetchers: [{ kind: 'guancha-fengwen', url: 'https://user.guancha.cn/main/index-list.json?page=1&order=1', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'guancha-fengwen', url: 'https://rsshub.app/guancha/topic/0/1', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }] },
+  { id: 'hupu', name: '虎扑', badge: '虎', icon: 'icons/hupu.ico?v=2.18.124', className: 'hupu', mobileHost: 'm.hupu.com', visibleByDefault: true, siteUrl: 'https://bbs.hupu.com/bxj', fetchers: [{ kind: 'hupu-bbs', url: 'https://bbs.hupu.com/bxj', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'hupu-bbs', url: 'https://bbs.hupu.com/topic-daily', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }] },
   { id: 'xiaohongshu', name: '红书', badge: '红', icon: 'https://www.xiaohongshu.com/favicon.ico?v=2.18.264', className: 'xiaohongshu', visibleByDefault: true, siteUrl: 'https://www.xiaohongshu.com/explore', fetchers: [{ kind: 'xiaohongshu-explore', url: 'https://www.xiaohongshu.com/explore' }, { kind: 'xiaohongshu-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=xiaohongshu&limit=30', direct: true }] },
   { id: 'douyin', name: '抖音', badge: '音', icon: 'https://www.douyin.com/favicon.ico?v=2.18.264', className: 'douyin', visibleByDefault: true, siteUrl: 'https://www.douyin.com/jingxuan', fetchers: [{ kind: 'douyin-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=douyin&limit=30', direct: true }, { kind: 'douyin-jingxuan', url: 'https://www.douyin.com/jingxuan' }] },
   { id: 'thepaper', name: '澎湃', badge: '澎', icon: 'https://m.thepaper.cn/_next/static/media/logo.8d76cf45.png?v=2.18.334', className: 'thepaper', mobileHost: 'm.thepaper.cn', visibleByDefault: true, siteUrl: 'https://m.thepaper.cn/', fetchers: [{ kind: 'thepaper-channel', url: 'https://www.thepaper.cn/channel_25950', timeoutMs: 15000, deadlineMs: 18000 }] },
@@ -1977,12 +1977,13 @@ function normalizeFeedItem(item, source, overrides = {}) {
   const publishedAt = item.pubDate || item.published || item.isoDate || item.date || '';
   return { id: source.id + ':' + link, source: source.id, title, link, description: feedText(item.description || item.content || '').slice(0, 180), thumbnail, publishedAt, publishedMs: parseFeedTimestamp(publishedAt), ...overrides };
 }
-function jinaReaderUrl(url) {
+function jinaReaderUrl(url, noCache = false) {
   const value = String(url || '').trim();
   if (!value) return '';
   const separator = value.includes('?') ? '&' : '?';
   const target = value.replace(/^https?:\/\//i, '');
-  return 'https://r.jina.ai/http://' + target + separator + '_onebox=' + Date.now();
+  // Bypass Reader's own cache for sources that must reflect the live page.
+  return 'https://r.jina.ai/http://' + target + (noCache ? '' : separator + '_onebox=' + Date.now());
 }
 function jinaContent(value) {
   const text = String(value || '').trim();
@@ -2173,7 +2174,9 @@ function thepaperChannelItems(value, source) {
 }
 function hupuBbsItems(value, source) {
   const content = jinaContent(value);
-  const matches = [...content.matchAll(/\[([^\]]+)\]\((https?:\/\/(?:www\.)?bbs\.hupu\.com\/\d+(?:-\d+)?\.html)\)([^\n]*)/g)];
+  // Keep only the topic link. Pagination links like /123-2.html were
+  // previously misread as separate feed entries titled "2".
+  const matches = [...content.matchAll(/\[([^\]]+)\]\((https?:\/\/(?:www\.)?bbs\.hupu\.com\/\d+\.html)\)([^\n]*)/g)];
   return matches.map((match, index) => normalizeFeedItem({
     title: match[1],
     link: match[2].replace(/^http:/i, 'https:'),
@@ -2262,7 +2265,8 @@ function structuredHotItems(payload, source, kind) {
 }
 function guanchaRelativeTimestamp(value, index) {
   const text = String(value || '');
-  const match = text.match(/(\d+)\s*(分钟|小时|天)前/);
+  const matches = [...text.matchAll(/(\d+)\s*(分钟|小时|天)前/g)];
+  const match = matches[matches.length - 1];
   if (match) {
     const unit = match[2] === '分钟' ? 60 * 1000 : match[2] === '小时' ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
     return Date.now() - Number(match[1]) * unit;
@@ -2277,7 +2281,11 @@ function guanchaFengwenItems(value, source) {
     .filter((match) => /\/main\/content(?:\?|$)/i.test(match[2]));
   if (!headings.length) return [];
   return headings.map((match, index) => {
-    const blockStart = (match.index || 0) + match[0].length;
+    const headingStart = match.index || 0;
+    const previousHeadingEnd = index ? (headings[index - 1].index || 0) + headings[index - 1][0].length : 0;
+    // Guancha prints each relative time immediately before its title.
+    const timestampContext = content.slice(Math.max(previousHeadingEnd, headingStart - 500), headingStart);
+    const blockStart = headingStart + match[0].length;
     const nextStart = headings[index + 1]?.index ?? content.length;
     const block = content.slice(blockStart, nextStart);
     const description = feedText(block)
@@ -2287,7 +2295,7 @@ function guanchaFengwenItems(value, source) {
     const link = match[2].replace(/^http:/i, 'https:');
     return normalizeFeedItem({ title: match[1], link, description, content: block }, source, {
       approximate: false,
-      publishedMs: guanchaRelativeTimestamp(block, index),
+      publishedMs: guanchaRelativeTimestamp(timestampContext, index),
     });
   }).filter(Boolean);
 }
@@ -2314,8 +2322,10 @@ async function fetchFeedSource(source) {
   const fetchers = Array.isArray(source.fetchers) ? source.fetchers : (source.urls || []).map((url) => ({ kind: 'rss', url }));
   const sourceController = new AbortController();
   const fetchOne = async (fetcher) => {
-    const targetUrl = fetcher.direct ? fetcher.url : jinaReaderUrl(fetcher.url);
-    const { response, text } = await fetchTextWithTimeout(targetUrl, { cache: 'no-store', headers: { Accept: 'text/plain, application/json, application/xml' } }, fetcher.timeoutMs || HOME_FEED_REQUEST_TIMEOUT_MS, sourceController.signal);
+    const targetUrl = fetcher.direct ? fetcher.url : jinaReaderUrl(fetcher.url, fetcher.noCache);
+    const headers = { Accept: 'text/plain, application/json, application/xml' };
+    if (fetcher.noCache) headers['X-No-Cache'] = 'true';
+    const { response, text } = await fetchTextWithTimeout(targetUrl, { cache: 'no-store', headers }, fetcher.timeoutMs || HOME_FEED_REQUEST_TIMEOUT_MS, sourceController.signal);
     if (!response.ok) throw Error('HTTP ' + response.status);
     const payload = fetcher.kind === 'rss' || fetcher.kind === 'guancha-fengwen' ? null : jinaJson(text);
     const items = fetcher.kind === 'rss' ? rssMarkdownItems(text, source) : fetcher.kind === 'jiemian-newsflash' ? jiemianNewsflashItems(text, source) : fetcher.kind === 'thepaper-channel' ? thepaperChannelItems(text, source) : fetcher.kind === 'hupu-bbs' ? hupuBbsItems(text, source) : fetcher.kind === 'guancha-fengwen' ? guanchaFengwenItems(text, source) : fetcher.kind === 'xiaohongshu-explore' ? xiaohongshuExploreItems(text, source) : fetcher.kind === 'douyin-jingxuan' ? douyinJingxuanItems(source) : structuredHotItems(payload, source, fetcher.kind);
