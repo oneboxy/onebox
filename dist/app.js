@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.677';
+const APP_VERSION = '2.18.690';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -82,7 +82,7 @@ const TOOL_DEFS = {
 // The fetchers are intentionally source-specific: using one RSS aggregator for
 // every site was the reason several feeds lagged by hours and hit rate limits.
 const FEED_SOURCE_REGISTRY = [
-  { id: 'ithome', name: '之家', badge: 'IT', icon: 'icons/ithome.svg?v=2.18.170', className: 'ithome', mobileHost: 'm.ithome.com', visibleByDefault: true, siteUrl: 'https://www.ithome.com/', fetchers: [{ kind: 'rss', url: 'https://www.ithome.com/rss/' }, { kind: 'rss', url: 'https://www.ithome.com/rss', direct: true }] },
+  { id: 'ithome', name: '之家', badge: 'IT', icon: 'icons/ithome.svg?v=2.18.170', className: 'ithome', mobileHost: 'm.ithome.com', visibleByDefault: true, siteUrl: 'https://www.ithome.com/', fetchers: [{ kind: 'rss', url: 'https://www.ithome.com/rss/', timeoutMs: 15000, deadlineMs: 16000 }] },
   { id: 'huxiu', name: '虎嗅', badge: '虎', icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/be/4c/7f/be4c7f2c-0ebc-7ba8-a60e-c5707c67b0ee/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/128x128bb.png', className: 'huxiu', mobileHost: 'm.huxiu.com', visibleByDefault: true, siteUrl: 'https://www.huxiu.com/', fetchers: [{ kind: 'rss', url: 'https://www.huxiu.com/rss/0.xml' }, { kind: 'rss', url: 'https://rsshub.rssforever.com/huxiu/article' }, { kind: 'rss', url: 'https://rsshub.app/huxiu/article' }] },
   { id: 'zhihu', name: '知乎', badge: '知', icon: 'https://www.zhihu.com/favicon.ico', className: 'zhihu', mobileHost: 'www.zhihu.com', visibleByDefault: true, siteUrl: 'https://www.zhihu.com/hot', fetchers: [{ kind: 'zhihu-hot', url: 'https://www.zhihu.com/api/v4/search/hot_search' }, { kind: 'zhihu-hot', url: 'https://www.zhihu.com/api/v4/search/hot_search?limit=50' }] },
   { id: 'v2ex', name: 'V站', badge: 'V', icon: 'https://www.v2ex.com/favicon.ico', className: 'v2ex', visibleByDefault: false, siteUrl: 'https://www.v2ex.com/?tab=all', fetchers: [{ kind: 'v2ex-latest', url: 'https://www.v2ex.com/api/topics/latest.json' }, { kind: 'rss', url: 'https://www.v2ex.com/index.xml' }] },
@@ -3529,9 +3529,10 @@ function renderHome() {
   const emptyActivityKey = state.homeFeed.activityFilter === 'like' ? 'feedFootprintEmptyLike' : state.homeFeed.activityFilter === 'dislike' ? 'feedFootprintEmptyDislike' : 'feedFootprintEmptyRead';
   const feedBody = state.homeFeed.loading && !hasItems && !isFootprint ? '<div class="feed-loading"><span></span><span></span><span></span></div>' : hasItems ? '<div class="feed-list">' + feedList + '</div>' : '<p class="empty feed-empty">' + (isFootprint ? t(emptyActivityKey) : t('feedEmpty')) + '</p>';
   const refreshState = state.homeFeed.loading ? '<div class="feed-refresh-state" role="status" aria-label="' + escapeHtml(t('feedLoading')) + '"><span></span></div>' : '';
+  const staleNotice = !isFootprint && state.homeFeed.stale[state.homeFeed.active] ? '<p class="feed-hint" role="status">' + (state.language === 'en' ? 'Could not refresh this feed. Showing saved items; tap this tab to retry.' : '暂时无法更新，当前显示已保存内容；点击此栏目可重试。') + '</p>' : '';
   const newContentAction = !state.homeFeed.loading && !homeFeedSourceRequesting() && newCount ? '<div class="feed-new-content-action-wrap"><button class="feed-new-content-action" type="button" data-feed-only-new>' + escapeHtml(homeFeedNewActionLabel(newCount)) + '</button></div>' : '';
   const loadMoreAction = hasMoreItems ? '<div class="feed-load-more-wrap"><button class="feed-load-more" type="button" data-feed-load-more>' + escapeHtml(t('feedLoadMore')) + '</button></div>' : '';
-  return '<div class="home-page feed-home">' + (featuredJiemianFlash ? renderJiemianFlash(featuredJiemianFlash) : '') + '<section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
+  return '<div class="home-page feed-home">' + (featuredJiemianFlash ? renderJiemianFlash(featuredJiemianFlash) : '') + '<section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + refreshState + staleNotice + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
 }
 function navigationIconMarkup(site, extraClass = '') {
   const generatedSources = navigationIconSources(site?.url);
