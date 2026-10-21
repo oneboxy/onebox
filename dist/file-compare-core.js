@@ -239,8 +239,8 @@
   function compareJson(leftText, rightText) {
     let left;
     let right;
-    try { left = JSON.parse(String(leftText)); } catch (error) { return { changes: [], error: 'invalid-left-json', detail: error.message }; }
-    try { right = JSON.parse(String(rightText)); } catch (error) { return { changes: [], error: 'invalid-right-json', detail: error.message }; }
+    try { left = JSON.parse(String(leftText).replace(/^\uFEFF/, '')); } catch (error) { return { changes: [], error: 'invalid-left-json', detail: error.message }; }
+    try { right = JSON.parse(String(rightText).replace(/^\uFEFF/, '')); } catch (error) { return { changes: [], error: 'invalid-right-json', detail: error.message }; }
     const changes = [];
     compareJsonValues(left, right, '$', changes);
     return { changes, error: '' };

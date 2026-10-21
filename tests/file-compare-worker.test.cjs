@@ -33,17 +33,17 @@ test('Excel worker parses workbook sheets and preserves cell values', () => {
   ]));
 });
 
-test('Excel worker returns a parse error for a damaged workbook', () => {
+test('Excel worker returns a parse error when the parser rejects a workbook', () => {
   const source = fs.readFileSync(path.join(__dirname, '../dist/file-compare-worker.js'), 'utf8');
   const messages = [];
   let onMessage;
   const self = {
-    XLSX,
+    XLSX: { read() { throw new Error('damaged workbook'); } },
     addEventListener(type, listener) { if (type === 'message') onMessage = listener; },
     postMessage(message) { messages.push(message); },
   };
   vm.runInNewContext(source, { self, importScripts() {} }, { filename: 'file-compare-worker.js' });
-  onMessage({ data: { id: 42, buffer: new ArrayBuffer(0) } });
+  onMessage({ data: { id: 42, buffer: new ArrayBuffer(8) } });
   assert.equal(messages.at(-1).id, 42);
   assert.equal(messages.at(-1).ok, false);
   assert.equal(messages.at(-1).error, 'excel-parse-error');

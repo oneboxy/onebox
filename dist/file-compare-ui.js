@@ -205,6 +205,7 @@
 
   function cancelPendingReads() {
     stopWorker();
+    state.progress = '';
     for (const side of ['left', 'right']) {
       if (state[side].loading) state[side] = { file: null, kind: '', data: null, loading: false, error: '' };
     }

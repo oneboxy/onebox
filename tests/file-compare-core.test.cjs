@@ -45,6 +45,10 @@ test('reports invalid JSON on the correct side', () => {
   assert.equal(compare.compareJson('{}', '{').error, 'invalid-right-json');
 });
 
+test('accepts JSON files that start with a UTF-8 BOM', () => {
+  assert.deepEqual(compare.compareJson('\uFEFF{"value":1}', '{"value":1}').changes, []);
+});
+
 test('aligns text edits and distinguishes additions and removals', () => {
   const result = compare.compareText('alpha\nbeta\ngamma', 'alpha\nbetter\ngamma\ndelta');
   assert.equal(result.truncatedAlignment, false);
