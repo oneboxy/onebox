@@ -1,4 +1,4 @@
-name: File comparison checks
+name: OneBox app checks
 
 on:
   push:
@@ -6,18 +6,20 @@ on:
     paths:
       - 'dist/app.js'
       - 'dist/file-compare-*.js'
+      - 'dist/ticket-wallet-layout.js'
       - 'dist/style.css'
       - 'dist/vendor/**'
-      - 'tests/file-compare-*.test.cjs'
+      - 'tests/*.test.cjs'
       - '.github/workflows/file-compare-tests.yml'
   pull_request:
     branches: [main]
     paths:
       - 'dist/app.js'
       - 'dist/file-compare-*.js'
+      - 'dist/ticket-wallet-layout.js'
       - 'dist/style.css'
       - 'dist/vendor/**'
-      - 'tests/file-compare-*.test.cjs'
+      - 'tests/*.test.cjs'
       - '.github/workflows/file-compare-tests.yml'
   workflow_dispatch:
 
@@ -38,5 +40,6 @@ jobs:
           node --check dist/file-compare-core.js
           node --check dist/file-compare-ui.js
           node --check dist/file-compare-worker.js
+          node --check dist/ticket-wallet-layout.js
       - name: Run file comparison tests
-        run: node --test tests/file-compare-*.test.cjs
+        run: node --test tests/*.test.cjs
