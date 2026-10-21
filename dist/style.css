@@ -18396,3 +18396,43 @@ html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is
   .dev-tools-page.dev-is-fullscreen .dev-mode-tab { font-size: 9px; letter-spacing: -.03em; }
   .dev-file-compare-heading { flex-direction: column; }
 }
+
+/* Ticket wallet view toggle and flat ticket layout. */
+body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle {
+  display:inline-grid;width:32px;min-width:32px;height:32px;place-items:center;box-sizing:border-box;padding:0;
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--muted);cursor:pointer;
+  transition:color .16s ease,background .16s ease,border-color .16s ease,transform .16s ease;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle svg {
+  width:17px;height:17px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.7;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle:hover,
+body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle:focus-visible {
+  border-color:color-mix(in srgb,var(--primary) 34%,var(--line));background:var(--soft);color:var(--primary);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle[aria-pressed="true"] { color:var(--primary); }
+body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle:active { transform:translateY(1px); }
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack {
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px!important;padding:8px 0 16px!important;
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack > .ticket-wallet-swipe-row {
+  position:relative!important;width:100%!important;margin:0!important;overflow:hidden!important;transform:none!important;z-index:auto!important;
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack .ticket-wallet-card { margin-top:0!important;z-index:auto!important; }
+@media (min-width:761px) {
+  body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack .ticket-wallet-swipe-row-train { width:100%!important;margin-inline:0!important; }
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-stack.ticket-wallet-reorder-active > .ticket-wallet-swipe-row.ticket-wallet-reorder-dragging,
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-stack.ticket-wallet-reorder-active > .ticket-wallet-swipe-row.ticket-wallet-reorder-settling {
+  z-index:1000!important;overflow:visible!important;
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-stack.ticket-wallet-reorder-active > .ticket-wallet-swipe-row {
+  transform:translate3d(0,var(--ticket-reorder-offset,0px),0)!important;
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-stack.ticket-wallet-reorder-active > .ticket-wallet-swipe-row.ticket-wallet-reorder-dragging {
+  transform:translate3d(0,var(--ticket-reorder-offset,0px),0) scale(1.012)!important;
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-stack:not(.ticket-wallet-reorder-active) > .ticket-wallet-swipe-row.ticket-wallet-reorder-armed {
+  transform:scale(1.006)!important;
+}
+@media (max-width:760px) { body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle { width:30px;min-width:30px;height:30px;border-radius:9px; } }
