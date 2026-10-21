@@ -18287,3 +18287,112 @@ html[data-theme="dark"] body:has(.ticket-wallet-page) .ticket-wallet-real-map.is
   .ticket-wallet-detail-template-picker .ticket-wallet-template-option.active { padding-right: 25px; }
   .ticket-wallet-detail-template-picker .ticket-wallet-template-swatch { width: 40px; height: 28px; }
 }
+
+
+/* Local file comparison */
+.dev-file-compare { display: grid; gap: 14px; min-width: 0; }
+.dev-file-compare-heading,
+.dev-file-compare-result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.dev-file-compare-heading h2 { margin: 0; font-size: 20px; letter-spacing: -.025em; }
+.dev-file-compare-heading p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.dev-file-compare-actions { display: flex; gap: 7px; }
+.dev-file-compare-actions button,
+.dev-file-compare-run button,
+.dev-file-compare-status button { min-height: 34px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+.dev-file-compare-actions button:disabled,
+.dev-file-compare-run button:disabled { opacity: .46; cursor: not-allowed; }
+.dev-file-compare-privacy { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border-radius: 10px; background: color-mix(in srgb, var(--primary) 5%, var(--panel)); color: var(--muted); font-size: 12px; line-height: 1.5; }
+.dev-file-compare-privacy svg { width: 16px; height: 16px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.dev-file-compare-pair { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); align-items: stretch; gap: 10px; }
+.dev-file-compare-dropzone { position: relative; display: flex; min-height: 138px; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 14px; border: 1px dashed color-mix(in srgb, var(--primary) 24%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--panel-2) 70%, var(--panel)); color: var(--ink); text-align: center; cursor: pointer; transition: border-color .16s ease, background .16s ease; }
+.dev-file-compare-dropzone:hover,
+.dev-file-compare-dropzone:focus-within,
+.dev-file-compare-dropzone.is-dragging { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 5%, var(--panel)); }
+.dev-file-compare-dropzone > strong { font-size: 13px; }
+.dev-file-compare-dropzone > span:not(.dev-file-compare-upload-icon) { color: var(--muted); font-size: 12px; }
+.dev-file-compare-dropzone small { color: var(--muted); font-size: 10px; }
+.dev-file-compare-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; }
+.dev-file-compare-upload-icon { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--primary); }
+.dev-file-compare-upload-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.dev-file-compare-vs { display: grid; place-items: center; color: var(--muted); font-size: 17px; }
+.dev-file-compare-file-card { position: relative; display: flex; min-width: 0; min-height: 88px; align-items: center; gap: 10px; padding: 12px 36px 12px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+.dev-file-compare-file-icon { display: grid; width: 38px; height: 42px; flex: 0 0 38px; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); color: var(--primary); font-size: 9px; font-weight: 800; }
+.dev-file-compare-file-meta { display: grid; min-width: 0; gap: 5px; }
+.dev-file-compare-file-meta strong { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.dev-file-compare-file-meta span { color: var(--muted); font-size: 11px; }
+.dev-file-compare-remove { position: absolute; top: 8px; right: 8px; display: grid; width: 25px; height: 25px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font: inherit; font-size: 19px; line-height: 1; cursor: pointer; }
+.dev-file-compare-remove:hover { background: var(--soft); color: var(--ink); }
+.dev-file-compare-file-error { position: absolute; right: 9px; bottom: -20px; left: 9px; margin: 0; color: var(--danger); font-size: 10px; }
+.dev-file-compare-settings { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; padding: 11px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
+.dev-file-compare-control,
+.dev-file-compare-filter { display: grid; min-width: 140px; gap: 5px; }
+.dev-file-compare-control > span,
+.dev-file-compare-filter > span { color: var(--muted); font-size: 10px; font-weight: 650; }
+.dev-file-compare-control select,
+.dev-file-compare-filter select { width: 100%; min-height: 34px; padding: 0 28px 0 9px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; }
+.dev-file-compare-control select:disabled { color: var(--muted); }
+.dev-file-compare-mode-note { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.dev-file-compare-run { display: flex; justify-content: flex-end; }
+.dev-file-compare-run button { min-width: 132px; }
+.dev-file-compare-status { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 9px 11px; border-radius: 10px; font-size: 12px; }
+.dev-file-compare-status.is-error { background: color-mix(in srgb, var(--danger) 8%, var(--panel)); color: var(--danger); }
+.dev-file-compare-status.is-loading { background: var(--panel-2); color: var(--muted); }
+.dev-file-compare-status button { min-height: 28px; padding: 0 9px; font-size: 11px; }
+.dev-file-compare-result { display: grid; min-width: 0; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+.dev-file-compare-result-head > div { display: grid; gap: 4px; }
+.dev-file-compare-result-head strong { color: var(--ink); font-size: 14px; }
+.dev-file-compare-result-head > div > span { color: var(--muted); font-size: 10px; }
+.dev-file-compare-filter { min-width: 136px; }
+.dev-file-compare-table-wrap { max-width: 100%; overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
+.dev-file-compare-table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 11px; }
+.dev-file-compare-table th,
+.dev-file-compare-table td { padding: 8px 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.dev-file-compare-table th { position: sticky; top: 0; z-index: 1; background: var(--panel-2); color: var(--muted); font-size: 10px; font-weight: 700; white-space: nowrap; }
+.dev-file-compare-table tr:last-child td { border-bottom: 0; }
+.dev-file-compare-table tr.is-added td { background: color-mix(in srgb, var(--success) 4%, var(--panel)); }
+.dev-file-compare-table tr.is-removed td { background: color-mix(in srgb, var(--danger) 4%, var(--panel)); }
+.dev-file-compare-table tr.is-changed td { background: color-mix(in srgb, var(--warning) 4%, var(--panel)); }
+.dev-file-compare-table pre { max-width: 420px; margin: 0; overflow-wrap: anywhere; color: var(--ink); font: inherit; white-space: pre-wrap; }
+.dev-file-compare-table code { color: var(--primary); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+.dev-file-compare-position { width: 42px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dev-file-compare-path { min-width: 135px; color: var(--ink); }
+.dev-file-compare-badge { display: inline-flex; align-items: center; padding: 3px 6px; border-radius: 999px; background: var(--soft); color: var(--muted); font-size: 9px; white-space: nowrap; }
+.dev-file-compare-badge.is-added { background: color-mix(in srgb, var(--success) 10%, var(--panel)); color: var(--success); }
+.dev-file-compare-badge.is-removed { background: color-mix(in srgb, var(--danger) 10%, var(--panel)); color: var(--danger); }
+.dev-file-compare-badge.is-changed { background: color-mix(in srgb, var(--warning) 11%, var(--panel)); color: var(--warning); }
+.dev-file-compare-notice,
+.dev-file-compare-truncated { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.dev-file-compare-error { display: grid; gap: 5px; padding: 10px; border-radius: 9px; background: color-mix(in srgb, var(--danger) 8%, var(--panel)); color: var(--danger); font-size: 12px; }
+.dev-file-compare-error small { opacity: .8; }
+.dev-file-compare-empty-result { padding: 18px; color: var(--muted); text-align: center; font-size: 12px; }
+.dev-file-compare-identical { display: grid; min-height: 100px; place-content: center; justify-items: center; gap: 8px; color: var(--success); }
+.dev-file-compare-identical span { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--success) 10%, var(--panel)); font-size: 16px; }
+.dev-file-compare-identical strong { font-size: 12px; }
+.dev-file-compare-spinner { width: 18px; height: 18px; flex: 0 0 18px; border: 2px solid var(--line); border-top-color: var(--primary); border-radius: 50%; animation: dev-file-compare-spin .8s linear infinite; }
+@keyframes dev-file-compare-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) {
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab { font-size: 10px; }
+  .dev-file-compare { gap: 10px; }
+  .dev-file-compare-heading { align-items: flex-start; }
+  .dev-file-compare-heading h2 { font-size: 17px; }
+  .dev-file-compare-actions { gap: 5px; }
+  .dev-file-compare-actions button { min-height: 30px; padding-inline: 9px; font-size: 11px; }
+  .dev-file-compare-pair { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+  .dev-file-compare-vs { height: 14px; transform: rotate(90deg); font-size: 14px; }
+  .dev-file-compare-dropzone { min-height: 112px; }
+  .dev-file-compare-file-card { min-height: 70px; }
+  .dev-file-compare-settings { align-items: stretch; gap: 8px; padding: 9px; }
+  .dev-file-compare-control { flex: 1 1 125px; min-width: 0; }
+  .dev-file-compare-run button { width: 100%; }
+  .dev-file-compare-result { padding: 9px; }
+  .dev-file-compare-result-head { align-items: flex-start; }
+  .dev-file-compare-filter { min-width: 110px; }
+}
+
+@media (max-width: 380px) {
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab { font-size: 9px; letter-spacing: -.03em; }
+  .dev-file-compare-heading { flex-direction: column; }
+}

@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.691';
+const APP_VERSION = '2.18.692';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -528,7 +528,7 @@ const storedFootprint = parseStored(STORAGE.footprint, true) !== false;
 const storedOpenMode = readOpenModePreference();
 const storedMascotVisible = localStorage.getItem(STORAGE.mascotVisible) !== 'false';
 const storedMascotDisplayMode = localStorage.getItem(STORAGE.mascotDisplayMode) === 'full' ? 'full' : 'half';
-const DEV_TOOL_IDS = ['json-format', 'json-compare', 'text-stats', 'timestamp'];
+const DEV_TOOL_IDS = ['json-format', 'json-compare', 'text-stats', 'timestamp', 'file-compare'];
 function normalizeDevTools(value) {
   const source = value && typeof value === 'object' ? value : {};
   const sourceRecords = source.records && typeof source.records === 'object' ? source.records : {};
@@ -8636,7 +8636,7 @@ function addDevRecord(kind, record) {
   saveDevTools();
 }
 function devModeLabel(mode) {
-  return mode === 'json-format' ? t('devJsonFormat') : mode === 'json-compare' ? t('devJsonCompare') : mode === 'text-stats' ? t('devTextStats') : t('devTimestamp');
+  return mode === 'json-format' ? t('devJsonFormat') : mode === 'json-compare' ? t('devJsonCompare') : mode === 'text-stats' ? t('devTextStats') : mode === 'file-compare' ? (state.language === 'en' ? 'File diff' : '文件对比') : t('devTimestamp');
 }
 function devRecordLabel(kind, item) {
   const date = new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(Number(item.at) || Date.now());
@@ -9152,7 +9152,7 @@ function syncDeveloperJsonLineNumbers(editor) {
 function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
   const mode = state.devTools.active;
-  const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : renderDeveloperTimestamp();
+  const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : window.OneBoxFileCompareUI.render();
   return '<section class="dev-tools-page dev-is-fullscreen"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
 }
 function syncDeveloperFullscreenFrame() {
