@@ -41,5 +41,5 @@ jobs:
           node --check dist/file-compare-ui.js
           node --check dist/file-compare-worker.js
           node --check dist/ticket-wallet-layout.js
-      - name: Run file comparison tests
+      - name: Run application test suite
         run: node --test tests/*.test.cjs
