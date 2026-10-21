@@ -6,7 +6,7 @@
   if (!core || !workspace) return;
 
   const MAX_FILE_BYTES = 20 * 1024 * 1024;
-  const WORKER_SRC = 'file-compare-worker.js?v=2.18.692';
+  const WORKER_SRC = 'file-compare-worker.js?v=2.18.693';
   const state = {
     left: { file: null, kind: '', data: null, loading: false, error: '' },
     right: { file: null, kind: '', data: null, loading: false, error: '' },
@@ -171,14 +171,13 @@
     const canCompare = Boolean(itemsReady) && !state.left.loading && !state.right.loading && !state.status;
     const hasFiles = state.left.file || state.right.file;
     const loading = state.left.loading || state.right.loading;
-    const actions = '<button type="button" class="secondary dev-file-compare-swap" data-fc-action="swap" ' + (state.left.file && state.right.file ? '' : 'disabled') + '>' + words('交换', 'Swap') + '</button>' +
-      '<button type="button" class="secondary" data-fc-action="clear" ' + (hasFiles ? '' : 'disabled') + '>' + words('清空', 'Clear') + '</button>';
+    const actions = '<button type="button" class="secondary" data-fc-action="clear" ' + (hasFiles ? '' : 'disabled') + '>' + words('清空', 'Clear') + '</button>';
     const error = state.status ? '<p class="dev-file-compare-status is-error" role="alert">' + escape(state.status) + '</p>' : '';
     const busy = loading ? '<p class="dev-file-compare-status is-loading" role="status">' + escape(state.progress || words('正在读取文件…', 'Reading file…')) + '<button type="button" data-fc-action="cancel">' + words('取消', 'Cancel') + '</button></p>' : '';
     return '<div class="dev-file-compare">' +
-      '<header class="dev-file-compare-heading"><div><h2>' + words('文件对比', 'File comparison') + '</h2><p>' + words('选择两个文件，查看内容差异', 'Choose two files to inspect their differences') + '</p></div><div class="dev-file-compare-actions">' + actions + '</div></header>' +
-      '<div class="dev-file-compare-privacy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>' + words('文件只在此浏览器内读取和比较，不会上传或保存。支持单文件最大 20 MB。', 'Files are read and compared in this browser; they are not uploaded or saved. Up to 20 MB per file.') + '</span></div>' +
-      '<div class="dev-file-compare-pair">' + fileCard('left') + '<div class="dev-file-compare-vs" aria-hidden="true">↔</div>' + fileCard('right') + '</div>' +
+      '<header class="dev-file-compare-heading"><div><h2>' + words('文件对比', 'File comparison') + '</h2></div><div class="dev-file-compare-actions">' + actions + '</div></header>' +
+      '<div class="dev-file-compare-privacy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><div class="dev-file-compare-privacy-copy"><strong>' + words('选择两个文件，查看内容差异', 'Choose two files to inspect their differences') + '</strong><span>' + words('文件只在此浏览器内读取和比较，不会上传或保存。支持单文件最大 20 MB。', 'Files are read and compared in this browser; they are not uploaded or saved. Up to 20 MB per file.') + '</span></div></div>' +
+      '<div class="dev-file-compare-pair">' + fileCard('left') + '<button type="button" class="dev-file-compare-vs" data-fc-action="swap" aria-label="' + words('交换文件 A 与文件 B', 'Swap File A and File B') + '" title="' + words('交换文件 A 与文件 B', 'Swap File A and File B') + '" ' + (state.left.file && state.right.file && !loading ? '' : 'disabled') + '>↔</button>' + fileCard('right') + '</div>' +
       (state.left.error || state.right.error ? '<p class="dev-file-compare-status is-error" role="alert">' + escape(state.left.error || state.right.error) + '</p>' : '') + error + busy +
       (itemsReady && currentSpreadsheetPair() ? renderSettings() : itemsReady ? renderSettings() : '') +
       '<div class="dev-file-compare-run"><button type="button" class="primary" data-fc-action="compare" ' + (canCompare ? '' : 'disabled') + '>' + words('开始对比', 'Compare files') + '</button></div>' +
@@ -352,9 +351,11 @@
     }
     if (action === 'remove-left' || action === 'remove-right') return clearSide(action.slice(7));
     if (action === 'swap') {
+      if (!state.left.file || !state.right.file || state.left.loading || state.right.loading) return;
       [state.left, state.right] = [state.right, state.left];
       state.result = null;
       state.status = '';
+      state.progress = '';
       return renderIntoPage();
     }
     if (action === 'cancel') {
