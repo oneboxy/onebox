@@ -1,5 +1,5 @@
 /* Local-only Excel parser. The workbook buffer is received through postMessage and is never sent over the network. */
-importScripts('vendor/xlsx.full.min.js?v=2.18.692');
+importScripts('vendor/xlsx.full.min.js?v=2.18.693');
 
 self.addEventListener('message', (event) => {
   const { id, buffer } = event.data || {};

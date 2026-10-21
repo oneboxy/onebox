@@ -1,0 +1,31 @@
+/* Small UI refinements for local file comparison. */
+.dev-file-compare-privacy-copy { display: grid; min-width: 0; gap: 2px; }
+.dev-file-compare-privacy-copy strong { color: var(--ink); font-size: 12px; font-weight: 650; }
+.dev-file-compare-privacy-copy span { color: var(--muted); font-size: 11px; }
+.dev-file-compare-vs {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-self: center;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, color .16s ease;
+}
+.dev-file-compare-vs:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--line));
+  background: color-mix(in srgb, var(--primary) 7%, var(--panel));
+  color: var(--primary);
+}
+.dev-file-compare-vs:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.dev-file-compare-vs:disabled { opacity: .42; cursor: not-allowed; }
+@media (max-width: 760px) {
+  .dev-file-compare-vs { width: 28px; height: 28px; margin-block: -2px; transform: none; font-size: 19px; }
+}
