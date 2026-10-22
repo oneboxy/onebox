@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.709';
+const APP_VERSION = '2.18.710';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8954,7 +8954,7 @@ function developerJsonEditor(field, value, placeholder, compareResult = null) {
   const result = compareResult || developerCompareResult();
   return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side], result.lines[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
 }
-function syncDeveloperCompareEditor(editor, result = developerCompareResult(), refreshMarkup = true) {
+function syncDeveloperCompareEditor(editor, result = lastDeveloperCompareResult || developerCompareResult(), refreshMarkup = true) {
   if (!editor?.matches?.('[data-dev-field="compareLeft"], [data-dev-field="compareRight"]')) return;
   const side = editor.dataset.devField === 'compareLeft' ? 'left' : 'right';
   const host = editor.closest('.dev-code-editor');
@@ -8965,8 +8965,77 @@ function syncDeveloperCompareEditor(editor, result = developerCompareResult(), r
   if (highlight) highlight.style.transform = 'translate(' + (-editor.scrollLeft) + 'px, ' + (-editor.scrollTop) + 'px)';
   if (gutter) gutter.scrollTop = editor.scrollTop;
 }
-function syncDeveloperCompareEditors(result = developerCompareResult()) {
+function syncDeveloperCompareEditors(result = lastDeveloperCompareResult || developerCompareResult()) {
   workspace.querySelectorAll('[data-dev-field="compareLeft"], [data-dev-field="compareRight"]').forEach((editor) => syncDeveloperCompareEditor(editor, result));
+  updateDeveloperCompareLineMappings(result);
+}
+let syncingDeveloperCompareScroll = false;
+function developerCompareLineY(editor, line, gridTop) {
+  const editorRect = editor.getBoundingClientRect();
+  const style = getComputedStyle(editor);
+  const lineHeight = Number.parseFloat(style.lineHeight) || 21;
+  const paddingTop = Number.parseFloat(style.paddingTop) || 8;
+  return editorRect.top - gridTop + paddingTop + (line - 0.5) * lineHeight - editor.scrollTop;
+}
+function updateDeveloperCompareLineMappings(result = lastDeveloperCompareResult) {
+  const grid = workspace.querySelector('.dev-json-compare [data-dev-pane-grid]');
+  const svg = grid?.querySelector('[data-dev-compare-line-map]');
+  const left = grid?.querySelector('[data-dev-field="compareLeft"]');
+  const right = grid?.querySelector('[data-dev-field="compareRight"]');
+  if (!grid || !svg || !left || !right) return;
+  const gridRect = grid.getBoundingClientRect();
+  const leftRect = left.getBoundingClientRect();
+  const rightRect = right.getBoundingClientRect();
+  const width = Math.max(0, gridRect.width);
+  const height = Math.max(0, gridRect.height);
+  svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+  svg.setAttribute('width', String(width));
+  svg.setAttribute('height', String(height));
+  if (!width || !height || !result?.lineMappings?.length) { svg.innerHTML = ''; return; }
+  const leftStyle = getComputedStyle(left);
+  const rightStyle = getComputedStyle(right);
+  const leftPadTop = Number.parseFloat(leftStyle.paddingTop) || 8;
+  const leftPadBottom = Number.parseFloat(leftStyle.paddingBottom) || 8;
+  const rightPadTop = Number.parseFloat(rightStyle.paddingTop) || 8;
+  const rightPadBottom = Number.parseFloat(rightStyle.paddingBottom) || 8;
+  const x1 = leftRect.right - gridRect.left + 1;
+  const x2 = rightRect.left - gridRect.left - 1;
+  const middle = (x1 + x2) / 2;
+  const paths = [];
+  const dots = [];
+  result.lineMappings.forEach((mapping) => {
+    const y1 = developerCompareLineY(left, mapping.leftLine, gridRect.top);
+    const y2 = developerCompareLineY(right, mapping.rightLine, gridRect.top);
+    const leftTop = leftRect.top - gridRect.top + leftPadTop;
+    const leftBottom = leftRect.bottom - gridRect.top - leftPadBottom;
+    const rightTop = rightRect.top - gridRect.top + rightPadTop;
+    const rightBottom = rightRect.bottom - gridRect.top - rightPadBottom;
+    if (y1 < leftTop || y1 > leftBottom || y2 < rightTop || y2 > rightBottom) return;
+    const d = 'M ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' C ' + middle.toFixed(1) + ' ' + y1.toFixed(1) + ', ' + middle.toFixed(1) + ' ' + y2.toFixed(1) + ', ' + x2.toFixed(1) + ' ' + y2.toFixed(1);
+    paths.push('<path class="dev-compare-map-line" d="' + d + '"></path>');
+    dots.push('<circle class="dev-compare-map-dot" cx="' + x1.toFixed(1) + '" cy="' + y1.toFixed(1) + '" r="2.2"></circle><circle class="dev-compare-map-dot" cx="' + x2.toFixed(1) + '" cy="' + y2.toFixed(1) + '" r="2.2"></circle>');
+  });
+  svg.innerHTML = paths.join('') + dots.join('');
+}
+function syncDeveloperCompareScroll(editor) {
+  const side = editor?.dataset.devField === 'compareRight' ? 'right' : 'left';
+  const grid = editor?.closest('[data-dev-pane-grid]');
+  const other = grid?.querySelector('[data-dev-field="' + (side === 'left' ? 'compareRight' : 'compareLeft') + '"]');
+  const result = lastDeveloperCompareResult || developerCompareResult();
+  if (!syncingDeveloperCompareScroll && other && result.rowMappings?.length) {
+    const sourceLineHeight = Number.parseFloat(getComputedStyle(editor).lineHeight) || 21;
+    const targetLineHeight = Number.parseFloat(getComputedStyle(other).lineHeight) || 21;
+    const currentLine = editor.scrollTop / sourceLineHeight + 1;
+    const targetLine = DeveloperJsonEditor.mapLine(result.rowMappings, currentLine, side);
+    const targetScrollTop = Math.max(0, (targetLine - 1) * targetLineHeight);
+    if (Math.abs(other.scrollTop - targetScrollTop) > 1) {
+      syncingDeveloperCompareScroll = true;
+      other.scrollTop = targetScrollTop;
+      requestAnimationFrame(() => { syncingDeveloperCompareScroll = false; updateDeveloperCompareLineMappings(result); });
+      return;
+    }
+  }
+  updateDeveloperCompareLineMappings(result);
 }
 
 function devJsonAdjustControls(target, fontSize, height) {
@@ -9008,9 +9077,11 @@ function developerCompareInlineStatusMarkup(comparison) {
 function renderDeveloperCompare() {
   const dev = state.devTools;
   const comparison = developerCompareResult();
+  lastDeveloperCompareResult = comparison;
   dev.compareOutput = comparison.output;
   dev.compareStatus = comparison.status;
   return '<div class="dev-workbench dev-json-compare">' + developerCompareInlineStatusMarkup(comparison) + '<div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
+    '<svg class="dev-compare-line-map" data-dev-compare-line-map aria-hidden="true"></svg>' +
     '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devHistoryToggle('json-compare') + devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' + devPaneSplitter('compare') +
     '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }', comparison) + '</section>' +
     '</div>' + devHistoryContent('json-compare') + '</div>';
@@ -9034,11 +9105,13 @@ function renderDeveloperTimestamp() {
   const outputActions = devActionButton('timestamp-save', t('devSaveRecord')) + devActionButton('dev-copy-output', t('devCopy'));
   return '<div class="dev-workbench dev-timestamp" data-dev-pane-grid ' + devPaneSplitStyle('timestamp') + '><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput'), inputActions) + timestampMode + input + '</section>' + devPaneSplitter('timestamp') + '<section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
 }
+let lastDeveloperCompareResult = null;
 function developerCompareResult() {
   const dev = state.devTools;
   const leftSource = String(dev.compareLeft || '');
   const rightSource = String(dev.compareRight || '');
-  if (!leftSource.trim() || !rightSource.trim()) return { output: '', status: '', changes: [], lines: { left: new Set(), right: new Set() }, ranges: { left: [], right: [] } };
+  const empty = { output: '', status: '', changes: [], lines: { left: new Set(), right: new Set() }, ranges: { left: [], right: [] }, rowMappings: [], lineMappings: [] };
+  if (!leftSource.trim() || !rightSource.trim()) return empty;
   try {
     const left = parseDeveloperJson(leftSource).value;
     const right = parseDeveloperJson(rightSource).value;
@@ -9047,32 +9120,57 @@ function developerCompareResult() {
     const rightRanges = developerJsonPathRanges(rightSource);
     const lines = { left: new Set(), right: new Set() };
     const ranges = { left: [], right: [] };
+    const rowMappings = [];
+    const lineMappings = [];
+    const seenRows = new Set();
+    const addRowMapping = (leftLine, rightLine, path) => {
+      if (!Number.isFinite(leftLine) || !Number.isFinite(rightLine) || leftLine < 1 || rightLine < 1) return;
+      const key = leftLine + ':' + rightLine;
+      if (seenRows.has(key)) return;
+      seenRows.add(key);
+      rowMappings.push({ leftLine, rightLine, path: path || '' });
+    };
+    const rowOf = (range) => range?.keyLine || range?.line || 1;
+    leftRanges.forEach((leftRange, path) => {
+      const rightRange = rightRanges.get(path);
+      if (rightRange) addRowMapping(rowOf(leftRange), rowOf(rightRange), path);
+    });
+    const markExactRange = (range, side) => {
+      if (!range) return;
+      ranges[side].push(range);
+      if (range.keyLine) lines[side].add(range.keyLine);
+      for (let line = range.line; line <= range.endLine; line += 1) lines[side].add(line);
+    };
     changes.forEach((item) => {
-      const leftRange = developerJsonFindPathRange(leftRanges, item.path);
-      const rightRange = developerJsonFindPathRange(rightRanges, item.path);
-      const leftExact = Boolean(leftRange && !leftRange.fallback);
-      const rightExact = Boolean(rightRange && !rightRange.fallback);
-      item.leftLine = leftExact ? leftRange.line : rightExact ? rightRange.line : leftRange?.line || rightRange?.line || 1;
-      item.rightLine = rightExact ? rightRange.line : leftExact ? leftRange.line : rightRange?.line || leftRange?.line || 1;
-      const markSide = (range, side, counterpartRange, counterpartLine) => {
-        if (range && !range.fallback) {
-          ranges[side].push(range);
-          for (let line = range.line; line <= range.endLine; line += 1) lines[side].add(line);
-        } else if (counterpartRange && !counterpartRange.fallback) {
-          lines[side].add(counterpartLine);
-        } else if (range) {
-          lines[side].add(range.line);
-        }
-      };
-      markSide(leftRange, 'left', rightRange, item.rightLine);
-      markSide(rightRange, 'right', leftRange, item.leftLine);
+      const leftExactRange = leftRanges.get(item.path) || null;
+      const rightExactRange = rightRanges.get(item.path) || null;
+      let leftRange = leftExactRange || developerJsonFindPathRange(leftRanges, item.path);
+      let rightRange = rightExactRange || developerJsonFindPathRange(rightRanges, item.path);
+      if (leftExactRange && !rightExactRange) rightRange = developerJsonFindMappedPathRange(leftRanges, rightRanges, item.path) || rightRange;
+      if (rightExactRange && !leftExactRange) leftRange = developerJsonFindMappedPathRange(rightRanges, leftRanges, item.path) || leftRange;
+      item.leftLine = rowOf(leftRange);
+      item.rightLine = rowOf(rightRange);
+      if (leftExactRange) markExactRange(leftExactRange, 'left');
+      else if (leftRange) lines.left.add(rowOf(leftRange));
+      if (rightExactRange) markExactRange(rightExactRange, 'right');
+      else if (rightRange) lines.right.add(rowOf(rightRange));
+      addRowMapping(item.leftLine, item.rightLine, item.path);
+      lineMappings.push({ leftLine: item.leftLine, rightLine: item.rightLine, path: item.path });
+    });
+    rowMappings.sort((a, b) => a.leftLine - b.leftLine || a.rightLine - b.rightLine);
+    const monotonicRows = [];
+    let lastMappedRightLine = 0;
+    rowMappings.forEach((mapping) => {
+      if (mapping.rightLine < lastMappedRightLine) return;
+      monotonicRows.push(mapping);
+      lastMappedRightLine = mapping.rightLine;
     });
     const output = changes.length
       ? changes.map((item) => item.path + '  A:L' + item.leftLine + ' ' + item.before + '  →  B:L' + item.rightLine + ' ' + item.after).join('\n')
       : '✓ ' + t('devSame');
-    return { output, status: changes.length ? t('devDifferent').replace('{count}', changes.length) : t('devSame'), changes, lines, ranges };
+    return { output, status: changes.length ? t('devDifferent').replace('{count}', changes.length) : t('devSame'), changes, lines, ranges, rowMappings: monotonicRows, lineMappings };
   } catch (error) {
-    return { output: '', status: t('devInvalid') + (error?.message ? '：' + error.message : ''), changes: [], lines: { left: new Set(), right: new Set() }, ranges: { left: [], right: [] } };
+    return { output: '', status: t('devInvalid') + (error?.message ? '：' + error.message : ''), changes: [], lines: { left: new Set(), right: new Set() }, ranges: { left: [], right: [] }, rowMappings: [], lineMappings: [] };
   }
 }
 function developerJsonPathRanges(rawSource) {
@@ -9103,7 +9201,7 @@ function developerJsonPathRanges(rawSource) {
     }
     return JSON.parse(source.slice(start, index));
   };
-  const parseValue = (path, keyRange = null) => {
+  const parseValue = (path, keyRange = null, parentPath = null, pathKey = null) => {
     skipSpace();
     const start = index;
     const char = source[index];
@@ -9117,7 +9215,7 @@ function developerJsonPathRanges(rawSource) {
         skipSpace();
         if (source[index] !== ':') throw new Error('Expected colon');
         index += 1;
-        parseValue(path + '.' + key, { start: keyStart, end: keyEnd });
+        parseValue(path + '.' + key, { start: keyStart, end: keyEnd }, path, key);
         skipSpace();
         if (source[index] === ',') { index += 1; skipSpace(); }
         else if (source[index] !== '}') throw new Error('Expected object separator');
@@ -9129,7 +9227,7 @@ function developerJsonPathRanges(rawSource) {
       index += 1; skipSpace();
       let itemIndex = 0;
       while (index < source.length && source[index] !== ']') {
-        parseValue(path + '[' + itemIndex + ']');
+        parseValue(path + '[' + itemIndex + ']', null, path, itemIndex);
         itemIndex += 1;
         skipSpace();
         if (source[index] === ',') { index += 1; skipSpace(); }
@@ -9149,12 +9247,44 @@ function developerJsonPathRanges(rawSource) {
     const absoluteEnd = offsetBase + end;
     const absoluteClose = offsetBase + closeStart;
     const keyStart = offsetBase + (keyRange?.start ?? start);
-    ranges.set(path, { start: absoluteStart, end: absoluteEnd, line: lineAt(absoluteStart), endLine: lineAt(Math.max(absoluteStart, absoluteEnd - 1)), closeStart: absoluteClose, closeLine: lineAt(absoluteClose), keyStart, keyEnd: offsetBase + (keyRange?.end ?? end) });
+    ranges.set(path, { start: absoluteStart, end: absoluteEnd, line: lineAt(absoluteStart), endLine: lineAt(Math.max(absoluteStart, absoluteEnd - 1)), closeStart: absoluteClose, closeLine: lineAt(absoluteClose), keyStart, keyEnd: offsetBase + (keyRange?.end ?? end), keyLine: lineAt(keyStart), parentPath, pathKey });
   };
   try { skipSpace(); parseValue('$'); } catch { return ranges; }
   return ranges;
 }
 
+function developerJsonFindMappedPathRange(sourceRanges, targetRanges, path, visited = new Set()) {
+  if (targetRanges.has(path)) return targetRanges.get(path);
+  if (visited.has(path)) return null;
+  visited.add(path);
+  const sourceRange = sourceRanges.get(path);
+  if (!sourceRange || sourceRange.parentPath == null) return developerJsonFindPathRange(targetRanges, path);
+  const siblings = Array.from(sourceRanges.entries())
+    .filter(([, range]) => range.parentPath === sourceRange.parentPath)
+    .sort((a, b) => a[1].keyStart - b[1].keyStart);
+  const ownIndex = siblings.findIndex(([siblingPath]) => siblingPath === path);
+  const mappedSibling = (entry) => {
+    if (!entry) return null;
+    const targetRange = targetRanges.get(entry[0]);
+    if (!targetRange) return null;
+    const line = targetRange.keyLine || targetRange.line;
+    return { ...targetRange, start: targetRange.keyStart, end: targetRange.keyEnd, line, endLine: line, keyLine: line, fallback: true, mapped: true };
+  };
+  for (let index = ownIndex + 1; index < siblings.length; index += 1) {
+    const match = mappedSibling(siblings[index]);
+    if (match) return match;
+  }
+  for (let index = ownIndex - 1; index >= 0; index -= 1) {
+    const match = mappedSibling(siblings[index]);
+    if (match) return match;
+  }
+  const targetParent = targetRanges.get(sourceRange.parentPath);
+  if (targetParent) {
+    const line = targetParent.closeLine || targetParent.endLine;
+    return { ...targetParent, start: targetParent.closeStart, end: targetParent.closeStart + 1, line, endLine: line, keyLine: line, fallback: true, mapped: true };
+  }
+  return developerJsonFindMappedPathRange(sourceRanges, targetRanges, sourceRange.parentPath, visited);
+}
 function developerJsonFindPathRange(pathRanges, path) {
   let candidate = path;
   while (candidate && candidate !== '$') {
@@ -9266,7 +9396,7 @@ function updateDeveloperLiveState(field) {
     if (!String(dev.formatInput || '').trim()) { dev.formatOutput = ''; dev.formatStatus = ''; dev.formatCollapsed = []; }
     else { const result = formatDeveloperJson(dev.formatInput, dev.formatCompact); dev.formatOutput = result.output; dev.formatStatus = result.message; dev.formatCollapsed = []; }
   } else if (dev.active === 'json-compare' && (field === 'compareLeft' || field === 'compareRight')) {
-    const result = developerCompareResult(); comparison = result; dev.compareOutput = result.output; dev.compareStatus = result.status; syncDeveloperCompareEditors(result);
+    const result = developerCompareResult(); comparison = result; lastDeveloperCompareResult = result; dev.compareOutput = result.output; dev.compareStatus = result.status; syncDeveloperCompareEditors(result);
   } else if (dev.active === 'text-stats' && field === 'textInput') {
     dev.textOutput = developerTextStats(dev.textInput);
   } else if (dev.active === 'timestamp' && ['timestampValue', 'timestampUnit', 'timestampDate'].includes(field)) {
@@ -9318,6 +9448,7 @@ function applyDeveloperPaneSplit(grid, kind, value) {
   });
   const separator = grid?.querySelector('[data-dev-pane-splitter="' + kind + '"]');
   if (separator) separator.setAttribute('aria-valuenow', String(split));
+  if (kind === 'compare') updateDeveloperCompareLineMappings();
   return split;
 }
 let activeDeveloperPaneResize = null;
@@ -14725,8 +14856,11 @@ workspace.addEventListener('input', (event) => {
   }
 });
 workspace.addEventListener('scroll', (event) => {
-  if (event.target.matches?.('[data-dev-line-numbered]')) syncDeveloperJsonLineNumbers(event.target);
+  if (!event.target.matches?.('[data-dev-line-numbered]')) return;
+  syncDeveloperJsonLineNumbers(event.target);
+  if (event.target.dataset.devField === 'compareLeft' || event.target.dataset.devField === 'compareRight') syncDeveloperCompareScroll(event.target);
 }, true);
+window.addEventListener('resize', () => updateDeveloperCompareLineMappings(), { passive: true });
 workspace.addEventListener('change', (event) => {
   if (event.target.dataset.ticketWalletCafeField && state.ticketWalletEditorOpen && state.ticketWalletDraft) {
     const field = event.target.dataset.ticketWalletCafeField;
