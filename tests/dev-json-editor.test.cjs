@@ -86,8 +86,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.711/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.711/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.712/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.712/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -128,6 +128,12 @@ test('JSON comparison keeps its change count with JSON B and provides zoom plus 
   assert.match(compareMarkup, /jsonCompareLeftFontSize/);
   assert.match(compareMarkup, /jsonCompareRightFontSize/);
   assert.match(compareMarkup, /json-compare-fullscreen/);
+  assert.doesNotMatch(compareMarkup, /dev-json-compare-backdrop/);
+  const toolStart = app.indexOf('function developerTool()');
+  const toolEnd = app.indexOf('function syncDeveloperFullscreenFrame()', toolStart);
+  const toolMarkup = app.slice(toolStart, toolEnd);
+  assert.match(toolMarkup, /const modalOverlay = mode === 'json-compare'/);
+  assert.ok(toolMarkup.includes("+ modalOverlay + '<nav class=\"dev-mode-tabs\""));
   assert.doesNotMatch(compareMarkup, /dev-compare-inline-status[^<]*<div class="dev-compare-grid"/);
   assert.match(app, /jsonCompareLeftFontSize: DeveloperJsonEditor\.clampSetting/);
   assert.match(app, /jsonCompareRightFontSize: DeveloperJsonEditor\.clampSetting/);

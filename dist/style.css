@@ -19093,3 +19093,12 @@ body.dev-pane-resizing * {
     min-height: 120px;
   }
 }
+
+
+/* 2.18.712: keep the compare dimmer behind the floating comparison window. */
+.dev-json-compare-backdrop {
+  z-index: 1000;
+}
+.dev-tools-page.dev-is-fullscreen.dev-compare-modal-open > .dev-json-compare-backdrop {
+  z-index: 1000;
+}
