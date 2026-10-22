@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.704';
+const APP_VERSION = '2.18.705';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8730,7 +8730,7 @@ function devJsonTreeNode(value, path = '$', label = '', depth = 0, trailingComma
   const collapsed = container && !empty && state.devTools.formatCollapsed.includes(path);
   const keyMarkup = label === '' ? '' : '<span class="dev-json-key">' + escapeHtml(JSON.stringify(label)) + '</span><span class="dev-json-colon">:</span> ';
   const comma = trailingComma ? ',' : '';
-  const indentStyle = ' style="--dev-indent:' + (depth * 24) + 'px"';
+  const indentStyle = ' style="--dev-indent:' + (depth * 32) + 'px"';
   if (!container) {
     const lineNumber = ++lineCounter.value;
     return '<div class="dev-json-line dev-json-leaf"' + indentStyle + '><span class="dev-json-line-number" aria-hidden="true">' + lineNumber + '</span><span class="dev-json-line-content">' + keyMarkup + devJsonPrimitive(value) + comma + '</span></div>';
