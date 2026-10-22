@@ -17196,14 +17196,14 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
   caret-color: var(--ink);
 }
 .dev-compare-editor .dev-code-input::selection { color: transparent; background: color-mix(in srgb, var(--primary) 20%, transparent); }
-.dev-compare-editor-a .dev-json-diff-mark {
+.dev-compare-editor-left .dev-json-diff-mark {
   text-decoration-line: underline;
   text-decoration-style: wavy;
   text-decoration-color: #df5a57;
   text-decoration-thickness: 1.5px;
   text-underline-offset: 2px;
 }
-.dev-compare-editor-b .dev-json-diff-mark {
+.dev-compare-editor-right .dev-json-diff-mark {
   text-decoration-line: underline;
   text-decoration-style: wavy;
   text-decoration-color: #31a77b;
@@ -17212,8 +17212,8 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 }
 .dev-line-number { display: inline; }
 .dev-line-number.is-diff { color: var(--primary); font-weight: 800; }
-.dev-compare-editor-a .dev-line-number.is-diff { color: #df5a57; }
-.dev-compare-editor-b .dev-line-number.is-diff { color: #31a77b; }
+.dev-compare-editor-left .dev-line-number.is-diff { color: #df5a57; }
+.dev-compare-editor-right .dev-line-number.is-diff { color: #31a77b; }
 .dev-compare-diff-list { display: grid; min-height: 0; max-height: 100%; flex: 1 1 auto; overflow: auto; scrollbar-width: thin; }
 .dev-compare-diff-row {
   display: grid;
@@ -18759,11 +18759,11 @@ body.dev-pane-resizing * {
   min-height: 1.65em;
   line-height: inherit;
 }
-.dev-compare-editor-a .dev-compare-highlight-line.is-diff {
+.dev-compare-editor-left .dev-compare-highlight-line.is-diff {
   background: color-mix(in srgb, #df5a57 8%, transparent);
   box-shadow: inset 2px 0 0 color-mix(in srgb, #df5a57 72%, transparent);
 }
-.dev-compare-editor-b .dev-compare-highlight-line.is-diff {
+.dev-compare-editor-right .dev-compare-highlight-line.is-diff {
   background: color-mix(in srgb, #31a77b 8%, transparent);
   box-shadow: inset 2px 0 0 color-mix(in srgb, #31a77b 72%, transparent);
 }
@@ -18773,22 +18773,22 @@ body.dev-pane-resizing * {
 .dev-compare-editor .dev-json-token-boolean,
 .dev-compare-editor .dev-json-token-null { color: #8b55b3; }
 .dev-compare-editor .dev-json-token-punctuation { color: var(--muted); }
-.dev-compare-editor-a .dev-json-diff-mark {
+.dev-compare-editor-left .dev-json-diff-mark {
   border-radius: 2px;
   background: color-mix(in srgb, #df5a57 19%, transparent);
   color: #b6383d;
   text-decoration: none;
 }
-.dev-compare-editor-b .dev-json-diff-mark {
+.dev-compare-editor-right .dev-json-diff-mark {
   border-radius: 2px;
   background: color-mix(in srgb, #31a77b 18%, transparent);
   color: #18784f;
   text-decoration: none;
 }
-.dev-compare-editor-a .dev-line-number.is-diff {
+.dev-compare-editor-left .dev-line-number.is-diff {
   background: color-mix(in srgb, #df5a57 9%, transparent);
 }
-.dev-compare-editor-b .dev-line-number.is-diff {
+.dev-compare-editor-right .dev-line-number.is-diff {
   background: color-mix(in srgb, #31a77b 9%, transparent);
 }
 
@@ -18883,27 +18883,27 @@ body.dev-pane-resizing * {
 .dev-compare-inline-status.is-error { color: #c34444; }
 .dev-compare-inline-status.is-same { color: var(--success); }
 
-.dev-compare-editor-a .dev-compare-highlight-line.is-diff {
+.dev-compare-editor-left .dev-compare-highlight-line.is-diff {
   background: color-mix(in srgb, #df5a57 13%, transparent);
   box-shadow: inset 3px 0 0 color-mix(in srgb, #df5a57 88%, transparent);
 }
-.dev-compare-editor-b .dev-compare-highlight-line.is-diff {
+.dev-compare-editor-right .dev-compare-highlight-line.is-diff {
   background: color-mix(in srgb, #31a77b 13%, transparent);
   box-shadow: inset 3px 0 0 color-mix(in srgb, #31a77b 88%, transparent);
 }
-.dev-compare-editor-a .dev-json-diff-mark,
-.dev-compare-editor-b .dev-json-diff-mark {
+.dev-compare-editor-left .dev-json-diff-mark,
+.dev-compare-editor-right .dev-json-diff-mark {
   border-radius: 3px;
   padding: 0 1px;
   text-decoration: none;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
-.dev-compare-editor-a .dev-json-diff-mark {
+.dev-compare-editor-left .dev-json-diff-mark {
   background: color-mix(in srgb, #df5a57 22%, transparent);
   box-shadow: inset 0 -2px 0 color-mix(in srgb, #df5a57 86%, transparent);
 }
-.dev-compare-editor-b .dev-json-diff-mark {
+.dev-compare-editor-right .dev-json-diff-mark {
   background: color-mix(in srgb, #31a77b 22%, transparent);
   box-shadow: inset 0 -2px 0 color-mix(in srgb, #31a77b 86%, transparent);
 }
