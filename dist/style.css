@@ -18974,3 +18974,122 @@ body.dev-pane-resizing * {
 @media (max-width: 760px) {
   .dev-json-compare .dev-compare-line-map { display: none; }
 }
+
+
+/* 2.18.711: place compare status beside JSON B and add per-pane zoom plus a paired fullscreen overlay. */
+.dev-json-compare .dev-compare-right-head {
+  justify-content: flex-start;
+}
+.dev-json-compare .dev-compare-right-head h3 {
+  flex: 0 0 auto;
+}
+.dev-json-compare .dev-compare-right-head .dev-compare-inline-status {
+  flex: 1 1 auto;
+  margin: 0 4px 0 10px;
+}
+.dev-json-compare .dev-compare-editor {
+  font-size: var(--dev-json-compare-font-size, 13px);
+}
+.dev-json-compare .dev-compare-editor .dev-code-input,
+.dev-json-compare .dev-compare-editor .dev-code-highlight,
+.dev-json-compare .dev-compare-editor .dev-line-numbers {
+  font-size: inherit;
+}
+.dev-json-compare .dev-json-compare-font-controls {
+  flex: 0 0 auto;
+}
+.dev-tools-page.dev-is-fullscreen.dev-compare-modal-open {
+  inset: 0 !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+.dev-json-compare-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--ink) 42%, transparent);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  cursor: default;
+}
+.dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare.is-floating {
+  position: fixed !important;
+  z-index: 1001 !important;
+  inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  display: grid !important;
+  width: auto;
+  height: auto !important;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 0;
+  margin: 0;
+  padding: 14px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, var(--primary) 18%);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--ink) 26%, transparent);
+}
+.dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare.is-floating > .dev-compare-grid {
+  display: grid !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  grid-template-columns: minmax(0, var(--dev-left-share, 50fr)) 10px minmax(0, var(--dev-right-share, 50fr)) !important;
+  grid-template-rows: minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.dev-workbench.dev-json-compare.is-floating > .dev-compare-grid > .dev-pane {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dev-workbench.dev-json-compare.is-floating .dev-code-editor {
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  resize: none;
+}
+.dev-json-compare.is-floating .dev-compare-right-head {
+  flex-wrap: nowrap;
+}
+@media (max-width: 760px) {
+  .dev-json-compare .dev-compare-right-head {
+    flex-wrap: wrap;
+  }
+  .dev-json-compare .dev-compare-right-head .dev-compare-inline-status {
+    order: 2;
+    flex-basis: 100%;
+    margin: 0;
+  }
+  .dev-json-compare .dev-compare-right-head .dev-pane-actions {
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare.is-floating {
+    inset: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    padding: 8px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare.is-floating > .dev-compare-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) 10px minmax(0, 1fr);
+    overflow-y: auto;
+  }
+  .dev-workbench.dev-json-compare.is-floating > .dev-compare-grid > .dev-pane-splitter {
+    display: none !important;
+  }
+  .dev-json-compare.is-floating .dev-code-editor {
+    min-height: 120px;
+  }
+}
