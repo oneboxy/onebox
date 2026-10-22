@@ -86,8 +86,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.712/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.712/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.713/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.713/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -141,4 +141,5 @@ test('JSON comparison keeps its change count with JSON B and provides zoom plus 
   assert.match(css, /dev-json-compare\.is-floating/);
   assert.match(css, /dev-compare-editor \{\s*font-size: var\(--dev-json-compare-font-size, 13px\)/);
   assert.match(css, /dev-compare-modal-open/);
+  assert.match(css, /\.dev-json-compare \.dev-compare-right-head \.dev-pane-actions \{\s*margin-left:\s*auto;/);
 });

@@ -19102,3 +19102,9 @@ body.dev-pane-resizing * {
 .dev-tools-page.dev-is-fullscreen.dev-compare-modal-open > .dev-json-compare-backdrop {
   z-index: 1000;
 }
+
+
+/* 2.18.713: keep JSON B controls at the far right of its title row. */
+.dev-json-compare .dev-compare-right-head .dev-pane-actions {
+  margin-left: auto;
+}
