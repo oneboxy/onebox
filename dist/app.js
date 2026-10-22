@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.695';
+const APP_VERSION = '2.18.696';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8884,8 +8884,9 @@ function developerJsonEditor(field, value, placeholder, compareResult = null) {
     const editorStyle = isFormat ? ' style="--dev-json-input-font-size:' + state.devTools.jsonInputFontSize + 'px;--dev-json-input-height:' + state.devTools.jsonInputHeight + 'px"' : '';
     const editorClass = isFormat ? 'dev-code-editor dev-editor-with-lines dev-format-editor' : 'dev-code-editor dev-editor-with-lines';
     const editorContent = isFormat
-      ? '<div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + DeveloperJsonEditor.highlightMarkup(value) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="soft" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div>'
+      ? '<textarea class="dev-code-input" data-dev-field="' + field + '" wrap="soft" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea>'
       : '<textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea>';
+    if (isFormat) return '<div class="' + editorClass + '"' + editorStyle + '>' + editorContent + '</div>';
     return '<div class="' + editorClass + '"' + editorStyle + '><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre>' + editorContent + '</div>';
   }
   const side = field === 'compareLeft' ? 'left' : 'right';
@@ -9194,11 +9195,6 @@ function syncDeveloperJsonLineNumbers(editor) {
   const numbers = developerJsonLineNumbers(editor.value);
   if (gutter.textContent !== numbers) gutter.textContent = numbers;
   gutter.scrollTop = editor.scrollTop;
-  const highlight = host.querySelector('[data-dev-code-highlight]');
-  if (editor.dataset.devField === 'formatInput' && highlight) {
-    highlight.innerHTML = DeveloperJsonEditor.highlightMarkup(editor.value);
-    highlight.style.transform = 'translate(' + (-editor.scrollLeft) + 'px, ' + (-editor.scrollTop) + 'px)';
-  }
 }
 
 function developerTool() {
