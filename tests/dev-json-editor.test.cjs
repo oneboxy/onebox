@@ -33,7 +33,9 @@ test('formatter input displays raw text without syntax highlighting', () => {
   assert.ok(rawBranchStart >= 0 && rawBranchEnd > rawBranchStart);
   const rawBranch = inputMarkup.slice(rawBranchStart, rawBranchEnd);
   assert.match(rawBranch, /wrap="soft"/);
-  assert.doesNotMatch(rawBranch, /highlight|dev-line-number|data-dev-line-numbered/);
+  assert.doesNotMatch(rawBranch, /highlight/);
+  assert.match(rawBranch, /data-dev-line-numbered/);
+  assert.match(inputMarkup, /dev-line-numbers/);
   assert.doesNotMatch(app, /DeveloperJsonEditor\.highlightMarkup/);
   assert.match(css, /grid-template-columns:minmax\(0,1fr\)/);
   assert.match(css, /color:var\(--ink\)!important/);
@@ -64,8 +66,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.699/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.699/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.700/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.700/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 

@@ -18651,3 +18651,141 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
   max-height:none!important;
   overflow:auto!important;
 }
+
+
+/* 2.18.700: resizable developer panes, raw input line numbers, and inline JSON diff rows. */
+.dev-tools-page .dev-editor-grid[data-dev-pane-grid],
+.dev-tools-page .dev-compare-grid[data-dev-pane-grid],
+.dev-tools-page .dev-workbench.dev-timestamp[data-dev-pane-grid] {
+  grid-template-columns: minmax(0, var(--dev-left-share, 50)fr) 12px minmax(0, var(--dev-right-share, 50)fr);
+}
+.dev-pane-splitter {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  min-width: 12px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dev-pane-splitter::before {
+  width: 2px;
+  height: 36px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--muted) 32%, transparent);
+  content: "";
+  transition: width .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+.dev-pane-splitter:hover::before,
+.dev-pane-splitter:focus-visible::before {
+  width: 4px;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.dev-pane-splitter:focus-visible { outline: 0; }
+body.dev-pane-resizing,
+body.dev-pane-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+.dev-json-format .dev-format-editor {
+  grid-template-columns: 46px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+.dev-workbench.dev-json-format.is-output-floating .dev-editor-grid[data-dev-pane-grid] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.dev-workbench.dev-json-format.is-output-floating .dev-pane-splitter { display: none; }
+
+/* Keep the compare editors paired in the expanded desktop workbench while
+   retaining the adjustable divider between the two source panes. */
+.dev-workbench.dev-json-compare > .dev-compare-grid[data-dev-pane-grid] {
+  min-height: 0;
+}
+@media (min-width: 761px) {
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr) minmax(110px, .4fr);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, var(--dev-left-share, 50)fr) 12px minmax(0, var(--dev-right-share, 50)fr);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid > .dev-pane {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-result {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1160px) {
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
+    grid-column: 1 / span 2;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-result {
+    grid-column: 3;
+  }
+}
+@media (max-width: 760px) {
+  .dev-tools-page .dev-editor-grid[data-dev-pane-grid],
+  .dev-tools-page .dev-compare-grid[data-dev-pane-grid],
+  .dev-tools-page .dev-workbench.dev-timestamp[data-dev-pane-grid] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .dev-pane-splitter { display: none !important; }
+}
+
+/* Paint changed rows and values inside each compare editor, with a compact
+   red/green treatment that leaves the source easy to read. */
+.dev-compare-editor .dev-compare-highlight-line {
+  box-sizing: border-box;
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  min-height: 1.65em;
+  line-height: inherit;
+}
+.dev-compare-editor-a .dev-compare-highlight-line.is-diff {
+  background: color-mix(in srgb, #df5a57 8%, transparent);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, #df5a57 72%, transparent);
+}
+.dev-compare-editor-b .dev-compare-highlight-line.is-diff {
+  background: color-mix(in srgb, #31a77b 8%, transparent);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, #31a77b 72%, transparent);
+}
+.dev-compare-editor .dev-json-token-key { color: #c24170; }
+.dev-compare-editor .dev-json-token-string { color: #31835d; }
+.dev-compare-editor .dev-json-token-number { color: #3272c4; }
+.dev-compare-editor .dev-json-token-boolean,
+.dev-compare-editor .dev-json-token-null { color: #8b55b3; }
+.dev-compare-editor .dev-json-token-punctuation { color: var(--muted); }
+.dev-compare-editor-a .dev-json-diff-mark {
+  border-radius: 2px;
+  background: color-mix(in srgb, #df5a57 19%, transparent);
+  color: #b6383d;
+  text-decoration: none;
+}
+.dev-compare-editor-b .dev-json-diff-mark {
+  border-radius: 2px;
+  background: color-mix(in srgb, #31a77b 18%, transparent);
+  color: #18784f;
+  text-decoration: none;
+}
+.dev-compare-editor-a .dev-line-number.is-diff {
+  background: color-mix(in srgb, #df5a57 9%, transparent);
+}
+.dev-compare-editor-b .dev-line-number.is-diff {
+  background: color-mix(in srgb, #31a77b 9%, transparent);
+}

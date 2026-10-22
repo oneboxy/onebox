@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.699';
+const APP_VERSION = '2.18.700';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -543,6 +543,10 @@ function normalizeDevTools(value) {
     jsonOutputFontSize: DeveloperJsonEditor.clampSetting(source.jsonOutputFontSize, 10, 24, 13),
     jsonInputHeight: DeveloperJsonEditor.clampSetting(source.jsonInputHeight, 240, 1200, 460),
     jsonOutputHeight: DeveloperJsonEditor.clampSetting(source.jsonOutputHeight, 240, 1200, 460),
+    jsonFormatSplit: DeveloperJsonEditor.clampSetting(source.jsonFormatSplit, 25, 75, 50),
+    jsonCompareSplit: DeveloperJsonEditor.clampSetting(source.jsonCompareSplit, 25, 75, 50),
+    textStatsSplit: DeveloperJsonEditor.clampSetting(source.textStatsSplit, 25, 75, 50),
+    timestampSplit: DeveloperJsonEditor.clampSetting(source.timestampSplit, 25, 75, 50),
     formatOutputFullscreen: false,
     historyOpen: source.historyOpen === true,
     compareLeft: String(source.compareLeft || ''), compareRight: String(source.compareRight || ''), compareOutput: String(source.compareOutput || ''), compareStatus: String(source.compareStatus || ''),
@@ -8861,7 +8865,7 @@ function developerJsonLineNumberMarkup(value, highlightedLines = new Set()) {
   const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
   return Array.from({ length: count }, (_, index) => '<span class="dev-line-number ' + (highlightedLines.has(index + 1) ? 'is-diff' : '') + '">' + (index + 1) + '</span>').join('\n');
 }
-function developerJsonHighlightMarkup(value, ranges = []) {
+function developerJsonHighlightMarkup(value, ranges = [], highlightedLines = new Set()) {
   const source = String(value ?? '');
   const merged = ranges.filter((item) => item && item.end > item.start).map((item) => [item.start, item.end]).sort((a, b) => a[0] - b[0]).reduce((output, range) => {
     const previous = output[output.length - 1];
@@ -8869,13 +8873,57 @@ function developerJsonHighlightMarkup(value, ranges = []) {
     else output.push(range);
     return output;
   }, []);
-  let cursor = 0;
+  let rangeIndex = 0;
+  const renderText = (start, end) => {
+    let cursor = start;
+    let output = '';
+    while (rangeIndex < merged.length && merged[rangeIndex][0] < end) {
+      const [rangeStart, rangeEnd] = merged[rangeIndex];
+      if (rangeEnd <= cursor) { rangeIndex += 1; continue; }
+      const overlapStart = Math.max(cursor, rangeStart);
+      const overlapEnd = Math.min(end, rangeEnd);
+      if (overlapStart >= overlapEnd) break;
+      output += escapeHtml(source.slice(cursor, overlapStart)) + '<span class="dev-json-diff-mark">' + escapeHtml(source.slice(overlapStart, overlapEnd)) + '</span>';
+      cursor = overlapEnd;
+      if (rangeEnd <= end) rangeIndex += 1;
+      else break;
+    }
+    return output + escapeHtml(source.slice(cursor, end));
+  };
+  const renderLine = (start, end, lineNumber) => {
+    const text = source.slice(start, end);
+    const tokenPattern = /"(?:\\.|[^"\\])*"|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?|\b(?:true|false|null)\b|[{}\[\],:]/g;
+    let cursor = start;
+    let output = '';
+    let match;
+    while ((match = tokenPattern.exec(text))) {
+      const tokenStart = start + match.index;
+      const tokenEnd = tokenStart + match[0].length;
+      output += renderText(cursor, tokenStart);
+      const token = match[0];
+      let tokenClass = 'dev-json-token-punctuation';
+      if (token[0] === '"') tokenClass = /^\s*:/.test(source.slice(tokenEnd, end)) ? 'dev-json-token-key' : 'dev-json-token-string';
+      else if (/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(token)) tokenClass = 'dev-json-token-number';
+      else if (/^(?:true|false|null)$/.test(token)) tokenClass = token === 'null' ? 'dev-json-token-null' : 'dev-json-token-boolean';
+      output += '<span class="' + tokenClass + '">' + renderText(tokenStart, tokenEnd) + '</span>';
+      cursor = tokenEnd;
+    }
+    output += renderText(cursor, end);
+    const changed = highlightedLines?.has?.(lineNumber);
+    return '<span class="dev-compare-highlight-line' + (changed ? ' is-diff' : '') + '">' + output + '</span>';
+  };
   let markup = '';
-  merged.forEach(([rangeStart, rangeEnd]) => {
-    markup += escapeHtml(source.slice(cursor, rangeStart)) + '<span class="dev-json-diff-mark">' + escapeHtml(source.slice(rangeStart, rangeEnd)) + '</span>';
-    cursor = rangeEnd;
-  });
-  return markup + escapeHtml(source.slice(cursor)) + (source.endsWith('\n') ? ' ' : '');
+  let lineStart = 0;
+  let lineNumber = 1;
+  const breaks = /\r\n|\r|\n/g;
+  let lineBreak;
+  while ((lineBreak = breaks.exec(source))) {
+    markup += renderLine(lineStart, lineBreak.index, lineNumber);
+    lineStart = lineBreak.index + lineBreak[0].length;
+    lineNumber += 1;
+  }
+  markup += renderLine(lineStart, source.length, lineNumber);
+  return markup;
 }
 function developerJsonEditor(field, value, placeholder, compareResult = null) {
   const isCompare = field === 'compareLeft' || field === 'compareRight';
@@ -8884,14 +8932,14 @@ function developerJsonEditor(field, value, placeholder, compareResult = null) {
     const editorStyle = isFormat ? ' style="--dev-json-input-font-size:' + state.devTools.jsonInputFontSize + 'px;--dev-json-input-height:' + state.devTools.jsonInputHeight + 'px"' : '';
     const editorClass = isFormat ? 'dev-code-editor dev-editor-with-lines dev-format-editor' : 'dev-code-editor dev-editor-with-lines';
     const editorContent = isFormat
-      ? '<textarea class="dev-code-input" data-dev-field="' + field + '" wrap="soft" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea>'
+      ? '<textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="soft" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea>'
       : '<textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea>';
-    if (isFormat) return '<div class="' + editorClass + '"' + editorStyle + '>' + editorContent + '</div>';
+    if (isFormat) return '<div class="' + editorClass + '"' + editorStyle + '><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre>' + editorContent + '</div>';
     return '<div class="' + editorClass + '"' + editorStyle + '><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre>' + editorContent + '</div>';
   }
   const side = field === 'compareLeft' ? 'left' : 'right';
   const result = compareResult || developerCompareResult();
-  return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
+  return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side], result.lines[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
 }
 function syncDeveloperCompareEditor(editor, result = developerCompareResult(), refreshMarkup = true) {
   if (!editor?.matches?.('[data-dev-field="compareLeft"], [data-dev-field="compareRight"]')) return;
@@ -8900,7 +8948,7 @@ function syncDeveloperCompareEditor(editor, result = developerCompareResult(), r
   const gutter = host?.querySelector('[data-dev-line-numbers]');
   const highlight = host?.querySelector('[data-dev-code-highlight]');
   if (refreshMarkup && gutter) gutter.innerHTML = developerJsonLineNumberMarkup(editor.value, result.lines[side]);
-  if (refreshMarkup && highlight) highlight.innerHTML = developerJsonHighlightMarkup(editor.value, result.ranges[side]);
+  if (refreshMarkup && highlight) highlight.innerHTML = developerJsonHighlightMarkup(editor.value, result.ranges[side], result.lines[side]);
   if (highlight) highlight.style.transform = 'translate(' + (-editor.scrollLeft) + 'px, ' + (-editor.scrollTop) + 'px)';
   if (gutter) gutter.scrollTop = editor.scrollTop;
 }
@@ -8933,8 +8981,8 @@ function renderDeveloperJsonFormat() {
   const inputActions = devJsonAdjustControls('input', dev.jsonInputFontSize, dev.jsonInputHeight) + devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-example', t('devExample')) + devActionButton('json-clear', t('devClear'));
   const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + (dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '') + devJsonOutputFullscreenButton(dev.formatOutputFullscreen);
   const overlay = dev.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' : '';
-  return '<div class="dev-workbench dev-json-format">' + overlay + '<div class="dev-editor-grid">' +
-    '<section class="dev-pane">' + devPaneHead(t('devInput'), inputActions) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '</section>' +
+  return '<div class="dev-workbench dev-json-format' + (dev.formatOutputFullscreen ? ' is-output-floating' : '') + '">' + overlay + '<div class="dev-editor-grid" data-dev-pane-grid ' + devPaneSplitStyle('format') + '>' +
+    '<section class="dev-pane">' + devPaneHead(t('devInput'), inputActions) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '</section>' + devPaneSplitter('format') +
     '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '">' + devOutputPaneHead('json-format', t('devOutput'), outputActions) + devHistoryContent('json-format') + '<div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '</div>' + '</section>' +
     '</div></div>';
 }
@@ -8943,8 +8991,8 @@ function renderDeveloperCompare() {
   const comparison = developerCompareResult();
   dev.compareOutput = comparison.output;
   dev.compareStatus = comparison.status;
-  return '<div class="dev-workbench dev-json-compare"><div class="dev-compare-grid">' +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' +
+  return '<div class="dev-workbench dev-json-compare"><div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
+    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' + devPaneSplitter('compare') +
     '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }', comparison) + '</section>' +
     '</div><section class="dev-pane dev-compare-result">' + devOutputPaneHead('json-compare', t('devOutput'), devActionButton('dev-copy-output', t('devCopy'))) + devHistoryContent('json-compare') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup(comparison) + '</div></section></div>';
 }
@@ -8954,7 +9002,7 @@ function renderDeveloperStatsCards(stats) {
 }
 function renderDeveloperStats() {
   const dev = state.devTools;
-  return '<div class="dev-workbench dev-text-stats"><div class="dev-editor-grid"><section class="dev-pane">' + devPaneHead(t('devInput'), devActionButton('text-clear', t('devClear'))) + '<textarea class="dev-text-editor" data-dev-field="textInput" spellcheck="true" placeholder="' + escapeHtml(state.language === 'en' ? 'Paste or type text here…' : '粘贴或输入文本…') + '">' + escapeHtml(dev.textInput) + '</textarea></section><section class="dev-pane dev-stats-pane">' + devOutputPaneHead('text-stats', t('devOutput')) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('text-stats') + '</section></div></div>';
+  return '<div class="dev-workbench dev-text-stats"><div class="dev-editor-grid" data-dev-pane-grid ' + devPaneSplitStyle('stats') + '><section class="dev-pane">' + devPaneHead(t('devInput'), devActionButton('text-clear', t('devClear'))) + '<textarea class="dev-text-editor" data-dev-field="textInput" spellcheck="true" placeholder="' + escapeHtml(state.language === 'en' ? 'Paste or type text here…' : '粘贴或输入文本…') + '">' + escapeHtml(dev.textInput) + '</textarea></section>' + devPaneSplitter('stats') + '<section class="dev-pane dev-stats-pane">' + devOutputPaneHead('text-stats', t('devOutput')) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('text-stats') + '</section></div></div>';
 }
 function renderDeveloperTimestamp() {
   const dev = state.devTools;
@@ -8965,7 +9013,7 @@ function renderDeveloperTimestamp() {
     : '<label class="dev-timestamp-field"><span>' + (english ? 'Date and time · device local time' : '日期和时间 · 设备本地时区') + '</span><input class="dev-plain-input dev-date-input" data-dev-field="timestampDate" type="datetime-local" step="1" value="' + escapeHtml(dev.timestampDate) + '"><small>' + (english ? 'The selected local date is also shown as UTC and ISO 8601.' : '按设备本地时区换算，同时显示 UTC 和 ISO 8601。') + '</small></label>';
   const inputActions = devActionButton('timestamp-now', t('devNow')) + devActionButton('timestamp-clear', t('devClear'));
   const outputActions = devActionButton('timestamp-save', t('devSaveRecord')) + devActionButton('dev-copy-output', t('devCopy'));
-  return '<div class="dev-workbench dev-timestamp"><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput'), inputActions) + timestampMode + input + '</section><section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
+  return '<div class="dev-workbench dev-timestamp" data-dev-pane-grid ' + devPaneSplitStyle('timestamp') + '><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput'), inputActions) + timestampMode + input + '</section>' + devPaneSplitter('timestamp') + '<section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
 }
 function developerCompareResult() {
   const dev = state.devTools;
@@ -9196,6 +9244,91 @@ function syncDeveloperJsonLineNumbers(editor) {
   if (gutter.textContent !== numbers) gutter.textContent = numbers;
   gutter.scrollTop = editor.scrollTop;
 }
+
+
+function devPaneSplitConfig(kind) {
+  const english = state.language === 'en';
+  const configs = {
+    format: { field: 'jsonFormatSplit', label: english ? 'Resize input and output widths' : '调整输入和输出宽度' },
+    compare: { field: 'jsonCompareSplit', label: english ? 'Resize JSON A and B widths' : '调整 JSON A、B 宽度' },
+    stats: { field: 'textStatsSplit', label: english ? 'Resize input and output widths' : '调整输入和输出宽度' },
+    timestamp: { field: 'timestampSplit', label: english ? 'Resize input and output widths' : '调整输入和输出宽度' },
+  };
+  return configs[kind] || configs.format;
+}
+function devPaneSplitStyle(kind) {
+  const value = DeveloperJsonEditor.clampSetting(state.devTools[devPaneSplitConfig(kind).field], 25, 75, 50);
+  return 'style="--dev-left-share:' + value + ';--dev-right-share:' + (100 - value) + ';"';
+}
+function devPaneSplitter(kind) {
+  const value = DeveloperJsonEditor.clampSetting(state.devTools[devPaneSplitConfig(kind).field], 25, 75, 50);
+  return '<div class="dev-pane-splitter" role="separator" aria-orientation="vertical" aria-label="' + escapeHtml(devPaneSplitConfig(kind).label) + '" aria-valuemin="25" aria-valuemax="75" aria-valuenow="' + value + '" tabindex="0" data-dev-pane-splitter="' + kind + '"></div>';
+}
+function applyDeveloperPaneSplit(grid, kind, value) {
+  const config = devPaneSplitConfig(kind);
+  const split = DeveloperJsonEditor.clampSetting(value, 25, 75, 50);
+  state.devTools[config.field] = split;
+  const relatedLayout = kind === 'compare' ? grid?.closest('.dev-workbench.dev-json-compare') : null;
+  [grid, relatedLayout].filter(Boolean).forEach((target) => {
+    target.style.setProperty('--dev-left-share', String(split));
+    target.style.setProperty('--dev-right-share', String(100 - split));
+  });
+  const separator = grid?.querySelector('[data-dev-pane-splitter="' + kind + '"]');
+  if (separator) separator.setAttribute('aria-valuenow', String(split));
+  return split;
+}
+let activeDeveloperPaneResize = null;
+function finishDeveloperPaneResize(event = null) {
+  const resize = activeDeveloperPaneResize;
+  if (!resize || (event?.pointerId != null && resize.pointerId !== event.pointerId)) return;
+  activeDeveloperPaneResize = null;
+  document.body.classList.remove('dev-pane-resizing');
+  try { resize.separator.releasePointerCapture?.(resize.pointerId); } catch {}
+  saveDevTools();
+}
+workspace.addEventListener('pointerdown', (event) => {
+  const separator = event.target.closest?.('[data-dev-pane-splitter]');
+  if (!separator || event.button !== 0) return;
+  const kind = separator.dataset.devPaneSplitter;
+  const grid = separator.closest('[data-dev-pane-grid]');
+  if (!grid || window.matchMedia('(max-width: 760px)').matches) return;
+  const rect = grid.getBoundingClientRect();
+  if (rect.width <= 0) return;
+  event.preventDefault();
+  activeDeveloperPaneResize = { separator, grid, kind, pointerId: event.pointerId };
+  separator.setPointerCapture?.(event.pointerId);
+  document.body.classList.add('dev-pane-resizing');
+});
+window.addEventListener('pointermove', (event) => {
+  const resize = activeDeveloperPaneResize;
+  if (!resize || resize.pointerId !== event.pointerId) return;
+  const rect = resize.grid.getBoundingClientRect();
+  const style = getComputedStyle(resize.grid);
+  const gap = Number.parseFloat(style.columnGap) || 0;
+  const handleWidth = resize.separator.getBoundingClientRect().width || 12;
+  const available = Math.max(1, rect.width - gap * 2 - handleWidth);
+  const leftWidth = event.clientX - rect.left - gap - handleWidth / 2;
+  applyDeveloperPaneSplit(resize.grid, resize.kind, leftWidth / available * 100);
+});
+window.addEventListener('pointerup', finishDeveloperPaneResize);
+window.addEventListener('pointercancel', finishDeveloperPaneResize);
+window.addEventListener('blur', () => finishDeveloperPaneResize());
+workspace.addEventListener('keydown', (event) => {
+  const separator = event.target.closest?.('[data-dev-pane-splitter]');
+  if (!separator) return;
+  const kind = separator.dataset.devPaneSplitter;
+  const config = devPaneSplitConfig(kind);
+  const current = DeveloperJsonEditor.clampSetting(state.devTools[config.field], 25, 75, 50);
+  let next = current;
+  if (event.key === 'ArrowLeft') next -= 2;
+  else if (event.key === 'ArrowRight') next += 2;
+  else if (event.key === 'Home') next = 25;
+  else if (event.key === 'End') next = 75;
+  else return;
+  event.preventDefault();
+  applyDeveloperPaneSplit(separator.closest('[data-dev-pane-grid]'), kind, next);
+  saveDevTools();
+});
 
 function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
