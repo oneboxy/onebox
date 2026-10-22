@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.700';
+const APP_VERSION = '2.18.701';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9258,7 +9258,7 @@ function devPaneSplitConfig(kind) {
 }
 function devPaneSplitStyle(kind) {
   const value = DeveloperJsonEditor.clampSetting(state.devTools[devPaneSplitConfig(kind).field], 25, 75, 50);
-  return 'style="--dev-left-share:' + value + ';--dev-right-share:' + (100 - value) + ';"';
+  return 'style="--dev-left-share:' + value + 'fr;--dev-right-share:' + (100 - value) + 'fr;"';
 }
 function devPaneSplitter(kind) {
   const value = DeveloperJsonEditor.clampSetting(state.devTools[devPaneSplitConfig(kind).field], 25, 75, 50);
@@ -9270,8 +9270,8 @@ function applyDeveloperPaneSplit(grid, kind, value) {
   state.devTools[config.field] = split;
   const relatedLayout = kind === 'compare' ? grid?.closest('.dev-workbench.dev-json-compare') : null;
   [grid, relatedLayout].filter(Boolean).forEach((target) => {
-    target.style.setProperty('--dev-left-share', String(split));
-    target.style.setProperty('--dev-right-share', String(100 - split));
+    target.style.setProperty('--dev-left-share', String(split) + 'fr');
+    target.style.setProperty('--dev-right-share', String(100 - split) + 'fr');
   });
   const separator = grid?.querySelector('[data-dev-pane-splitter="' + kind + '"]');
   if (separator) separator.setAttribute('aria-valuenow', String(split));

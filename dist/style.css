@@ -18653,11 +18653,11 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
 }
 
 
-/* 2.18.700: resizable developer panes, raw input line numbers, and inline JSON diff rows. */
+/* 2.18.701: repair developer pane split tracks; retain resizable panes, raw input line numbers, and inline JSON diff rows. */
 .dev-tools-page .dev-editor-grid[data-dev-pane-grid],
 .dev-tools-page .dev-compare-grid[data-dev-pane-grid],
 .dev-tools-page .dev-workbench.dev-timestamp[data-dev-pane-grid] {
-  grid-template-columns: minmax(0, var(--dev-left-share, 50)fr) 12px minmax(0, var(--dev-right-share, 50)fr);
+  grid-template-columns: minmax(0, var(--dev-left-share, 50fr)) 12px minmax(0, var(--dev-right-share, 50fr));
 }
 .dev-pane-splitter {
   position: relative;
@@ -18715,7 +18715,7 @@ body.dev-pane-resizing * {
   .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
     display: grid;
     grid-column: 1 / -1;
-    grid-template-columns: minmax(0, var(--dev-left-share, 50)fr) 12px minmax(0, var(--dev-right-share, 50)fr);
+    grid-template-columns: minmax(0, var(--dev-left-share, 50fr)) 12px minmax(0, var(--dev-right-share, 50fr));
   }
   .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid > .dev-pane {
     display: flex;
