@@ -18,6 +18,21 @@ test('JSON editor settings clamp to readable, usable ranges', () => {
   assert.equal(editor.clampSetting('bad', 240, 1200, 460), 460);
 });
 
+test('comparison scroll mapping pairs rows across different line numbers', () => {
+  const anchors = [
+    { leftLine: 1, rightLine: 1 },
+    { leftLine: 20, rightLine: 32 },
+    { leftLine: 40, rightLine: 64 },
+  ];
+  assert.equal(editor.mapLine(anchors, 10, 'left'), 16);
+  assert.equal(editor.mapLine(anchors, 16, 'right'), 10);
+  assert.equal(editor.mapLine(anchors, 48, 'right'), 30);
+  assert.equal(editor.mapLine([
+    { leftLine: 10, rightLine: 20 },
+    { leftLine: 10, rightLine: 30 },
+  ], 10, 'left'), 25);
+});
+
 test('formatter input displays raw text without syntax highlighting', () => {
   const app = read('dist/app.js');
   const css = read('dist/style.css');
@@ -53,6 +68,11 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.match(app, /dev-json-line-number/);
   assert.match(app, /devJsonTreeNode/);
   assert.match(app, /dev-json-key/);
+  assert.match(app, /developerJsonFindMappedPathRange/);
+  assert.match(app, /data-dev-compare-line-map/);
+  assert.match(app, /rowMappings: monotonicRows/);
+  assert.match(app, /syncDeveloperCompareScroll/);
+  assert.match(css, /dev-compare-map-line/);
   assert.match(app, /data-dev-json-adjust/);
   assert.match(app, /json-output-fullscreen/);
   assert.match(app, /lineCounter\.value/);
@@ -66,13 +86,14 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.709/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.709/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.710/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.710/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
 test('JSON editor helper passes JavaScript syntax checking', () => {
   assert.doesNotThrow(() => new vm.Script(helperSource, { filename: 'dev-json-editor.js' }));
+  assert.equal(typeof editor.mapLine, 'function');
 });
 
 test('JSON formatter shows parse errors in the output pane and keeps successful output clean', () => {
