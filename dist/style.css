@@ -18444,7 +18444,6 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
   box-sizing:border-box;
   height:var(--dev-json-input-height,460px);
   min-height:240px;
-  max-height:80dvh;
   overflow:auto!important;
   resize:vertical!important;
   font-size:var(--dev-json-input-font-size,13px)!important;
@@ -18501,7 +18500,6 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
   box-sizing:border-box;
   height:var(--dev-json-output-height,460px);
   min-height:240px;
-  max-height:80dvh;
   resize:vertical;
   overflow:auto;
   border-radius:12px;
