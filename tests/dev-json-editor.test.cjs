@@ -28,7 +28,13 @@ test('formatter input displays raw text without syntax highlighting', () => {
   const inputMarkup = app.slice(formatStart, compareStart);
   assert.match(inputMarkup, /wrap="soft"/);
   assert.match(inputMarkup, /data-dev-field=/);
-  assert.doesNotMatch(inputMarkup, /DeveloperJsonEditor\.highlightMarkup|dev-code-highlight|dev-line-numbers|data-dev-line-numbered/);
+  const rawBranchStart = inputMarkup.indexOf("? '<textarea class=\"dev-code-input\"");
+  const rawBranchEnd = inputMarkup.indexOf("\n      :", rawBranchStart);
+  assert.ok(rawBranchStart >= 0 && rawBranchEnd > rawBranchStart);
+  const rawBranch = inputMarkup.slice(rawBranchStart, rawBranchEnd);
+  assert.match(rawBranch, /wrap="soft"/);
+  assert.doesNotMatch(rawBranch, /highlight|dev-line-number|data-dev-line-numbered/);
+  assert.doesNotMatch(app, /DeveloperJsonEditor\.highlightMarkup/);
   assert.match(css, /grid-template-columns:minmax\(0,1fr\)/);
   assert.match(css, /color:var\(--ink\)!important/);
   assert.match(css, /-webkit-text-fill-color:var\(--ink\)!important/);
