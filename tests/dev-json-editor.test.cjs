@@ -55,10 +55,17 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.match(app, /json-output-fullscreen/);
   assert.match(app, /lineCounter\.value/);
   assert.match(css, /dev-json-output-pane\.is-floating/);
+  const scrollStyles = css.slice(css.lastIndexOf('/* Keep long formatted JSON'));
+  assert.ok(scrollStyles.includes('.dev-json-format .dev-json-live-output {'));
+  assert.ok(scrollStyles.includes('.dev-json-format .dev-json-live-output > .dev-json-tree,'));
+  assert.ok(scrollStyles.includes('.dev-json-output-pane.is-floating .dev-json-live-output {'));
+  assert.ok(scrollStyles.includes('overflow:auto!important'));
+  assert.ok(scrollStyles.includes('-webkit-overflow-scrolling:touch'));
+  assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.696/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.696/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.697/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.697/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 

@@ -18613,3 +18613,41 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
   overflow-wrap:anywhere!important;
   word-break:break-word!important;
 }
+
+
+/* Keep long formatted JSON inside its output viewport in normal and fullscreen modes. */
+.dev-json-format .dev-json-live-output {
+  display:flex;
+  min-height:0!important;
+  flex-direction:column;
+  overflow:hidden!important;
+}
+.dev-json-format .dev-json-live-output > .dev-json-tree,
+.dev-json-format .dev-json-live-output > .dev-json-empty,
+.dev-json-format .dev-json-live-output > .dev-result-pre {
+  box-sizing:border-box;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.dev-json-format .dev-json-live-output > .dev-status {
+  flex:0 0 auto;
+}
+.dev-json-output-pane.is-floating .dev-json-live-output {
+  flex:1 1 0%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.dev-json-output-pane.is-floating .dev-json-live-output > .dev-json-tree,
+.dev-json-output-pane.is-floating .dev-json-live-output > .dev-json-empty,
+.dev-json-output-pane.is-floating .dev-json-live-output > .dev-result-pre {
+  flex:1 1 0%!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:auto!important;
+}
