@@ -18448,53 +18448,25 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
   resize:vertical!important;
   font-size:var(--dev-json-input-font-size,13px)!important;
 }
-.dev-json-format .dev-format-editor .dev-line-numbers,
-.dev-json-format .dev-format-editor .dev-code-input,
-.dev-json-format .dev-format-editor .dev-code-highlight {
-  font-size:inherit;
-  line-height:1.65;
-}
-.dev-json-format .dev-format-editor .dev-code-input-wrap {
-  position:relative;
-  min-width:0;
-  min-height:0;
-  overflow:hidden;
-}
-.dev-json-format .dev-format-editor .dev-code-highlight {
-  position:absolute;
-  z-index:1;
-  inset:0;
-  box-sizing:border-box;
-  width:100%;
-  min-width:0;
-  min-height:100%;
-  margin:0;
-  padding:8px 10px;
-  overflow:hidden;
-  color:var(--ink);
-  font:inherit;
-  tab-size:2;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-  word-break:break-word;
-  pointer-events:none;
+.dev-json-format .dev-format-editor {
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);
 }
 .dev-json-format .dev-format-editor .dev-code-input {
-  position:absolute;
-  z-index:2;
-  inset:0;
+  position:relative;
+  z-index:auto;
+  inset:auto;
   box-sizing:border-box;
-  background:transparent!important;
-  color:transparent!important;
-  -webkit-text-fill-color:transparent;
-  caret-color:var(--ink);
+  width:100%;
+  height:100%;
+  min-height:0;
+  overflow:auto;
+  background:var(--panel)!important;
+  color:var(--ink)!important;
+  -webkit-text-fill-color:var(--ink);
   white-space:pre-wrap;
   overflow-wrap:anywhere;
   word-break:break-word;
-}
-.dev-json-format .dev-format-editor .dev-code-input::selection {
-  color:transparent;
-  background:color-mix(in srgb,var(--primary) 22%,transparent);
 }
 .dev-json-format .dev-json-live-output {
   box-sizing:border-box;
@@ -18630,4 +18602,14 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
   .dev-json-adjust { min-width:23px;height:23px;padding-inline:3px;font-size:9px; }
   .dev-json-adjust-readout { padding-inline:3px;font-size:8px; }
   .dev-json-output-pane.is-floating { inset:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));padding:10px; }
+}
+
+
+/* JSON formatter input stays raw and readable, while the output owns syntax colors. */
+.dev-json-format .dev-format-editor .dev-code-input {
+  color:var(--ink)!important;
+  -webkit-text-fill-color:var(--ink)!important;
+  white-space:pre-wrap!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
 }
