@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.705';
+const APP_VERSION = '2.18.706';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8855,8 +8855,20 @@ function devHistoryContent(kind) {
   const open = state.devTools.historyOpen === true;
   return '<div class="dev-history-content" ' + (open ? '' : 'hidden') + '><div class="dev-history-head"><strong>' + t('recentCalculations') + '</strong><button class="text-btn" data-clear-dev-records data-dev-record-kind="' + kind + '" ' + (records.length ? '' : 'disabled') + '>' + t('clear') + '</button></div><div class="dev-record-list">' + list + '</div></div>';
 }
-function devOutputPaneHead(kind, title, actions = '') {
-  return '<div class="dev-pane-head dev-output-pane-head"><div class="dev-output-title"><h3>' + escapeHtml(title) + '</h3><div class="dev-history-anchor">' + devHistoryToggle(kind) + '</div></div><div class="dev-pane-actions">' + actions + '</div></div>';
+function developerJsonFormattedLineCount() {
+  const output = String(state.devTools.formatOutput || '');
+  return output ? output.split(/\r\n|\r|\n/u).length : 0;
+}
+function developerJsonFormattedLineCountLabel(count) {
+  return count.toLocaleString(state.language === 'en' ? 'en-US' : 'zh-CN') + (state.language === 'en' ? ' lines' : ' 行');
+}
+function developerJsonFormattedLineCountMarkup() {
+  const count = developerJsonFormattedLineCount();
+  const label = count ? developerJsonFormattedLineCountLabel(count) : '';
+  return '<span class="dev-json-line-count" data-dev-json-line-count title="' + (state.language === 'en' ? 'Formatted JSON line count' : '格式化后的 JSON 行数') + '"' + (count ? '' : ' hidden') + '>' + escapeHtml(label) + '</span>';
+}
+function devOutputPaneHead(kind, title, actions = '', meta = '') {
+  return '<div class="dev-pane-head dev-output-pane-head"><div class="dev-output-title"><h3>' + escapeHtml(title) + '</h3><div class="dev-history-anchor">' + devHistoryToggle(kind) + '</div>' + meta + '</div><div class="dev-pane-actions">' + actions + '</div></div>';
 }
 function developerJsonLineNumbers(value) {
   const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
@@ -8984,7 +8996,7 @@ function renderDeveloperJsonFormat() {
   const overlay = dev.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' : '';
   return '<div class="dev-workbench dev-json-format' + (dev.formatOutputFullscreen ? ' is-output-floating' : '') + '">' + overlay + '<div class="dev-editor-grid" data-dev-pane-grid ' + devPaneSplitStyle('format') + '>' +
     '<section class="dev-pane">' + devPaneHead(t('devInput'), inputActions) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '</section>' + devPaneSplitter('format') +
-    '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '">' + devOutputPaneHead('json-format', t('devOutput'), outputActions) + devHistoryContent('json-format') + '<div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '</div>' + '</section>' +
+    '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '">' + devOutputPaneHead('json-format', t('devOutput'), outputActions, developerJsonFormattedLineCountMarkup()) + devHistoryContent('json-format') + '<div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '</div>' + '</section>' +
     '</div></div>';
 }
 function renderDeveloperCompare() {
@@ -9214,6 +9226,12 @@ function renderDeveloperTimestampResult() {
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
+  const countBadge = workspace.querySelector('[data-dev-json-line-count]');
+  if (countBadge) {
+    const count = developerJsonFormattedLineCount();
+    countBadge.hidden = !count;
+    countBadge.textContent = count ? developerJsonFormattedLineCountLabel(count) : '';
+  }
   const host = workspace.querySelector('[data-dev-live-output]');
   if (host) host.innerHTML = developerLiveOutputMarkup(comparison);
 }
