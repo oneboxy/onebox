@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.694';
+const APP_VERSION = '2.18.695';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -16,6 +16,7 @@ const ACCOUNT_LOGIN_PROVIDERS = Object.freeze([
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const TicketWalletLayout = window.OneBoxTicketWalletLayout;
+const DeveloperJsonEditor = window.OneBoxDeveloperJsonEditor;
 const uid = () => Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 const pad = (value) => String(value).padStart(2, '0');
 const today = new Date();
@@ -538,6 +539,11 @@ function normalizeDevTools(value) {
   return {
     active: DEV_TOOL_IDS.includes(source.active) ? source.active : DEV_TOOL_IDS[0],
     fullscreen: source.fullscreen === true, formatInput: String(source.formatInput || ''), formatOutput: String(source.formatOutput || ''), formatStatus: String(source.formatStatus || ''), formatCompact: source.formatCompact === true, formatUnescape: source.formatUnescape !== false, formatCollapsed: Array.isArray(source.formatCollapsed) ? [...new Set(source.formatCollapsed.map((item) => String(item)))] : [],
+    jsonInputFontSize: DeveloperJsonEditor.clampSetting(source.jsonInputFontSize, 10, 24, 13),
+    jsonOutputFontSize: DeveloperJsonEditor.clampSetting(source.jsonOutputFontSize, 10, 24, 13),
+    jsonInputHeight: DeveloperJsonEditor.clampSetting(source.jsonInputHeight, 240, 1200, 460),
+    jsonOutputHeight: DeveloperJsonEditor.clampSetting(source.jsonOutputHeight, 240, 1200, 460),
+    formatOutputFullscreen: false,
     historyOpen: source.historyOpen === true,
     compareLeft: String(source.compareLeft || ''), compareRight: String(source.compareRight || ''), compareOutput: String(source.compareOutput || ''), compareStatus: String(source.compareStatus || ''),
     textInput: String(source.textInput || ''), textOutput: source.textOutput && typeof source.textOutput === 'object' ? source.textOutput : null,
@@ -8713,25 +8719,30 @@ function devJsonSummary(value) {
   const count = value && typeof value === 'object' ? Object.keys(value).length : 0;
   return Array.isArray(value) ? '[… ' + count + ']' : '{… ' + count + '}';
 }
-function devJsonTreeNode(value, path = '$', label = '', depth = 0, trailingComma = false) {
+function devJsonTreeNode(value, path = '$', label = '', depth = 0, trailingComma = false, lineCounter = { value: 0 }) {
   const container = value && typeof value === 'object';
   const entries = container ? Object.entries(value) : [];
   const empty = container && entries.length === 0;
   const collapsed = container && !empty && state.devTools.formatCollapsed.includes(path);
   const keyMarkup = label === '' ? '' : '<span class="dev-json-key">' + escapeHtml(JSON.stringify(label)) + '</span><span class="dev-json-colon">:</span> ';
   const comma = trailingComma ? ',' : '';
-  if (!container) return '<div class="dev-json-line dev-json-leaf" style="--dev-depth:' + depth + '">' + keyMarkup + devJsonPrimitive(value) + comma + '</div>';
+  if (!container) {
+    const lineNumber = ++lineCounter.value;
+    return '<div class="dev-json-line dev-json-leaf" style="--dev-depth:' + depth + '"><span class="dev-json-line-number" aria-hidden="true">' + lineNumber + '</span>' + keyMarkup + devJsonPrimitive(value) + comma + '</div>';
+  }
   const open = Array.isArray(value) ? '[' : '{';
   const close = Array.isArray(value) ? ']' : '}';
+  const lineNumber = ++lineCounter.value;
   const toggle = empty ? '<span class="dev-json-toggle-placeholder"></span>' : '<button class="dev-json-toggle" type="button" data-dev-json-toggle data-dev-json-path="' + encodeURIComponent(path) + '" aria-expanded="' + String(!collapsed) + '" aria-label="' + escapeHtml((collapsed ? t('devExpandAll') : t('devCollapseAll')) + ' ' + (label || '$')) + '">' + (collapsed ? '▸' : '▾') + '</button>';
-  const openLine = '<div class="dev-json-line dev-json-open ' + (collapsed ? 'is-collapsed' : '') + '" style="--dev-depth:' + depth + '">' + toggle + keyMarkup + '<span class="dev-json-bracket">' + (collapsed ? devJsonSummary(value) : open) + '</span>' + (collapsed ? comma : '') + '</div>';
+  const openLine = '<div class="dev-json-line ' + (collapsed ? 'is-collapsed' : '') + '" style="--dev-depth:' + depth + '"><span class="dev-json-line-number" aria-hidden="true">' + lineNumber + '</span>' + toggle + keyMarkup + '<span class="dev-json-bracket">' + (collapsed ? devJsonSummary(value) : open) + '</span>' + (collapsed ? comma : '') + '</div>';
   if (empty || collapsed) return '<div class="dev-json-node ' + (collapsed ? 'is-collapsed' : '') + '">' + openLine + (empty ? '<span class="dev-json-close-inline">' + close + (comma ? ',' : '') + '</span>' : '') + '</div>';
-  const children = entries.map(([key, child], index) => devJsonTreeNode(child, path + devJsonPathSegment(key, Array.isArray(value)), Array.isArray(value) ? '' : key, depth + 1, index < entries.length - 1)).join('');
-  return '<div class="dev-json-node">' + openLine + '<div class="dev-json-children">' + children + '</div><div class="dev-json-line dev-json-close" style="--dev-depth:' + depth + '"><span class="dev-json-toggle-placeholder"></span><span class="dev-json-bracket">' + close + comma + '</span></div></div>';
+  const children = entries.map(([key, child], index) => devJsonTreeNode(child, path + devJsonPathSegment(key, Array.isArray(value)), Array.isArray(value) ? '' : key, depth + 1, index < entries.length - 1, lineCounter)).join('');
+  const closeLineNumber = ++lineCounter.value;
+  return '<div class="dev-json-node">' + openLine + '<div class="dev-json-children">' + children + '</div><div class="dev-json-line dev-json-close" style="--dev-depth:' + depth + '"><span class="dev-json-line-number" aria-hidden="true">' + closeLineNumber + '</span><span class="dev-json-toggle-placeholder"></span><span class="dev-json-bracket">' + close + comma + '</span></div></div>';
 }
 function renderDeveloperJsonTree() {
   if (!state.devTools.formatOutput) return '<div class="dev-json-empty">' + (state.language === 'en' ? 'Formatted JSON will appear here' : '格式化结果会显示在这里') + '</div>';
-  try { return '<div class="dev-json-tree" role="tree">' + devJsonTreeNode(JSON.parse(state.devTools.formatOutput)) + '</div>'; } catch { return '<pre class="dev-result-pre">' + escapeHtml(state.devTools.formatOutput) + '</pre>'; }
+  try { return '<div class="dev-json-tree" role="tree">' + devJsonTreeNode(JSON.parse(state.devTools.formatOutput), '$', '', 0, false, { value: 0 }) + '</div>'; } catch { return '<pre class="dev-result-pre">' + escapeHtml(state.devTools.formatOutput) + '</pre>'; }
 }
 function collectDeveloperJsonPaths(value, path = '$', output = []) {
   if (!value || typeof value !== 'object' || Object.keys(value).length === 0) return output;
@@ -8868,7 +8879,15 @@ function developerJsonHighlightMarkup(value, ranges = []) {
 }
 function developerJsonEditor(field, value, placeholder, compareResult = null) {
   const isCompare = field === 'compareLeft' || field === 'compareRight';
-  if (!isCompare) return '<div class="dev-code-editor dev-editor-with-lines"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div>';
+  if (!isCompare) {
+    const isFormat = field === 'formatInput';
+    const editorStyle = isFormat ? ' style="--dev-json-input-font-size:' + state.devTools.jsonInputFontSize + 'px;--dev-json-input-height:' + state.devTools.jsonInputHeight + 'px"' : '';
+    const editorClass = isFormat ? 'dev-code-editor dev-editor-with-lines dev-format-editor' : 'dev-code-editor dev-editor-with-lines';
+    const editorContent = isFormat
+      ? '<div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + DeveloperJsonEditor.highlightMarkup(value) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="soft" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div>'
+      : '<textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea>';
+    return '<div class="' + editorClass + '"' + editorStyle + '><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumbers(value) + '</pre>' + editorContent + '</div>';
+  }
   const side = field === 'compareLeft' ? 'left' : 'right';
   const result = compareResult || developerCompareResult();
   return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
@@ -8888,12 +8907,34 @@ function syncDeveloperCompareEditors(result = developerCompareResult()) {
   workspace.querySelectorAll('[data-dev-field="compareLeft"], [data-dev-field="compareRight"]').forEach((editor) => syncDeveloperCompareEditor(editor, result));
 }
 
+function devJsonAdjustControls(target, fontSize, height) {
+  const english = state.language === 'en';
+  const name = target === 'input' ? (english ? 'input' : '输入') : (english ? 'output' : '输出');
+  const fontField = target === 'input' ? 'jsonInputFontSize' : 'jsonOutputFontSize';
+  const heightField = target === 'input' ? 'jsonInputHeight' : 'jsonOutputHeight';
+  const actions = [
+    [fontField, -1, 'A−', english ? 'Decrease ' + name + ' text size' : '缩小' + name + '文字'],
+    [fontField, 1, 'A+', english ? 'Increase ' + name + ' text size' : '放大' + name + '文字'],
+    [heightField, -80, '↕−', english ? 'Reduce ' + name + ' panel height' : '缩小' + name + '区域'],
+    [heightField, 80, '↕+', english ? 'Increase ' + name + ' panel height' : '放大' + name + '区域'],
+  ];
+  return '<div class="dev-json-adjustments" role="group" aria-label="' + (english ? 'Editor size controls' : '编辑器尺寸调整') + '">' + actions.map(([field, delta, label, title]) => '<button type="button" class="dev-json-adjust" data-dev-json-adjust="' + field + '" data-dev-json-delta="' + delta + '" aria-label="' + title + '" title="' + title + '">' + label + '</button>').join('') + '<span class="dev-json-adjust-readout">' + fontSize + 'px · ' + height + 'px</span></div>';
+}
+function devJsonOutputFullscreenButton(open) {
+  const english = state.language === 'en';
+  const label = english ? (open ? 'Close output overlay' : 'Open output overlay') : (open ? '退出输出浮窗' : '输出全屏浮窗');
+  const text = english ? (open ? 'Close' : 'Full screen') : (open ? '关闭' : '全屏');
+  const icon = open ? '<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"></path>' : '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"></path>';
+  return '<button type="button" class="dev-action dev-json-fullscreen-button" data-dev-action="json-output-fullscreen" aria-label="' + label + '" title="' + label + '" aria-pressed="' + String(open) + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + icon + '</svg><span>' + text + '</span></button>';
+}
 function renderDeveloperJsonFormat() {
   const dev = state.devTools;
-  const outputActions = dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '';
-  return '<div class="dev-workbench dev-json-format"><div class="dev-editor-grid">' +
-    '<section class="dev-pane">' + devPaneHead(t('devInput'), devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-example', t('devExample')) + devActionButton('json-clear', t('devClear'))) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '</section>' +
-    '<section class="dev-pane dev-output-pane">' + devOutputPaneHead('json-format', t('devOutput'), outputActions) + devHistoryContent('json-format') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + '</section>' +
+  const inputActions = devJsonAdjustControls('input', dev.jsonInputFontSize, dev.jsonInputHeight) + devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-example', t('devExample')) + devActionButton('json-clear', t('devClear'));
+  const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + (dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '') + devJsonOutputFullscreenButton(dev.formatOutputFullscreen);
+  const overlay = dev.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' : '';
+  return '<div class="dev-workbench dev-json-format">' + overlay + '<div class="dev-editor-grid">' +
+    '<section class="dev-pane">' + devPaneHead(t('devInput'), inputActions) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '</section>' +
+    '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '">' + devOutputPaneHead('json-format', t('devOutput'), outputActions) + devHistoryContent('json-format') + '<div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '</div>' + '</section>' +
     '</div></div>';
 }
 function renderDeveloperCompare() {
@@ -9147,18 +9188,24 @@ function syncDeveloperJsonLineNumbers(editor) {
     syncDeveloperCompareEditor(editor, null, false);
     return;
   }
-  const gutter = editor.closest('.dev-code-editor')?.querySelector('[data-dev-line-numbers]');
+  const host = editor.closest('.dev-code-editor');
+  const gutter = host?.querySelector('[data-dev-line-numbers]');
   if (!gutter) return;
   const numbers = developerJsonLineNumbers(editor.value);
   if (gutter.textContent !== numbers) gutter.textContent = numbers;
   gutter.scrollTop = editor.scrollTop;
+  const highlight = host.querySelector('[data-dev-code-highlight]');
+  if (editor.dataset.devField === 'formatInput' && highlight) {
+    highlight.innerHTML = DeveloperJsonEditor.highlightMarkup(editor.value);
+    highlight.style.transform = 'translate(' + (-editor.scrollLeft) + 'px, ' + (-editor.scrollTop) + 'px)';
+  }
 }
 
 function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
   const mode = state.devTools.active;
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : window.OneBoxFileCompareUI.render();
-  return '<section class="dev-tools-page dev-is-fullscreen"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
+  return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : '') + '"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
 }
 function syncDeveloperFullscreenFrame() {
   if (!document.body.classList.contains('dev-tools-fullscreen')) {
@@ -9172,7 +9219,8 @@ function syncDeveloperFullscreenFrame() {
 }
 function runDeveloperAction(action, sourceEvent = null) {
   const dev = state.devTools;
-  if (action === 'json-example' || action === 'json-a-example' || action === 'json-b-example') {
+  if (action === 'json-output-fullscreen') dev.formatOutputFullscreen = !dev.formatOutputFullscreen;
+  else if (action === 'json-example' || action === 'json-a-example' || action === 'json-b-example') {
     const example = action === 'json-b-example' ? '{\n  "name": "OneBox",\n  "version": 2,\n  "features": ["calendar", "reader"]\n}' : '{\n  "name": "OneBox",\n  "version": 1,\n  "features": ["calendar"]\n}';
     if (action === 'json-a-example') dev.compareLeft = example; else if (action === 'json-b-example') dev.compareRight = example; else dev.formatInput = example;
     if (action === 'json-example') { const result = formatDeveloperJson(dev.formatInput, dev.formatCompact); dev.formatOutput = result.output; dev.formatStatus = result.message; dev.formatCollapsed = []; }
@@ -14088,6 +14136,18 @@ workspace.addEventListener('click', async (event) => {
   if (devMode) { state.devTools.active = DEV_TOOL_IDS.includes(devMode.dataset.devMode) ? devMode.dataset.devMode : DEV_TOOL_IDS[0]; saveDevTools(); return render(); }
   const devRecord = event.target.closest('[data-dev-record]');
   if (devRecord) return loadDeveloperRecord(devRecord.dataset.devRecordKind, devRecord.dataset.devRecord);
+  const jsonAdjust = event.target.closest('[data-dev-json-adjust]');
+  if (jsonAdjust) {
+    const field = jsonAdjust.dataset.devJsonAdjust;
+    const delta = Number(jsonAdjust.dataset.devJsonDelta) || 0;
+    const settings = { jsonInputFontSize: [10, 24], jsonOutputFontSize: [10, 24], jsonInputHeight: [240, 1200], jsonOutputHeight: [240, 1200] };
+    const bounds = settings[field];
+    if (bounds && delta) {
+      state.devTools[field] = DeveloperJsonEditor.clampSetting(Number(state.devTools[field]) + delta, bounds[0], bounds[1], state.devTools[field]);
+      saveDevTools();
+      return render();
+    }
+  }
   const devAction = event.target.closest('[data-dev-action]');
   if (devAction) {
     if (devAction.dataset.devAction === 'dev-copy-output') return developerCopyOutput();
@@ -14417,6 +14477,11 @@ workspace.addEventListener('dblclick', (event) => {
   if (day && state.section === 'tools' && state.tool === 'calendar') { event.preventDefault(); renderLunarDialog(day.dataset.date); }
 });
 workspace.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && state.devTools.formatOutputFullscreen && state.devTools.active === 'json-format') {
+    event.preventDefault();
+    state.devTools.formatOutputFullscreen = false;
+    return render();
+  }
   if (event.key !== 'Enter' || !event.target.closest('[data-ticket-wallet-cafe-inline], [data-ticket-wallet-draft-field]')) return;
   event.preventDefault();
   event.target.blur();

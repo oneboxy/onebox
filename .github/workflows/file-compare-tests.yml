@@ -7,6 +7,7 @@ on:
       - 'dist/app.js'
       - 'dist/file-compare-*.js'
       - 'dist/ticket-wallet-layout.js'
+      - 'dist/dev-json-editor.js'
       - 'dist/style.css'
       - 'dist/vendor/**'
       - 'tests/*.test.cjs'
@@ -17,6 +18,7 @@ on:
       - 'dist/app.js'
       - 'dist/file-compare-*.js'
       - 'dist/ticket-wallet-layout.js'
+      - 'dist/dev-json-editor.js'
       - 'dist/style.css'
       - 'dist/vendor/**'
       - 'tests/*.test.cjs'
@@ -41,5 +43,6 @@ jobs:
           node --check dist/file-compare-ui.js
           node --check dist/file-compare-worker.js
           node --check dist/ticket-wallet-layout.js
+          node --check dist/dev-json-editor.js
       - name: Run application test suite
         run: node --test tests/*.test.cjs
