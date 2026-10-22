@@ -18837,3 +18837,20 @@ body.dev-pane-resizing * {
   content: "";
   pointer-events: none;
 }
+
+/* Show formatted JSON line count beside output history. */
+.dev-json-line-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+.dev-json-line-count[hidden] { display: none; }
