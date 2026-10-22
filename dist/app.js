@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.711';
+const APP_VERSION = '2.18.712';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9101,11 +9101,10 @@ function renderDeveloperCompare() {
   lastDeveloperCompareResult = comparison;
   dev.compareOutput = comparison.output;
   dev.compareStatus = comparison.status;
-  const overlay = dev.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
   const leftActions = devHistoryToggle('json-compare') + devJsonCompareFontControls('jsonCompareLeftFontSize', dev.jsonCompareLeftFontSize, t('devJsonA')) + devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'));
   const rightActions = devJsonCompareFontControls('jsonCompareRightFontSize', dev.jsonCompareRightFontSize, t('devJsonB')) + devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear')) + devJsonCompareFullscreenButton(dev.compareFullscreen);
   const rightHeader = '<div class="dev-pane-head dev-compare-right-head"><h3>' + escapeHtml(t('devJsonB')) + '</h3>' + developerCompareInlineStatusMarkup(comparison) + '<div class="dev-pane-actions">' + rightActions + '</div></div>';
-  return '<div class="dev-workbench dev-json-compare' + (dev.compareFullscreen ? ' is-floating' : '') + '">' + overlay + '<div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
+  return '<div class="dev-workbench dev-json-compare' + (dev.compareFullscreen ? ' is-floating' : '') + '"><div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
     '<svg class="dev-compare-line-map" data-dev-compare-line-map aria-hidden="true"></svg>' +
     '<section class="dev-pane">' + devPaneHead(t('devJsonA'), leftActions) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' + devPaneSplitter('compare') +
     '<section class="dev-pane">' + rightHeader + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }', comparison) + '</section>' +
@@ -9533,7 +9532,8 @@ function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
   const mode = state.devTools.active;
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : window.OneBoxFileCompareUI.render();
-  return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
+  const modalOverlay = mode === 'json-compare' && state.devTools.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
+  return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '">' + modalOverlay + '<nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
 }
 function syncDeveloperFullscreenFrame() {
   if (!document.body.classList.contains('dev-tools-fullscreen')) {
