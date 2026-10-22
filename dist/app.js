@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.710';
+const APP_VERSION = '2.18.711';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -541,6 +541,8 @@ function normalizeDevTools(value) {
     fullscreen: source.fullscreen === true, formatInput: String(source.formatInput || ''), formatOutput: String(source.formatOutput || ''), formatStatus: String(source.formatStatus || ''), formatCompact: source.formatCompact === true, formatUnescape: source.formatUnescape !== false, formatCollapsed: Array.isArray(source.formatCollapsed) ? [...new Set(source.formatCollapsed.map((item) => String(item)))] : [],
     jsonInputFontSize: DeveloperJsonEditor.clampSetting(source.jsonInputFontSize, 10, 24, 13),
     jsonOutputFontSize: DeveloperJsonEditor.clampSetting(source.jsonOutputFontSize, 10, 24, 13),
+    jsonCompareLeftFontSize: DeveloperJsonEditor.clampSetting(source.jsonCompareLeftFontSize, 10, 24, 13),
+    jsonCompareRightFontSize: DeveloperJsonEditor.clampSetting(source.jsonCompareRightFontSize, 10, 24, 13),
     jsonInputHeight: DeveloperJsonEditor.clampSetting(source.jsonInputHeight, 240, 1200, 460),
     jsonOutputHeight: DeveloperJsonEditor.clampSetting(source.jsonOutputHeight, 240, 1200, 460),
     jsonFormatSplit: DeveloperJsonEditor.clampSetting(source.jsonFormatSplit, 25, 75, 50),
@@ -548,6 +550,7 @@ function normalizeDevTools(value) {
     textStatsSplit: DeveloperJsonEditor.clampSetting(source.textStatsSplit, 25, 75, 50),
     timestampSplit: DeveloperJsonEditor.clampSetting(source.timestampSplit, 25, 75, 50),
     formatOutputFullscreen: false,
+    compareFullscreen: false,
     historyOpen: source.historyOpen === true,
     compareLeft: String(source.compareLeft || ''), compareRight: String(source.compareRight || ''), compareOutput: String(source.compareOutput || ''), compareStatus: String(source.compareStatus || ''),
     textInput: String(source.textInput || ''), textOutput: source.textOutput && typeof source.textOutput === 'object' ? source.textOutput : null,
@@ -8952,7 +8955,8 @@ function developerJsonEditor(field, value, placeholder, compareResult = null) {
   }
   const side = field === 'compareLeft' ? 'left' : 'right';
   const result = compareResult || developerCompareResult();
-  return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side], result.lines[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
+  const fontSize = state.devTools[side === 'left' ? 'jsonCompareLeftFontSize' : 'jsonCompareRightFontSize'];
+  return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '" style="--dev-json-compare-font-size:' + fontSize + 'px"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side], result.lines[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
 }
 function syncDeveloperCompareEditor(editor, result = lastDeveloperCompareResult || developerCompareResult(), refreshMarkup = true) {
   if (!editor?.matches?.('[data-dev-field="compareLeft"], [data-dev-field="compareRight"]')) return;
@@ -9051,6 +9055,23 @@ function devJsonAdjustControls(target, fontSize, height) {
   ];
   return '<div class="dev-json-adjustments" role="group" aria-label="' + (english ? 'Editor size controls' : '编辑器尺寸调整') + '">' + actions.map(([field, delta, label, title]) => '<button type="button" class="dev-json-adjust" data-dev-json-adjust="' + field + '" data-dev-json-delta="' + delta + '" aria-label="' + title + '" title="' + title + '">' + label + '</button>').join('') + '<span class="dev-json-adjust-readout">' + fontSize + 'px · ' + height + 'px</span></div>';
 }
+function devJsonCompareFontControls(field, fontSize, paneName) {
+  const english = state.language === 'en';
+  const label = english ? paneName + ' text size' : paneName + '字号';
+  const decrease = english ? 'Decrease ' + label : '缩小' + label;
+  const increase = english ? 'Increase ' + label : '放大' + label;
+  return '<div class="dev-json-adjustments dev-json-compare-font-controls" role="group" aria-label="' + escapeHtml(label) + '">' +
+    '<button type="button" class="dev-json-adjust" data-dev-json-adjust="' + field + '" data-dev-json-delta="-1" aria-label="' + escapeHtml(decrease) + '" title="' + escapeHtml(decrease) + '">A−</button>' +
+    '<button type="button" class="dev-json-adjust" data-dev-json-adjust="' + field + '" data-dev-json-delta="1" aria-label="' + escapeHtml(increase) + '" title="' + escapeHtml(increase) + '">A+</button>' +
+    '<span class="dev-json-adjust-readout">' + fontSize + 'px</span></div>';
+}
+function devJsonCompareFullscreenButton(open) {
+  const english = state.language === 'en';
+  const label = english ? (open ? 'Close comparison overlay' : 'Open comparison overlay') : (open ? '关闭对比浮窗' : '对比全屏浮窗');
+  const text = english ? (open ? 'Close' : 'Full screen') : (open ? '关闭' : '全屏');
+  const icon = open ? '<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"></path>' : '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"></path>';
+  return '<button type="button" class="dev-action dev-json-fullscreen-button" data-dev-action="json-compare-fullscreen" aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '" aria-pressed="' + String(open) + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + icon + '</svg><span>' + escapeHtml(text) + '</span></button>';
+}
 function devJsonOutputFullscreenButton(open) {
   const english = state.language === 'en';
   const label = english ? (open ? 'Close output overlay' : 'Open output overlay') : (open ? '退出输出浮窗' : '输出全屏浮窗');
@@ -9080,10 +9101,14 @@ function renderDeveloperCompare() {
   lastDeveloperCompareResult = comparison;
   dev.compareOutput = comparison.output;
   dev.compareStatus = comparison.status;
-  return '<div class="dev-workbench dev-json-compare">' + developerCompareInlineStatusMarkup(comparison) + '<div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
+  const overlay = dev.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
+  const leftActions = devHistoryToggle('json-compare') + devJsonCompareFontControls('jsonCompareLeftFontSize', dev.jsonCompareLeftFontSize, t('devJsonA')) + devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'));
+  const rightActions = devJsonCompareFontControls('jsonCompareRightFontSize', dev.jsonCompareRightFontSize, t('devJsonB')) + devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear')) + devJsonCompareFullscreenButton(dev.compareFullscreen);
+  const rightHeader = '<div class="dev-pane-head dev-compare-right-head"><h3>' + escapeHtml(t('devJsonB')) + '</h3>' + developerCompareInlineStatusMarkup(comparison) + '<div class="dev-pane-actions">' + rightActions + '</div></div>';
+  return '<div class="dev-workbench dev-json-compare' + (dev.compareFullscreen ? ' is-floating' : '') + '">' + overlay + '<div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
     '<svg class="dev-compare-line-map" data-dev-compare-line-map aria-hidden="true"></svg>' +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devHistoryToggle('json-compare') + devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' + devPaneSplitter('compare') +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }', comparison) + '</section>' +
+    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), leftActions) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' + devPaneSplitter('compare') +
+    '<section class="dev-pane">' + rightHeader + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }', comparison) + '</section>' +
     '</div>' + devHistoryContent('json-compare') + '</div>';
 }
 
@@ -9508,7 +9533,7 @@ function developerTool() {
   const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
   const mode = state.devTools.active;
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : window.OneBoxFileCompareUI.render();
-  return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : '') + '"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
+  return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '"><nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
 }
 function syncDeveloperFullscreenFrame() {
   if (!document.body.classList.contains('dev-tools-fullscreen')) {
@@ -9523,6 +9548,7 @@ function syncDeveloperFullscreenFrame() {
 function runDeveloperAction(action, sourceEvent = null) {
   const dev = state.devTools;
   if (action === 'json-output-fullscreen') dev.formatOutputFullscreen = !dev.formatOutputFullscreen;
+  else if (action === 'json-compare-fullscreen') dev.compareFullscreen = !dev.compareFullscreen;
   else if (action === 'json-example' || action === 'json-a-example' || action === 'json-b-example') {
     const example = action === 'json-b-example' ? '{\n  "name": "OneBox",\n  "version": 2,\n  "features": ["calendar", "reader"]\n}' : '{\n  "name": "OneBox",\n  "version": 1,\n  "features": ["calendar"]\n}';
     if (action === 'json-a-example') dev.compareLeft = example; else if (action === 'json-b-example') dev.compareRight = example; else dev.formatInput = example;
@@ -14443,7 +14469,7 @@ workspace.addEventListener('click', async (event) => {
   if (jsonAdjust) {
     const field = jsonAdjust.dataset.devJsonAdjust;
     const delta = Number(jsonAdjust.dataset.devJsonDelta) || 0;
-    const settings = { jsonInputFontSize: [10, 24], jsonOutputFontSize: [10, 24], jsonInputHeight: [240, 1200], jsonOutputHeight: [240, 1200] };
+    const settings = { jsonInputFontSize: [10, 24], jsonOutputFontSize: [10, 24], jsonCompareLeftFontSize: [10, 24], jsonCompareRightFontSize: [10, 24], jsonInputHeight: [240, 1200], jsonOutputHeight: [240, 1200] };
     const bounds = settings[field];
     if (bounds && delta) {
       state.devTools[field] = DeveloperJsonEditor.clampSetting(Number(state.devTools[field]) + delta, bounds[0], bounds[1], state.devTools[field]);

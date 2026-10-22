@@ -86,8 +86,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.710/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.710/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.711/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.711/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -112,4 +112,27 @@ test('JSON formatter shows parse errors in the output pane and keeps successful 
   assert.match(outputMarkup, /if \(dev\.active === 'json-format'\) return String\(dev\.formatInput \|\| ''\)\.trim\(\) && dev\.formatStatus\.startsWith\(t\('devInvalid'\)\) \? devStatus\(dev\.formatStatus, true\) : renderDeveloperJsonTree\(\);/);
   assert.doesNotMatch(outputMarkup, /devStatus\(dev\.formatStatus, dev\.formatStatus\.startsWith/);
   assert.doesNotMatch(refreshMarkup, /data-dev-json-input-error/);
+});
+
+
+test('JSON comparison keeps its change count with JSON B and provides zoom plus paired fullscreen', () => {
+  const app = read('dist/app.js');
+  const css = read('dist/style.css');
+  const compareStart = app.indexOf('function renderDeveloperCompare()');
+  const compareEnd = app.indexOf('function renderDeveloperStatsCards(', compareStart);
+  const compareMarkup = app.slice(compareStart, compareEnd);
+
+  assert.ok(compareStart >= 0 && compareEnd > compareStart);
+  assert.match(compareMarkup, /dev-compare-right-head/);
+  assert.match(compareMarkup, /developerCompareInlineStatusMarkup\(comparison\)/);
+  assert.match(compareMarkup, /jsonCompareLeftFontSize/);
+  assert.match(compareMarkup, /jsonCompareRightFontSize/);
+  assert.match(compareMarkup, /json-compare-fullscreen/);
+  assert.doesNotMatch(compareMarkup, /dev-compare-inline-status[^<]*<div class="dev-compare-grid"/);
+  assert.match(app, /jsonCompareLeftFontSize: DeveloperJsonEditor\.clampSetting/);
+  assert.match(app, /jsonCompareRightFontSize: DeveloperJsonEditor\.clampSetting/);
+  assert.match(app, /dev\.compareFullscreen = !dev\.compareFullscreen/);
+  assert.match(css, /dev-json-compare\.is-floating/);
+  assert.match(css, /dev-compare-editor \{\s*font-size: var\(--dev-json-compare-font-size, 13px\)/);
+  assert.match(css, /dev-compare-modal-open/);
 });
