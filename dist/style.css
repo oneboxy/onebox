@@ -18854,3 +18854,94 @@ body.dev-pane-resizing * {
   white-space: nowrap;
 }
 .dev-json-line-count[hidden] { display: none; }
+
+/* Show JSON comparison changes in the two source editors only. */
+.dev-workbench.dev-json-compare {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+.dev-workbench.dev-json-compare > .dev-compare-grid[data-dev-pane-grid] {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-column: auto;
+  grid-row: auto;
+}
+.dev-workbench.dev-json-compare > .dev-compare-grid > .dev-pane { min-width: 0; }
+.dev-compare-inline-status {
+  min-width: 0;
+  margin: 0 2px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.dev-compare-inline-status[hidden] { display: none !important; }
+.dev-compare-inline-status.is-different { color: var(--primary); font-weight: 650; }
+.dev-compare-inline-status.is-error { color: #c34444; }
+.dev-compare-inline-status.is-same { color: var(--success); }
+
+.dev-compare-editor-a .dev-compare-highlight-line.is-diff {
+  background: color-mix(in srgb, #df5a57 13%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, #df5a57 88%, transparent);
+}
+.dev-compare-editor-b .dev-compare-highlight-line.is-diff {
+  background: color-mix(in srgb, #31a77b 13%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, #31a77b 88%, transparent);
+}
+.dev-compare-editor-a .dev-json-diff-mark,
+.dev-compare-editor-b .dev-json-diff-mark {
+  border-radius: 3px;
+  padding: 0 1px;
+  text-decoration: none;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.dev-compare-editor-a .dev-json-diff-mark {
+  background: color-mix(in srgb, #df5a57 22%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, #df5a57 86%, transparent);
+}
+.dev-compare-editor-b .dev-json-diff-mark {
+  background: color-mix(in srgb, #31a77b 22%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, #31a77b 86%, transparent);
+}
+
+@media (min-width: 761px) {
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    height: clamp(260px, calc(100dvh - var(--dev-fullscreen-top, 90px) - 110px), 620px);
+    min-height: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
+    display: grid;
+    flex: 1 1 auto;
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid > .dev-pane {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare .dev-code-editor {
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    resize: none;
+  }
+}
+@media (min-width: 1160px) {
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare {
+    grid-template-columns: none;
+    grid-template-rows: none;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
+    grid-column: auto;
+  }
+}
