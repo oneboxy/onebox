@@ -127,7 +127,7 @@ test('JSON comparison keeps its change count with JSON B and provides zoom plus 
   assert.match(compareMarkup, /developerCompareInlineStatusMarkup\(comparison\)/);
   assert.match(compareMarkup, /jsonCompareLeftFontSize/);
   assert.match(compareMarkup, /jsonCompareRightFontSize/);
-  assert.match(compareMarkup, /json-compare-fullscreen/);
+  assert.match(compareMarkup, /devJsonCompareFullscreenButton\(dev\.compareFullscreen\)/);
   assert.doesNotMatch(compareMarkup, /dev-json-compare-backdrop/);
   const toolStart = app.indexOf('function developerTool()');
   const toolEnd = app.indexOf('function syncDeveloperFullscreenFrame()', toolStart);
