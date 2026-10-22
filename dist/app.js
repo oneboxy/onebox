@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.698';
+const APP_VERSION = '2.18.699';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8934,7 +8934,7 @@ function renderDeveloperJsonFormat() {
   const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + (dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '') + devJsonOutputFullscreenButton(dev.formatOutputFullscreen);
   const overlay = dev.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' : '';
   return '<div class="dev-workbench dev-json-format">' + overlay + '<div class="dev-editor-grid">' +
-    '<section class="dev-pane">' + devPaneHead(t('devInput'), inputActions) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '<div class="dev-json-input-error" data-dev-json-input-error aria-live="polite">' + (dev.formatStatus.startsWith(t('devInvalid')) ? devStatus(dev.formatStatus, true) : '') + '</div>' + '</section>' +
+    '<section class="dev-pane">' + devPaneHead(t('devInput'), inputActions) + developerJsonEditor('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}') + '</section>' +
     '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '">' + devOutputPaneHead('json-format', t('devOutput'), outputActions) + devHistoryContent('json-format') + '<div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '</div>' + '</section>' +
     '</div></div>';
 }
@@ -9110,7 +9110,7 @@ function syncDeveloperTimestampOutput() {
 }
 function developerLiveOutputMarkup(comparison = null) {
   const dev = state.devTools;
-  if (dev.active === 'json-format') return renderDeveloperJsonTree();
+  if (dev.active === 'json-format') return String(dev.formatInput || '').trim() && dev.formatStatus.startsWith(t('devInvalid')) ? devStatus(dev.formatStatus, true) : renderDeveloperJsonTree();
   if (dev.active === 'json-compare') return renderDeveloperCompareResult(comparison);
   if (dev.active === 'text-stats') return '<div class="dev-stat-grid">' + renderDeveloperStatsCards(dev.textOutput || developerTextStats(dev.textInput)) + '</div>';
   return renderDeveloperTimestampResult();
@@ -9165,11 +9165,6 @@ function renderDeveloperTimestampResult() {
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
-  const inputErrorHost = workspace.querySelector('[data-dev-json-input-error]');
-  if (inputErrorHost) {
-    const status = state.devTools.formatStatus || '';
-    inputErrorHost.innerHTML = status.startsWith(t('devInvalid')) ? devStatus(status, true) : '';
-  }
   const host = workspace.querySelector('[data-dev-live-output]');
   if (host) host.innerHTML = developerLiveOutputMarkup(comparison);
 }
