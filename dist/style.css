@@ -18820,3 +18820,20 @@ body.dev-pane-resizing * {
   padding-left: var(--dev-indent, 0px);
   white-space: pre;
 }
+
+/* 2.18.705: make nested JSON indentation clear with quiet depth guides. */
+.dev-json-format .dev-json-line-content {
+  position: relative;
+}
+.dev-json-format .dev-json-line-content::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--dev-indent, 0px);
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0 31px,
+    color-mix(in srgb, var(--muted) 24%, transparent) 31px 32px
+  );
+  content: "";
+  pointer-events: none;
+}
