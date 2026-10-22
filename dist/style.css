@@ -10024,7 +10024,7 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
 .dev-check { display: inline-flex; align-items: center; gap: 5px; margin: 0 0 9px 2px; color: var(--muted); font-size: 11px; user-select: none; }
 .dev-check input { width: 14px; height: 14px; accent-color: var(--primary); }
 .dev-json-tree { height: clamp(320px, calc(100dvh - 430px), 680px); min-height: 0; overflow: auto; padding: 12px 10px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); color: var(--ink); font: 13px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; tab-size: 2; }
-.dev-json-line { min-height: 22px; padding-left: calc(var(--dev-depth) * 18px); white-space: pre; }
+.dev-json-line { min-height: 22px; padding-left: var(--dev-indent, 0px); white-space: pre; }
 .dev-json-toggle, .dev-json-toggle-placeholder { display: inline-grid; width: 17px; height: 20px; margin-right: 2px; place-items: center; vertical-align: -3px; }
 .dev-json-toggle { padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--primary); cursor: pointer; font: inherit; font-size: 14px; line-height: 1; }
 .dev-json-toggle:hover, .dev-json-toggle:focus-visible { background: var(--soft); outline: 0; }
@@ -18495,7 +18495,7 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
   position:relative;
   box-sizing:border-box;
   min-height:1.65em;
-  padding-left:calc(48px + var(--dev-depth) * 18px);
+  padding-left:calc(48px + var(--dev-indent, 0px));
 }
 .dev-json-format .dev-json-line-number {
   position:absolute;
@@ -18657,13 +18657,14 @@ body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-s
 .dev-tools-page .dev-editor-grid[data-dev-pane-grid],
 .dev-tools-page .dev-compare-grid[data-dev-pane-grid],
 .dev-tools-page .dev-workbench.dev-timestamp[data-dev-pane-grid] {
-  grid-template-columns: minmax(0, var(--dev-left-share, 50fr)) 12px minmax(0, var(--dev-right-share, 50fr));
+  grid-template-columns: minmax(0, var(--dev-left-share, 50fr)) 10px minmax(0, var(--dev-right-share, 50fr));
+  column-gap: 3px;
 }
 .dev-pane-splitter {
   position: relative;
   z-index: 4;
   display: flex;
-  min-width: 12px;
+  min-width: 10px;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
@@ -18715,7 +18716,8 @@ body.dev-pane-resizing * {
   .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid {
     display: grid;
     grid-column: 1 / -1;
-    grid-template-columns: minmax(0, var(--dev-left-share, 50fr)) 12px minmax(0, var(--dev-right-share, 50fr));
+    grid-template-columns: minmax(0, var(--dev-left-share, 50fr)) 10px minmax(0, var(--dev-right-share, 50fr));
+  column-gap: 3px;
   }
   .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare > .dev-compare-grid > .dev-pane {
     display: flex;
@@ -18789,3 +18791,5 @@ body.dev-pane-resizing * {
 .dev-compare-editor-b .dev-line-number.is-diff {
   background: color-mix(in srgb, #31a77b 9%, transparent);
 }
+
+/* 2.18.702: keep formatted JSON outside the line-number gutter and slim the adjustable divider. */
