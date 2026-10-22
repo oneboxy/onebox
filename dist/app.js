@@ -8732,17 +8732,17 @@ function devJsonTreeNode(value, path = '$', label = '', depth = 0, trailingComma
   const comma = trailingComma ? ',' : '';
   if (!container) {
     const lineNumber = ++lineCounter.value;
-    return '<div class="dev-json-line dev-json-leaf" style="--dev-depth:' + depth + ';--dev-indent:' + (depth * 18) + 'px'"><span class="dev-json-line-number" aria-hidden="true">' + lineNumber + '</span>' + keyMarkup + devJsonPrimitive(value) + comma + '</div>';
+    return '<div class="dev-json-line dev-json-leaf" style="--dev-depth:' + depth + ';--dev-indent:' + (depth * 18) + 'px"><span class="dev-json-line-number" aria-hidden="true">' + lineNumber + '</span>' + keyMarkup + devJsonPrimitive(value) + comma + '</div>';
   }
   const open = Array.isArray(value) ? '[' : '{';
   const close = Array.isArray(value) ? ']' : '}';
   const lineNumber = ++lineCounter.value;
   const toggle = empty ? '<span class="dev-json-toggle-placeholder"></span>' : '<button class="dev-json-toggle" type="button" data-dev-json-toggle data-dev-json-path="' + encodeURIComponent(path) + '" aria-expanded="' + String(!collapsed) + '" aria-label="' + escapeHtml((collapsed ? t('devExpandAll') : t('devCollapseAll')) + ' ' + (label || '$')) + '">' + (collapsed ? '▸' : '▾') + '</button>';
-  const openLine = '<div class="dev-json-line ' + (collapsed ? 'is-collapsed' : '') + '" style="--dev-depth:' + depth + ';--dev-indent:' + (depth * 18) + 'px'"><span class="dev-json-line-number" aria-hidden="true">' + lineNumber + '</span>' + toggle + keyMarkup + '<span class="dev-json-bracket">' + (collapsed ? devJsonSummary(value) : open) + '</span>' + (collapsed ? comma : '') + '</div>';
+  const openLine = '<div class="dev-json-line ' + (collapsed ? 'is-collapsed' : '') + '" style="--dev-depth:' + depth + ';--dev-indent:' + (depth * 18) + 'px"><span class="dev-json-line-number" aria-hidden="true">' + lineNumber + '</span>' + toggle + keyMarkup + '<span class="dev-json-bracket">' + (collapsed ? devJsonSummary(value) : open) + '</span>' + (collapsed ? comma : '') + '</div>';
   if (empty || collapsed) return '<div class="dev-json-node ' + (collapsed ? 'is-collapsed' : '') + '">' + openLine + (empty ? '<span class="dev-json-close-inline">' + close + (comma ? ',' : '') + '</span>' : '') + '</div>';
   const children = entries.map(([key, child], index) => devJsonTreeNode(child, path + devJsonPathSegment(key, Array.isArray(value)), Array.isArray(value) ? '' : key, depth + 1, index < entries.length - 1, lineCounter)).join('');
   const closeLineNumber = ++lineCounter.value;
-  return '<div class="dev-json-node">' + openLine + '<div class="dev-json-children">' + children + '</div><div class="dev-json-line dev-json-close" style="--dev-depth:' + depth + ';--dev-indent:' + (depth * 18) + 'px'"><span class="dev-json-line-number" aria-hidden="true">' + closeLineNumber + '</span><span class="dev-json-toggle-placeholder"></span><span class="dev-json-bracket">' + close + comma + '</span></div></div>';
+  return '<div class="dev-json-node">' + openLine + '<div class="dev-json-children">' + children + '</div><div class="dev-json-line dev-json-close" style="--dev-depth:' + depth + ';--dev-indent:' + (depth * 18) + 'px"><span class="dev-json-line-number" aria-hidden="true">' + closeLineNumber + '</span><span class="dev-json-toggle-placeholder"></span><span class="dev-json-bracket">' + close + comma + '</span></div></div>';
 }
 function renderDeveloperJsonTree() {
   if (!state.devTools.formatOutput) return '<div class="dev-json-empty">' + (state.language === 'en' ? 'Formatted JSON will appear here' : '格式化结果会显示在这里') + '</div>';
