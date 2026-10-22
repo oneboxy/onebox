@@ -64,8 +64,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.698/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.698/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.699/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.699/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -73,7 +73,7 @@ test('JSON editor helper passes JavaScript syntax checking', () => {
   assert.doesNotThrow(() => new vm.Script(helperSource, { filename: 'dev-json-editor.js' }));
 });
 
-test('JSON formatter shows parse errors by the input and keeps successful output clean', () => {
+test('JSON formatter shows parse errors in the output pane and keeps successful output clean', () => {
   const app = read('dist/app.js');
   const inputStart = app.indexOf('function renderDeveloperJsonFormat()');
   const inputEnd = app.indexOf('function renderDeveloperCompare()', inputStart);
@@ -85,10 +85,8 @@ test('JSON formatter shows parse errors by the input and keeps successful output
   const refreshEnd = app.indexOf('function updateDeveloperLiveState(', refreshStart);
   const refreshMarkup = app.slice(refreshStart, refreshEnd);
 
-  assert.match(inputMarkup, /data-dev-json-input-error/);
-  assert.match(inputMarkup, /devStatus\(dev\.formatStatus, true\)/);
-  assert.match(outputMarkup, /if \(dev\.active === 'json-format'\) return renderDeveloperJsonTree\(\);/);
-  assert.doesNotMatch(outputMarkup, /devStatus\(dev\.formatStatus/);
-  assert.match(refreshMarkup, /data-dev-json-input-error/);
-  assert.match(refreshMarkup, /status\.startsWith\(t\('devInvalid'\)\)/);
+  assert.doesNotMatch(inputMarkup, /data-dev-json-input-error|devStatus\(dev\.formatStatus/);
+  assert.match(outputMarkup, /if \(dev\.active === 'json-format'\) return String\(dev\.formatInput \|\| ''\)\.trim\(\) && dev\.formatStatus\.startsWith\(t\('devInvalid'\)\) \? devStatus\(dev\.formatStatus, true\) : renderDeveloperJsonTree\(\);/);
+  assert.doesNotMatch(outputMarkup, /devStatus\(dev\.formatStatus, dev\.formatStatus\.startsWith/);
+  assert.doesNotMatch(refreshMarkup, /data-dev-json-input-error/);
 });
