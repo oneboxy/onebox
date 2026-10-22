@@ -66,8 +66,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.700/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.700/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.701/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.701/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
