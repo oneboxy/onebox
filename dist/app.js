@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.708';
+const APP_VERSION = '2.18.709';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9050,14 +9050,22 @@ function developerCompareResult() {
     changes.forEach((item) => {
       const leftRange = developerJsonFindPathRange(leftRanges, item.path);
       const rightRange = developerJsonFindPathRange(rightRanges, item.path);
-      item.leftLine = leftRange?.line || 1;
-      item.rightLine = rightRange?.line || 1;
-      [leftRange, rightRange].forEach((range, sideIndex) => {
-        if (!range) return;
-        const side = sideIndex === 0 ? 'left' : 'right';
-        ranges[side].push(range);
-        for (let line = range.line; line <= range.endLine; line += 1) lines[side].add(line);
-      });
+      const leftExact = Boolean(leftRange && !leftRange.fallback);
+      const rightExact = Boolean(rightRange && !rightRange.fallback);
+      item.leftLine = leftExact ? leftRange.line : rightExact ? rightRange.line : leftRange?.line || rightRange?.line || 1;
+      item.rightLine = rightExact ? rightRange.line : leftExact ? leftRange.line : rightRange?.line || leftRange?.line || 1;
+      const markSide = (range, side, counterpartRange, counterpartLine) => {
+        if (range && !range.fallback) {
+          ranges[side].push(range);
+          for (let line = range.line; line <= range.endLine; line += 1) lines[side].add(line);
+        } else if (counterpartRange && !counterpartRange.fallback) {
+          lines[side].add(counterpartLine);
+        } else if (range) {
+          lines[side].add(range.line);
+        }
+      };
+      markSide(leftRange, 'left', rightRange, item.rightLine);
+      markSide(rightRange, 'right', leftRange, item.leftLine);
     });
     const output = changes.length
       ? changes.map((item) => item.path + '  A:L' + item.leftLine + ' ' + item.before + '  →  B:L' + item.rightLine + ' ' + item.after).join('\n')
@@ -9154,7 +9162,7 @@ function developerJsonFindPathRange(pathRanges, path) {
     if (found) {
       if (candidate === path) return found;
       const point = found.closeStart ?? Math.max(found.start, found.end - 1);
-      return { ...found, start: point, end: point + 1, line: found.closeLine || found.endLine, endLine: found.closeLine || found.endLine };
+      return { ...found, start: point, end: point + 1, line: found.closeLine || found.endLine, endLine: found.closeLine || found.endLine, fallback: true };
     }
     const arrayStart = candidate.lastIndexOf('[');
     if (candidate.endsWith(']') && arrayStart >= 0 && /^\d+$/.test(candidate.slice(arrayStart + 1, -1))) candidate = candidate.slice(0, arrayStart);
@@ -9166,7 +9174,7 @@ function developerJsonFindPathRange(pathRanges, path) {
   const root = pathRanges.get('$');
   if (!root) return null;
   const point = root.closeStart ?? Math.max(root.start, root.end - 1);
-  return { ...root, start: point, end: point + 1, line: root.closeLine || root.endLine, endLine: root.closeLine || root.endLine };
+  return { ...root, start: point, end: point + 1, line: root.closeLine || root.endLine, endLine: root.closeLine || root.endLine, fallback: true };
 }
 
 function syncDeveloperTimestampOutput() {
