@@ -18793,3 +18793,30 @@ body.dev-pane-resizing * {
 }
 
 /* 2.18.702: keep formatted JSON outside the line-number gutter and slim the adjustable divider. */
+
+/* 2.18.703: isolate JSON line numbers from the formatted text column. */
+.dev-json-format .dev-json-line {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: start;
+  padding-left: 0;
+  white-space: normal;
+}
+.dev-json-format .dev-json-line-number {
+  position: sticky;
+  top: auto;
+  left: 0;
+  z-index: 1;
+  display: block;
+  box-sizing: border-box;
+  width: auto;
+  align-self: start;
+  background: var(--panel);
+}
+.dev-json-format .dev-json-line-content {
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  padding-left: var(--dev-indent, 0px);
+  white-space: pre;
+}
