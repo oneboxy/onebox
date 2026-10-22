@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.706';
+const APP_VERSION = '2.18.707';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8999,15 +8999,21 @@ function renderDeveloperJsonFormat() {
     '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '">' + devOutputPaneHead('json-format', t('devOutput'), outputActions, developerJsonFormattedLineCountMarkup()) + devHistoryContent('json-format') + '<div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '</div>' + '</section>' +
     '</div></div>';
 }
+function developerCompareInlineStatusMarkup(comparison) {
+  const status = comparison.status || '';
+  const isError = status.startsWith(t('devInvalid'));
+  const classes = isError ? ' is-error' : comparison.changes.length ? ' is-different' : status ? ' is-same' : '';
+  return '<div class="dev-compare-inline-status' + classes + '" data-dev-compare-status role="status" aria-live="polite"' + (status ? '' : ' hidden') + '>' + escapeHtml(status) + '</div>';
+}
 function renderDeveloperCompare() {
   const dev = state.devTools;
   const comparison = developerCompareResult();
   dev.compareOutput = comparison.output;
   dev.compareStatus = comparison.status;
-  return '<div class="dev-workbench dev-json-compare"><div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
-    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' + devPaneSplitter('compare') +
+  return '<div class="dev-workbench dev-json-compare">' + developerCompareInlineStatusMarkup(comparison) + '<div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
+    '<section class="dev-pane">' + devPaneHead(t('devJsonA'), devHistoryToggle('json-compare') + devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'))) + developerJsonEditor('compareLeft', dev.compareLeft, '{ "version": 1 }', comparison) + '</section>' + devPaneSplitter('compare') +
     '<section class="dev-pane">' + devPaneHead(t('devJsonB'), devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear'))) + developerJsonEditor('compareRight', dev.compareRight, '{ "version": 2 }', comparison) + '</section>' +
-    '</div><section class="dev-pane dev-compare-result">' + devOutputPaneHead('json-compare', t('devOutput'), devActionButton('dev-copy-output', t('devCopy'))) + devHistoryContent('json-compare') + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup(comparison) + '</div></section></div>';
+    '</div>' + devHistoryContent('json-compare') + '</div>';
 }
 
 function renderDeveloperStatsCards(stats) {
@@ -9231,6 +9237,16 @@ function refreshDeveloperLiveOutput(comparison = null) {
     const count = developerJsonFormattedLineCount();
     countBadge.hidden = !count;
     countBadge.textContent = count ? developerJsonFormattedLineCountLabel(count) : '';
+  }
+  const compareStatus = workspace.querySelector('[data-dev-compare-status]');
+  if (compareStatus) {
+    const result = comparison || developerCompareResult();
+    const isError = result.status.startsWith(t('devInvalid'));
+    compareStatus.textContent = result.status;
+    compareStatus.hidden = !result.status;
+    compareStatus.classList.toggle('is-error', isError);
+    compareStatus.classList.toggle('is-different', !isError && result.changes.length > 0);
+    compareStatus.classList.toggle('is-same', Boolean(result.status) && !isError && result.changes.length === 0);
   }
   const host = workspace.querySelector('[data-dev-live-output]');
   if (host) host.innerHTML = developerLiveOutputMarkup(comparison);
