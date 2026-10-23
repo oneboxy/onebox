@@ -64,40 +64,36 @@
       .dev-timestamp-city-card.is-dragging { z-index: 3; box-shadow: 0 8px 24px #17255428; }
       .dev-timestamp-city-form-row.dev-timestamp-country-row.is-modal {
         position: fixed !important; inset: 0 !important; z-index: 9999 !important; display: grid !important;
-        place-items: center; padding: 18px !important; margin: 0 !important;
-        background: rgb(15 23 42 / .34) !important; backdrop-filter: blur(4px);
+        place-items: center; box-sizing: border-box; padding: calc(var(--app-header-height, 56px) + 12px) 16px 20px !important;
+        margin: 0 !important; background: rgb(17 19 26 / .28) !important; backdrop-filter: blur(2px);
       }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form {
-        box-sizing: border-box; display: grid !important; grid-template-columns: 1fr 1fr; gap: 12px;
-        width: min(100%, 420px); padding: 22px; border: 1px solid var(--line, #dce2ee);
-        border-radius: 16px; background: var(--panel, #fff); color: var(--ink, #172033);
-        box-shadow: 0 18px 56px #0f172a30;
+        box-sizing: border-box; display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 7px;
+        width: min(100%, 400px); padding: 4px; border: 1px solid var(--line);
+        border-radius: 10px; background: color-mix(in srgb, var(--soft) 10%, var(--panel));
+        color: var(--ink); box-shadow: var(--shadow);
       }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form > strong {
-        grid-column: 1 / -1; margin: 0 0 2px; font-size: 17px; font-weight: 650; color: var(--ink, #172033);
+        grid-column: 1 / -1; margin: 0; padding: 8px 9px; border-bottom: 1px solid var(--line);
+        color: var(--ink); font-size: 12px; font-weight: 700;
       }
-      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-country-select {
-        grid-column: 1 / -1; width: 100%; min-width: 0; height: 42px; padding: 0 12px;
-        border: 1px solid var(--line, #dce2ee); border-radius: 9px; background: var(--panel, #fff);
-        color: var(--ink, #172033); font: inherit;
-      }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-country-select,
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form input {
-        box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; padding: 0 12px;
-        border: 1px solid var(--line, #dce2ee); border-radius: 9px; background: var(--panel, #fff);
-        color: var(--ink, #172033);
+        box-sizing: border-box; width: 100%; min-width: 0; min-height: 36px; padding: 6px 9px;
+        border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+        color: var(--ink); font: inherit; font-size: 12px;
       }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-country-select { grid-column: 1 / -1; }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button {
-        min-height: 40px; border-radius: 9px; cursor: pointer;
+        min-height: 30px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px;
+        background: var(--panel); color: var(--ink); font-size: 10px; cursor: pointer;
       }
-      .dev-timestamp-city-form-row.is-modal [data-dev-action="timestamp-city-add"] {
-        border: 1px solid var(--accent, #465fff); background: var(--accent, #465fff); color: #fff;
-      }
-      .dev-timestamp-city-form-row.is-modal [data-dev-action="timestamp-city-add-cancel"] {
-        border: 1px solid var(--line, #dce2ee); background: transparent; color: var(--ink, #172033);
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button:hover {
+        background: var(--soft); border-color: color-mix(in srgb, var(--primary) 22%, var(--line));
       }
       @media (max-width: 480px) {
-        .dev-timestamp-city-form-row.is-modal { padding: 14px !important; }
-        .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form { padding: 18px; gap: 10px; }
+        .dev-timestamp-city-form-row.is-modal { padding: calc(var(--app-header-height, 56px) + 8px) 12px 12px !important; }
+        .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form { width: 100%; }
       }
       @media (max-width: 720px) {
         .dev-timestamp-country-list { overflow-x: auto !important; }
