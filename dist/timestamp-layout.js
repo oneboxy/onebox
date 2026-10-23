@@ -223,6 +223,10 @@
       const countryName = header?.querySelector('.dev-timestamp-country-name')?.textContent?.trim() || '';
       const options = cityOptionsFor(matrix, countryKey, countryName);
       const query = nameInput.value.trim();
+      if (!query) {
+        closeResults();
+        return;
+      }
       const matches = options.map((option) => ({ option, score: Math.max(...option.aliases.map((alias) => fuzzyScore(query, alias))) }))
         .filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
       results.replaceChildren();
