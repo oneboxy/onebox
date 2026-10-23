@@ -86,8 +86,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.717/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.717/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.718/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.718/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -106,7 +106,7 @@ test('timestamp tools use a full-width responsive layout with compact city cards
   assert.ok(outputStart >= 0 && outputEnd > outputStart);
   const inputMarkup = app.slice(inputStart, inputEnd);
   const outputMarkup = app.slice(outputStart, outputEnd);
-  assert.match(app, /const APP_VERSION = '2\\.18\\.718';/);
+  assert.match(app, /const APP_VERSION = '2\.18\.718';/);
   assert.doesNotMatch(inputMarkup, /data-dev-pane-grid|devPaneSplitter/);
   assert.match(inputMarkup, /dev-timestamp-card/);
   assert.match(outputMarkup, /dev-timestamp-city-grid/);
