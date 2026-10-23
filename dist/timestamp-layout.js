@@ -39,6 +39,8 @@
       .dev-timestamp-city-cell.is-country-last-city.is-country-dragging { box-shadow: inset 2px 0 var(--accent), inset -2px 0 var(--accent), inset 0 -2px var(--accent); }
       .dev-timestamp-country-name { flex: 0 0 auto; }
       .dev-timestamp-country-add { flex: 0 0 auto; }
+      .dev-timestamp-expand-cities { flex: 0 0 23px; margin-left: auto; }
+      .dev-timestamp-expand-cities.is-no-extra-cities { opacity: .48; cursor: default; }
       .dev-timestamp-city-row { border: 0 !important; border-bottom: 0 !important; min-height: 0 !important; }
       .dev-timestamp-city-cell { box-sizing: border-box; min-width: 0; padding: 3px 10px 5px !important; border-left: 1px solid var(--line, #dce2ee); border-right: 1px solid var(--line, #dce2ee); border-bottom: 1px solid var(--line, #dce2ee); background: var(--panel, #fff); }
       .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 0 !important; }
@@ -106,6 +108,16 @@
       const headers = [...matrix.querySelectorAll('.dev-timestamp-country-header-cell[data-dev-country-key]')];
       for (const header of headers) {
         const key = header.dataset.devCountryKey;
+        if (!header.querySelector('.dev-timestamp-expand-cities')) {
+          const expandButton = document.createElement('button');
+          expandButton.type = 'button';
+          expandButton.className = 'dev-timestamp-icon-button dev-timestamp-expand-cities is-no-extra-cities';
+          expandButton.disabled = true;
+          expandButton.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'All cities are visible' : '所有城市均已显示');
+          expandButton.title = document.documentElement.lang === 'en' ? 'All cities are visible' : '所有城市均已显示';
+          expandButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>';
+          header.append(expandButton);
+        }
         const cityCells = [...matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(key) + '"]')];
         cityCells.forEach((cell) => cell.classList.remove('is-country-last-city'));
         const cityCellsWithCards = cityCells.filter((cell) => {
