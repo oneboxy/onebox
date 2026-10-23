@@ -86,18 +86,18 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.720/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.720/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.721/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.721/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
 
-test('timestamp tools fit a page with inline controls and equal flag-labeled country city cards', () => {
+test('timestamp conversion tabs are the parent of clearly grouped input, output, and country rows', () => {
   const app = read('dist/app.js');
   const css = read('dist/style.css');
   const html = read('dist/index.html');
   const sw = read('dist/sw.js');
-  const timestampStyles = css.slice(css.lastIndexOf('/* 2.18.720: fit timestamp conversions'));
+  const timestampStyles = css.slice(css.lastIndexOf('/* 2.18.721: make conversion tabs'));
   const inputStart = app.indexOf('function renderDeveloperTimestamp()');
   const inputEnd = app.indexOf('let lastDeveloperCompareResult', inputStart);
   const outputStart = app.indexOf('function renderDeveloperTimestampResult()');
@@ -106,8 +106,9 @@ test('timestamp tools fit a page with inline controls and equal flag-labeled cou
   assert.ok(outputStart >= 0 && outputEnd > outputStart);
   const inputMarkup = app.slice(inputStart, inputEnd);
   const outputMarkup = app.slice(outputStart, outputEnd);
-  assert.match(app, /const APP_VERSION = '2\.18\.720';/);
-  assert.match(inputMarkup, /dev-timestamp-controls/);
+  assert.match(app, /const APP_VERSION = '2\.18\.721';/);
+  assert.match(inputMarkup, /dev-timestamp-mode-bar[^]*dev-timestamp-content/);
+  assert.match(inputMarkup, /dev-timestamp-content[^]*devPaneHead\(t\('devInput'\)\)[^]*devOutputPaneHead\('timestamp', t\('devOutput'\)/);
   assert.match(inputMarkup, /timestampUnit[^]*<\/select>' \+ inputActions/);
   assert.match(inputMarkup, /devActionButton\('timestamp-now'[^]*devActionButton\('timestamp-clear'/);
   assert.doesNotMatch(inputMarkup, /自动识别常见的秒或毫秒时间戳/);
@@ -115,13 +116,15 @@ test('timestamp tools fit a page with inline controls and equal flag-labeled cou
   assert.match(outputMarkup, /countryFlags\[country\]/);
   assert.match(outputMarkup, /const flagUs = '<svg viewBox="0 0 36 24"/);
   assert.doesNotMatch(outputMarkup, /rows\.length \+.*cities|个城市/);
-  assert.match(timestampStyles, /\.dev-timestamp-controls\s*\{[^}]*grid-template-columns:\s*max-content/s);
-  assert.match(timestampStyles, /\.dev-timestamp-standard-grid\s*\{[^}]*repeat\(6,/s);
+  assert.match(timestampStyles, /\.dev-timestamp-mode-bar\s*\{[^}]*border-bottom/s);
+  assert.match(timestampStyles, /\.dev-timestamp-country-list\s*\{[^}]*gap:\s*5px/s);
+  assert.match(timestampStyles, /\.dev-timestamp-country-row\s*\{[^}]*border-radius:\s*9px/s);
+  assert.match(timestampStyles, /\.dev-timestamp-country-heading\s*\{[^}]*border-right/s);
   assert.match(timestampStyles, /\.dev-timestamp-city-grid\s*\{[^}]*repeat\(6,/s);
-  assert.match(timestampStyles, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*50px/s);
-  assert.match(html, /app\.js\?v=2\.18\.720/);
-  assert.match(sw, /app\.js\?v=2\.18\.720/);
-  assert.match(sw, /onebox-v651/);
+  assert.match(timestampStyles, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*64px/s);
+  assert.match(html, /app\.js\?v=2\.18\.721/);
+  assert.match(sw, /app\.js\?v=2\.18\.721/);
+  assert.match(sw, /onebox-v652/);
 });
 
 test('JSON editor helper passes JavaScript syntax checking', () => {

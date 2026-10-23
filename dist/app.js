@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.720';
+const APP_VERSION = '2.18.721';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9179,7 +9179,7 @@ function renderDeveloperTimestamp() {
     ? '<label class="dev-timestamp-field"><span>' + (english ? 'Timestamp' : '时间戳') + '</span><div class="dev-timestamp-input-row"><input class="dev-plain-input" data-dev-field="timestampValue" inputmode="decimal" autocomplete="off" value="' + escapeHtml(dev.timestampValue) + '" placeholder="' + (english ? 'e.g. 1726905600' : '例如 1726905600') + '"><select class="dev-plain-input" data-dev-field="timestampUnit" aria-label="' + (english ? 'Timestamp unit' : '时间戳单位') + '"><option value="auto" ' + (dev.timestampUnit === 'auto' ? 'selected' : '') + '>' + (english ? 'Auto detect' : '自动识别') + '</option><option value="s" ' + (dev.timestampUnit === 's' ? 'selected' : '') + '>' + t('devSeconds') + '</option><option value="ms" ' + (dev.timestampUnit === 'ms' ? 'selected' : '') + '>' + t('devMilliseconds') + '</option></select>' + inputActions + '</div></label>'
     : '<label class="dev-timestamp-field"><span>' + (english ? 'Date and time · device local time' : '日期和时间 · 设备本地时区') + '</span><div class="dev-timestamp-input-row dev-timestamp-date-row"><input class="dev-plain-input dev-date-input" data-dev-field="timestampDate" type="datetime-local" step="1" value="' + escapeHtml(dev.timestampDate) + '">' + inputActions + '</div></label>';
   const outputActions = devActionButton('timestamp-save', t('devSaveRecord')) + devActionButton('dev-copy-output', t('devCopy'));
-  return '<div class="dev-workbench dev-timestamp"><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput')) + '<div class="dev-timestamp-controls">' + timestampMode + input + '</div></section><section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
+  return '<div class="dev-workbench dev-timestamp"><div class="dev-timestamp-mode-bar">' + timestampMode + '</div><div class="dev-timestamp-content"><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput')) + input + '</section><section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div></div>';
 }
 let lastDeveloperCompareResult = null;
 function developerCompareResult() {
