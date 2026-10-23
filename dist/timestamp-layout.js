@@ -17,35 +17,56 @@
       .dev-timestamp-mode-bar { padding-inline: 12px; }
       .dev-timestamp-mode button.active::after { bottom: -1px !important; }
       .dev-timestamp-country-header-row, .dev-timestamp-city-row { column-gap: 10px !important; }
-      .dev-timestamp-country-header-row { padding: 0 0 8px !important; }
+      .dev-timestamp-country-header-row { padding: 0 !important; }
       .dev-timestamp-country-header-cell {
         box-sizing: border-box; min-width: 0; border: 1px solid var(--line, #dce2ee) !important;
-        border-radius: 10px !important; background: var(--panel, #fff) !important;
+        border-bottom: 0 !important; border-radius: 10px 10px 0 0 !important; background: var(--panel, #fff) !important;
         padding: 0 10px !important; gap: 7px; transition: box-shadow .18s ease, transform .18s ease;
       }
+      .dev-timestamp-country-header-cell.is-empty-country { border-bottom: 1px solid var(--line, #dce2ee) !important; border-radius: 10px !important; }
       .dev-timestamp-country-header-cell.is-dragging { z-index: 3; box-shadow: 0 10px 26px #17255425; transform: scale(1.025); }
       .dev-timestamp-country-name { flex: 0 0 auto; }
       .dev-timestamp-country-add { flex: 0 0 auto; }
       .dev-timestamp-city-row { border: 0 !important; min-height: 0 !important; }
-      .dev-timestamp-city-cell { box-sizing: border-box; min-width: 0; padding: 3px 10px 5px !important; border-bottom: 1px solid var(--line, #dce2ee); }
-      .dev-timestamp-city-card { position: relative; min-height: 56px !important; padding: 7px 54px 7px 0 !important; }
-      .dev-timestamp-city-card-head { min-width: 0; display: flex; align-items: baseline; gap: 7px; padding-right: 0; }
-      .dev-timestamp-city-name { flex: 0 0 auto; font-size: 13px !important; }
+      .dev-timestamp-city-cell { box-sizing: border-box; min-width: 0; padding: 3px 10px 5px !important; border-left: 1px solid var(--line, #dce2ee); border-right: 1px solid var(--line, #dce2ee); border-bottom: 1px solid var(--line, #dce2ee); background: var(--panel, #fff); }
+      .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 1px solid var(--line, #dce2ee); }
+      .dev-timestamp-city-cell.is-country-last-city { border-radius: 0 0 10px 10px; }
+      .dev-timestamp-city-cell.is-empty { border: 0 !important; background: transparent !important; }
+      .dev-timestamp-city-card { position: relative; min-height: 56px !important; padding: 7px 0 !important; }
+      .dev-timestamp-city-card-head { min-width: 0; display: grid !important; grid-template-columns: max-content minmax(0, 1fr) 50px; align-items: center !important; gap: 7px; }
+      .dev-timestamp-city-name { flex: 0 0 auto; font-size: 13px !important; white-space: nowrap; }
       .dev-timestamp-city-zone.is-inline { display: block !important; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted, #697386); font-size: 10px !important; }
       .dev-timestamp-city-zone.is-inline code { display: inline; font-size: inherit !important; }
-      .dev-timestamp-city-time { display: block; margin-top: 4px; font-size: 12px !important; }
-      .dev-timestamp-city-copy { right: 0 !important; top: 4px !important; }
-      .dev-timestamp-city-delete { position: absolute; top: 4px; right: 28px; z-index: 2; width: 22px !important; height: 22px !important; padding: 3px !important; color: var(--muted, #697386) !important; opacity: .72; }
+      .dev-timestamp-city-actions { display: flex; align-items: center; justify-content: flex-end; gap: 3px; min-width: 0; }
+      .dev-timestamp-city-actions .dev-timestamp-city-copy,
+      .dev-timestamp-city-actions .dev-timestamp-city-delete { position: static !important; inset: auto !important; flex: 0 0 22px; width: 22px !important; height: 22px !important; min-width: 22px; padding: 3px !important; opacity: .78; }
+      .dev-timestamp-city-actions .dev-timestamp-city-delete { color: var(--muted, #697386) !important; }
       .dev-timestamp-city-delete:hover, .dev-timestamp-city-delete:focus-visible { color: #dc2626 !important; opacity: 1; }
       .dev-timestamp-city-delete svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
       .dev-timestamp-city-cell.is-deleted { visibility: hidden !important; pointer-events: none !important; }
       .dev-timestamp-city-card.is-dragging { z-index: 3; box-shadow: 0 8px 24px #17255428; }
-      .dev-timestamp-city-form-row.dev-timestamp-country-row { padding: 10px 12px !important; }
+      .dev-timestamp-city-form-row.dev-timestamp-country-row.is-modal {
+        position: fixed !important; inset: 0 !important; z-index: 9999 !important; display: grid !important;
+        align-content: center; justify-items: center; gap: 12px; padding: 24px !important;
+        margin: 0 !important; background: rgb(15 23 42 / .42) !important; backdrop-filter: blur(3px);
+      }
+      .dev-timestamp-city-form-row.is-modal > strong { display: block; width: min(100%, 440px); padding: 0 2px; color: #fff; font-size: 16px; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form {
+        box-sizing: border-box; display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px;
+        width: min(100%, 440px); padding: 18px; border: 1px solid var(--line, #dce2ee);
+        border-radius: 14px; background: var(--panel, #fff); box-shadow: 0 20px 60px #0f172a35;
+      }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form input { min-width: 0; width: 100%; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button { min-height: 40px; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button:first-of-type { grid-column: 1; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button:last-of-type { grid-column: 2; }
       @media (max-width: 720px) {
         .dev-timestamp-country-list { overflow-x: auto !important; }
         .dev-timestamp-country-matrix { min-width: max(100%, calc(var(--dev-timestamp-country-count, 1) * 210px)) !important; }
         .dev-timestamp-country-header-row, .dev-timestamp-city-row { column-gap: 8px !important; }
         .dev-timestamp-city-cell { padding-inline: 8px !important; }
+        .dev-timestamp-city-card-head { grid-template-columns: max-content minmax(0, 1fr) 48px; gap: 5px; }
+        .dev-timestamp-city-actions { gap: 2px; }
         .dev-timestamp-city-card-head { gap: 5px; }
         .dev-timestamp-city-zone.is-inline { font-size: 9px !important; }
       }
@@ -57,11 +78,30 @@
     document.querySelectorAll('.dev-timestamp-country-list').forEach((list) => {
       const matrix = list.querySelector('.dev-timestamp-country-matrix');
       if (!matrix) return;
-      list.querySelector('.dev-timestamp-city-form-row')?.classList.add('dev-timestamp-country-row');
+      const addForm = list.querySelector('.dev-timestamp-city-form-row');
+      if (addForm) {
+        addForm.classList.add('dev-timestamp-country-row');
+        addForm.setAttribute('role', 'dialog');
+        addForm.setAttribute('aria-modal', 'true');
+        addForm.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'Add a city' : '添加城市');
+        if (!addForm.classList.contains('is-modal')) {
+          addForm.classList.add('is-modal');
+          document.body.append(addForm);
+          requestAnimationFrame(() => addForm.querySelector('.dev-timestamp-city-name-input')?.focus());
+        }
+      }
+      matrix.querySelector('.dev-timestamp-city-row')?.classList.add('is-first-city-row');
       const headers = [...matrix.querySelectorAll('.dev-timestamp-country-header-cell[data-dev-country-key]')];
       for (const header of headers) {
         const key = header.dataset.devCountryKey;
         const cityCells = [...matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(key) + '"]')];
+        cityCells.forEach((cell) => cell.classList.remove('is-country-last-city'));
+        const cityCellsWithCards = cityCells.filter((cell) => {
+          const card = cell.querySelector('.dev-timestamp-city-card[data-dev-city-id]');
+          return card && !readHidden().has(card.dataset.devCityId);
+        });
+        header.classList.toggle('is-empty-country', cityCellsWithCards.length === 0);
+        cityCellsWithCards[cityCellsWithCards.length - 1]?.classList.add('is-country-last-city');
         const firstAdd = cityCells.map((cell) => cell.querySelector('.dev-timestamp-city-add-inline')).find(Boolean);
         if (firstAdd) {
           firstAdd.classList.add('dev-timestamp-country-add');
@@ -88,6 +128,14 @@
             zone.replaceChildren(document.createTextNode(value));
             if (cityName && cityName.nextElementSibling !== zone) cityName.insertAdjacentElement('afterend', zone);
           }
+          let actions = head?.querySelector('.dev-timestamp-city-actions');
+          if (head && !actions) {
+            actions = document.createElement('span');
+            actions.className = 'dev-timestamp-city-actions';
+            head.append(actions);
+          }
+          const copyButton = card.querySelector('.dev-timestamp-city-copy');
+          if (copyButton && actions && copyButton.parentElement !== actions) actions.append(copyButton);
           if (!card.querySelector('.dev-timestamp-city-delete')) {
             const button = document.createElement('button');
             button.type = 'button';
@@ -97,12 +145,30 @@
             button.setAttribute('aria-label', (document.documentElement.lang === 'en' ? 'Delete ' : '删除城市 ') + (cityName?.textContent || ''));
             button.title = document.documentElement.lang === 'en' ? 'Delete city' : '删除城市';
             button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-.8 13H6.8L6 7m4 4v5m4-5v5"/></svg>';
-            head?.append(button);
+            actions?.append(button);
           }
         });
       }
     });
   };
+  document.addEventListener('click', (event) => {
+    const modal = event.target.closest?.('.dev-timestamp-city-form-row.is-modal');
+    if (!modal) return;
+    if (event.target === modal) {
+      modal.querySelector('[data-dev-action="timestamp-city-add-cancel"]')?.click();
+      return;
+    }
+    const action = event.target.closest?.('[data-dev-action="timestamp-city-add"], [data-dev-action="timestamp-city-add-cancel"]');
+    if (!action) return;
+    const list = document.querySelector('.dev-timestamp-country-list');
+    if (!list) return;
+    modal.classList.remove('is-modal');
+    list.append(modal);
+  }, true);
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    document.querySelector('.dev-timestamp-city-form-row.is-modal [data-dev-action="timestamp-city-add-cancel"]')?.click();
+  });
   document.addEventListener('click', (event) => {
     const button = event.target.closest?.('.dev-timestamp-city-delete[data-city-id]');
     if (!button) return;
