@@ -84,6 +84,23 @@
         color: var(--ink); font: inherit; font-size: 12px;
       }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-country-select { grid-column: 1 / -1; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-search-wrap { position: relative; grid-column: 1 / -1; min-width: 0; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-search-wrap > input { width: 100%; }
+      .dev-timestamp-city-search-results {
+        position: absolute; inset: calc(100% + 4px) 0 auto; z-index: 10; max-height: min(260px, 42vh); overflow: auto;
+        padding: 4px; border: 1px solid var(--line); border-radius: 9px;
+        background: var(--panel); box-shadow: var(--shadow);
+      }
+      .dev-timestamp-city-search-results[hidden] { display: none !important; }
+      .dev-timestamp-city-search-option {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
+        min-height: 34px; padding: 6px 8px; border: 0 !important; border-radius: 6px !important;
+        background: transparent !important; color: var(--ink); text-align: left; cursor: pointer;
+      }
+      .dev-timestamp-city-search-option:hover,
+      .dev-timestamp-city-search-option:focus-visible { background: var(--soft) !important; outline: none; }
+      .dev-timestamp-city-search-option code { color: var(--muted); font-size: 10px; }
+      .dev-timestamp-city-search-empty { padding: 10px 8px; color: var(--muted); font-size: 11px; }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button {
         min-height: 30px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px;
         background: var(--panel); color: var(--ink); font-size: 10px; cursor: pointer;
@@ -135,6 +152,125 @@
     const panel = modal.querySelector('.dev-timestamp-city-form');
     ['flex', 'width', 'max-height', 'overflow-y'].forEach((property) => panel?.style.removeProperty(property));
   };
+  const EXTRA_CITY_OPTIONS = [
+    ['美国', [['西雅图', 'Seattle', 'America/Los_Angeles'], ['旧金山', 'San Francisco', 'America/Los_Angeles'], ['拉斯维加斯', 'Las Vegas', 'America/Los_Angeles'], ['凤凰城', 'Phoenix', 'America/Phoenix'], ['休斯敦', 'Houston', 'America/Chicago'], ['迈阿密', 'Miami', 'America/New_York'], ['波士顿', 'Boston', 'America/New_York']]],
+    ['日本', [['京都', 'Kyoto', 'Asia/Tokyo'], ['札幌', 'Sapporo', 'Asia/Tokyo'], ['福冈', 'Fukuoka', 'Asia/Tokyo']]],
+    ['英国', [['曼彻斯特', 'Manchester', 'Europe/London'], ['爱丁堡', 'Edinburgh', 'Europe/London'], ['伯明翰', 'Birmingham', 'Europe/London']]],
+    ['德国', [['慕尼黑', 'Munich', 'Europe/Berlin'], ['法兰克福', 'Frankfurt', 'Europe/Berlin'], ['汉堡', 'Hamburg', 'Europe/Berlin']]],
+    ['加拿大', [['蒙特利尔', 'Montreal', 'America/Toronto'], ['卡尔加里', 'Calgary', 'America/Edmonton'], ['温哥华', 'Vancouver', 'America/Vancouver'], ['渥太华', 'Ottawa', 'America/Toronto']]],
+    ['中国', [['成都', 'Chengdu', 'Asia/Shanghai'], ['深圳', 'Shenzhen', 'Asia/Shanghai'], ['重庆', 'Chongqing', 'Asia/Shanghai'], ['乌鲁木齐', 'Urumqi', 'Asia/Urumqi']]],
+    ['越南', [['河内', 'Hanoi', 'Asia/Ho_Chi_Minh'], ['岘港', 'Da Nang', 'Asia/Ho_Chi_Minh']]],
+  ];
+  const normalizeSearch = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().replace(/[\s_./-]+/g, '');
+  const fuzzyScore = (query, candidate) => {
+    if (!query) return 1;
+    const q = normalizeSearch(query);
+    const text = normalizeSearch(candidate);
+    const direct = text.indexOf(q);
+    if (direct >= 0) return 1000 - direct;
+    let at = 0;
+    for (const char of q) {
+      at = text.indexOf(char, at);
+      if (at < 0) return 0;
+      at += 1;
+    }
+    return 100 - text.length;
+  };
+  const cityOptionsFor = (matrix, countryKey, countryName) => {
+    const options = [];
+    const seen = new Set();
+    const add = (name, timeZone, aliases = []) => {
+      if (!name || !timeZone || seen.has(name.toLocaleLowerCase())) return;
+      seen.add(name.toLocaleLowerCase());
+      options.push({ name, timeZone, aliases: [name, timeZone, timeZone.split('/').pop().replace(/_/g, ' '), ...aliases] });
+    };
+    const existing = new Set();
+    matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(countryKey) + '"] .dev-timestamp-city-card[data-dev-city-id]').forEach((card) => {
+      const name = card.querySelector('.dev-timestamp-city-name')?.textContent?.trim();
+      const zoneText = card.querySelector('.dev-timestamp-city-zone')?.textContent || '';
+      const timeZone = zoneText.match(/(?:Africa|America|Antarctica|Asia|Atlantic|Australia|Europe|Indian|Pacific)\/[A-Za-z0-9_+.-]+(?:\/[A-Za-z0-9_+.-]+)*/)?.[0];
+      if (name) existing.add(name.toLocaleLowerCase());
+      add(name, timeZone);
+    });
+    const extras = EXTRA_CITY_OPTIONS.find(([country]) => countryName.includes(country))?.[1] || [];
+    extras.forEach(([name, alias, timeZone]) => add(name, timeZone, [alias]));
+    return options.filter((option) => !existing.has(option.name.toLocaleLowerCase()));
+  };
+  const installCitySearch = (form, matrix) => {
+    const nameInput = form.querySelector('.dev-timestamp-city-name-input');
+    const zoneInput = form.querySelector('.dev-timestamp-city-zone-input');
+    const countrySelect = form.querySelector('.dev-timestamp-city-country-select');
+    const addButton = form.querySelector('[data-dev-action="timestamp-city-add"]');
+    if (!nameInput || !zoneInput || !countrySelect || nameInput.dataset.fuzzyReady) return;
+    nameInput.dataset.fuzzyReady = '1';
+    nameInput.placeholder = document.documentElement.lang === 'en' ? 'Search for a city' : '模糊搜索城市名称或时区';
+    nameInput.setAttribute('autocomplete', 'off');
+    zoneInput.type = 'hidden';
+    zoneInput.setAttribute('aria-hidden', 'true');
+    const wrap = document.createElement('div');
+    wrap.className = 'dev-timestamp-city-search-wrap';
+    nameInput.parentNode.insertBefore(wrap, nameInput);
+    wrap.append(nameInput);
+    const results = document.createElement('div');
+    results.className = 'dev-timestamp-city-search-results';
+    results.setAttribute('role', 'listbox');
+    results.hidden = true;
+    wrap.append(results);
+    const closeResults = () => { results.hidden = true; results.replaceChildren(); };
+    const search = () => {
+      const countryKey = countrySelect.value;
+      const header = matrix.querySelector('.dev-timestamp-country-header-cell[data-dev-country-key="' + CSS.escape(countryKey) + '"]');
+      const countryName = header?.querySelector('.dev-timestamp-country-name')?.textContent?.trim() || '';
+      const options = cityOptionsFor(matrix, countryKey, countryName);
+      const query = nameInput.value.trim();
+      const matches = options.map((option) => ({ option, score: Math.max(...option.aliases.map((alias) => fuzzyScore(query, alias))) }))
+        .filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+      results.replaceChildren();
+      if (!matches.length) {
+        if (query) {
+          const empty = document.createElement('div');
+          empty.className = 'dev-timestamp-city-search-empty';
+          empty.textContent = document.documentElement.lang === 'en' ? 'No matching cities' : '没有匹配的城市';
+          results.append(empty);
+        }
+      } else {
+        matches.forEach(({ option }) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'dev-timestamp-city-search-option';
+          button.setAttribute('role', 'option');
+          const city = document.createElement('span');
+          city.textContent = option.name;
+          const zone = document.createElement('code');
+          zone.textContent = option.timeZone;
+          button.append(city, zone);
+          button.addEventListener('pointerdown', (event) => event.preventDefault());
+          button.addEventListener('click', () => {
+            nameInput.value = option.name;
+            zoneInput.value = option.timeZone;
+            if (addButton) addButton.disabled = false;
+            closeResults();
+          });
+          results.append(button);
+        });
+      }
+      results.hidden = false;
+    };
+    nameInput.addEventListener('input', () => {
+      zoneInput.value = '';
+      if (addButton) addButton.disabled = true;
+      search();
+    });
+    nameInput.addEventListener('focus', search);
+    countrySelect.addEventListener('change', () => {
+      nameInput.value = '';
+      zoneInput.value = '';
+      if (addButton) addButton.disabled = true;
+      closeResults();
+    });
+    form.addEventListener('submit', (event) => event.preventDefault());
+    if (addButton) addButton.disabled = true;
+  };
   const enhance = () => {
     addStyle();
     document.querySelectorAll('.dev-timestamp-country-list').forEach((list) => {
@@ -177,6 +313,7 @@
           select.addEventListener('change', syncCountry);
         }
         syncCountry();
+        if (form) installCitySearch(form, matrix);
         if (!addForm.classList.contains('is-modal')) {
           addForm.classList.add('is-modal');
           centerModal(addForm);
