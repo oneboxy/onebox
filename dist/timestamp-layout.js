@@ -87,7 +87,7 @@
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-search-wrap { position: relative; grid-column: 1 / -1; min-width: 0; }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-search-wrap > input { width: 100%; }
       .dev-timestamp-city-search-results {
-        position: absolute; inset: calc(100% + 4px) 0 auto; z-index: 10; max-height: min(260px, 42vh); overflow: auto;
+        position: relative; z-index: 1; max-height: min(180px, 30vh); overflow: auto; margin-top: 4px;
         padding: 4px; border: 1px solid var(--line); border-radius: 9px;
         background: var(--panel); box-shadow: var(--shadow);
       }
