@@ -8943,13 +8943,18 @@ function devHistoryToggle(kind) {
   const records = state.devTools.records[kind] || [];
   if (!records.length) return '';
   const open = state.devTools.historyOpen === true;
-  return '<div class="dev-history-toggle-wrap"><button class="display-history-toggle dev-history-toggle" type="button" data-toggle-dev-history aria-expanded="' + String(open) + '" aria-label="' + escapeHtml(t('devRecords')) + '" title="' + escapeHtml(t('devRecords')) + '">' + devHistoryIcon() + '</button><span class="dev-history-count">' + records.length + '</span></div>';
+  return '<div class="dev-history-toggle-wrap"><button class="display-history-toggle dev-history-toggle" type="button" data-toggle-dev-history data-dev-history-kind="' + escapeHtml(kind) + '" aria-expanded="' + String(open) + '" aria-label="' + escapeHtml(t('devRecords')) + '" title="' + escapeHtml(t('devRecords')) + '">' + devHistoryIcon() + '</button><span class="dev-history-count">' + records.length + '</span></div>';
 }
 function devHistoryContent(kind) {
   const records = state.devTools.records[kind] || [];
   if (!records.length) return '';
   const list = records.length ? records.map((item) => '<div class="swipe-row dev-history-swipe-row" data-swipe-row><button class="dev-record history-item swipe-content" type="button" data-dev-record-kind="' + kind + '" data-dev-record="' + escapeHtml(item.id) + '" title="' + escapeHtml(devRecordDetail(kind, item)) + '"><strong>' + escapeHtml(devRecordLabel(kind, item)) + '</strong><small>' + escapeHtml(devRecordPreview(kind, item)) + '</small></button><button class="swipe-delete" data-delete-dev-record-kind="' + kind + '" data-delete-dev-record="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>').join('') : '<p class="dev-history-empty">' + t('devNoRecords') + '</p>';
   const open = state.devTools.historyOpen === true;
+  const historyBody = '<div class="dev-history-content"><div class="dev-history-head"><strong>' + t('recentCalculations') + '</strong><button class="text-btn" data-clear-dev-records data-dev-record-kind="' + kind + '" ' + (records.length ? '' : 'disabled') + '>' + t('clear') + '</button></div><div class="dev-record-list">' + list + '</div></div>';
+  if (kind === 'timestamp') {
+    if (!open) return '';
+    return '<div class="dialog dev-history-modal" data-dev-history-modal><section class="dialog-card dev-history-modal-card" role="dialog" aria-modal="true" aria-label="' + escapeHtml(t('devRecords')) + '"><div class="dialog-head"><h2>' + escapeHtml(t('devRecords')) + '</h2><button class="icon-btn" type="button" data-close-dev-history aria-label="' + escapeHtml(t('close')) + '">×</button></div>' + historyBody + '</section></div>';
+  }
   return '<div class="dev-history-content" ' + (open ? '' : 'hidden') + '><div class="dev-history-head"><strong>' + t('recentCalculations') + '</strong><button class="text-btn" data-clear-dev-records data-dev-record-kind="' + kind + '" ' + (records.length ? '' : 'disabled') + '>' + t('clear') + '</button></div><div class="dev-record-list">' + list + '</div></div>';
 }
 function developerJsonFormattedLineCount() {
@@ -10105,6 +10110,7 @@ function loadDeveloperRecord(kind, id) {
   if (kind === 'json-compare') Object.assign(state.devTools, { compareLeft: record.left || '', compareRight: record.right || '', compareOutput: record.output || '', compareStatus: record.status || '' });
   if (kind === 'text-stats') Object.assign(state.devTools, { textInput: record.text || '', textOutput: record.output || null });
   if (kind === 'timestamp') Object.assign(state.devTools, { timestampMode: record.mode === 'date' ? 'date' : 'timestamp', timestampUnit: record.unit === 'ms' ? 'ms' : 's', timestampValue: record.value || '', timestampDate: record.date || '', timestampOutput: record.output || '', timestampStatus: record.status || '' });
+  state.devTools.historyOpen = false;
   saveDevTools(); render();
 }
 function developerCopyOutput() {
@@ -14971,7 +14977,13 @@ workspace.addEventListener('click', async (event) => {
     if (collapsed.has(path)) collapsed.delete(path); else collapsed.add(path);
     state.devTools.formatCollapsed = [...collapsed]; saveDevTools(); return render();
   }
-  if (event.target.closest('[data-toggle-dev-history]')) { state.devTools.historyOpen = !state.devTools.historyOpen; saveDevTools(); return render(); }
+  if (event.target.closest('[data-toggle-dev-history]')) {
+    state.devTools.historyOpen = !state.devTools.historyOpen;
+    saveDevTools(); return render();
+  }
+  if (event.target.closest('[data-close-dev-history]') || event.target.matches?.('[data-dev-history-modal]')) {
+    state.devTools.historyOpen = false; saveDevTools(); return render();
+  }
   const deleteDevRecord = event.target.closest('[data-delete-dev-record]');
   if (deleteDevRecord) {
     const kind = DEV_TOOL_IDS.includes(deleteDevRecord.dataset.deleteDevRecordKind) ? deleteDevRecord.dataset.deleteDevRecordKind : state.devTools.active;
@@ -14985,7 +14997,7 @@ workspace.addEventListener('click', async (event) => {
     saveDevTools(); return render();
   }
   const devMode = event.target.closest('[data-dev-mode]');
-  if (devMode) { state.devTools.active = DEV_TOOL_IDS.includes(devMode.dataset.devMode) ? devMode.dataset.devMode : DEV_TOOL_IDS[0]; saveDevTools(); return render(); }
+  if (devMode) { state.devTools.active = DEV_TOOL_IDS.includes(devMode.dataset.devMode) ? devMode.dataset.devMode : DEV_TOOL_IDS[0]; state.devTools.historyOpen = false; saveDevTools(); return render(); }
   const devRecord = event.target.closest('[data-dev-record]');
   if (devRecord) return loadDeveloperRecord(devRecord.dataset.devRecordKind, devRecord.dataset.devRecord);
   const jsonAdjust = event.target.closest('[data-dev-json-adjust]');
