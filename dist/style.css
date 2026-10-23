@@ -19352,3 +19352,292 @@ body.dev-pane-resizing * {
     letter-spacing: -.03em;
   }
 }
+
+ 
+/* 2.18.715: use one button system across Developer tools. */
+.dev-tools-page {
+  --dev-button-border: color-mix(in srgb, var(--line) 88%, var(--muted) 12%);
+  --dev-button-surface: var(--panel);
+  --dev-button-text: var(--muted);
+  --dev-button-radius: 9px;
+}
+.dev-tools-page .dev-action,
+.dev-tools-page .dev-file-compare-actions button,
+.dev-tools-page .dev-file-compare-run button,
+.dev-tools-page .dev-file-compare-status button {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--dev-button-border);
+  border-radius: var(--dev-button-radius);
+  background: var(--dev-button-surface);
+  color: var(--dev-button-text);
+  box-shadow: none;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: color .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.dev-tools-page .dev-action:not(:disabled):hover,
+.dev-tools-page .dev-file-compare-actions button:not(:disabled):hover,
+.dev-tools-page .dev-file-compare-run button:not(:disabled):hover,
+.dev-tools-page .dev-file-compare-status button:not(:disabled):hover {
+  transform: none;
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--primary) 5%, var(--panel));
+  color: var(--primary);
+}
+.dev-tools-page .dev-action:focus-visible,
+.dev-tools-page .dev-file-compare-actions button:focus-visible,
+.dev-tools-page .dev-file-compare-run button:focus-visible,
+.dev-tools-page .dev-file-compare-status button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 60%, transparent);
+  outline-offset: 2px;
+}
+.dev-tools-page .dev-action:disabled,
+.dev-tools-page .dev-file-compare-actions button:disabled,
+.dev-tools-page .dev-file-compare-run button:disabled,
+.dev-tools-page .dev-file-compare-status button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+  transform: none;
+}
+.dev-tools-page .dev-action.primary,
+.dev-tools-page .dev-file-compare-run button.primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-contrast, #fff);
+}
+.dev-tools-page .dev-action.primary:not(:disabled):hover,
+.dev-tools-page .dev-file-compare-run button.primary:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--primary) 82%, var(--ink));
+  background: color-mix(in srgb, var(--primary) 88%, var(--ink));
+  color: var(--primary-contrast, #fff);
+}
+.dev-tools-page .dev-action[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--primary) 7%, var(--panel));
+  color: var(--primary);
+}
+
+/* Font and height controls stay visually grouped, with matching compact buttons. */
+.dev-tools-page .dev-json-adjustments {
+  align-items: center;
+  gap: 3px;
+  min-height: 34px;
+  padding: 3px;
+  border: 1px solid var(--dev-button-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel-2) 45%, var(--panel));
+}
+.dev-tools-page .dev-json-adjust {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  min-height: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dev-button-text);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+  transition: color .16s ease, background .16s ease, border-color .16s ease;
+}
+.dev-tools-page .dev-json-adjust:hover,
+.dev-tools-page .dev-json-adjust:focus-visible {
+  transform: none;
+  border-color: var(--dev-button-border);
+  background: var(--panel);
+  color: var(--primary);
+}
+.dev-tools-page .dev-json-adjust:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 1px;
+}
+.dev-tools-page .dev-json-adjust-readout {
+  padding-inline: 7px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+/* The inline switch remains recognizable as a switch while sharing the same
+   border, text, focus, and hover treatment as its neighboring actions. */
+.dev-tools-page .dev-inline-toggle {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--dev-button-border);
+  border-radius: 9px;
+  background: var(--dev-button-surface);
+  color: var(--dev-button-text);
+  font-size: 11px;
+  font-weight: 650;
+  transition: color .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.dev-tools-page .dev-inline-toggle:hover {
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--primary) 5%, var(--panel));
+  color: var(--primary);
+}
+.dev-tools-page .dev-inline-toggle:has(input:checked) {
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--line));
+  background: color-mix(in srgb, var(--primary) 5%, var(--panel));
+  color: var(--primary);
+}
+.dev-tools-page .dev-inline-toggle:has(input:focus-visible) {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Icon-only actions share the same quiet outline and focus ring. */
+.dev-tools-page .dev-fullscreen-button {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid var(--dev-button-border);
+  border-radius: var(--dev-button-radius);
+  background: var(--dev-button-surface);
+  color: var(--dev-button-text);
+  box-shadow: none;
+}
+.dev-tools-page .dev-fullscreen-button:hover,
+.dev-tools-page .dev-fullscreen-button:focus-visible {
+  transform: none;
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--primary) 5%, var(--panel));
+  color: var(--primary);
+}
+.dev-tools-page .dev-history-toggle {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+.dev-tools-page .dev-history-toggle:hover,
+.dev-tools-page .dev-history-toggle:focus-visible {
+  transform: none;
+  border-color: var(--dev-button-border);
+  background: var(--panel);
+  color: var(--primary);
+}
+.dev-tools-page .dev-history-toggle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 1px;
+}
+.dev-tools-page .dev-timestamp-row-copy,
+.dev-tools-page .dev-file-compare-vs,
+.dev-tools-page .dev-file-compare-remove {
+  border: 1px solid var(--dev-button-border);
+  border-radius: var(--dev-button-radius);
+  background: var(--dev-button-surface);
+  color: var(--dev-button-text);
+  transition: color .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.dev-tools-page .dev-timestamp-row-copy:hover,
+.dev-tools-page .dev-file-compare-vs:hover:not(:disabled),
+.dev-tools-page .dev-file-compare-remove:hover:not(:disabled) {
+  transform: none;
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--primary) 5%, var(--panel));
+  color: var(--primary);
+}
+.dev-tools-page .dev-timestamp-row-copy:focus-visible,
+.dev-tools-page .dev-file-compare-vs:focus-visible,
+.dev-tools-page .dev-file-compare-remove:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 2px;
+}
+
+
+.dev-tools-page .dev-timestamp-row-copy,
+.dev-tools-page .dev-file-compare-vs,
+.dev-tools-page .dev-file-compare-remove {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+}
+
+/* Timestamp mode choices are tabs, so use the same selected state as the
+   Developer tab bar instead of browser-default button chrome. */
+.dev-tools-page .dev-timestamp-mode {
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--dev-button-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel-2) 45%, var(--panel));
+}
+.dev-tools-page .dev-timestamp-mode button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+.dev-tools-page .dev-timestamp-mode button.active {
+  border: 0;
+  background: var(--panel);
+  color: var(--primary);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+.dev-tools-page .dev-timestamp-mode button:hover,
+.dev-tools-page .dev-timestamp-mode button:focus-visible {
+  transform: none;
+  background: var(--panel);
+  color: var(--primary);
+}
+.dev-tools-page .dev-timestamp-mode button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 760px) {
+  .dev-tools-page.dev-is-fullscreen .dev-action,
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-actions button,
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-run button,
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-status button {
+    min-height: 40px;
+    padding-inline: 12px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-json-adjust {
+    min-height: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-row-copy,
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-remove {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-vs {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
