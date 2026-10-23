@@ -135,19 +135,19 @@
           align-items: stretch; padding: 0 !important; border-bottom: 0 !important; overflow: visible;
         }
         .dev-timestamp-mode-bar::after {
-          content: ""; position: absolute; z-index: 0; right: 0; bottom: -1px; left: 0;
+          content: ""; position: absolute; z-index: 0; right: 0; bottom: 0; left: 0;
           height: 2px; background: var(--line); pointer-events: none;
         }
         .dev-timestamp-mode {
-          align-self: stretch; width: 100%; max-width: none; height: 100%;
+          position: absolute; inset: 0; align-self: stretch; width: auto; max-width: none; height: auto;
           align-items: stretch; margin: 0; padding: 0; overflow: visible;
         }
         .dev-timestamp-mode button {
-          align-self: stretch; height: 100%; min-height: 0; box-sizing: border-box;
+          align-self: stretch; height: 100%; min-height: 0; box-sizing: border-box; margin: 0;
           padding: 6px 8px 7px; position: relative;
         }
         .dev-timestamp-mode button.active { z-index: 1; }
-        .dev-timestamp-mode button.active::after { bottom: -1px !important; height: 2px; }
+        .dev-timestamp-mode button.active::after { bottom: 0 !important; height: 2px; }
         .dev-timestamp-content { gap: 7px; }
         .dev-timestamp-card, .dev-timestamp-output-card { padding: 7px 9px; gap: 5px; }
         .dev-timestamp .dev-pane-head { margin: 0; }
