@@ -131,14 +131,23 @@
         }
         #workspace[data-tool="development"] .dev-workbench.dev-timestamp { gap: 6px; }
         .dev-timestamp-mode-bar {
-          min-height: 0; align-items: flex-end; padding: 0 !important;
-          border-bottom: 1px solid var(--line);
+          position: relative; height: 39px; min-height: 39px; box-sizing: border-box;
+          align-items: stretch; padding: 0 !important; border-bottom: 0 !important; overflow: visible;
+        }
+        .dev-timestamp-mode-bar::after {
+          content: ""; position: absolute; z-index: 0; right: 0; bottom: -1px; left: 0;
+          height: 2px; background: var(--line); pointer-events: none;
         }
         .dev-timestamp-mode {
-          width: 100%; max-width: none; align-items: flex-end; margin: 0; padding: 0;
+          align-self: stretch; width: 100%; max-width: none; height: 100%;
+          align-items: stretch; margin: 0; padding: 0; overflow: visible;
         }
-        .dev-timestamp-mode button { min-height: 38px; padding: 6px 8px 7px; }
-        .dev-timestamp-mode button.active::after { bottom: -5px !important; }
+        .dev-timestamp-mode button {
+          align-self: stretch; height: 100%; min-height: 0; box-sizing: border-box;
+          padding: 6px 8px 7px; position: relative;
+        }
+        .dev-timestamp-mode button.active { z-index: 1; }
+        .dev-timestamp-mode button.active::after { bottom: -1px !important; height: 2px; }
         .dev-timestamp-content { gap: 7px; }
         .dev-timestamp-card, .dev-timestamp-output-card { padding: 7px 9px; gap: 5px; }
         .dev-timestamp .dev-pane-head { margin: 0; }
