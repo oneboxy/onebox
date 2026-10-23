@@ -19773,34 +19773,38 @@ body.dev-pane-resizing * {
 /* 2.18.717: tighten city-time cards to fit more conversions in one view. */
 
 
-/* 2.18.719: underline timestamp modes and group city conversions by country. */
+/* 2.18.720: fit timestamp conversions in one view with compact country rows. */
 .dev-workbench.dev-timestamp {
   grid-template-columns: minmax(0, 1fr) !important;
   align-content: start;
-  gap: 10px;
+  gap: 6px;
 }
 .dev-timestamp-card {
   display: grid;
-  grid-template-columns: minmax(170px, 220px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 10px 18px;
-  padding: 12px 14px;
+  gap: 6px;
+  padding: 8px 12px;
 }
-.dev-timestamp-card .dev-pane-head {
-  grid-column: 1 / -1;
-  min-width: 0;
-  margin: 0;
-}
+.dev-timestamp-card .dev-pane-head { min-width: 0; margin: 0; }
+.dev-timestamp-card .dev-pane-actions:empty { display: none; }
 .dev-timestamp .dev-pane-head h3 { font-size: 12px; }
 .dev-timestamp .dev-pane-actions { gap: 5px; }
-.dev-timestamp .dev-action { min-height: 30px; padding: 5px 8px; }
+.dev-timestamp .dev-action { min-height: 28px; padding: 4px 8px; }
+.dev-timestamp-controls {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: end;
+  gap: 12px;
+  min-width: 0;
+}
 .dev-timestamp-mode {
   display: flex;
-  align-items: flex-start;
-  gap: 18px;
+  align-items: flex-end;
+  gap: 14px;
   width: max-content;
   max-width: 100%;
-  margin: 0;
+  margin: 0 0 1px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -19839,75 +19843,71 @@ body.dev-pane-resizing * {
 }
 .dev-timestamp-field {
   display: grid;
-  grid-column: 2;
   grid-template-columns: minmax(0, 1fr);
-  align-content: start;
-  gap: 5px;
+  align-content: end;
+  gap: 4px;
   min-width: 0;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 650;
 }
-.dev-timestamp-field > span,
-.dev-timestamp-field small,
-.dev-timestamp-input-row,
-.dev-timestamp-field > .dev-plain-input { grid-column: 1; }
 .dev-timestamp-field > span { padding-left: 1px; }
-.dev-timestamp-field small {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 400;
-  line-height: 1.35;
-}
 .dev-timestamp-input-row {
-  grid-template-columns: minmax(0, 1fr) minmax(112px, 130px);
-  gap: 7px;
-}
-.dev-timestamp-input-row .dev-plain-input,
-.dev-timestamp-field > .dev-plain-input {
+  display: grid;
+  grid-template-columns: minmax(160px, 360px) 112px auto auto;
+  align-items: center;
+  gap: 6px;
   min-width: 0;
-  min-height: 38px;
-  margin: 0;
+}
+.dev-timestamp-input-row .dev-plain-input {
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 9px;
   font-size: 12px;
 }
-.dev-timestamp-results { gap: 10px; }
+.dev-timestamp-input-row .dev-action { white-space: nowrap; }
+.dev-timestamp-date-row {
+  grid-template-columns: minmax(180px, 360px) auto auto;
+  max-width: 620px;
+}
+.dev-timestamp-date-row .dev-date-input { margin: 0; }
+.dev-timestamp-results { gap: 5px; }
 .dev-timestamp-standard-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
 }
 .dev-timestamp-summary-card {
-  min-height: 56px;
-  gap: 3px;
-  padding: 7px 30px 7px 9px;
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--soft) 14%, var(--panel));
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 48px;
+  gap: 2px;
+  padding: 5px 27px 5px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--soft) 12%, var(--panel));
 }
-.dev-timestamp-summary-card > span { font-size: 10px; }
-.dev-timestamp-summary-card > code { font-size: 10px; }
+.dev-timestamp-summary-card > span { font-size: 9px; }
+.dev-timestamp-summary-card > code {
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dev-timestamp-city-section { min-width: 0; }
 .dev-timestamp-city-section > h4 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 0 0 5px;
-  padding: 0 1px 6px;
+  margin: 0 0 3px;
+  padding: 0 1px 4px;
   border-bottom: 1px solid var(--line);
   color: var(--ink);
   font-size: 11px;
-}
-.dev-timestamp-city-section > h4 small {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 400;
+  line-height: 1.2;
 }
 .dev-timestamp-country-list { display: grid; }
 .dev-timestamp-country-row {
   display: grid;
-  grid-template-columns: minmax(125px, 155px) minmax(0, 1fr);
-  align-items: start;
-  gap: 10px;
-  padding: 7px 0;
+  grid-template-columns: minmax(125px, 145px) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 7px;
+  padding: 2px 0;
   border-bottom: 1px solid var(--line);
 }
 .dev-timestamp-country-row:last-child { border-bottom: 0; }
@@ -19916,96 +19916,95 @@ body.dev-pane-resizing * {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 8px 4px;
+  padding: 4px 5px;
 }
 .dev-timestamp-country-flag {
+  display: inline-flex;
   flex: 0 0 auto;
-  font-size: 21px;
-  line-height: 1;
-}
-.dev-timestamp-country-name {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-}
-.dev-timestamp-country-name strong {
+  width: 30px;
+  height: 20px;
   overflow: hidden;
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.dev-timestamp-country-name small {
-  color: var(--muted);
-  font-size: 10px;
-}
-.dev-timestamp-city-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
-  align-items: stretch;
-  gap: 6px;
-  min-width: 0;
-}
-.dev-timestamp-city-card {
-  position: relative;
-  display: grid;
-  align-content: center;
-  gap: 3px;
-  min-width: 0;
-  min-height: 58px;
-  padding: 7px 30px 7px 9px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--soft) 10%, var(--panel));
-}
-.dev-timestamp-city-card-head {
-  display: flex;
   align-items: center;
-  gap: 5px;
-  min-width: 0;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  border-radius: 3px;
+  background: #fff;
 }
-.dev-timestamp-city-name {
+.dev-timestamp-country-flag svg { display: block; width: 100%; height: 100%; }
+.dev-timestamp-country-name {
   min-width: 0;
   overflow: hidden;
   color: var(--ink);
   font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dev-timestamp-city-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 5px;
+  min-width: 0;
+}
+.dev-timestamp-city-card {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  width: 100%;
+  height: 50px;
+  min-width: 0;
+  min-height: 50px;
+  padding: 4px 24px 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--soft) 9%, var(--panel));
+}
+.dev-timestamp-city-card-head { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.dev-timestamp-city-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 10px;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .dev-timestamp-city-time {
   min-width: 0;
+  overflow: hidden;
   color: var(--ink);
-  font: 10px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font: 9px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.dev-timestamp-city-zone {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 6px;
-  min-width: 0;
-}
+.dev-timestamp-city-zone { display: flex; gap: 2px 5px; min-width: 0; overflow: hidden; white-space: nowrap; }
 .dev-timestamp-city-zone code {
+  overflow: hidden;
   color: var(--muted);
-  font: 9px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  overflow-wrap: anywhere;
+  font: 8px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-overflow: ellipsis;
 }
-.dev-timestamp-city-copy { position: absolute; top: 4px; right: 4px; }
+.dev-timestamp-city-copy { position: absolute; top: 3px; right: 3px; }
+.dev-timestamp-output-card { min-width: 0; padding: 8px 12px; gap: 5px; }
+.dev-timestamp-output-card > .dev-pane-head { margin: 0; }
+.dev-timestamp-output-card > .dev-live-output { min-height: 0; flex: 0 0 auto; }
 .dev-timestamp-output-card .dev-timestamp-row-copy {
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
-  min-height: 22px;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
   color: var(--muted);
-  opacity: .48;
+  opacity: .4;
   transition: background-color .15s ease, color .15s ease, opacity .15s ease;
 }
-.dev-timestamp-output-card .dev-timestamp-row-copy svg { width: 13px; height: 13px; }
+.dev-timestamp-output-card .dev-timestamp-row-copy svg { width: 12px; height: 12px; }
 .dev-timestamp-output-card .dev-timestamp-row-copy:hover,
 .dev-timestamp-output-card .dev-timestamp-row-copy:focus-visible {
   border: 0;
@@ -20017,39 +20016,32 @@ body.dev-pane-resizing * {
   outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
   outline-offset: 1px;
 }
-@media (max-width: 760px) {
-  .dev-timestamp-card {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 9px;
-    padding: 12px;
-  }
-  .dev-timestamp-card .dev-pane-head,
-  .dev-timestamp-card .dev-timestamp-mode,
-  .dev-timestamp-card .dev-timestamp-field {
-    grid-column: 1;
-    grid-row: auto;
-  }
-  .dev-timestamp-mode { width: max-content; }
-  .dev-timestamp-mode button { min-height: 34px; }
-  .dev-timestamp-field { gap: 5px; }
-  .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 112px; }
-  .dev-timestamp-standard-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 165px), 1fr)); }
-  .dev-timestamp-country-row { grid-template-columns: minmax(95px, 112px) minmax(0, 1fr); gap: 6px; }
-  .dev-timestamp-country-heading { align-items: flex-start; gap: 5px; padding: 7px 2px; }
-  .dev-timestamp-country-flag { font-size: 18px; }
-  .dev-timestamp-city-grid { grid-template-columns: minmax(0, 1fr); }
-  .dev-timestamp-city-card { min-height: 54px; }
-  .dev-timestamp-output-card { padding: 12px; }
-  .dev-timestamp-output-card .dev-timestamp-row-copy {
-    width: 26px;
-    min-width: 26px;
-    height: 26px;
-    min-height: 26px;
-    opacity: .68;
-  }
+@media (max-width: 1400px) {
+  .dev-timestamp-city-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-@media (max-width: 360px) {
-  .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 100px; }
-  .dev-timestamp-standard-grid { grid-template-columns: minmax(0, 1fr); }
-  .dev-timestamp-country-row { grid-template-columns: minmax(78px, 88px) minmax(0, 1fr); }
+@media (max-width: 1000px) {
+  .dev-timestamp-standard-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dev-timestamp-city-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .dev-timestamp-controls { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .dev-timestamp-mode { gap: 13px; }
+  .dev-timestamp-field { gap: 3px; }
+  .dev-timestamp-input-row { grid-template-columns: minmax(90px, 1fr) 100px auto auto; }
+  .dev-timestamp-date-row { grid-template-columns: minmax(130px, 1fr) auto auto; }
+  .dev-timestamp-country-row { grid-template-columns: minmax(90px, 105px) minmax(0, 1fr); gap: 5px; }
+  .dev-timestamp-country-heading { gap: 5px; padding: 4px 2px; }
+  .dev-timestamp-country-flag { width: 26px; height: 18px; }
+  .dev-timestamp-city-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .dev-timestamp-city-card { height: 52px; min-height: 52px; }
+  .dev-timestamp-output-card { padding: 8px; }
+}
+@media (max-width: 500px) {
+  .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 90px; }
+  .dev-timestamp-input-row .dev-action { min-height: 26px; padding: 3px 6px; }
+  .dev-timestamp-country-row { grid-template-columns: minmax(82px, 88px) minmax(0, 1fr); }
+  .dev-timestamp-country-heading { flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; }
+  .dev-timestamp-country-name { max-width: 100%; font-size: 10px; }
+  .dev-timestamp-city-grid { grid-template-columns: minmax(0, 1fr); }
+  .dev-timestamp-standard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

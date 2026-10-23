@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.719';
+const APP_VERSION = '2.18.720';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9173,13 +9173,13 @@ function renderDeveloperStats() {
 function renderDeveloperTimestamp() {
   const dev = state.devTools;
   const english = state.language === 'en';
-  const timestampMode = '<div class="dev-segmented dev-timestamp-mode"><button type="button" class="' + (dev.timestampMode === 'timestamp' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="timestamp">' + t('devTimestampToDate') + '</button><button type="button" class="' + (dev.timestampMode === 'date' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="date">' + t('devDateToTimestamp') + '</button></div>';
-  const input = dev.timestampMode === 'timestamp'
-    ? '<label class="dev-timestamp-field"><span>' + (english ? 'Timestamp' : '时间戳') + '</span><div class="dev-timestamp-input-row"><input class="dev-plain-input" data-dev-field="timestampValue" inputmode="decimal" autocomplete="off" value="' + escapeHtml(dev.timestampValue) + '" placeholder="' + (english ? 'e.g. 1726905600' : '例如 1726905600') + '"><select class="dev-plain-input" data-dev-field="timestampUnit" aria-label="' + (english ? 'Timestamp unit' : '时间戳单位') + '"><option value="auto" ' + (dev.timestampUnit === 'auto' ? 'selected' : '') + '>' + (english ? 'Auto detect' : '自动识别') + '</option><option value="s" ' + (dev.timestampUnit === 's' ? 'selected' : '') + '>' + t('devSeconds') + '</option><option value="ms" ' + (dev.timestampUnit === 'ms' ? 'selected' : '') + '>' + t('devMilliseconds') + '</option></select></div><small>' + (english ? 'Auto detects milliseconds for 13-digit timestamps; choose a unit manually if needed.' : '自动识别常见的秒或毫秒时间戳，也可以手动指定单位。') + '</small></label>'
-    : '<label class="dev-timestamp-field"><span>' + (english ? 'Date and time · device local time' : '日期和时间 · 设备本地时区') + '</span><input class="dev-plain-input dev-date-input" data-dev-field="timestampDate" type="datetime-local" step="1" value="' + escapeHtml(dev.timestampDate) + '"><small>' + (english ? 'The selected local date is also shown as UTC and ISO 8601.' : '按设备本地时区换算，同时显示 UTC 和 ISO 8601。') + '</small></label>';
+  const timestampMode = '<div class="dev-segmented dev-timestamp-mode" role="tablist" aria-label="' + (english ? 'Conversion mode' : '转换模式') + '"><button type="button" role="tab" aria-selected="' + (dev.timestampMode === 'timestamp') + '" class="' + (dev.timestampMode === 'timestamp' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="timestamp">' + t('devTimestampToDate') + '</button><button type="button" role="tab" aria-selected="' + (dev.timestampMode === 'date') + '" class="' + (dev.timestampMode === 'date' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="date">' + t('devDateToTimestamp') + '</button></div>';
   const inputActions = devActionButton('timestamp-now', t('devNow')) + devActionButton('timestamp-clear', t('devClear'));
+  const input = dev.timestampMode === 'timestamp'
+    ? '<label class="dev-timestamp-field"><span>' + (english ? 'Timestamp' : '时间戳') + '</span><div class="dev-timestamp-input-row"><input class="dev-plain-input" data-dev-field="timestampValue" inputmode="decimal" autocomplete="off" value="' + escapeHtml(dev.timestampValue) + '" placeholder="' + (english ? 'e.g. 1726905600' : '例如 1726905600') + '"><select class="dev-plain-input" data-dev-field="timestampUnit" aria-label="' + (english ? 'Timestamp unit' : '时间戳单位') + '"><option value="auto" ' + (dev.timestampUnit === 'auto' ? 'selected' : '') + '>' + (english ? 'Auto detect' : '自动识别') + '</option><option value="s" ' + (dev.timestampUnit === 's' ? 'selected' : '') + '>' + t('devSeconds') + '</option><option value="ms" ' + (dev.timestampUnit === 'ms' ? 'selected' : '') + '>' + t('devMilliseconds') + '</option></select>' + inputActions + '</div></label>'
+    : '<label class="dev-timestamp-field"><span>' + (english ? 'Date and time · device local time' : '日期和时间 · 设备本地时区') + '</span><div class="dev-timestamp-input-row dev-timestamp-date-row"><input class="dev-plain-input dev-date-input" data-dev-field="timestampDate" type="datetime-local" step="1" value="' + escapeHtml(dev.timestampDate) + '">' + inputActions + '</div></label>';
   const outputActions = devActionButton('timestamp-save', t('devSaveRecord')) + devActionButton('dev-copy-output', t('devCopy'));
-  return '<div class="dev-workbench dev-timestamp"><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput'), inputActions) + timestampMode + input + '</section><section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
+  return '<div class="dev-workbench dev-timestamp"><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput')) + '<div class="dev-timestamp-controls">' + timestampMode + input + '</div></section><section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
 }
 let lastDeveloperCompareResult = null;
 function developerCompareResult() {
@@ -9446,23 +9446,26 @@ function renderDeveloperTimestampResult() {
     if (!countries.has(country)) countries.set(country, []);
     countries.get(country).push(row);
   });
+  const flagUs = '<svg viewBox="0 0 36 24"><rect width="36" height="24" fill="#fff"/><path d="M0 0h36v2H0zm0 4h36v2H0zm0 8h36v2H0zm0 16h36v2H0z" fill="#c62828"/><rect width="16" height="13" fill="#23406f"/><g fill="#fff"><circle cx="3" cy="3" r=".7"/><circle cx="8" cy="3" r=".7"/><circle cx="13" cy="3" r=".7"/><circle cx="5" cy="7" r=".7"/><circle cx="10" cy="7" r=".7"/><circle cx="15" cy="7" r=".7"/><circle cx="3" cy="11" r=".7"/><circle cx="8" cy="11" r=".7"/><circle cx="13" cy="11" r=".7"/></g></svg>';
+  const flagJp = '<svg viewBox="0 0 36 24"><rect width="36" height="24" fill="#fff"/><circle cx="18" cy="12" r="6.5" fill="#bc002d"/></svg>';
+  const flagGb = '<svg viewBox="0 0 36 24"><rect width="36" height="24" fill="#244276"/><path d="M0 0l36 24M36 0L0 24" stroke="#fff" stroke-width="7"/><path d="M0 0l36 24M36 0L0 24" stroke="#c8102e" stroke-width="3"/><path d="M18 0v24M0 12h36" stroke="#fff" stroke-width="8"/><path d="M18 0v24M0 12h36" stroke="#c8102e" stroke-width="4"/></svg>';
+  const flagDe = '<svg viewBox="0 0 36 24"><rect width="36" height="8" fill="#111"/><rect y="8" width="36" height="8" fill="#d00"/><rect y="16" width="36" height="8" fill="#ffce00"/></svg>';
+  const flagCa = '<svg viewBox="0 0 36 24"><rect width="36" height="24" fill="#fff"/><rect width="9" height="24" fill="#d80621"/><rect x="27" width="9" height="24" fill="#d80621"/><path d="M18 4l2 4 3-1-1 4 3 2-4 1 .5 4-3.5-2-3.5 2 .5-4-4-1 3-2-1-4 3 1z" fill="#d80621"/></svg>';
+  const flagCn = '<svg viewBox="0 0 36 24"><rect width="36" height="24" fill="#de2910"/><path d="M8 4l1.2 2.5 2.8.4-2 1.9.5 2.8L8 10.3l-2.5 1.3.5-2.8-2-1.9 2.8-.4z" fill="#ffde00"/><circle cx="15" cy="4" r="1.2" fill="#ffde00"/><circle cx="18" cy="7" r="1.2" fill="#ffde00"/><circle cx="18" cy="11" r="1.2" fill="#ffde00"/><circle cx="15" cy="14" r="1.2" fill="#ffde00"/></svg>';
+  const flagVn = '<svg viewBox="0 0 36 24"><rect width="36" height="24" fill="#da251d"/><path d="M18 4l2.3 4.8 5.2.8-3.8 3.7.9 5.2-4.6-2.5-4.6 2.5.9-5.2-3.8-3.7 5.2-.8z" fill="#ff0"/></svg>';
+  const flagOther = '<svg viewBox="0 0 36 24"><rect width="36" height="24" fill="#e5e7eb"/><circle cx="18" cy="12" r="7" fill="#94a3b8"/></svg>';
   const countryFlags = {
-    '美国': '🇺🇸', 'United States': '🇺🇸',
-    '日本': '🇯🇵', 'Japan': '🇯🇵',
-    '英国': '🇬🇧', 'United Kingdom': '🇬🇧',
-    '德国': '🇩🇪', 'Germany': '🇩🇪',
-    '加拿大': '🇨🇦', 'Canada': '🇨🇦',
-    '中国': '🇨🇳', 'China': '🇨🇳',
-    '越南': '🇻🇳', 'Vietnam': '🇻🇳',
+    '美国': flagUs, 'United States': flagUs, '日本': flagJp, 'Japan': flagJp,
+    '英国': flagGb, 'United Kingdom': flagGb, '德国': flagDe, 'Germany': flagDe,
+    '加拿大': flagCa, 'Canada': flagCa, '中国': flagCn, 'China': flagCn,
+    '越南': flagVn, 'Vietnam': flagVn,
   };
   const cityMarkup = [...countries.entries()].map(([country, rows]) => {
     const entries = rows.map((row) => '<article class="dev-timestamp-city-card"><div class="dev-timestamp-city-card-head"><strong class="dev-timestamp-city-name">' + escapeHtml(row.displayLabel || row.label) + '</strong>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div><code class="dev-timestamp-city-time">' + escapeHtml(row.localTime) + '</code><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></article>').join('');
-    const countryCount = english ? rows.length + (rows.length === 1 ? ' city' : ' cities') : rows.length + ' 个城市';
-    return '<section class="dev-timestamp-country-row"><div class="dev-timestamp-country-heading"><span class="dev-timestamp-country-flag" aria-hidden="true">' + (countryFlags[country] || '🌐') + '</span><span class="dev-timestamp-country-name"><strong>' + escapeHtml(country) + '</strong><small>' + escapeHtml(countryCount) + '</small></span></div><div class="dev-timestamp-city-grid">' + entries + '</div></section>';
+    return '<section class="dev-timestamp-country-row"><div class="dev-timestamp-country-heading"><span class="dev-timestamp-country-flag" aria-hidden="true">' + (countryFlags[country] || flagOther) + '</span><strong class="dev-timestamp-country-name">' + escapeHtml(country) + '</strong></div><div class="dev-timestamp-city-grid">' + entries + '</div></section>';
   }).join('');
   const cityHeading = english ? 'Major city times' : '主要城市时间';
-  const cityCount = english ? cityRows.length + ' cities' : cityRows.length + ' 个城市';
-  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4><span>' + escapeHtml(cityHeading) + '</span><small>' + escapeHtml(cityCount) + '</small></h4><div class="dev-timestamp-country-list">' + cityMarkup + '</div></section></div>';
+  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4>' + escapeHtml(cityHeading) + '</h4><div class="dev-timestamp-country-list">' + cityMarkup + '</div></section></div>';
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
