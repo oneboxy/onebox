@@ -19108,3 +19108,247 @@ body.dev-pane-resizing * {
 .dev-json-compare .dev-compare-right-head .dev-pane-actions {
   margin-left: auto;
 }
+
+
+/* 2.18.714: keep every Developer tab and control usable on phone-sized screens. */
+@media (max-width: 760px) {
+  .dev-tools-page,
+  .dev-tools-page * {
+    box-sizing: border-box;
+  }
+  .dev-tools-page.dev-is-fullscreen {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tabs {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab {
+    min-width: 0;
+    min-height: 40px;
+    padding: 4px 2px;
+    font-size: 10px;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench,
+  .dev-tools-page.dev-is-fullscreen .dev-editor-grid,
+  .dev-tools-page.dev-is-fullscreen .dev-compare-grid,
+  .dev-tools-page.dev-is-fullscreen .dev-pane {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-pane-head,
+  .dev-tools-page.dev-is-fullscreen .dev-compare-right-head {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    gap: 7px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-pane-actions,
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-actions {
+    display: flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 100% !important;
+    height: auto;
+    min-width: 0;
+    overflow: visible !important;
+    overscroll-behavior: auto;
+    gap: 6px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-action,
+  .dev-tools-page.dev-is-fullscreen .dev-json-adjust,
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-row-copy,
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-actions button {
+    min-height: 40px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-action {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-json-adjustments {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-width: 0;
+    gap: 5px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-json-adjust {
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-json-adjust-readout {
+    flex: 0 1 auto;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  /* Preserve the user's editor-height controls on phones; the page scrolls
+     around taller panes instead of clipping the requested height. */
+  .dev-workbench.dev-json-format:not(.is-output-floating) .dev-format-editor {
+    height: var(--dev-json-input-height, 460px) !important;
+    min-height: 240px;
+    max-height: none;
+  }
+  .dev-workbench.dev-json-format:not(.is-output-floating) .dev-json-live-output {
+    height: var(--dev-json-output-height, 460px) !important;
+    min-height: 240px;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Keep both JSON comparison editors visible in the floating mobile view. */
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare.is-floating > .dev-compare-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-workbench.dev-json-compare.is-floating > .dev-compare-grid > .dev-pane {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* Timestamp values and their copy actions stay inside the screen width. */
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-mode {
+    display: flex;
+    width: 100%;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-mode button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 40px;
+    padding-inline: 6px;
+    white-space: normal;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-result-row {
+    grid-template-columns: minmax(74px, .3fr) minmax(0, 1fr) 40px;
+    gap: 6px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-result-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-result-row code {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-timestamp-row-copy {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* File comparison controls use full-width fields and touch-sized actions. */
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-actions button {
+    min-width: 40px;
+    padding-inline: 10px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-pair {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-vs {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    margin-inline: auto;
+    transform: rotate(90deg);
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-settings {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    gap: 5px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-control select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    font-size: 16px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-run button {
+    width: 100%;
+    min-height: 44px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-result-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-filter {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: 6px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-filter select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    font-size: 16px;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+  }
+  .dev-tools-page.dev-is-fullscreen .dev-file-compare-remove {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 380px) {
+  .dev-tools-page.dev-is-fullscreen .dev-mode-tab {
+    min-height: 42px;
+    padding-inline: 1px;
+    font-size: 9px;
+    letter-spacing: -.03em;
+  }
+}
