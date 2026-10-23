@@ -130,9 +130,15 @@
           font-size: 11px; white-space: nowrap;
         }
         #workspace[data-tool="development"] .dev-workbench.dev-timestamp { gap: 6px; }
-        .dev-timestamp-mode-bar { padding-inline: 0 !important; }
-        .dev-timestamp-mode { width: 100%; max-width: none; margin: 0 0 7px; padding: 2px; }
-        .dev-timestamp-mode button { min-height: 34px; padding: 6px 8px; }
+        .dev-timestamp-mode-bar {
+          min-height: 0; align-items: flex-end; padding: 0 !important;
+          border-bottom: 1px solid var(--line);
+        }
+        .dev-timestamp-mode {
+          width: 100%; max-width: none; align-items: flex-end; margin: 0; padding: 0;
+        }
+        .dev-timestamp-mode button { min-height: 38px; padding: 6px 8px 7px; }
+        .dev-timestamp-mode button.active::after { bottom: -1px !important; }
         .dev-timestamp-content { gap: 7px; }
         .dev-timestamp-card, .dev-timestamp-output-card { padding: 7px 9px; gap: 5px; }
         .dev-timestamp .dev-pane-head { margin: 0; }
