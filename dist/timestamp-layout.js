@@ -138,7 +138,7 @@
           width: 100%; max-width: none; align-items: flex-end; margin: 0; padding: 0;
         }
         .dev-timestamp-mode button { min-height: 38px; padding: 6px 8px 7px; }
-        .dev-timestamp-mode button.active::after { bottom: -1px !important; }
+        .dev-timestamp-mode button.active::after { bottom: -5px !important; }
         .dev-timestamp-content { gap: 7px; }
         .dev-timestamp-card, .dev-timestamp-output-card { padding: 7px 9px; gap: 5px; }
         .dev-timestamp .dev-pane-head { margin: 0; }
