@@ -175,13 +175,13 @@ test('timestamp cities collapse, can be added and reordered; country drag reorde
   assert.match(outputMarkup, /data-dev-timestamp-row=/);
   assert.match(actionMarkup, /timestamp-city-add/);
   assert.match(actionMarkup, /validDeveloperTimeZone\(timeZone\)/);
-  assert.match(app, /timestampCityOrder\[countryKey\]/);
+  assert.match(app, /timestampCityOrder\[drag\.countryKey\]/);
   assert.match(countryDragMarkup, /finishTimestampCountryDrag/);
   assert.match(countryDragMarkup, /timestampCountryOrder =/);
   assert.match(countryDragMarkup, /cell\.animate\?\.\(/);
   assert.match(countryDragMarkup, /\.dev-timestamp-city-row/);
   assert.match(cityDragMarkup, /timestampCityOrderInMatrix/);
-  assert.match(cityDragMarkup, /data-dev-country-key/);
+  assert.match(cityDragMarkup, /dataset\.devCountryKey/);
   assert.match(actionMarkup, /timestampLive = true/);
   assert.match(actionMarkup, /stopDeveloperTimestampLive\(\)/);
   assert.match(app, /document\.addEventListener\('touchmove'[^]*passive: false/);
