@@ -1,4 +1,4 @@
-const CACHE = 'onebox-v673';
+const CACHE = 'onebox-v674';
 const APP_SHELL = [
   './',
   'index.html',
