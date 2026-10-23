@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.718';
+const APP_VERSION = '2.18.719';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9440,10 +9440,29 @@ function renderDeveloperTimestampResult() {
   const standardRows = result.rows.filter((row) => !row.city);
   const cityRows = result.rows.filter((row) => row.city);
   const standardMarkup = standardRows.map((row) => '<article class="dev-timestamp-summary-card ' + (row.primary ? 'is-primary' : '') + '"><span>' + escapeHtml(row.label) + '</span><code>' + escapeHtml(row.value) + '</code>' + (row.copyable ? copyButton(row) : '') + '</article>').join('');
-  const cityMarkup = cityRows.map((row) => '<article class="dev-timestamp-city-card"><div class="dev-timestamp-city-card-head"><span class="dev-timestamp-country-label">' + escapeHtml(row.group || (english ? 'Other' : '其他')) + '</span><strong class="dev-timestamp-city-name">' + escapeHtml(row.displayLabel || row.label) + '</strong>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div><code class="dev-timestamp-city-time">' + escapeHtml(row.localTime) + '</code><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></article>').join('');
+  const countries = new Map();
+  cityRows.forEach((row) => {
+    const country = row.group || (english ? 'Other' : '其他');
+    if (!countries.has(country)) countries.set(country, []);
+    countries.get(country).push(row);
+  });
+  const countryFlags = {
+    '美国': '🇺🇸', 'United States': '🇺🇸',
+    '日本': '🇯🇵', 'Japan': '🇯🇵',
+    '英国': '🇬🇧', 'United Kingdom': '🇬🇧',
+    '德国': '🇩🇪', 'Germany': '🇩🇪',
+    '加拿大': '🇨🇦', 'Canada': '🇨🇦',
+    '中国': '🇨🇳', 'China': '🇨🇳',
+    '越南': '🇻🇳', 'Vietnam': '🇻🇳',
+  };
+  const cityMarkup = [...countries.entries()].map(([country, rows]) => {
+    const entries = rows.map((row) => '<article class="dev-timestamp-city-card"><div class="dev-timestamp-city-card-head"><strong class="dev-timestamp-city-name">' + escapeHtml(row.displayLabel || row.label) + '</strong>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div><code class="dev-timestamp-city-time">' + escapeHtml(row.localTime) + '</code><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></article>').join('');
+    const countryCount = english ? rows.length + (rows.length === 1 ? ' city' : ' cities') : rows.length + ' 个城市';
+    return '<section class="dev-timestamp-country-row"><div class="dev-timestamp-country-heading"><span class="dev-timestamp-country-flag" aria-hidden="true">' + (countryFlags[country] || '🌐') + '</span><span class="dev-timestamp-country-name"><strong>' + escapeHtml(country) + '</strong><small>' + escapeHtml(countryCount) + '</small></span></div><div class="dev-timestamp-city-grid">' + entries + '</div></section>';
+  }).join('');
   const cityHeading = english ? 'Major city times' : '主要城市时间';
   const cityCount = english ? cityRows.length + ' cities' : cityRows.length + ' 个城市';
-  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4><span>' + escapeHtml(cityHeading) + '</span><small>' + escapeHtml(cityCount) + '</small></h4><div class="dev-timestamp-city-grid">' + cityMarkup + '</div></section></div>';
+  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4><span>' + escapeHtml(cityHeading) + '</span><small>' + escapeHtml(cityCount) + '</small></h4><div class="dev-timestamp-country-list">' + cityMarkup + '</div></section></div>';
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
