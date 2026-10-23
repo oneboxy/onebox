@@ -23,6 +23,7 @@
         border-bottom: 0 !important; border-radius: 10px 10px 0 0 !important; background: var(--panel, #fff) !important;
         padding: 0 10px !important; gap: 7px; transition: box-shadow .18s ease, transform .18s ease;
       }
+      .dev-timestamp-country-header-cell.is-empty-country { border-bottom: 1px solid var(--line, #dce2ee) !important; border-radius: 10px !important; }
       .dev-timestamp-country-header-cell.is-dragging { z-index: 3; box-shadow: 0 10px 26px #17255425; transform: scale(1.025); }
       .dev-timestamp-country-name { flex: 0 0 auto; }
       .dev-timestamp-country-add { flex: 0 0 auto; }
@@ -95,7 +96,11 @@
         const key = header.dataset.devCountryKey;
         const cityCells = [...matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(key) + '"]')];
         cityCells.forEach((cell) => cell.classList.remove('is-country-last-city'));
-        const cityCellsWithCards = cityCells.filter((cell) => cell.querySelector('.dev-timestamp-city-card[data-dev-city-id]'));
+        const cityCellsWithCards = cityCells.filter((cell) => {
+          const card = cell.querySelector('.dev-timestamp-city-card[data-dev-city-id]');
+          return card && !readHidden().has(card.dataset.devCityId);
+        });
+        header.classList.toggle('is-empty-country', cityCellsWithCards.length === 0);
         cityCellsWithCards[cityCellsWithCards.length - 1]?.classList.add('is-country-last-city');
         const firstAdd = cityCells.map((cell) => cell.querySelector('.dev-timestamp-city-add-inline')).find(Boolean);
         if (firstAdd) {
