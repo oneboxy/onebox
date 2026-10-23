@@ -92,12 +92,12 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
 });
 
 
-test('timestamp tools use a full-width responsive layout with compact city cards', () => {
+test('timestamp tools use underlined mode tabs and group city times into flag-labeled country rows', () => {
   const app = read('dist/app.js');
   const css = read('dist/style.css');
   const html = read('dist/index.html');
   const sw = read('dist/sw.js');
-  const timestampStyles = css.slice(css.lastIndexOf('/* 2.18.718: simplify timestamp controls'));
+  const timestampStyles = css.slice(css.lastIndexOf('/* 2.18.719: underline timestamp modes'));
   const inputStart = app.indexOf('function renderDeveloperTimestamp()');
   const inputEnd = app.indexOf('let lastDeveloperCompareResult', inputStart);
   const outputStart = app.indexOf('function renderDeveloperTimestampResult()');
@@ -106,17 +106,21 @@ test('timestamp tools use a full-width responsive layout with compact city cards
   assert.ok(outputStart >= 0 && outputEnd > outputStart);
   const inputMarkup = app.slice(inputStart, inputEnd);
   const outputMarkup = app.slice(outputStart, outputEnd);
-  assert.match(app, /const APP_VERSION = '2\.18\.718';/);
+  assert.match(app, /const APP_VERSION = '2\.18\.719';/);
   assert.doesNotMatch(inputMarkup, /data-dev-pane-grid|devPaneSplitter/);
-  assert.match(inputMarkup, /dev-timestamp-card/);
-  assert.match(outputMarkup, /dev-timestamp-city-grid/);
-  assert.match(outputMarkup, /dev-timestamp-city-card/);
+  assert.match(inputMarkup, /dev-timestamp-mode/);
+  assert.match(outputMarkup, /dev-timestamp-country-row/);
+  assert.match(outputMarkup, /dev-timestamp-country-flag/);
+  assert.match(outputMarkup, /countryFlags\[country\]/);
+  assert.match(outputMarkup, /countries\.entries\(\)/);
   assert.match(outputMarkup, /row\.group/);
-  assert.match(timestampStyles, /\.dev-workbench\.dev-timestamp\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*!important/s);
+  assert.match(timestampStyles, /\.dev-timestamp-mode\s*\{[^}]*border:\s*0/s);
+  assert.match(timestampStyles, /\.dev-timestamp-mode button\.active::after/);
+  assert.match(timestampStyles, /\.dev-timestamp-country-row\s*\{[^}]*grid-template-columns/s);
   assert.match(timestampStyles, /\.dev-timestamp-city-grid\s*\{[^}]*repeat\(auto-fit/s);
-  assert.match(timestampStyles, /\.dev-timestamp-output-card \.dev-timestamp-row-copy\s*\{[^}]*opacity:\s*\.48/s);
-  assert.match(html, /timestamp-layout\.js\?v=2\.18\.718/);
-  assert.match(sw, /timestamp-layout\.js\?v=2\.18\.718/);
+  assert.match(html, /timestamp-layout\.js\?v=2\.18\.719/);
+  assert.match(sw, /timestamp-layout\.js\?v=2\.18\.719/);
+  assert.match(sw, /onebox-v650/);
 });
 
 test('JSON editor helper passes JavaScript syntax checking', () => {

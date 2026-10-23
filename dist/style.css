@@ -19773,7 +19773,7 @@ body.dev-pane-resizing * {
 /* 2.18.717: tighten city-time cards to fit more conversions in one view. */
 
 
-/* 2.18.718: simplify timestamp controls and use consistent full-width result cards. */
+/* 2.18.719: underline timestamp modes and group city conversions by country. */
 .dev-workbench.dev-timestamp {
   grid-template-columns: minmax(0, 1fr) !important;
   align-content: start;
@@ -19781,12 +19781,13 @@ body.dev-pane-resizing * {
 }
 .dev-timestamp-card {
   display: grid;
-  grid-template-columns: minmax(145px, auto) minmax(210px, 270px) minmax(0, 1fr);
-  align-items: center;
-  gap: 10px 14px;
-  padding: 10px 14px;
+  grid-template-columns: minmax(170px, 220px) minmax(0, 1fr);
+  align-items: start;
+  gap: 10px 18px;
+  padding: 12px 14px;
 }
 .dev-timestamp-card .dev-pane-head {
+  grid-column: 1 / -1;
   min-width: 0;
   margin: 0;
 }
@@ -19794,35 +19795,71 @@ body.dev-pane-resizing * {
 .dev-timestamp .dev-pane-actions { gap: 5px; }
 .dev-timestamp .dev-action { min-height: 30px; padding: 5px 8px; }
 .dev-timestamp-mode {
-  width: 100%;
-  max-width: 380px;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  width: max-content;
+  max-width: 100%;
   margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
-.dev-timestamp-mode button { min-height: 32px; }
+.dev-timestamp-mode button {
+  position: relative;
+  min-height: 34px;
+  padding: 0 1px 8px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  margin: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dev-timestamp-mode button.active { color: var(--primary); }
+.dev-timestamp-mode button.active::after {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary);
+  content: "";
+}
+.dev-timestamp-mode button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 50%, transparent);
+  outline-offset: 3px;
+}
 .dev-timestamp-field {
   display: grid;
-  grid-template-columns: minmax(94px, auto) minmax(0, 1fr);
-  align-items: center;
-  gap: 4px 10px;
+  grid-column: 2;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 5px;
   min-width: 0;
   color: var(--ink);
   font-size: 11px;
   font-weight: 650;
 }
-.dev-timestamp-field > span {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  padding-left: 1px;
-}
+.dev-timestamp-field > span,
+.dev-timestamp-field small,
+.dev-timestamp-input-row,
+.dev-timestamp-field > .dev-plain-input { grid-column: 1; }
+.dev-timestamp-field > span { padding-left: 1px; }
 .dev-timestamp-field small {
-  grid-column: 2;
   color: var(--muted);
   font-size: 10px;
   font-weight: 400;
   line-height: 1.35;
 }
 .dev-timestamp-input-row {
-  grid-column: 2;
   grid-template-columns: minmax(0, 1fr) minmax(112px, 130px);
   gap: 7px;
 }
@@ -19830,9 +19867,9 @@ body.dev-pane-resizing * {
 .dev-timestamp-field > .dev-plain-input {
   min-width: 0;
   min-height: 38px;
+  margin: 0;
   font-size: 12px;
 }
-.dev-timestamp-field .dev-date-input { grid-column: 2; margin: 0; }
 .dev-timestamp-results { gap: 10px; }
 .dev-timestamp-standard-grid {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
@@ -19853,7 +19890,7 @@ body.dev-pane-resizing * {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin: 0 0 7px;
+  margin: 0 0 5px;
   padding: 0 1px 6px;
   border-bottom: 1px solid var(--line);
   color: var(--ink);
@@ -19864,39 +19901,69 @@ body.dev-pane-resizing * {
   font-size: 10px;
   font-weight: 400;
 }
+.dev-timestamp-country-list { display: grid; }
+.dev-timestamp-country-row {
+  display: grid;
+  grid-template-columns: minmax(125px, 155px) minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+.dev-timestamp-country-row:last-child { border-bottom: 0; }
+.dev-timestamp-country-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 4px;
+}
+.dev-timestamp-country-flag {
+  flex: 0 0 auto;
+  font-size: 21px;
+  line-height: 1;
+}
+.dev-timestamp-country-name {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.dev-timestamp-country-name strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dev-timestamp-country-name small {
+  color: var(--muted);
+  font-size: 10px;
+}
 .dev-timestamp-city-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
   align-items: stretch;
-  gap: 7px;
+  gap: 6px;
+  min-width: 0;
 }
 .dev-timestamp-city-card {
   position: relative;
   display: grid;
-  align-content: start;
+  align-content: center;
   gap: 3px;
   min-width: 0;
-  min-height: 68px;
-  padding: 7px 30px 6px 8px;
+  min-height: 58px;
+  padding: 7px 30px 7px 9px;
   border: 1px solid var(--line);
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--soft) 12%, var(--panel));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--soft) 10%, var(--panel));
 }
 .dev-timestamp-city-card-head {
   display: flex;
   align-items: center;
   gap: 5px;
   min-width: 0;
-}
-.dev-timestamp-country-label {
-  flex: 0 0 auto;
-  padding: 2px 5px;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--primary) 7%, var(--panel));
-  color: var(--muted);
-  font-size: 9px;
-  line-height: 1.2;
-  white-space: nowrap;
 }
 .dev-timestamp-city-name {
   min-width: 0;
@@ -19924,11 +19991,7 @@ body.dev-pane-resizing * {
   font: 9px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   overflow-wrap: anywhere;
 }
-.dev-timestamp-city-copy {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-}
+.dev-timestamp-city-copy { position: absolute; top: 4px; right: 4px; }
 .dev-timestamp-output-card .dev-timestamp-row-copy {
   width: 22px;
   min-width: 22px;
@@ -19954,13 +20017,6 @@ body.dev-pane-resizing * {
   outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
   outline-offset: 1px;
 }
-@media (min-width: 761px) and (max-width: 1040px) {
-  .dev-timestamp-card { grid-template-columns: minmax(0, 1fr) minmax(190px, .8fr); }
-  .dev-timestamp-card .dev-pane-head { grid-column: 1; grid-row: 1; }
-  .dev-timestamp-card .dev-timestamp-mode { grid-column: 2; grid-row: 1; }
-  .dev-timestamp-card .dev-timestamp-field { grid-column: 1 / -1; }
-  .dev-timestamp-mode { max-width: none; }
-}
 @media (max-width: 760px) {
   .dev-timestamp-card {
     grid-template-columns: minmax(0, 1fr);
@@ -19973,26 +20029,17 @@ body.dev-pane-resizing * {
     grid-column: 1;
     grid-row: auto;
   }
-  .dev-timestamp-card .dev-pane-head { align-items: center; }
-  .dev-timestamp-mode { max-width: none; }
+  .dev-timestamp-mode { width: max-content; }
   .dev-timestamp-mode button { min-height: 34px; }
-  .dev-timestamp-field {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 5px;
-    font-size: 11px;
-  }
-  .dev-timestamp-field > span,
-  .dev-timestamp-field small,
-  .dev-timestamp-input-row,
-  .dev-timestamp-field > .dev-plain-input {
-    grid-column: 1;
-    grid-row: auto;
-  }
+  .dev-timestamp-field { gap: 5px; }
   .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 112px; }
   .dev-timestamp-standard-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 165px), 1fr)); }
-  .dev-timestamp-city-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+  .dev-timestamp-country-row { grid-template-columns: minmax(95px, 112px) minmax(0, 1fr); gap: 6px; }
+  .dev-timestamp-country-heading { align-items: flex-start; gap: 5px; padding: 7px 2px; }
+  .dev-timestamp-country-flag { font-size: 18px; }
+  .dev-timestamp-city-grid { grid-template-columns: minmax(0, 1fr); }
+  .dev-timestamp-city-card { min-height: 54px; }
   .dev-timestamp-output-card { padding: 12px; }
-  .dev-timestamp-city-card { min-height: 66px; }
   .dev-timestamp-output-card .dev-timestamp-row-copy {
     width: 26px;
     min-width: 26px;
@@ -20003,6 +20050,6 @@ body.dev-pane-resizing * {
 }
 @media (max-width: 360px) {
   .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 100px; }
-  .dev-timestamp-city-grid,
   .dev-timestamp-standard-grid { grid-template-columns: minmax(0, 1fr); }
+  .dev-timestamp-country-row { grid-template-columns: minmax(78px, 88px) minmax(0, 1fr); }
 }
