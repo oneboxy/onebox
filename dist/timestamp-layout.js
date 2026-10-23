@@ -43,15 +43,18 @@
       .dev-timestamp-expand-cities.is-no-extra-cities { opacity: .48; cursor: default; }
       .dev-timestamp-city-row { border: 0 !important; border-bottom: 0 !important; min-height: 0 !important; }
       .dev-timestamp-city-cell { box-sizing: border-box; min-width: 0; padding: 3px 10px 5px !important; border-left: 1px solid var(--line, #dce2ee); border-right: 1px solid var(--line, #dce2ee); border-bottom: 1px solid var(--line, #dce2ee); background: var(--panel, #fff); }
-      .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 0 !important; }
+      .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 1px solid var(--line, #dce2ee) !important; }
       .dev-timestamp-city-cell.is-country-last-city { border-radius: 0 0 10px 10px; }
       .dev-timestamp-city-cell.is-empty { border: 0 !important; background: transparent !important; }
       .dev-timestamp-city-card { position: relative; min-height: 56px !important; padding: 7px 0 !important; }
-      .dev-timestamp-city-card-head { min-width: 0; display: grid !important; grid-template-columns: minmax(0, 1fr) 42px; grid-template-areas: "name actions" "zone actions"; align-items: start !important; gap: 3px 5px; }
-      .dev-timestamp-city-name { grid-area: name; min-width: 0; font-size: 13px !important; white-space: nowrap; }
-      .dev-timestamp-city-zone.is-inline { grid-area: zone; display: block !important; min-width: 0; overflow: visible; white-space: normal; overflow-wrap: anywhere; word-break: break-word; color: var(--muted, #697386); font-size: 10px !important; line-height: 1.3; }
+      .dev-timestamp-city-card-head { min-width: 0; display: flex !important; align-items: baseline !important; gap: 5px; white-space: nowrap; }
+      .dev-timestamp-city-heading { display: flex; align-items: baseline; flex-wrap: nowrap; gap: 5px; min-width: 0; white-space: nowrap; }
+      .dev-timestamp-city-name { flex: 0 0 auto; font-size: 13px !important; white-space: nowrap; }
+      .dev-timestamp-city-zone.is-inline { display: inline !important; flex: 0 0 auto; min-width: 0; overflow: visible; white-space: nowrap; color: var(--muted, #697386); font-size: 8px !important; line-height: 1.25; }
       .dev-timestamp-city-zone.is-inline code { display: inline; font-size: inherit !important; }
-      .dev-timestamp-city-actions { grid-area: actions; display: flex; align-items: flex-start; justify-content: flex-end; gap: 2px; min-width: 0; }
+      .dev-timestamp-city-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+      .dev-timestamp-city-actions { display: flex; align-items: center; justify-content: flex-end; gap: 2px; min-width: 0; }
+      .dev-timestamp-city-time { display: block; margin-top: 0; font-size: 11px !important; white-space: nowrap; }
       .dev-timestamp-city-actions .dev-timestamp-city-copy,
       .dev-timestamp-city-actions .dev-timestamp-city-delete { position: static !important; inset: auto !important; flex: 0 0 18px; width: 18px !important; height: 18px !important; min-width: 18px; min-height: 18px !important; padding: 2px !important; opacity: .78; }
       .dev-timestamp-city-actions .dev-timestamp-city-delete { color: var(--muted, #697386) !important; }
@@ -79,10 +82,9 @@
         .dev-timestamp-country-matrix { min-width: max(100%, calc(var(--dev-timestamp-country-count, 1) * 210px)) !important; }
         .dev-timestamp-country-header-row, .dev-timestamp-city-row { column-gap: 8px !important; }
         .dev-timestamp-city-cell { padding-inline: 8px !important; }
-        .dev-timestamp-city-card-head { grid-template-columns: minmax(0, 1fr) 38px; gap: 3px 4px; }
-        .dev-timestamp-city-actions { gap: 2px; }
-        .dev-timestamp-city-card-head { gap: 5px; }
-        .dev-timestamp-city-zone.is-inline { font-size: 9px !important; }
+        .dev-timestamp-city-card-head { gap: 4px; }
+        .dev-timestamp-city-heading { gap: 4px; }
+        .dev-timestamp-city-zone.is-inline { font-size: 8px !important; }
       }
     `;
     document.head.append(style);
@@ -152,12 +154,29 @@
             zone.replaceChildren(document.createTextNode(value));
             if (cityName && cityName.nextElementSibling !== zone) cityName.insertAdjacentElement('afterend', zone);
           }
-          let actions = head?.querySelector('.dev-timestamp-city-actions');
+          let actions = card.querySelector('.dev-timestamp-city-actions');
           if (head && !actions) {
             actions = document.createElement('span');
             actions.className = 'dev-timestamp-city-actions';
             head.append(actions);
           }
+          let heading = card.querySelector('.dev-timestamp-city-heading');
+          if (head && !heading) {
+            heading = document.createElement('div');
+            heading.className = 'dev-timestamp-city-heading';
+            head.insertBefore(heading, cityName || head.firstChild);
+          }
+          if (heading && cityName && cityName.parentElement !== heading) heading.append(cityName);
+          if (heading && zone && zone.parentElement !== heading) heading.append(zone);
+          let footer = card.querySelector('.dev-timestamp-city-footer');
+          if (!footer) {
+            footer = document.createElement('div');
+            footer.className = 'dev-timestamp-city-footer';
+            card.append(footer);
+          }
+          const cityTime = card.querySelector('.dev-timestamp-city-time');
+          if (cityTime && cityTime.parentElement !== footer) footer.append(cityTime);
+          if (actions && actions.parentElement !== footer) footer.append(actions);
           const copyButton = card.querySelector('.dev-timestamp-city-copy');
           if (copyButton && actions && copyButton.parentElement !== actions) actions.append(copyButton);
           if (!card.querySelector('.dev-timestamp-city-delete')) {
