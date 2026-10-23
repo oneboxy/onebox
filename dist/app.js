@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.716';
+const APP_VERSION = '2.18.717';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8839,6 +8839,9 @@ function developerTimestampRows(date, mode) {
       group: country,
       sectionLabel: citiesHeading,
       value: formattedTime + ' · ' + utcOffset + ' · ' + city.timeZone,
+      localTime: formattedTime,
+      utcOffset,
+      timeZone: city.timeZone,
       copyable: true,
       city: true,
     };
@@ -9433,24 +9436,21 @@ function renderDeveloperTimestampResult() {
   const result = developerTimestampResult();
   if (!result.ok) return '<div class="dev-timestamp-error" role="alert">' + escapeHtml(result.message) + '</div>';
   const copyTitle = t('devCopy');
-  let previousGroup = '';
-  let cityHeadingShown = false;
-  const rows = result.rows.map((row) => {
-    let heading = '';
-    if (row.group) {
-      if (!cityHeadingShown) {
-        heading += '<div class="dev-timestamp-city-heading">' + escapeHtml(row.sectionLabel) + '</div>';
-        cityHeadingShown = true;
-      }
-      if (previousGroup !== row.group) heading += '<div class="dev-timestamp-country-heading">' + escapeHtml(row.group) + '</div>';
-      previousGroup = row.group;
-    } else previousGroup = '';
-    const copy = row.copyable
-      ? '<button type="button" class="dev-timestamp-row-copy" data-dev-action="timestamp-copy-value" data-dev-value="' + escapeHtml(row.key) + '" aria-label="' + escapeHtml(copyTitle + ' ' + row.label) + '" title="' + escapeHtml(copyTitle) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"></path></svg></button>'
-      : '<span class="dev-timestamp-row-spacer" aria-hidden="true"></span>';
-    return heading + '<div class="dev-timestamp-result-row ' + (row.primary ? 'is-primary' : '') + (row.city ? ' is-city' : '') + '"><span class="dev-timestamp-result-label">' + escapeHtml(row.displayLabel || row.label) + '</span><code>' + escapeHtml(row.value) + '</code>' + copy + '</div>';
+  const copyButton = (row, className = 'dev-timestamp-row-copy') => '<button type="button" class="' + className + '" data-dev-action="timestamp-copy-value" data-dev-value="' + escapeHtml(row.key) + '" aria-label="' + escapeHtml(copyTitle + ' ' + row.label) + '" title="' + escapeHtml(copyTitle) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"></path></svg></button>';
+  const standardRows = result.rows.filter((row) => !row.city);
+  const cityRows = result.rows.filter((row) => row.city);
+  const standardMarkup = standardRows.map((row) => '<article class="dev-timestamp-summary-card ' + (row.primary ? 'is-primary' : '') + '"><span>' + escapeHtml(row.label) + '</span><code>' + escapeHtml(row.value) + '</code>' + (row.copyable ? copyButton(row) : '') + '</article>').join('');
+  const countries = new Map();
+  cityRows.forEach((row) => {
+    if (!countries.has(row.group)) countries.set(row.group, []);
+    countries.get(row.group).push(row);
+  });
+  const cityMarkup = [...countries.entries()].map(([country, rows]) => {
+    const entries = rows.map((row) => '<div class="dev-timestamp-city-entry"><div class="dev-timestamp-city-details"><div class="dev-timestamp-city-main"><span>' + escapeHtml(row.displayLabel || row.label) + '</span><code>' + escapeHtml(row.localTime) + '</code></div><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></div>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div>').join('');
+    return '<section class="dev-timestamp-country-card"><header><strong>' + escapeHtml(country) + '</strong><small>' + rows.length + (english ? ' cities' : ' 个城市') + '</small></header><div class="dev-timestamp-city-list">' + entries + '</div></section>';
   }).join('');
-  return '<div class="dev-timestamp-results">' + rows + '</div>';
+  const cityHeading = english ? 'Major city times' : '主要城市时间';
+  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4>' + escapeHtml(cityHeading) + '</h4><div class="dev-timestamp-country-grid">' + cityMarkup + '</div></section></div>';
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
