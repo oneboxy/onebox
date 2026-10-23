@@ -20066,3 +20066,49 @@ body.dev-pane-resizing * {
   .dev-timestamp-city-grid { grid-template-columns: minmax(0, 1fr); }
   .dev-timestamp-standard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+
+/* 2.18.722: show every timestamp country row and allow scrolling on short screens. */
+.dev-timestamp-country-list {
+  gap: 7px;
+}
+.dev-timestamp-country-row {
+  padding-block: 3px;
+}
+.dev-timestamp-city-card {
+  height: 54px;
+  min-height: 54px;
+  padding-block: 4px;
+}
+@media (max-width: 760px) {
+  .dev-timestamp-city-card {
+    height: 60px;
+    min-height: 60px;
+    padding-block: 5px;
+  }
+}
+@media (min-width: 761px) {
+  .dev-tools-page.dev-is-fullscreen:has(.dev-workbench.dev-timestamp) {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+  }
+  .dev-tools-page.dev-is-fullscreen:has(.dev-workbench.dev-timestamp) > .dev-mode-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: var(--panel);
+  }
+  .dev-tools-page.dev-is-fullscreen:has(.dev-workbench.dev-timestamp) > .dev-tools-body,
+  .dev-tools-page.dev-is-fullscreen:has(.dev-workbench.dev-timestamp) .dev-current-tool,
+  .dev-tools-page.dev-is-fullscreen:has(.dev-workbench.dev-timestamp) .dev-workbench.dev-timestamp {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+  .dev-tools-page.dev-is-fullscreen:has(.dev-workbench.dev-timestamp) .dev-workbench.dev-timestamp {
+    grid-template-rows: auto;
+    align-content: start;
+    overflow: visible;
+  }
+}
