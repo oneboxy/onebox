@@ -107,6 +107,34 @@
     `;
     document.head.append(style);
   };
+  const modalLayoutProperties = ['position', 'inset', 'width', 'height', 'display', 'align-items', 'justify-content', 'box-sizing', 'padding', 'margin', 'z-index', 'background', 'backdrop-filter'];
+  const centerModal = (modal) => {
+    modal.style.setProperty('position', 'fixed', 'important');
+    modal.style.setProperty('inset', '0', 'important');
+    modal.style.setProperty('width', '100vw', 'important');
+    modal.style.setProperty('height', '100vh', 'important');
+    modal.style.setProperty('height', '100dvh', 'important');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('align-items', 'center', 'important');
+    modal.style.setProperty('justify-content', 'center', 'important');
+    modal.style.setProperty('box-sizing', 'border-box', 'important');
+    modal.style.setProperty('padding', 'calc(var(--app-header-height, 56px) + 12px) 16px 20px', 'important');
+    modal.style.setProperty('margin', '0', 'important');
+    modal.style.setProperty('z-index', '9999', 'important');
+    modal.style.setProperty('background', 'rgb(17 19 26 / .28)', 'important');
+    modal.style.setProperty('backdrop-filter', 'blur(2px)', 'important');
+    const panel = modal.querySelector('.dev-timestamp-city-form');
+    if (!panel) return;
+    panel.style.setProperty('flex', '0 1 400px', 'important');
+    panel.style.setProperty('width', 'min(100%, 400px)', 'important');
+    panel.style.setProperty('max-height', 'calc(100dvh - 80px)', 'important');
+    panel.style.setProperty('overflow-y', 'auto', 'important');
+  };
+  const clearModalPosition = (modal) => {
+    modalLayoutProperties.forEach((property) => modal.style.removeProperty(property));
+    const panel = modal.querySelector('.dev-timestamp-city-form');
+    ['flex', 'width', 'max-height', 'overflow-y'].forEach((property) => panel?.style.removeProperty(property));
+  };
   const enhance = () => {
     addStyle();
     document.querySelectorAll('.dev-timestamp-country-list').forEach((list) => {
@@ -151,6 +179,7 @@
         syncCountry();
         if (!addForm.classList.contains('is-modal')) {
           addForm.classList.add('is-modal');
+          centerModal(addForm);
           document.body.append(addForm);
           requestAnimationFrame(() => addForm.querySelector('.dev-timestamp-city-name-input')?.focus());
         }
@@ -259,12 +288,14 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     modal.classList.remove('is-modal');
+    clearModalPosition(modal);
     list.append(modal);
     action.click();
     if (action.dataset.devAction === 'timestamp-city-add') {
       setTimeout(() => {
         if (!modal.isConnected || !modal.closest('.dev-timestamp-country-list')) return;
         modal.classList.add('is-modal');
+        centerModal(modal);
         document.body.append(modal);
         modal.querySelector('.dev-timestamp-city-name-input')?.focus();
       }, 0);
