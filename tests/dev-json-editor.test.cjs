@@ -108,7 +108,7 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
   assert.ok(outputStart >= 0 && outputEnd > outputStart);
   const inputMarkup = app.slice(inputStart, inputEnd);
   const outputMarkup = app.slice(outputStart, outputEnd);
-  assert.match(app, /const APP_VERSION = '2\.18\.723';/);
+  assert.match(app, /const APP_VERSION = '2\.18\.724';/);
   assert.match(inputMarkup, /dev-timestamp-mode-bar[^]*dev-timestamp-content/);
   assert.match(inputMarkup, /dev-timestamp-content[^]*devPaneHead\(t\('devInput'\)\)[^]*devOutputPaneHead\('timestamp', t\('devOutput'\)/);
   assert.match(inputMarkup, /timestampUnit[^]*<\/select>' \+ inputActions/);
@@ -126,9 +126,9 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
   assert.match(timestampStyles, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*64px/s);
   assert.match(timestampViewportFix, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*54px/s);
   assert.match(timestampViewportFix, /overflow-y:\s*auto !important/);
-  assert.match(html, /app\.js\?v=2\.18\.723/);
-  assert.match(sw, /app\.js\?v=2\.18\.723/);
-  assert.match(sw, /onebox-v654/);
+  assert.match(html, /app\.js\?v=2\.18\.724/);
+  assert.match(sw, /app\.js\?v=2\.18\.724/);
+  assert.match(sw, /onebox-v655/);
 });
 
 
@@ -147,6 +147,13 @@ test('timestamp country cards collapse city overflow and persist custom cities, 
   const stateMarkup = app.slice(stateStart, stateEnd);
   const rowMarkup = app.slice(rowsStart, rowsEnd);
   const outputMarkup = app.slice(outputStart, outputEnd);
+  const timestampRowsSource = rowMarkup.slice(0, rowMarkup.indexOf('function developerTimestampResult()')).trim();
+  const timestampRows = vm.runInNewContext(`(${timestampRowsSource})`, {
+    state: { language: 'en', devTools: { timestampCustomCities: [], timestampCityOrder: {} } },
+    DEV_TIMESTAMP_COUNTRIES: [],
+    developerTimestampRelative: () => 'now',
+  });
+  assert.equal(timestampRows(new Date(0), 'timestamp').filter((row) => row.city).length, 23);
   const actionMarkup = app.slice(actionStart, actionEnd);
 
   assert.match(app, /DEV_TIMESTAMP_COUNTRIES = Object\.freeze/);
