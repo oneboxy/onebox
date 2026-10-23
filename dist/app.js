@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.724';
+const APP_VERSION = '2.18.725';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -374,7 +374,7 @@ const DICT = {
     calendarDesc: '公历、农历、节气、节假日、补班和个人日程集中查看。',
     weatherDesc: '搜索区县，查看实时、小时级和未来 15 天天气趋势。',
     convertDesc: '常用单位换算',
-    developmentDesc: 'JSON、文本和时间工具，记录保存在本机。', devJsonFormat: 'JSON 格式化', devJsonCompare: 'JSON 对比', devTextStats: '文本统计', devTimestamp: '时间戳', devInput: '输入', devOutput: '输出', devFormat: '格式化', devMinify: '压缩', devCompare: '开始对比', devAnalyze: '统计文本', devConvert: '转换时间', devSaveRecord: '保存记录', devClear: '清空', devCopy: '复制结果', devExample: '示例', devRecords: '历史记录', devNoRecords: '还没有记录', devReuseHint: '点击记录即可复用', devJsonA: 'JSON A', devJsonB: 'JSON B', devValid: 'JSON 有效', devInvalid: 'JSON 格式有误', devSame: '两份 JSON 相同', devDifferent: '发现 {count} 处差异', devCharacters: '字符', devNonSpace: '非空格字符', devLines: '行数', devChinese: '中文字符', devWords: '单词', devParagraphs: '段落', devTimestampToDate: '时间戳 → 日期', devDateToTimestamp: '日期 → 时间戳', devSeconds: '秒', devMilliseconds: '毫秒', devNow: '当前时间', devUnescape: '去转义', devExpandAll: '全部展开', devCollapseAll: '全部折叠', devFullscreen: '全屏', devExitFullscreen: '退出全屏',
+    developmentDesc: 'JSON、文本和时间工具，记录保存在本机。', devJsonFormat: 'JSON 格式化', devJsonCompare: 'JSON 对比', devTextStats: '文本统计', devTimestamp: '时间', devInput: '输入', devOutput: '输出', devFormat: '格式化', devMinify: '压缩', devCompare: '开始对比', devAnalyze: '统计文本', devConvert: '转换时间', devSaveRecord: '保存记录', devClear: '清空', devCopy: '复制结果', devExample: '示例', devRecords: '历史记录', devNoRecords: '还没有记录', devReuseHint: '点击记录即可复用', devJsonA: 'JSON A', devJsonB: 'JSON B', devValid: 'JSON 有效', devInvalid: 'JSON 格式有误', devSame: '两份 JSON 相同', devDifferent: '发现 {count} 处差异', devCharacters: '字符', devNonSpace: '非空格字符', devLines: '行数', devChinese: '中文字符', devWords: '单词', devParagraphs: '段落', devTimestampToDate: '时间戳 → 日期', devDateToTimestamp: '日期 → 时间戳', devSeconds: '秒', devMilliseconds: '毫秒', devNow: '当前时间', devUnescape: '去转义', devExpandAll: '全部展开', devCollapseAll: '全部折叠', devFullscreen: '全屏', devExitFullscreen: '退出全屏',
     translateDesc: '快速翻译，结果保存在本机',
     recentCalculations: '最近计算', clear: '清除', ready: '完成的计算会显示在这里。',
     scientific: '科学计算', collapse: '收起', expand: '展开', degree: '度', radian: '弧度',
@@ -554,6 +554,7 @@ function normalizeDevTools(value) {
   const timestampCustomCities = (Array.isArray(source.timestampCustomCities) ? source.timestampCustomCities : []).map((item) => ({ id: String(item?.id || '').trim().slice(0, 80), countryKey: String(item?.countryKey || ''), name: String(item?.name || '').trim().slice(0, 60), timeZone: String(item?.timeZone || '').trim().slice(0, 100) })).filter((item) => /^[a-zA-Z0-9_-]{1,80}$/.test(item.id) && countryKeys.has(item.countryKey) && item.name && validDeveloperTimeZone(item.timeZone)).slice(0, 100);
   const timestampCityOrder = Object.fromEntries(DEV_TIMESTAMP_COUNTRIES.map((country) => [country.key, Array.isArray(source.timestampCityOrder?.[country.key]) ? [...new Set(source.timestampCityOrder[country.key].map((key) => String(key).slice(0, 120)))].slice(0, 120) : []]));
   const timestampExpandedCountries = Array.isArray(source.timestampExpandedCountries) ? [...new Set(source.timestampExpandedCountries.map(String).filter((key) => countryKeys.has(key)))] : [];
+  const timestampCountryOrder = Array.isArray(source.timestampCountryOrder) ? [...new Set(source.timestampCountryOrder.map(String).filter((key) => countryKeys.has(key)))].slice(0, DEV_TIMESTAMP_COUNTRIES.length) : [];
   return {
     active: DEV_TOOL_IDS.includes(source.active) ? source.active : DEV_TOOL_IDS[0],
     fullscreen: source.fullscreen === true, formatInput: String(source.formatInput || ''), formatOutput: String(source.formatOutput || ''), formatStatus: String(source.formatStatus || ''), formatCompact: source.formatCompact === true, formatUnescape: source.formatUnescape !== false, formatCollapsed: Array.isArray(source.formatCollapsed) ? [...new Set(source.formatCollapsed.map((item) => String(item)))] : [],
@@ -572,7 +573,7 @@ function normalizeDevTools(value) {
     historyOpen: source.historyOpen === true,
     compareLeft: String(source.compareLeft || ''), compareRight: String(source.compareRight || ''), compareOutput: String(source.compareOutput || ''), compareStatus: String(source.compareStatus || ''),
     textInput: String(source.textInput || ''), textOutput: source.textOutput && typeof source.textOutput === 'object' ? source.textOutput : null,
-    timestampMode: source.timestampMode === 'date' ? 'date' : 'timestamp', timestampUnit: ['s', 'ms', 'auto'].includes(source.timestampUnit) ? source.timestampUnit : 's', timestampValue: String(source.timestampValue || ''), timestampDate: String(source.timestampDate || ''), timestampOutput: String(source.timestampOutput || ''), timestampStatus: String(source.timestampStatus || ''), timestampLive: false, timestampCustomCities, timestampCityOrder, timestampExpandedCountries, timestampAddCityCountry: '',
+    timestampMode: source.timestampMode === 'date' ? 'date' : 'timestamp', timestampUnit: ['s', 'ms', 'auto'].includes(source.timestampUnit) ? source.timestampUnit : 's', timestampValue: String(source.timestampValue || ''), timestampDate: String(source.timestampDate || ''), timestampOutput: String(source.timestampOutput || ''), timestampStatus: String(source.timestampStatus || ''), timestampLive: false, timestampCustomCities, timestampCityOrder, timestampExpandedCountries, timestampCountryOrder, timestampAddCityCountry: '',
     records,
   };
 }
@@ -9508,20 +9509,37 @@ function renderDeveloperTimestampResult() {
     if (!countryGroups.has(countryKey)) countryGroups.set(countryKey, []);
     countryGroups.get(countryKey).push(row);
   });
-  const cityMarkup = [...countryGroups.entries()].map(([countryKey, rows]) => {
+  const savedCountryOrder = dev.timestampCountryOrder || [];
+  const countryGroupEntries = [...countryGroups.entries()];
+  countryGroupEntries.sort(([leftKey], [rightKey]) => {
+    const leftIndex = savedCountryOrder.indexOf(leftKey);
+    const rightIndex = savedCountryOrder.indexOf(rightKey);
+    if (leftIndex >= 0 && rightIndex >= 0) return leftIndex - rightIndex;
+    if (leftIndex >= 0) return -1;
+    if (rightIndex >= 0) return 1;
+    return 0;
+  });
+  const addCityLabel = english ? 'Add city' : '添加城市';
+  const addCityIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+  const expandIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>';
+  const cityMarkup = countryGroupEntries.map(([countryKey, rows]) => {
     const country = rows[0]?.group || (english ? 'Other' : '其他');
     const expanded = dev.timestampExpandedCountries.includes(countryKey);
     const visibleRows = expanded ? rows : rows.slice(0, 3);
-    const columnCount = Math.max(1, Math.min(3, visibleRows.length));
     const entries = visibleRows.map((row) => '<article class="dev-timestamp-city-card" tabindex="0" data-dev-city-id="' + escapeHtml(row.key) + '" data-dev-timestamp-row="' + escapeHtml(row.key) + '" aria-label="' + escapeHtml((row.displayLabel || row.label) + (english ? ', long press to reorder' : '，长按拖动以调整顺序')) + '"><div class="dev-timestamp-city-card-head"><strong class="dev-timestamp-city-name">' + escapeHtml(row.displayLabel || row.label) + '</strong>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div><code class="dev-timestamp-city-time">' + escapeHtml(row.localTime) + '</code><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></article>').join('');
-    const addCityLabel = english ? '+ Add city' : '+ 添加城市';
     const addForm = dev.timestampAddCityCountry === countryKey
       ? '<div class="dev-timestamp-city-form"><input class="dev-plain-input dev-timestamp-city-name-input" type="text" maxlength="60" autocomplete="off" placeholder="' + escapeHtml(english ? 'City name' : '城市名称') + '"><input class="dev-plain-input dev-timestamp-city-zone-input" type="text" maxlength="100" list="dev-timestamp-timezones" autocomplete="off" placeholder="America/New_York" aria-label="' + escapeHtml(english ? 'IANA time zone' : 'IANA 时区') + '"><button type="button" class="secondary dev-action" data-dev-action="timestamp-city-add" data-dev-country-key="' + escapeHtml(countryKey) + '">' + escapeHtml(english ? 'Add' : '添加') + '</button><button type="button" class="secondary dev-action" data-dev-action="timestamp-city-add-cancel" data-dev-country-key="' + escapeHtml(countryKey) + '">' + escapeHtml(english ? 'Cancel' : '取消') + '</button></div>'
       : '';
+    const expandLabel = expanded
+      ? (english ? 'Show fewer cities' : '收起城市')
+      : (english ? 'Show all cities' : '展开全部城市');
     const expandButton = rows.length > 3
-      ? '<button type="button" class="dev-timestamp-expand-cities" data-dev-action="timestamp-city-expand" data-dev-country-key="' + escapeHtml(countryKey) + '" aria-expanded="' + String(expanded) + '">' + escapeHtml(english ? (expanded ? 'Show fewer' : 'Show all') : (expanded ? '收起' : '展开全部')) + '</button>'
+      ? '<button type="button" class="dev-timestamp-icon-button dev-timestamp-expand-cities" data-dev-action="timestamp-city-expand" data-dev-country-key="' + escapeHtml(countryKey) + '" aria-label="' + escapeHtml(expandLabel) + '" title="' + escapeHtml(expandLabel) + '" aria-expanded="' + String(expanded) + '">' + expandIcon + '</button>'
       : '';
-    return '<section class="dev-timestamp-country-row" data-dev-timestamp-country="' + escapeHtml(countryKey) + '"><header class="dev-timestamp-country-heading"><span class="dev-timestamp-country-identity"><span class="dev-timestamp-country-flag" aria-hidden="true">' + (countryFlags[country] || flagOther) + '</span><strong class="dev-timestamp-country-name">' + escapeHtml(country) + '</strong></span><button type="button" class="dev-timestamp-country-add" data-dev-action="timestamp-city-add-open" data-dev-country-key="' + escapeHtml(countryKey) + '" aria-label="' + escapeHtml(addCityLabel.replace(/^\+ /, '')) + '">' + escapeHtml(addCityLabel) + '</button></header>' + addForm + '<div class="dev-timestamp-city-grid" style="--dev-timestamp-city-columns:' + columnCount + '">' + entries + '</div>' + (expandButton ? '<div class="dev-timestamp-country-footer">' + expandButton + '</div>' : '') + '</section>';
+    const addButton = '<button type="button" class="dev-timestamp-icon-button dev-timestamp-country-add" data-dev-action="timestamp-city-add-open" data-dev-country-key="' + escapeHtml(countryKey) + '" aria-label="' + escapeHtml(addCityLabel) + '" title="' + escapeHtml(addCityLabel) + '">' + addCityIcon + '</button>';
+    const dragLabel = english ? ', long press to reorder countries' : '，长按拖动调整国家顺序';
+    const dragGrip = '<span class="dev-timestamp-country-grip" aria-hidden="true"><svg viewBox="0 0 12 18"><circle cx="3" cy="4" r="1.2"/><circle cx="9" cy="4" r="1.2"/><circle cx="3" cy="9" r="1.2"/><circle cx="9" cy="9" r="1.2"/><circle cx="3" cy="14" r="1.2"/><circle cx="9" cy="14" r="1.2"/></svg></span>';
+    return '<section class="dev-timestamp-country-row" data-dev-timestamp-country="' + escapeHtml(countryKey) + '" data-dev-country-id="' + escapeHtml(countryKey) + '" aria-label="' + escapeHtml(country + dragLabel) + '"><header class="dev-timestamp-country-heading"><span class="dev-timestamp-country-identity"><span class="dev-timestamp-country-flag" aria-hidden="true">' + (countryFlags[country] || flagOther) + '</span><strong class="dev-timestamp-country-name">' + escapeHtml(country) + '</strong>' + dragGrip + '</span><div class="dev-timestamp-country-actions">' + addButton + expandButton + '</div></header>' + addForm + '<div class="dev-timestamp-city-grid">' + entries + '</div></section>';
   }).join('');
   const cityHeading = english ? 'Major city times' : '主要城市时间';
   const timezoneOptions = ['America/New_York', 'America/Los_Angeles', 'America/Chicago', 'America/Denver', 'America/Vancouver', 'America/Toronto', 'Europe/London', 'Europe/Berlin', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Ho_Chi_Minh', 'UTC'].map((zone) => '<option value="' + zone + '"></option>').join('');
@@ -9679,6 +9697,119 @@ workspace.addEventListener('keydown', (event) => {
   saveDevTools();
 });
 
+
+let activeTimestampCountryDrag = null;
+function finishTimestampCountryDrag(event = null) {
+  const drag = activeTimestampCountryDrag;
+  if (!drag || (event?.pointerId != null && drag.pointerId !== event.pointerId)) return;
+  clearTimeout(drag.timer);
+  drag.card.classList.remove('is-long-press', 'is-dragging');
+  try { if (drag.pointerId != null && drag.card.hasPointerCapture?.(drag.pointerId)) drag.card.releasePointerCapture(drag.pointerId); } catch {}
+  activeTimestampCountryDrag = null;
+  document.body.classList.remove('dev-timestamp-country-dragging');
+  if (!drag.activated || !drag.moved) return;
+  state.devTools.timestampCountryOrder = [...drag.list.querySelectorAll('[data-dev-country-id]')].map((card) => card.dataset.devCountryId);
+  saveDevTools();
+  refreshDeveloperLiveOutput();
+  toast(state.language === 'en' ? 'Country order saved.' : '国家顺序已保存。', 'info');
+}
+function beginTimestampCountryDrag(card, list, point) {
+  if (activeTimestampCountryDrag) finishTimestampCountryDrag();
+  if (activeTimestampCityDrag) finishTimestampCityDrag();
+  const drag = { card, list, pointerId: point.pointerId, touchId: point.touchId, startX: point.clientX, startY: point.clientY, activated: false, moved: false, timer: null };
+  activeTimestampCountryDrag = drag;
+  drag.timer = setTimeout(() => {
+    if (activeTimestampCountryDrag !== drag) return;
+    drag.activated = true;
+    drag.card.classList.add('is-long-press', 'is-dragging');
+    document.body.classList.add('dev-timestamp-country-dragging');
+    try { if (drag.pointerId != null) drag.card.setPointerCapture?.(drag.pointerId); } catch {}
+  }, 420);
+}
+function updateTimestampCountryDragPosition(clientX, clientY) {
+  const drag = activeTimestampCountryDrag;
+  if (!drag?.activated) return;
+  const target = document.elementFromPoint(clientX, clientY)?.closest?.('[data-dev-country-id]');
+  if (!target || target === drag.card || target.parentElement !== drag.list) return;
+  const rect = target.getBoundingClientRect();
+  const centerY = rect.top + rect.height / 2;
+  const centerX = rect.left + rect.width / 2;
+  const after = clientY > centerY || (Math.abs(clientY - centerY) < rect.height * .15 && clientX > centerX);
+  if ((after && target.nextElementSibling === drag.card) || (!after && target.previousElementSibling === drag.card)) return;
+  const cards = [...drag.list.querySelectorAll('[data-dev-country-id]')];
+  const beforeRects = new Map(cards.map((item) => [item, item.getBoundingClientRect()]));
+  if (after) target.after(drag.card); else target.before(drag.card);
+  drag.moved = true;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  for (const item of cards) {
+    if (item === drag.card || !item.isConnected) continue;
+    const first = beforeRects.get(item);
+    const last = item.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+    try {
+      item.animate?.([
+        { transform: 'translate3d(' + dx + 'px, ' + dy + 'px, 0)' },
+        { transform: 'translate3d(0, 0, 0)' },
+      ], { duration: 190, easing: 'cubic-bezier(.2, .75, .25, 1)' });
+    } catch {}
+  }
+}
+workspace.addEventListener('pointerdown', (event) => {
+  if (state.section !== 'tools' || state.tool !== 'dev' || state.devTools.active !== 'timestamp') return;
+  const card = event.target.closest?.('[data-dev-country-id]');
+  if (!card || event.target.closest?.('[data-dev-city-id], button, input, select, textarea') || event.pointerType === 'touch' || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  const list = card.closest('.dev-timestamp-country-list');
+  if (!list) return;
+  beginTimestampCountryDrag(card, list, event);
+});
+workspace.addEventListener('touchstart', (event) => {
+  if (state.section !== 'tools' || state.tool !== 'dev' || state.devTools.active !== 'timestamp') return;
+  const touch = event.changedTouches?.[0];
+  const card = event.target.closest?.('[data-dev-country-id]');
+  if (!touch || !card || event.target.closest?.('[data-dev-city-id], button, input, select, textarea')) return;
+  const list = card.closest('.dev-timestamp-country-list');
+  if (!list) return;
+  beginTimestampCountryDrag(card, list, { touchId: touch.identifier, clientX: touch.clientX, clientY: touch.clientY });
+}, { passive: true });
+document.addEventListener('pointermove', (event) => {
+  const drag = activeTimestampCountryDrag;
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  if (!drag.activated) {
+    if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 10) {
+      clearTimeout(drag.timer);
+      activeTimestampCountryDrag = null;
+    }
+    return;
+  }
+  event.preventDefault();
+  updateTimestampCountryDragPosition(event.clientX, event.clientY);
+});
+document.addEventListener('touchmove', (event) => {
+  const drag = activeTimestampCountryDrag;
+  if (!drag || drag.touchId == null) return;
+  const touch = [...(event.changedTouches || [])].find((item) => item.identifier === drag.touchId);
+  if (!touch) return;
+  if (!drag.activated) {
+    if (Math.hypot(touch.clientX - drag.startX, touch.clientY - drag.startY) > 10) {
+      clearTimeout(drag.timer);
+      activeTimestampCountryDrag = null;
+    }
+    return;
+  }
+  event.preventDefault();
+  updateTimestampCountryDragPosition(touch.clientX, touch.clientY);
+}, { passive: false });
+document.addEventListener('touchend', (event) => {
+  if (activeTimestampCountryDrag?.touchId != null && [...(event.changedTouches || [])].some((item) => item.identifier === activeTimestampCountryDrag.touchId)) finishTimestampCountryDrag();
+});
+document.addEventListener('touchcancel', (event) => {
+  if (activeTimestampCountryDrag?.touchId != null && [...(event.changedTouches || [])].some((item) => item.identifier === activeTimestampCountryDrag.touchId)) finishTimestampCountryDrag();
+});
+document.addEventListener('pointerup', finishTimestampCountryDrag);
+document.addEventListener('pointercancel', finishTimestampCountryDrag);
+window.addEventListener('blur', () => finishTimestampCountryDrag());
 
 let activeTimestampCityDrag = null;
 function finishTimestampCityDrag(event = null) {

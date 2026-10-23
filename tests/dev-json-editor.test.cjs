@@ -86,8 +86,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.724/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.724/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.725/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.725/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -108,7 +108,7 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
   assert.ok(outputStart >= 0 && outputEnd > outputStart);
   const inputMarkup = app.slice(inputStart, inputEnd);
   const outputMarkup = app.slice(outputStart, outputEnd);
-  assert.match(app, /const APP_VERSION = '2\.18\.724';/);
+  assert.match(app, /const APP_VERSION = '2\.18\.725';/);
   assert.match(inputMarkup, /dev-timestamp-mode-bar[^]*dev-timestamp-content/);
   assert.match(inputMarkup, /dev-timestamp-content[^]*devPaneHead\(t\('devInput'\)\)[^]*devOutputPaneHead\('timestamp', t\('devOutput'\)/);
   assert.match(inputMarkup, /timestampUnit[^]*<\/select>' \+ inputActions/);
@@ -126,9 +126,9 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
   assert.match(timestampStyles, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*64px/s);
   assert.match(timestampViewportFix, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*54px/s);
   assert.match(timestampViewportFix, /overflow-y:\s*auto !important/);
-  assert.match(html, /app\.js\?v=2\.18\.724/);
-  assert.match(sw, /app\.js\?v=2\.18\.724/);
-  assert.match(sw, /onebox-v655/);
+  assert.match(html, /app\.js\?v=2\.18\.725/);
+  assert.match(sw, /app\.js\?v=2\.18\.725/);
+  assert.match(sw, /onebox-v656/);
 });
 
 
@@ -155,27 +155,40 @@ test('timestamp country cards collapse city overflow and persist custom cities, 
   });
   assert.equal(timestampRows(new Date(0), 'timestamp').filter((row) => row.city).length, 23);
   const actionMarkup = app.slice(actionStart, actionEnd);
+  const countryDragStart = app.indexOf('let activeTimestampCountryDrag = null;');
+  const countryDragEnd = app.indexOf('let activeTimestampCityDrag = null;', countryDragStart);
+  const countryDragMarkup = app.slice(countryDragStart, countryDragEnd);
 
+  assert.match(app, /devTimestamp: '时间'/);
   assert.match(app, /DEV_TIMESTAMP_COUNTRIES = Object\.freeze/);
   assert.match(stateMarkup, /timestampCustomCities/);
   assert.match(stateMarkup, /timestampCityOrder/);
   assert.match(stateMarkup, /timestampExpandedCountries/);
+  assert.match(stateMarkup, /timestampCountryOrder/);
   assert.match(rowMarkup, /const customCities =/);
   assert.match(rowMarkup, /countryKey,/);
   assert.match(rowMarkup, /cityRows\.sort/);
   assert.match(outputMarkup, /rows\.slice\(0, 3\)/);
   assert.match(outputMarkup, /data-dev-action="timestamp-city-expand"/);
   assert.match(outputMarkup, /data-dev-action="timestamp-city-add-open"/);
+  assert.match(outputMarkup, /data-dev-country-id=/);
+  assert.match(outputMarkup, /dev-timestamp-icon-button dev-timestamp-country-add/);
+  assert.match(outputMarkup, /dev-timestamp-icon-button dev-timestamp-expand-cities/);
   assert.match(outputMarkup, /data-dev-timestamp-row=/);
   assert.match(actionMarkup, /timestamp-city-add/);
   assert.match(actionMarkup, /validDeveloperTimeZone\(timeZone\)/);
   assert.match(app, /timestampCityOrder\[countryKey\]/);
+  assert.match(countryDragMarkup, /finishTimestampCountryDrag/);
+  assert.match(countryDragMarkup, /timestampCountryOrder =/);
+  assert.match(countryDragMarkup, /item\.animate\?\.\(/);
   assert.match(actionMarkup, /timestampLive = true/);
   assert.match(actionMarkup, /stopDeveloperTimestampLive\(\)/);
   assert.match(app, /document\.addEventListener\('touchmove'[^]*passive: false/);
   assert.match(app, /document\.addEventListener\('pointermove'/);
   assert.match(app, /refreshDeveloperLiveOutput\(\)/);
   assert.match(timestampRedesign, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(timestampRedesign, /\.dev-timestamp-country-list\s*\{[^}]*repeat\(3,/s);
+  assert.match(timestampRedesign, /\.dev-timestamp-city-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s);
   assert.match(timestampRedesign, /dev-timestamp-city-form/);
   assert.match(timestampRedesign, /font-size:\s*12px/);
 });
