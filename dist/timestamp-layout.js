@@ -147,7 +147,7 @@
           padding: 6px 8px 7px; position: relative;
         }
         .dev-timestamp-mode button.active { z-index: 1; }
-        .dev-timestamp-mode button.active::after { bottom: 0 !important; height: 2px; }
+        .dev-timestamp-mode button.active::after { bottom: 0 !important; height: 2px; transform: translateY(-4px) !important; }
         .dev-timestamp-content { gap: 7px; }
         .dev-timestamp-card, .dev-timestamp-output-card { padding: 7px 9px; gap: 5px; }
         .dev-timestamp .dev-pane-head { margin: 0; }
