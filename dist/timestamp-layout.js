@@ -161,6 +161,17 @@
     ['中国', [['成都', 'Chengdu', 'Asia/Shanghai'], ['深圳', 'Shenzhen', 'Asia/Shanghai'], ['重庆', 'Chongqing', 'Asia/Shanghai'], ['乌鲁木齐', 'Urumqi', 'Asia/Urumqi']]],
     ['越南', [['河内', 'Hanoi', 'Asia/Ho_Chi_Minh'], ['岘港', 'Da Nang', 'Asia/Ho_Chi_Minh']]],
   ];
+  const COUNTRY_NAME_ALIASES = {
+    '美国': ['美国', 'United States', 'USA'], '日本': ['日本', 'Japan'], '英国': ['英国', 'United Kingdom', 'UK'],
+    '德国': ['德国', 'Germany'], '加拿大': ['加拿大', 'Canada'], '中国': ['中国', 'China'], '越南': ['越南', 'Vietnam'],
+  };
+  const CITY_SEARCH_ALIASES = {
+    '纽约': ['New York', 'NYC'], '洛杉矶': ['Los Angeles', 'LA'], '芝加哥': ['Chicago'], '丹佛': ['Denver'],
+    '安克雷奇': ['Anchorage'], '檀香山': ['Honolulu'], '东京': ['Tokyo', '東京'], '大阪': ['Osaka', 'Ōsaka', '大坂'],
+    '伦敦': ['London'], '曼彻斯特': ['Manchester'], '柏林': ['Berlin'], '纽伦堡': ['Nuremberg'],
+    '温哥华': ['Vancouver'], '卡尔加里': ['Calgary'], '多伦多': ['Toronto'], '北京': ['Beijing'],
+    '上海': ['Shanghai'], '广州': ['Guangzhou'], '河内': ['Hanoi'], '胡志明市': ['Ho Chi Minh City', 'Saigon'],
+  };
   const normalizeSearch = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().replace(/[\s_./-]+/g, '');
   const fuzzyScore = (query, candidate) => {
     if (!query) return 1;
@@ -179,28 +190,33 @@
   const cityOptionsFor = (matrix, countryKey, countryName) => {
     const options = [];
     const seen = new Set();
-    const add = (name, timeZone, aliases = []) => {
+    const existing = new Set();
+    const add = (name, timeZone, aliases = [], isExisting = false, restoreCityId = '') => {
       if (!name || !timeZone || seen.has(name.toLocaleLowerCase())) return;
       seen.add(name.toLocaleLowerCase());
-      options.push({ name, timeZone, aliases: [name, timeZone, timeZone.split('/').pop().replace(/_/g, ' '), ...aliases] });
+      const extraAliases = CITY_SEARCH_ALIASES[name] || [];
+      options.push({ name, timeZone, existing: isExisting, restoreCityId, aliases: [name, timeZone, timeZone.split('/').pop().replace(/_/g, ' '), ...extraAliases, ...aliases] });
     };
-    const existing = new Set();
     matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(countryKey) + '"] .dev-timestamp-city-card[data-dev-city-id]').forEach((card) => {
       const name = card.querySelector('.dev-timestamp-city-name')?.textContent?.trim();
       const zoneText = card.querySelector('.dev-timestamp-city-zone')?.textContent || '';
       const timeZone = zoneText.match(/(?:Africa|America|Antarctica|Asia|Atlantic|Australia|Europe|Indian|Pacific)\/[A-Za-z0-9_+.-]+(?:\/[A-Za-z0-9_+.-]+)*/)?.[0];
-      if (name) existing.add(name.toLocaleLowerCase());
-      add(name, timeZone);
+      const cityId = card.dataset.devCityId || '';
+      const isDeleted = Boolean(cityId) && readHidden().has(cityId);
+      if (name && !isDeleted) existing.add(name.toLocaleLowerCase());
+      add(name, timeZone, [], !isDeleted, isDeleted ? cityId : '');
     });
-    const extras = EXTRA_CITY_OPTIONS.find(([country]) => countryName.includes(country))?.[1] || [];
-    extras.forEach(([name, alias, timeZone]) => add(name, timeZone, [alias]));
-    return options.filter((option) => !existing.has(option.name.toLocaleLowerCase()));
+    const countryAliases = COUNTRY_NAME_ALIASES[countryName] || Object.entries(COUNTRY_NAME_ALIASES).find(([, names]) => names.includes(countryName))?.[1] || [countryName];
+    const extras = EXTRA_CITY_OPTIONS.find(([country]) => countryAliases.some((name) => country.includes(name) || name.includes(country)))?.[1] || [];
+    extras.forEach(([name, alias, timeZone]) => add(name, timeZone, [alias], existing.has(name.toLocaleLowerCase())));
+    return options;
   };
   const installCitySearch = (form, matrix) => {
     const nameInput = form.querySelector('.dev-timestamp-city-name-input');
     const zoneInput = form.querySelector('.dev-timestamp-city-zone-input');
     const countrySelect = form.querySelector('.dev-timestamp-city-country-select');
     const addButton = form.querySelector('[data-dev-action="timestamp-city-add"]');
+    if (addButton && !addButton.dataset.defaultLabel) addButton.dataset.defaultLabel = addButton.textContent.trim();
     if (!nameInput || !zoneInput || !countrySelect || nameInput.dataset.fuzzyReady) return;
     nameInput.dataset.fuzzyReady = '1';
     nameInput.placeholder = document.documentElement.lang === 'en' ? 'Search for a city' : '模糊搜索城市名称或时区';
@@ -248,13 +264,29 @@
           const zone = document.createElement('code');
           zone.textContent = option.timeZone;
           button.append(city, zone);
-          button.addEventListener('pointerdown', (event) => event.preventDefault());
-          button.addEventListener('click', () => {
-            nameInput.value = option.name;
-            zoneInput.value = option.timeZone;
-            if (addButton) addButton.disabled = false;
-            closeResults();
-          });
+          if (option.existing || option.restoreCityId) {
+            const status = document.createElement('small');
+            status.textContent = option.restoreCityId
+              ? (document.documentElement.lang === 'en' ? 'Deleted · restore' : '已删除 · 可恢复')
+              : (document.documentElement.lang === 'en' ? 'Added' : '已添加');
+            button.append(status);
+            if (option.existing) button.disabled = true;
+          }
+          if (!option.existing) {
+            button.addEventListener('pointerdown', (event) => event.preventDefault());
+            button.addEventListener('click', () => {
+              nameInput.value = option.name;
+              zoneInput.value = option.timeZone;
+              nameInput.dataset.restoreCityId = option.restoreCityId || '';
+              if (addButton) {
+                addButton.textContent = option.restoreCityId
+                  ? (document.documentElement.lang === 'en' ? 'Restore city' : '恢复城市')
+                  : addButton.dataset.defaultLabel;
+                addButton.disabled = false;
+              }
+              closeResults();
+            });
+          }
           results.append(button);
         });
       }
@@ -262,14 +294,22 @@
     };
     nameInput.addEventListener('input', () => {
       zoneInput.value = '';
-      if (addButton) addButton.disabled = true;
+      nameInput.dataset.restoreCityId = '';
+      if (addButton) {
+        addButton.textContent = addButton.dataset.defaultLabel;
+        addButton.disabled = true;
+      }
       search();
     });
     nameInput.addEventListener('focus', search);
     countrySelect.addEventListener('change', () => {
       nameInput.value = '';
       zoneInput.value = '';
-      if (addButton) addButton.disabled = true;
+      nameInput.dataset.restoreCityId = '';
+      if (addButton) {
+        addButton.textContent = addButton.dataset.defaultLabel;
+        addButton.disabled = true;
+      }
       closeResults();
     });
     form.addEventListener('submit', (event) => event.preventDefault());
@@ -428,9 +468,24 @@
     if (!list) return;
     event.preventDefault();
     event.stopImmediatePropagation();
+    const nameInput = modal.querySelector('.dev-timestamp-city-name-input');
+    const restoreCityId = action.dataset.devAction === 'timestamp-city-add' ? nameInput?.dataset.restoreCityId : '';
     modal.classList.remove('is-modal');
     clearModalPosition(modal);
     list.append(modal);
+    if (restoreCityId) {
+      const hidden = readHidden();
+      hidden.delete(restoreCityId);
+      writeHidden(hidden);
+      const card = [...list.querySelectorAll('.dev-timestamp-city-card[data-dev-city-id]')].find((item) => item.dataset.devCityId === restoreCityId);
+      const cell = card?.closest('.dev-timestamp-city-cell');
+      cell?.classList.remove('is-deleted');
+      cell?.removeAttribute('aria-hidden');
+      if (nameInput) nameInput.dataset.restoreCityId = '';
+      modal.querySelector('[data-dev-action="timestamp-city-add-cancel"]')?.click();
+      requestAnimationFrame(enhance);
+      return;
+    }
     action.click();
     if (action.dataset.devAction === 'timestamp-city-add') {
       setTimeout(() => {
