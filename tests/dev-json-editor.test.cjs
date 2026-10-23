@@ -135,6 +135,7 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
 test('timestamp country cards collapse city overflow and persist custom cities, order, and live time selection', () => {
   const app = read('dist/app.js');
   const css = read('dist/style.css');
+  const timestampRedesign = css.slice(css.lastIndexOf('/* 2.18.723: group countries'));
   const stateStart = app.indexOf('function normalizeDevTools(value)');
   const stateEnd = app.indexOf('const initialDevTools', stateStart);
   const rowsStart = app.indexOf('function developerTimestampRows(date, mode)');
