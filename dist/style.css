@@ -19771,3 +19771,238 @@ body.dev-pane-resizing * {
 /* 2.18.717: compact timestamp conversions into standard and country cards. */
 
 /* 2.18.717: tighten city-time cards to fit more conversions in one view. */
+
+
+/* 2.18.718: simplify timestamp controls and use consistent full-width result cards. */
+.dev-workbench.dev-timestamp {
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-content: start;
+  gap: 10px;
+}
+.dev-timestamp-card {
+  display: grid;
+  grid-template-columns: minmax(145px, auto) minmax(210px, 270px) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px 14px;
+}
+.dev-timestamp-card .dev-pane-head {
+  min-width: 0;
+  margin: 0;
+}
+.dev-timestamp .dev-pane-head h3 { font-size: 12px; }
+.dev-timestamp .dev-pane-actions { gap: 5px; }
+.dev-timestamp .dev-action { min-height: 30px; padding: 5px 8px; }
+.dev-timestamp-mode {
+  width: 100%;
+  max-width: 380px;
+  margin: 0;
+}
+.dev-timestamp-mode button { min-height: 32px; }
+.dev-timestamp-field {
+  display: grid;
+  grid-template-columns: minmax(94px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 10px;
+  min-width: 0;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 650;
+}
+.dev-timestamp-field > span {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  padding-left: 1px;
+}
+.dev-timestamp-field small {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.dev-timestamp-input-row {
+  grid-column: 2;
+  grid-template-columns: minmax(0, 1fr) minmax(112px, 130px);
+  gap: 7px;
+}
+.dev-timestamp-input-row .dev-plain-input,
+.dev-timestamp-field > .dev-plain-input {
+  min-width: 0;
+  min-height: 38px;
+  font-size: 12px;
+}
+.dev-timestamp-field .dev-date-input { grid-column: 2; margin: 0; }
+.dev-timestamp-results { gap: 10px; }
+.dev-timestamp-standard-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: 7px;
+}
+.dev-timestamp-summary-card {
+  min-height: 56px;
+  gap: 3px;
+  padding: 7px 30px 7px 9px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--soft) 14%, var(--panel));
+}
+.dev-timestamp-summary-card > span { font-size: 10px; }
+.dev-timestamp-summary-card > code { font-size: 10px; }
+.dev-timestamp-city-section { min-width: 0; }
+.dev-timestamp-city-section > h4 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 7px;
+  padding: 0 1px 6px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 11px;
+}
+.dev-timestamp-city-section > h4 small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+.dev-timestamp-city-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  align-items: stretch;
+  gap: 7px;
+}
+.dev-timestamp-city-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  min-height: 68px;
+  padding: 7px 30px 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--soft) 12%, var(--panel));
+}
+.dev-timestamp-city-card-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.dev-timestamp-country-label {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--primary) 7%, var(--panel));
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.dev-timestamp-city-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dev-timestamp-city-time {
+  min-width: 0;
+  color: var(--ink);
+  font: 10px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: nowrap;
+}
+.dev-timestamp-city-zone {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  min-width: 0;
+}
+.dev-timestamp-city-zone code {
+  color: var(--muted);
+  font: 9px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+.dev-timestamp-city-copy {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.dev-timestamp-output-card .dev-timestamp-row-copy {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  opacity: .48;
+  transition: background-color .15s ease, color .15s ease, opacity .15s ease;
+}
+.dev-timestamp-output-card .dev-timestamp-row-copy svg { width: 13px; height: 13px; }
+.dev-timestamp-output-card .dev-timestamp-row-copy:hover,
+.dev-timestamp-output-card .dev-timestamp-row-copy:focus-visible {
+  border: 0;
+  background: var(--soft);
+  color: var(--primary);
+  opacity: 1;
+}
+.dev-timestamp-output-card .dev-timestamp-row-copy:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 1px;
+}
+@media (min-width: 761px) and (max-width: 1040px) {
+  .dev-timestamp-card { grid-template-columns: minmax(0, 1fr) minmax(190px, .8fr); }
+  .dev-timestamp-card .dev-pane-head { grid-column: 1; grid-row: 1; }
+  .dev-timestamp-card .dev-timestamp-mode { grid-column: 2; grid-row: 1; }
+  .dev-timestamp-card .dev-timestamp-field { grid-column: 1 / -1; }
+  .dev-timestamp-mode { max-width: none; }
+}
+@media (max-width: 760px) {
+  .dev-timestamp-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+    padding: 12px;
+  }
+  .dev-timestamp-card .dev-pane-head,
+  .dev-timestamp-card .dev-timestamp-mode,
+  .dev-timestamp-card .dev-timestamp-field {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .dev-timestamp-card .dev-pane-head { align-items: center; }
+  .dev-timestamp-mode { max-width: none; }
+  .dev-timestamp-mode button { min-height: 34px; }
+  .dev-timestamp-field {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+    font-size: 11px;
+  }
+  .dev-timestamp-field > span,
+  .dev-timestamp-field small,
+  .dev-timestamp-input-row,
+  .dev-timestamp-field > .dev-plain-input {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 112px; }
+  .dev-timestamp-standard-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 165px), 1fr)); }
+  .dev-timestamp-city-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+  .dev-timestamp-output-card { padding: 12px; }
+  .dev-timestamp-city-card { min-height: 66px; }
+  .dev-timestamp-output-card .dev-timestamp-row-copy {
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    min-height: 26px;
+    opacity: .68;
+  }
+}
+@media (max-width: 360px) {
+  .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 100px; }
+  .dev-timestamp-city-grid,
+  .dev-timestamp-standard-grid { grid-template-columns: minmax(0, 1fr); }
+}
