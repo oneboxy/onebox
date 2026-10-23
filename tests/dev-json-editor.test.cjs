@@ -86,8 +86,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.722/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.722/);
+  assert.match(html, /dev-json-editor\.js\?v=2\.18\.723/);
+  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.723/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -99,6 +99,7 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
   const sw = read('dist/sw.js');
   const timestampStyles = css.slice(css.lastIndexOf('/* 2.18.721: make conversion tabs'));
   const timestampViewportFix = css.slice(css.lastIndexOf('/* 2.18.722: show every timestamp country row'));
+  const timestampRedesign = css.slice(css.lastIndexOf('/* 2.18.723: group countries'));
   const inputStart = app.indexOf('function renderDeveloperTimestamp()');
   const inputEnd = app.indexOf('let lastDeveloperCompareResult', inputStart);
   const outputStart = app.indexOf('function renderDeveloperTimestampResult()');
@@ -107,7 +108,7 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
   assert.ok(outputStart >= 0 && outputEnd > outputStart);
   const inputMarkup = app.slice(inputStart, inputEnd);
   const outputMarkup = app.slice(outputStart, outputEnd);
-  assert.match(app, /const APP_VERSION = '2\.18\.722';/);
+  assert.match(app, /const APP_VERSION = '2\.18\.723';/);
   assert.match(inputMarkup, /dev-timestamp-mode-bar[^]*dev-timestamp-content/);
   assert.match(inputMarkup, /dev-timestamp-content[^]*devPaneHead\(t\('devInput'\)\)[^]*devOutputPaneHead\('timestamp', t\('devOutput'\)/);
   assert.match(inputMarkup, /timestampUnit[^]*<\/select>' \+ inputActions/);
@@ -125,9 +126,51 @@ test('timestamp conversion tabs are the parent of clearly grouped input, output,
   assert.match(timestampStyles, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*64px/s);
   assert.match(timestampViewportFix, /\.dev-timestamp-city-card\s*\{[^}]*height:\s*54px/s);
   assert.match(timestampViewportFix, /overflow-y:\s*auto !important/);
-  assert.match(html, /app\.js\?v=2\.18\.722/);
-  assert.match(sw, /app\.js\?v=2\.18\.722/);
-  assert.match(sw, /onebox-v653/);
+  assert.match(html, /app\.js\?v=2\.18\.723/);
+  assert.match(sw, /app\.js\?v=2\.18\.723/);
+  assert.match(sw, /onebox-v654/);
+});
+
+
+test('timestamp country cards collapse city overflow and persist custom cities, order, and live time selection', () => {
+  const app = read('dist/app.js');
+  const css = read('dist/style.css');
+  const timestampRedesign = css.slice(css.lastIndexOf('/* 2.18.723: group countries'));
+  const stateStart = app.indexOf('function normalizeDevTools(value)');
+  const stateEnd = app.indexOf('const initialDevTools', stateStart);
+  const rowsStart = app.indexOf('function developerTimestampRows(date, mode)');
+  const rowsEnd = app.indexOf('function developerTimestampResult()', rowsStart);
+  const outputStart = app.indexOf('function renderDeveloperTimestampResult()');
+  const outputEnd = app.indexOf('function refreshDeveloperLiveOutput(', outputStart);
+  const actionStart = app.indexOf('function runDeveloperAction(action, sourceEvent = null)');
+  const actionEnd = app.indexOf('function loadDeveloperRecord(', actionStart);
+  const stateMarkup = app.slice(stateStart, stateEnd);
+  const rowMarkup = app.slice(rowsStart, rowsEnd);
+  const outputMarkup = app.slice(outputStart, outputEnd);
+  const actionMarkup = app.slice(actionStart, actionEnd);
+
+  assert.match(app, /DEV_TIMESTAMP_COUNTRIES = Object\.freeze/);
+  assert.match(stateMarkup, /timestampCustomCities/);
+  assert.match(stateMarkup, /timestampCityOrder/);
+  assert.match(stateMarkup, /timestampExpandedCountries/);
+  assert.match(rowMarkup, /const customCities =/);
+  assert.match(rowMarkup, /countryKey,/);
+  assert.match(rowMarkup, /cityRows\.sort/);
+  assert.match(outputMarkup, /rows\.slice\(0, 3\)/);
+  assert.match(outputMarkup, /data-dev-action="timestamp-city-expand"/);
+  assert.match(outputMarkup, /data-dev-action="timestamp-city-add-open"/);
+  assert.match(outputMarkup, /data-dev-timestamp-row=/);
+  assert.match(actionMarkup, /timestamp-city-add/);
+  assert.match(actionMarkup, /validDeveloperTimeZone\(timeZone\)/);
+  assert.match(app, /timestampCityOrder\[countryKey\]/);
+  assert.match(actionMarkup, /timestampLive = true/);
+  assert.match(actionMarkup, /stopDeveloperTimestampLive\(\)/);
+  assert.match(app, /document\.addEventListener\('touchmove'[^]*passive: false/);
+  assert.match(app, /document\.addEventListener\('pointermove'/);
+  assert.match(app, /refreshDeveloperLiveOutput\(\)/);
+  assert.match(timestampRedesign, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(timestampRedesign, /dev-timestamp-city-form/);
+  assert.match(timestampRedesign, /font-size:\s*12px/);
 });
 
 test('JSON editor helper passes JavaScript syntax checking', () => {

@@ -20112,3 +20112,128 @@ body.dev-pane-resizing * {
     overflow: visible;
   }
 }
+
+/* 2.18.723: group countries in pairs, collapse city overflow, and support custom cities. */
+.dev-timestamp-country-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px;
+}
+.dev-timestamp-country-row {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--soft) 12%, var(--panel));
+}
+.dev-timestamp-country-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  min-width: 0;
+  padding: 0 1px 7px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+.dev-timestamp-country-identity { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.dev-timestamp-country-flag { width: 30px; height: 20px; }
+.dev-timestamp-country-name { font-size: 12px; }
+.dev-timestamp-country-add,
+.dev-timestamp-expand-cities {
+  min-height: 26px;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.dev-timestamp-country-add:hover,
+.dev-timestamp-expand-cities:hover { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 45%, var(--line)); }
+.dev-timestamp-city-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--dev-timestamp-city-columns, 3), minmax(0, 1fr));
+  align-items: stretch;
+  gap: 7px;
+  min-width: 0;
+}
+.dev-timestamp-city-card {
+  min-width: 0;
+  min-height: 70px;
+  height: auto;
+  padding: 9px 31px 8px 10px;
+  align-content: center;
+  gap: 4px;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+  transition: border-color .15s ease, box-shadow .15s ease, opacity .15s ease, transform .15s ease;
+}
+.dev-timestamp-city-card:active { cursor: grabbing; }
+.dev-timestamp-city-card:focus-visible { outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent); outline-offset: 1px; }
+.dev-timestamp-city-card.is-long-press,
+.dev-timestamp-city-card.is-dragging {
+  border-color: var(--primary);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+.dev-timestamp-city-card.is-dragging { position: relative; z-index: 5; opacity: .82; transform: scale(1.025); }
+.dev-timestamp-city-card-head { min-width: 0; }
+.dev-timestamp-city-name { font-size: 12px; }
+.dev-timestamp-city-time { font-size: 11px; line-height: 1.25; }
+.dev-timestamp-city-zone { gap: 2px 6px; }
+.dev-timestamp-city-zone code { font-size: 10px; line-height: 1.25; }
+.dev-timestamp-city-copy { top: 6px; right: 6px; }
+.dev-timestamp-country-footer { display: flex; justify-content: center; }
+.dev-timestamp-expand-cities { min-height: 24px; padding-inline: 11px; }
+.dev-timestamp-city-form {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(160px, 1.2fr) auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+.dev-timestamp-city-form .dev-plain-input { min-width: 0; min-height: 32px; padding: 5px 8px; font-size: 11px; }
+.dev-timestamp-city-form .dev-action { min-height: 30px; padding: 4px 8px; white-space: nowrap; }
+.dev-action[data-dev-action="timestamp-now"][aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--primary) 54%, var(--line));
+  background: color-mix(in srgb, var(--primary) 11%, var(--panel));
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+body.dev-timestamp-city-dragging,
+body.dev-timestamp-city-dragging * { cursor: grabbing !important; }
+@media (max-width: 760px) {
+  .dev-timestamp-country-list { grid-template-columns: 1fr; gap: 8px; }
+  .dev-timestamp-country-row { padding: 8px; gap: 6px; }
+  .dev-timestamp-city-grid { gap: 6px; }
+  .dev-timestamp-city-card { min-height: 68px; padding: 8px 28px 7px 9px; }
+  .dev-timestamp-city-name { font-size: 12px; }
+  .dev-timestamp-city-time { font-size: 10px; }
+  .dev-timestamp-city-zone code { font-size: 9px; }
+  .dev-timestamp-city-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .dev-timestamp-city-form .dev-action { width: 100%; }
+}
+@media (max-width: 520px) {
+  .dev-timestamp-city-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dev-timestamp-standard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dev-timestamp-city-card { min-height: 72px; }
+  .dev-timestamp-city-time { font-size: 9px; }
+  .dev-timestamp-city-zone { flex-wrap: wrap; }
+}
+
+/* 2.18.723: bring the summary values up to the city card reading size. */
+.dev-timestamp-results { gap: 6px; }
+.dev-timestamp-standard-grid { gap: 8px; }
+.dev-timestamp-summary-card { min-height: 54px; padding-block: 7px; }
+.dev-timestamp-summary-card > span { font-size: 10px; }
+.dev-timestamp-summary-card > code { font-size: 10px; }
+.dev-timestamp-country-list { gap: 8px; }
+.dev-timestamp-country-row { gap: 6px; padding: 8px; }
+.dev-timestamp-country-heading { padding-bottom: 5px; }
