@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.717';
+const APP_VERSION = '2.18.718';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9175,11 +9175,11 @@ function renderDeveloperTimestamp() {
   const english = state.language === 'en';
   const timestampMode = '<div class="dev-segmented dev-timestamp-mode"><button type="button" class="' + (dev.timestampMode === 'timestamp' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="timestamp">' + t('devTimestampToDate') + '</button><button type="button" class="' + (dev.timestampMode === 'date' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="date">' + t('devDateToTimestamp') + '</button></div>';
   const input = dev.timestampMode === 'timestamp'
-    ? '<label class="dev-timestamp-field"><span>' + (english ? 'Timestamp' : '时间戳') + '</span><div class="dev-timestamp-input-row"><input class="dev-plain-input" data-dev-field="timestampValue" inputmode="decimal" autocomplete="off" value="' + escapeHtml(dev.timestampValue) + '" placeholder="' + (english ? 'e.g. 1726905600' : '例如 1726905600') + '"><select class="dev-plain-input" data-dev-field="timestampUnit" aria-label="' + (english ? 'Timestamp unit' : '时间戳单位') + '"><option value="auto" ' + (dev.timestampUnit === 'auto' ? 'selected' : '') + '>' + (english ? 'Auto detect' : '自动识别') + '</option><option value="s" ' + (dev.timestampUnit === 's' ? 'selected' : '') + '>' + t('devSeconds') + '</option><option value="ms" ' + (dev.timestampUnit === 'ms' ? 'selected' : '') + '>' + t('devMilliseconds') + '</option></select></div><small>' + (english ? 'Auto detects milliseconds for 13-digit timestamps; you can choose a unit manually.' : '自动识别常见的秒或毫秒时间戳，也可以手动指定单位。') + '</small></label>'
+    ? '<label class="dev-timestamp-field"><span>' + (english ? 'Timestamp' : '时间戳') + '</span><div class="dev-timestamp-input-row"><input class="dev-plain-input" data-dev-field="timestampValue" inputmode="decimal" autocomplete="off" value="' + escapeHtml(dev.timestampValue) + '" placeholder="' + (english ? 'e.g. 1726905600' : '例如 1726905600') + '"><select class="dev-plain-input" data-dev-field="timestampUnit" aria-label="' + (english ? 'Timestamp unit' : '时间戳单位') + '"><option value="auto" ' + (dev.timestampUnit === 'auto' ? 'selected' : '') + '>' + (english ? 'Auto detect' : '自动识别') + '</option><option value="s" ' + (dev.timestampUnit === 's' ? 'selected' : '') + '>' + t('devSeconds') + '</option><option value="ms" ' + (dev.timestampUnit === 'ms' ? 'selected' : '') + '>' + t('devMilliseconds') + '</option></select></div><small>' + (english ? 'Auto detects milliseconds for 13-digit timestamps; choose a unit manually if needed.' : '自动识别常见的秒或毫秒时间戳，也可以手动指定单位。') + '</small></label>'
     : '<label class="dev-timestamp-field"><span>' + (english ? 'Date and time · device local time' : '日期和时间 · 设备本地时区') + '</span><input class="dev-plain-input dev-date-input" data-dev-field="timestampDate" type="datetime-local" step="1" value="' + escapeHtml(dev.timestampDate) + '"><small>' + (english ? 'The selected local date is also shown as UTC and ISO 8601.' : '按设备本地时区换算，同时显示 UTC 和 ISO 8601。') + '</small></label>';
   const inputActions = devActionButton('timestamp-now', t('devNow')) + devActionButton('timestamp-clear', t('devClear'));
   const outputActions = devActionButton('timestamp-save', t('devSaveRecord')) + devActionButton('dev-copy-output', t('devCopy'));
-  return '<div class="dev-workbench dev-timestamp" data-dev-pane-grid ' + devPaneSplitStyle('timestamp') + '><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput'), inputActions) + timestampMode + input + '</section>' + devPaneSplitter('timestamp') + '<section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
+  return '<div class="dev-workbench dev-timestamp"><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput'), inputActions) + timestampMode + input + '</section><section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div>';
 }
 let lastDeveloperCompareResult = null;
 function developerCompareResult() {
@@ -9440,17 +9440,10 @@ function renderDeveloperTimestampResult() {
   const standardRows = result.rows.filter((row) => !row.city);
   const cityRows = result.rows.filter((row) => row.city);
   const standardMarkup = standardRows.map((row) => '<article class="dev-timestamp-summary-card ' + (row.primary ? 'is-primary' : '') + '"><span>' + escapeHtml(row.label) + '</span><code>' + escapeHtml(row.value) + '</code>' + (row.copyable ? copyButton(row) : '') + '</article>').join('');
-  const countries = new Map();
-  cityRows.forEach((row) => {
-    if (!countries.has(row.group)) countries.set(row.group, []);
-    countries.get(row.group).push(row);
-  });
-  const cityMarkup = [...countries.entries()].map(([country, rows]) => {
-    const entries = rows.map((row) => '<div class="dev-timestamp-city-entry"><div class="dev-timestamp-city-details"><div class="dev-timestamp-city-main"><span>' + escapeHtml(row.displayLabel || row.label) + '</span><code>' + escapeHtml(row.localTime) + '</code></div><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></div>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div>').join('');
-    return '<section class="dev-timestamp-country-card"><header><strong>' + escapeHtml(country) + '</strong><small>' + rows.length + (english ? ' cities' : ' 个城市') + '</small></header><div class="dev-timestamp-city-list">' + entries + '</div></section>';
-  }).join('');
+  const cityMarkup = cityRows.map((row) => '<article class="dev-timestamp-city-card"><div class="dev-timestamp-city-card-head"><span class="dev-timestamp-country-label">' + escapeHtml(row.group || (english ? 'Other' : '其他')) + '</span><strong class="dev-timestamp-city-name">' + escapeHtml(row.displayLabel || row.label) + '</strong>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div><code class="dev-timestamp-city-time">' + escapeHtml(row.localTime) + '</code><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></article>').join('');
   const cityHeading = english ? 'Major city times' : '主要城市时间';
-  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4>' + escapeHtml(cityHeading) + '</h4><div class="dev-timestamp-country-grid">' + cityMarkup + '</div></section></div>';
+  const cityCount = english ? cityRows.length + ' cities' : cityRows.length + ' 个城市';
+  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4><span>' + escapeHtml(cityHeading) + '</span><small>' + escapeHtml(cityCount) + '</small></h4><div class="dev-timestamp-city-grid">' + cityMarkup + '</div></section></div>';
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;

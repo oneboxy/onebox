@@ -91,6 +91,34 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
+
+test('timestamp tools use a full-width responsive layout with compact city cards', () => {
+  const app = read('dist/app.js');
+  const css = read('dist/style.css');
+  const html = read('dist/index.html');
+  const sw = read('dist/sw.js');
+  const timestampStyles = css.slice(css.lastIndexOf('/* 2.18.718: simplify timestamp controls'));
+  const inputStart = app.indexOf('function renderDeveloperTimestamp()');
+  const inputEnd = app.indexOf('let lastDeveloperCompareResult', inputStart);
+  const outputStart = app.indexOf('function renderDeveloperTimestampResult()');
+  const outputEnd = app.indexOf('function refreshDeveloperLiveOutput(', outputStart);
+  assert.ok(inputStart >= 0 && inputEnd > inputStart);
+  assert.ok(outputStart >= 0 && outputEnd > outputStart);
+  const inputMarkup = app.slice(inputStart, inputEnd);
+  const outputMarkup = app.slice(outputStart, outputEnd);
+  assert.match(app, /const APP_VERSION = '2\\.18\\.718';/);
+  assert.doesNotMatch(inputMarkup, /data-dev-pane-grid|devPaneSplitter/);
+  assert.match(inputMarkup, /dev-timestamp-card/);
+  assert.match(outputMarkup, /dev-timestamp-city-grid/);
+  assert.match(outputMarkup, /dev-timestamp-city-card/);
+  assert.match(outputMarkup, /row\.group/);
+  assert.match(timestampStyles, /\.dev-workbench\.dev-timestamp\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*!important/s);
+  assert.match(timestampStyles, /\.dev-timestamp-city-grid\s*\{[^}]*repeat\(auto-fit/s);
+  assert.match(timestampStyles, /\.dev-timestamp-output-card \.dev-timestamp-row-copy\s*\{[^}]*opacity:\s*\.48/s);
+  assert.match(html, /timestamp-layout\.js\?v=2\.18\.718/);
+  assert.match(sw, /timestamp-layout\.js\?v=2\.18\.718/);
+});
+
 test('JSON editor helper passes JavaScript syntax checking', () => {
   assert.doesNotThrow(() => new vm.Script(helperSource, { filename: 'dev-json-editor.js' }));
   assert.equal(typeof editor.mapLine, 'function');
