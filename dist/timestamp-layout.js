@@ -17,19 +17,31 @@
       .dev-timestamp-mode-bar { padding-inline: 12px; }
       .dev-timestamp-mode button.active::after { bottom: -1px !important; }
       .dev-timestamp-country-header-row, .dev-timestamp-city-row { column-gap: 10px !important; }
-      .dev-timestamp-country-header-row { padding: 0 !important; }
+      .dev-timestamp-country-header-row { padding: 0 !important; border-bottom: 0 !important; background: transparent !important; }
       .dev-timestamp-country-header-cell {
         box-sizing: border-box; min-width: 0; border: 1px solid var(--line, #dce2ee) !important;
         border-bottom: 0 !important; border-radius: 10px 10px 0 0 !important; background: var(--panel, #fff) !important;
         padding: 0 10px !important; gap: 7px; transition: box-shadow .18s ease, transform .18s ease;
       }
       .dev-timestamp-country-header-cell.is-empty-country { border-bottom: 1px solid var(--line, #dce2ee) !important; border-radius: 10px !important; }
-      .dev-timestamp-country-header-cell.is-dragging { z-index: 3; box-shadow: 0 10px 26px #17255425; transform: scale(1.025); }
+      .dev-timestamp-country-header-cell.is-dragging,
+      .dev-timestamp-country-header-cell.is-long-press { opacity: 1 !important; }
+      .dev-timestamp-country-header-cell.is-country-dragging {
+        z-index: 3; background: color-mix(in srgb, var(--accent) 6%, var(--panel, #fff)) !important;
+        box-shadow: 0 8px 22px #17255425; transform: translateY(-2px);
+      }
+      .dev-timestamp-city-cell.is-country-dragging {
+        z-index: 2; opacity: 1 !important; transform: translateY(-2px);
+        background: color-mix(in srgb, var(--accent) 4%, var(--panel, #fff));
+        box-shadow: inset 2px 0 var(--accent), inset -2px 0 var(--accent);
+      }
+      .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell.is-country-dragging { box-shadow: inset 2px 0 var(--accent), inset -2px 0 var(--accent); }
+      .dev-timestamp-city-cell.is-country-last-city.is-country-dragging { box-shadow: inset 2px 0 var(--accent), inset -2px 0 var(--accent), inset 0 -2px var(--accent); }
       .dev-timestamp-country-name { flex: 0 0 auto; }
       .dev-timestamp-country-add { flex: 0 0 auto; }
-      .dev-timestamp-city-row { border: 0 !important; min-height: 0 !important; }
+      .dev-timestamp-city-row { border: 0 !important; border-bottom: 0 !important; min-height: 0 !important; }
       .dev-timestamp-city-cell { box-sizing: border-box; min-width: 0; padding: 3px 10px 5px !important; border-left: 1px solid var(--line, #dce2ee); border-right: 1px solid var(--line, #dce2ee); border-bottom: 1px solid var(--line, #dce2ee); background: var(--panel, #fff); }
-      .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 1px solid var(--line, #dce2ee); }
+      .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 0 !important; }
       .dev-timestamp-city-cell.is-country-last-city { border-radius: 0 0 10px 10px; }
       .dev-timestamp-city-cell.is-empty { border: 0 !important; background: transparent !important; }
       .dev-timestamp-city-card { position: relative; min-height: 56px !important; padding: 7px 0 !important; }
@@ -183,6 +195,23 @@
       cell.setAttribute('aria-hidden', 'true');
     }
   }, true);
+  const syncCountryDragGroup = (header) => {
+    const matrix = header?.closest('.dev-timestamp-country-matrix');
+    const key = header?.dataset?.devCountryKey;
+    if (!matrix || !key) return;
+    const active = header.classList.contains('is-dragging') || header.classList.contains('is-long-press');
+    header.classList.toggle('is-country-dragging', active);
+    matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(key) + '"]').forEach((cell) => {
+      cell.classList.toggle('is-country-dragging', active);
+    });
+  };
+  const dragStateObserver = new MutationObserver((records) => {
+    records.forEach((record) => {
+      if (record.target.matches?.('.dev-timestamp-country-header-cell[data-dev-country-key]')) syncCountryDragGroup(record.target);
+    });
+  });
+  dragStateObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'], subtree: true });
+  document.querySelectorAll('.dev-timestamp-country-header-cell[data-dev-country-key]').forEach(syncCountryDragGroup);
   const observer = new MutationObserver(() => {
     if (document.querySelector('.dev-timestamp-country-list')) requestAnimationFrame(enhance);
   });
