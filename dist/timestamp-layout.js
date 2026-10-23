@@ -39,22 +39,24 @@
       .dev-timestamp-city-cell.is-country-last-city.is-country-dragging { box-shadow: inset 2px 0 var(--accent), inset -2px 0 var(--accent), inset 0 -2px var(--accent); }
       .dev-timestamp-country-name { flex: 0 0 auto; }
       .dev-timestamp-country-add { flex: 0 0 auto; }
+      .dev-timestamp-expand-cities { flex: 0 0 23px; margin-left: auto; }
+      .dev-timestamp-expand-cities.is-no-extra-cities { opacity: .48; cursor: default; }
       .dev-timestamp-city-row { border: 0 !important; border-bottom: 0 !important; min-height: 0 !important; }
       .dev-timestamp-city-cell { box-sizing: border-box; min-width: 0; padding: 3px 10px 5px !important; border-left: 1px solid var(--line, #dce2ee); border-right: 1px solid var(--line, #dce2ee); border-bottom: 1px solid var(--line, #dce2ee); background: var(--panel, #fff); }
       .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 0 !important; }
       .dev-timestamp-city-cell.is-country-last-city { border-radius: 0 0 10px 10px; }
       .dev-timestamp-city-cell.is-empty { border: 0 !important; background: transparent !important; }
       .dev-timestamp-city-card { position: relative; min-height: 56px !important; padding: 7px 0 !important; }
-      .dev-timestamp-city-card-head { min-width: 0; display: grid !important; grid-template-columns: max-content minmax(0, 1fr) 50px; align-items: center !important; gap: 7px; }
-      .dev-timestamp-city-name { flex: 0 0 auto; font-size: 13px !important; white-space: nowrap; }
-      .dev-timestamp-city-zone.is-inline { display: block !important; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted, #697386); font-size: 10px !important; }
+      .dev-timestamp-city-card-head { min-width: 0; display: grid !important; grid-template-columns: minmax(0, 1fr) 42px; grid-template-areas: "name actions" "zone actions"; align-items: start !important; gap: 3px 5px; }
+      .dev-timestamp-city-name { grid-area: name; min-width: 0; font-size: 13px !important; white-space: nowrap; }
+      .dev-timestamp-city-zone.is-inline { grid-area: zone; display: block !important; min-width: 0; overflow: visible; white-space: normal; overflow-wrap: anywhere; word-break: break-word; color: var(--muted, #697386); font-size: 10px !important; line-height: 1.3; }
       .dev-timestamp-city-zone.is-inline code { display: inline; font-size: inherit !important; }
-      .dev-timestamp-city-actions { display: flex; align-items: center; justify-content: flex-end; gap: 3px; min-width: 0; }
+      .dev-timestamp-city-actions { grid-area: actions; display: flex; align-items: flex-start; justify-content: flex-end; gap: 2px; min-width: 0; }
       .dev-timestamp-city-actions .dev-timestamp-city-copy,
-      .dev-timestamp-city-actions .dev-timestamp-city-delete { position: static !important; inset: auto !important; flex: 0 0 22px; width: 22px !important; height: 22px !important; min-width: 22px; padding: 3px !important; opacity: .78; }
+      .dev-timestamp-city-actions .dev-timestamp-city-delete { position: static !important; inset: auto !important; flex: 0 0 18px; width: 18px !important; height: 18px !important; min-width: 18px; min-height: 18px !important; padding: 2px !important; opacity: .78; }
       .dev-timestamp-city-actions .dev-timestamp-city-delete { color: var(--muted, #697386) !important; }
       .dev-timestamp-city-delete:hover, .dev-timestamp-city-delete:focus-visible { color: #dc2626 !important; opacity: 1; }
-      .dev-timestamp-city-delete svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .dev-timestamp-city-delete svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
       .dev-timestamp-city-cell.is-deleted { visibility: hidden !important; pointer-events: none !important; }
       .dev-timestamp-city-card.is-dragging { z-index: 3; box-shadow: 0 8px 24px #17255428; }
       .dev-timestamp-city-form-row.dev-timestamp-country-row.is-modal {
@@ -77,7 +79,7 @@
         .dev-timestamp-country-matrix { min-width: max(100%, calc(var(--dev-timestamp-country-count, 1) * 210px)) !important; }
         .dev-timestamp-country-header-row, .dev-timestamp-city-row { column-gap: 8px !important; }
         .dev-timestamp-city-cell { padding-inline: 8px !important; }
-        .dev-timestamp-city-card-head { grid-template-columns: max-content minmax(0, 1fr) 48px; gap: 5px; }
+        .dev-timestamp-city-card-head { grid-template-columns: minmax(0, 1fr) 38px; gap: 3px 4px; }
         .dev-timestamp-city-actions { gap: 2px; }
         .dev-timestamp-city-card-head { gap: 5px; }
         .dev-timestamp-city-zone.is-inline { font-size: 9px !important; }
@@ -106,6 +108,16 @@
       const headers = [...matrix.querySelectorAll('.dev-timestamp-country-header-cell[data-dev-country-key]')];
       for (const header of headers) {
         const key = header.dataset.devCountryKey;
+        if (!header.querySelector('.dev-timestamp-expand-cities')) {
+          const expandButton = document.createElement('button');
+          expandButton.type = 'button';
+          expandButton.className = 'dev-timestamp-icon-button dev-timestamp-expand-cities is-no-extra-cities';
+          expandButton.disabled = true;
+          expandButton.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'All cities are visible' : '所有城市均已显示');
+          expandButton.title = document.documentElement.lang === 'en' ? 'All cities are visible' : '所有城市均已显示';
+          expandButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>';
+          header.append(expandButton);
+        }
         const cityCells = [...matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(key) + '"]')];
         cityCells.forEach((cell) => cell.classList.remove('is-country-last-city'));
         const cityCellsWithCards = cityCells.filter((cell) => {
