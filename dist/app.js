@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.725';
+const APP_VERSION = '2.18.726';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9522,28 +9522,42 @@ function renderDeveloperTimestampResult() {
   const addCityLabel = english ? 'Add city' : '添加城市';
   const addCityIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
   const expandIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>';
-  const cityMarkup = countryGroupEntries.map(([countryKey, rows]) => {
+  const dragLabel = english ? ', long press to reorder countries' : '，长按拖动调整国家顺序';
+  const dragGrip = '<span class="dev-timestamp-country-grip" aria-hidden="true"><svg viewBox="0 0 12 18"><circle cx="3" cy="4" r="1.2"/><circle cx="9" cy="4" r="1.2"/><circle cx="3" cy="9" r="1.2"/><circle cx="9" cy="9" r="1.2"/><circle cx="3" cy="14" r="1.2"/><circle cx="9" cy="14" r="1.2"/></svg></span>';
+  const groups = countryGroupEntries.map(([countryKey, rows]) => {
     const country = rows[0]?.group || (english ? 'Other' : '其他');
     const expanded = dev.timestampExpandedCountries.includes(countryKey);
     const visibleRows = expanded ? rows : rows.slice(0, 3);
-    const entries = visibleRows.map((row) => '<article class="dev-timestamp-city-card" tabindex="0" data-dev-city-id="' + escapeHtml(row.key) + '" data-dev-timestamp-row="' + escapeHtml(row.key) + '" aria-label="' + escapeHtml((row.displayLabel || row.label) + (english ? ', long press to reorder' : '，长按拖动以调整顺序')) + '"><div class="dev-timestamp-city-card-head"><strong class="dev-timestamp-city-name">' + escapeHtml(row.displayLabel || row.label) + '</strong>' + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div><code class="dev-timestamp-city-time">' + escapeHtml(row.localTime) + '</code><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></article>').join('');
-    const addForm = dev.timestampAddCityCountry === countryKey
-      ? '<div class="dev-timestamp-city-form"><input class="dev-plain-input dev-timestamp-city-name-input" type="text" maxlength="60" autocomplete="off" placeholder="' + escapeHtml(english ? 'City name' : '城市名称') + '"><input class="dev-plain-input dev-timestamp-city-zone-input" type="text" maxlength="100" list="dev-timestamp-timezones" autocomplete="off" placeholder="America/New_York" aria-label="' + escapeHtml(english ? 'IANA time zone' : 'IANA 时区') + '"><button type="button" class="secondary dev-action" data-dev-action="timestamp-city-add" data-dev-country-key="' + escapeHtml(countryKey) + '">' + escapeHtml(english ? 'Add' : '添加') + '</button><button type="button" class="secondary dev-action" data-dev-action="timestamp-city-add-cancel" data-dev-country-key="' + escapeHtml(countryKey) + '">' + escapeHtml(english ? 'Cancel' : '取消') + '</button></div>'
-      : '';
     const expandLabel = expanded
       ? (english ? 'Show fewer cities' : '收起城市')
       : (english ? 'Show all cities' : '展开全部城市');
     const expandButton = rows.length > 3
       ? '<button type="button" class="dev-timestamp-icon-button dev-timestamp-expand-cities" data-dev-action="timestamp-city-expand" data-dev-country-key="' + escapeHtml(countryKey) + '" aria-label="' + escapeHtml(expandLabel) + '" title="' + escapeHtml(expandLabel) + '" aria-expanded="' + String(expanded) + '">' + expandIcon + '</button>'
       : '';
-    const addButton = '<button type="button" class="dev-timestamp-icon-button dev-timestamp-country-add" data-dev-action="timestamp-city-add-open" data-dev-country-key="' + escapeHtml(countryKey) + '" aria-label="' + escapeHtml(addCityLabel) + '" title="' + escapeHtml(addCityLabel) + '">' + addCityIcon + '</button>';
-    const dragLabel = english ? ', long press to reorder countries' : '，长按拖动调整国家顺序';
-    const dragGrip = '<span class="dev-timestamp-country-grip" aria-hidden="true"><svg viewBox="0 0 12 18"><circle cx="3" cy="4" r="1.2"/><circle cx="9" cy="4" r="1.2"/><circle cx="3" cy="9" r="1.2"/><circle cx="9" cy="9" r="1.2"/><circle cx="3" cy="14" r="1.2"/><circle cx="9" cy="14" r="1.2"/></svg></span>';
-    return '<section class="dev-timestamp-country-row" data-dev-timestamp-country="' + escapeHtml(countryKey) + '" data-dev-country-id="' + escapeHtml(countryKey) + '" aria-label="' + escapeHtml(country + dragLabel) + '"><header class="dev-timestamp-country-heading"><span class="dev-timestamp-country-identity"><span class="dev-timestamp-country-flag" aria-hidden="true">' + (countryFlags[country] || flagOther) + '</span><strong class="dev-timestamp-country-name">' + escapeHtml(country) + '</strong>' + dragGrip + '</span><div class="dev-timestamp-country-actions">' + addButton + expandButton + '</div></header>' + addForm + '<div class="dev-timestamp-city-grid">' + entries + '</div></section>';
+    const header = '<div class="dev-timestamp-country-header-cell" data-dev-country-key="' + escapeHtml(countryKey) + '" data-dev-country-id="' + escapeHtml(countryKey) + '" role="columnheader" aria-label="' + escapeHtml(country + dragLabel) + '"><span class="dev-timestamp-country-flag" aria-hidden="true">' + (countryFlags[country] || flagOther) + '</span><strong class="dev-timestamp-country-name">' + escapeHtml(country) + '</strong>' + dragGrip + expandButton + '</div>';
+    return { countryKey, country, rows: visibleRows, header };
+  });
+  const matrixStyle = ' style="--dev-timestamp-country-count:' + Math.max(1, groups.length) + '"';
+  const countryHeader = '<div class="dev-timestamp-country-header-row" role="row">' + groups.map((group) => group.header).join('') + '</div>';
+  const maxCityRows = Math.max(0, ...groups.map((group) => group.rows.length));
+  const cityMatrixRows = Array.from({ length: maxCityRows }, (_, rowIndex) => {
+    const cells = groups.map((group) => {
+      const row = group.rows[rowIndex];
+      if (!row) return '<div class="dev-timestamp-city-cell is-empty" data-dev-country-key="' + escapeHtml(group.countryKey) + '" role="cell" aria-hidden="true"></div>';
+      const cityName = row.displayLabel || row.label;
+      const addButton = '<button type="button" class="dev-timestamp-icon-button dev-timestamp-city-add-inline" data-dev-action="timestamp-city-add-open" data-dev-country-key="' + escapeHtml(group.countryKey) + '" aria-label="' + escapeHtml(addCityLabel + ' · ' + cityName) + '" title="' + escapeHtml(addCityLabel) + '">' + addCityIcon + '</button>';
+      const card = '<article class="dev-timestamp-city-card" tabindex="0" data-dev-city-id="' + escapeHtml(row.key) + '" data-dev-timestamp-row="' + escapeHtml(row.key) + '" aria-label="' + escapeHtml(cityName + (english ? ', long press to reorder' : '，长按拖动以调整顺序')) + '"><div class="dev-timestamp-city-card-head"><strong class="dev-timestamp-city-name">' + escapeHtml(cityName) + '</strong>' + addButton + copyButton(row, 'dev-timestamp-row-copy dev-timestamp-city-copy') + '</div><code class="dev-timestamp-city-time">' + escapeHtml(row.localTime) + '</code><div class="dev-timestamp-city-zone"><code>' + escapeHtml(row.utcOffset) + '</code><code>' + escapeHtml(row.timeZone) + '</code></div></article>';
+      return '<div class="dev-timestamp-city-cell" data-dev-country-key="' + escapeHtml(group.countryKey) + '" data-dev-timestamp-country="' + escapeHtml(group.countryKey) + '" role="cell">' + card + '</div>';
+    }).join('');
+    return '<div class="dev-timestamp-city-row" data-dev-city-row="' + rowIndex + '" role="row">' + cells + '</div>';
   }).join('');
+  const activeCountry = groups.find((group) => group.countryKey === dev.timestampAddCityCountry);
+  const addForm = activeCountry
+    ? '<div class="dev-timestamp-city-form-row"><strong>' + escapeHtml((english ? 'Add a city to ' : '添加城市到 ') + activeCountry.country) + '</strong><div class="dev-timestamp-city-form" data-dev-country-key="' + escapeHtml(activeCountry.countryKey) + '"><input class="dev-plain-input dev-timestamp-city-name-input" type="text" maxlength="60" autocomplete="off" placeholder="' + escapeHtml(english ? 'City name' : '城市名称') + '"><input class="dev-plain-input dev-timestamp-city-zone-input" type="text" maxlength="100" list="dev-timestamp-timezones" autocomplete="off" placeholder="America/New_York" aria-label="' + escapeHtml(english ? 'IANA time zone' : 'IANA 时区') + '"><button type="button" class="secondary dev-action" data-dev-action="timestamp-city-add" data-dev-country-key="' + escapeHtml(activeCountry.countryKey) + '">' + escapeHtml(english ? 'Add' : '添加') + '</button><button type="button" class="secondary dev-action" data-dev-action="timestamp-city-add-cancel" data-dev-country-key="' + escapeHtml(activeCountry.countryKey) + '">' + escapeHtml(english ? 'Cancel' : '取消') + '</button></div></div>'
+    : '';
   const cityHeading = english ? 'Major city times' : '主要城市时间';
   const timezoneOptions = ['America/New_York', 'America/Los_Angeles', 'America/Chicago', 'America/Denver', 'America/Vancouver', 'America/Toronto', 'Europe/London', 'Europe/Berlin', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Ho_Chi_Minh', 'UTC'].map((zone) => '<option value="' + zone + '"></option>').join('');
-  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4>' + escapeHtml(cityHeading) + '</h4><div class="dev-timestamp-country-list">' + cityMarkup + '</div><datalist id="dev-timestamp-timezones">' + timezoneOptions + '</datalist></section></div>';
+  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4>' + escapeHtml(cityHeading) + '</h4><div class="dev-timestamp-country-list"><div class="dev-timestamp-country-matrix"' + matrixStyle + '>' + countryHeader + cityMatrixRows + '</div>' + addForm + '</div><datalist id="dev-timestamp-timezones">' + timezoneOptions + '</datalist></section></div>';
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
@@ -9708,7 +9722,7 @@ function finishTimestampCountryDrag(event = null) {
   activeTimestampCountryDrag = null;
   document.body.classList.remove('dev-timestamp-country-dragging');
   if (!drag.activated || !drag.moved) return;
-  state.devTools.timestampCountryOrder = [...drag.list.querySelectorAll('[data-dev-country-id]')].map((card) => card.dataset.devCountryId);
+  state.devTools.timestampCountryOrder = [...drag.list.querySelectorAll('.dev-timestamp-country-header-row [data-dev-country-id]')].map((cell) => cell.dataset.devCountryId);
   saveDevTools();
   refreshDeveloperLiveOutput();
   toast(state.language === 'en' ? 'Country order saved.' : '国家顺序已保存。', 'info');
@@ -9729,27 +9743,41 @@ function beginTimestampCountryDrag(card, list, point) {
 function updateTimestampCountryDragPosition(clientX, clientY) {
   const drag = activeTimestampCountryDrag;
   if (!drag?.activated) return;
-  const target = document.elementFromPoint(clientX, clientY)?.closest?.('[data-dev-country-id]');
-  if (!target || target === drag.card || target.parentElement !== drag.list) return;
+  const target = document.elementFromPoint(clientX, clientY)?.closest?.('.dev-timestamp-country-header-cell[data-dev-country-id]');
+  const headerRow = drag.list.querySelector('.dev-timestamp-country-header-row');
+  if (!target || target === drag.card || target.parentElement !== headerRow) return;
   const rect = target.getBoundingClientRect();
-  const centerY = rect.top + rect.height / 2;
-  const centerX = rect.left + rect.width / 2;
-  const after = clientY > centerY || (Math.abs(clientY - centerY) < rect.height * .15 && clientX > centerX);
-  if ((after && target.nextElementSibling === drag.card) || (!after && target.previousElementSibling === drag.card)) return;
-  const cards = [...drag.list.querySelectorAll('[data-dev-country-id]')];
-  const beforeRects = new Map(cards.map((item) => [item, item.getBoundingClientRect()]));
-  if (after) target.after(drag.card); else target.before(drag.card);
+  const after = clientX > rect.left + rect.width / 2;
+  const order = [...headerRow.querySelectorAll('[data-dev-country-id]')].map((cell) => cell.dataset.devCountryId);
+  const fromIndex = order.indexOf(drag.card.dataset.devCountryId);
+  const targetIndex = order.indexOf(target.dataset.devCountryId);
+  if (fromIndex < 0 || targetIndex < 0) return;
+  const nextIndex = targetIndex + (after ? 1 : 0);
+  if (fromIndex === nextIndex || fromIndex + 1 === nextIndex) return;
+  order.splice(fromIndex, 1);
+  const insertionIndex = Math.max(0, Math.min(order.length, nextIndex > fromIndex ? nextIndex - 1 : nextIndex));
+  order.splice(insertionIndex, 0, drag.card.dataset.devCountryId);
+  if (order.every((key, index) => key === [...headerRow.querySelectorAll('[data-dev-country-id]')][index]?.dataset.devCountryId)) return;
+
+  const matrix = headerRow.closest('.dev-timestamp-country-matrix');
+  const rows = [headerRow, ...matrix.querySelectorAll('.dev-timestamp-city-row')];
+  const cells = [...matrix.querySelectorAll('[data-dev-country-key]')];
+  const beforeRects = new Map(cells.map((cell) => [cell, cell.getBoundingClientRect()]));
+  rows.forEach((row) => {
+    const byCountry = new Map([...row.children].filter((cell) => cell.hasAttribute('data-dev-country-key')).map((cell) => [cell.dataset.devCountryKey, cell]));
+    order.forEach((key) => { const cell = byCountry.get(key); if (cell) row.append(cell); });
+  });
   drag.moved = true;
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-  for (const item of cards) {
-    if (item === drag.card || !item.isConnected) continue;
-    const first = beforeRects.get(item);
-    const last = item.getBoundingClientRect();
+  for (const cell of cells) {
+    if (!cell.isConnected) continue;
+    const first = beforeRects.get(cell);
+    const last = cell.getBoundingClientRect();
     const dx = first.left - last.left;
     const dy = first.top - last.top;
     if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
     try {
-      item.animate?.([
+      cell.animate?.([
         { transform: 'translate3d(' + dx + 'px, ' + dy + 'px, 0)' },
         { transform: 'translate3d(0, 0, 0)' },
       ], { duration: 190, easing: 'cubic-bezier(.2, .75, .25, 1)' });
@@ -9758,16 +9786,16 @@ function updateTimestampCountryDragPosition(clientX, clientY) {
 }
 workspace.addEventListener('pointerdown', (event) => {
   if (state.section !== 'tools' || state.tool !== 'dev' || state.devTools.active !== 'timestamp') return;
-  const card = event.target.closest?.('[data-dev-country-id]');
-  if (!card || event.target.closest?.('[data-dev-city-id], button, input, select, textarea') || event.pointerType === 'touch' || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  const card = event.target.closest?.('.dev-timestamp-country-header-cell[data-dev-country-id]');
+  if (!card || event.pointerType === 'touch' || event.target.closest('button, input, select, textarea') || (event.pointerType === 'mouse' && event.button !== 0)) return;
   const list = card.closest('.dev-timestamp-country-list');
   if (!list) return;
-  beginTimestampCountryDrag(card, list, event);
+  beginTimestampCountryDrag(card, list, { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY });
 });
 workspace.addEventListener('touchstart', (event) => {
   if (state.section !== 'tools' || state.tool !== 'dev' || state.devTools.active !== 'timestamp') return;
   const touch = event.changedTouches?.[0];
-  const card = event.target.closest?.('[data-dev-country-id]');
+  const card = event.target.closest?.('.dev-timestamp-country-header-cell[data-dev-country-id]');
   if (!touch || !card || event.target.closest?.('[data-dev-city-id], button, input, select, textarea')) return;
   const list = card.closest('.dev-timestamp-country-list');
   if (!list) return;
@@ -9812,6 +9840,12 @@ document.addEventListener('pointercancel', finishTimestampCountryDrag);
 window.addEventListener('blur', () => finishTimestampCountryDrag());
 
 let activeTimestampCityDrag = null;
+function timestampCityOrderInMatrix(matrix, countryKey) {
+  return [...matrix.querySelectorAll('.dev-timestamp-city-cell')]
+    .filter((cell) => cell.dataset.devCountryKey === countryKey)
+    .map((cell) => cell.querySelector('[data-dev-city-id]'))
+    .filter(Boolean);
+}
 function finishTimestampCityDrag(event = null) {
   const drag = activeTimestampCityDrag;
   if (!drag || (event?.pointerId != null && drag.pointerId !== event.pointerId)) return;
@@ -9821,11 +9855,10 @@ function finishTimestampCityDrag(event = null) {
   activeTimestampCityDrag = null;
   document.body.classList.remove('dev-timestamp-city-dragging');
   if (!drag.activated || !drag.moved) return;
-  const countryKey = drag.countryKey;
-  const visibleOrder = [...drag.grid.querySelectorAll('[data-dev-city-id]')].map((card) => card.dataset.devCityId);
-  const allRows = developerTimestampResult().rows.filter((row) => row.city && row.countryKey === countryKey).map((row) => row.key);
+  const visibleOrder = timestampCityOrderInMatrix(drag.grid, drag.countryKey).map((card) => card.dataset.devCityId);
+  const allRows = developerTimestampResult().rows.filter((row) => row.city && row.countryKey === drag.countryKey).map((row) => row.key);
   const visible = new Set(visibleOrder);
-  state.devTools.timestampCityOrder[countryKey] = [...visibleOrder, ...allRows.filter((key) => !visible.has(key))];
+  state.devTools.timestampCityOrder[drag.countryKey] = [...visibleOrder, ...allRows.filter((key) => !visible.has(key))];
   saveDevTools();
   refreshDeveloperLiveOutput();
   toast(state.language === 'en' ? 'City order saved.' : '城市顺序已保存。', 'info');
@@ -9835,8 +9868,8 @@ workspace.addEventListener('pointerdown', (event) => {
   const card = event.target.closest?.('[data-dev-city-id]');
   if (!card || event.pointerType === 'touch' || event.target.closest('button, input, select, textarea') || (event.pointerType === 'mouse' && event.button !== 0)) return;
   if (activeTimestampCityDrag) finishTimestampCityDrag();
-  const grid = card.closest('.dev-timestamp-city-grid');
-  const countryKey = card.closest('[data-dev-timestamp-country]')?.dataset.devTimestampCountry;
+  const grid = card.closest('.dev-timestamp-country-matrix');
+  const countryKey = card.closest('.dev-timestamp-city-cell')?.dataset.devCountryKey;
   if (!grid || !countryKey) return;
   const drag = { card, grid, countryKey, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, activated: false, moved: false, timer: null };
   activeTimestampCityDrag = drag;
@@ -9852,11 +9885,34 @@ function updateTimestampCityDragPosition(clientX, clientY) {
   const drag = activeTimestampCityDrag;
   if (!drag?.activated) return;
   const target = document.elementFromPoint(clientX, clientY)?.closest?.('[data-dev-city-id]');
-  if (!target || target === drag.card || target.parentElement !== drag.grid) return;
+  const targetCell = target?.closest?.('.dev-timestamp-city-cell');
+  if (!target || target === drag.card || targetCell?.dataset.devCountryKey !== drag.countryKey) return;
+  const cards = timestampCityOrderInMatrix(drag.grid, drag.countryKey);
+  const fromIndex = cards.indexOf(drag.card);
+  const targetIndex = cards.indexOf(target);
+  if (fromIndex < 0 || targetIndex < 0) return;
   const rect = target.getBoundingClientRect();
-  const after = clientY > rect.top + rect.height / 2 || (Math.abs(clientY - (rect.top + rect.height / 2)) < rect.height * .25 && clientX > rect.left + rect.width / 2);
-  if (after) target.after(drag.card); else target.before(drag.card);
+  const after = clientY > rect.top + rect.height / 2;
+  let nextIndex = targetIndex + (after ? 1 : 0);
+  if (fromIndex < nextIndex) nextIndex--;
+  if (fromIndex === nextIndex) return;
+  const beforeRects = new Map(cards.map((card) => [card, card.getBoundingClientRect()]));
+  const nextOrder = [...cards];
+  nextOrder.splice(fromIndex, 1);
+  nextOrder.splice(nextIndex, 0, drag.card);
+  const cells = [...drag.grid.querySelectorAll('.dev-timestamp-city-cell')].filter((cell) => cell.dataset.devCountryKey === drag.countryKey);
+  cells.forEach((cell) => cell.querySelector('[data-dev-city-id]')?.remove());
+  nextOrder.forEach((card, index) => cells[index]?.append(card));
   drag.moved = true;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  for (const card of nextOrder) {
+    const first = beforeRects.get(card);
+    const last = card.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+    try { card.animate?.([{ transform: 'translate3d(' + dx + 'px, ' + dy + 'px, 0)' }, { transform: 'translate3d(0, 0, 0)' }], { duration: 170, easing: 'cubic-bezier(.2, .75, .25, 1)' }); } catch {}
+  }
 }
 document.addEventListener('pointermove', (event) => {
   const drag = activeTimestampCityDrag;
@@ -9877,8 +9933,8 @@ workspace.addEventListener('touchstart', (event) => {
   const card = event.target.closest?.('[data-dev-city-id]');
   if (!touch || !card || event.target.closest('button, input, select, textarea')) return;
   if (activeTimestampCityDrag) finishTimestampCityDrag();
-  const grid = card.closest('.dev-timestamp-city-grid');
-  const countryKey = card.closest('[data-dev-timestamp-country]')?.dataset.devTimestampCountry;
+  const grid = card.closest('.dev-timestamp-country-matrix');
+  const countryKey = card.closest('.dev-timestamp-city-cell')?.dataset.devCountryKey;
   if (!grid || !countryKey) return;
   const drag = { card, grid, countryKey, touchId: touch.identifier, startX: touch.clientX, startY: touch.clientY, activated: false, moved: false, timer: null };
   activeTimestampCityDrag = drag;
