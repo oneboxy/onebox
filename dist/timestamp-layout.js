@@ -40,7 +40,9 @@
       .dev-timestamp-country-name { flex: 0 0 auto; }
       .dev-timestamp-country-add { flex: 0 0 auto; }
       .dev-timestamp-expand-cities { flex: 0 0 23px; margin-left: auto; }
-      .dev-timestamp-expand-cities.is-no-extra-cities { opacity: .48; cursor: default; }
+      .dev-timestamp-expand-cities { opacity: .82; cursor: pointer; }
+      .dev-timestamp-expand-cities:hover { opacity: 1; color: var(--accent); }
+      .dev-timestamp-city-cell.is-country-cities-collapsed { visibility: hidden !important; pointer-events: none !important; }
       .dev-timestamp-city-row { border: 0 !important; border-bottom: 0 !important; min-height: 0 !important; }
       .dev-timestamp-city-cell { box-sizing: border-box; min-width: 0; padding: 3px 10px 5px !important; border-left: 1px solid var(--line, #dce2ee); border-right: 1px solid var(--line, #dce2ee); border-bottom: 1px solid var(--line, #dce2ee); background: var(--panel, #fff); }
       .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell:not(.is-empty) { border-top: 1px solid var(--line, #dce2ee) !important; }
@@ -372,14 +374,46 @@
         if (!header.querySelector('.dev-timestamp-expand-cities')) {
           const expandButton = document.createElement('button');
           expandButton.type = 'button';
-          expandButton.className = 'dev-timestamp-icon-button dev-timestamp-expand-cities is-no-extra-cities';
-          expandButton.disabled = true;
-          expandButton.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'All cities are visible' : '所有城市均已显示');
-          expandButton.title = document.documentElement.lang === 'en' ? 'All cities are visible' : '所有城市均已显示';
+          expandButton.className = 'dev-timestamp-icon-button dev-timestamp-expand-cities';
+          expandButton.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'Collapse all cities' : '折叠全部城市');
+          expandButton.title = document.documentElement.lang === 'en' ? 'Collapse all cities' : '折叠全部城市';
           expandButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>';
           header.append(expandButton);
         }
         const cityCells = [...matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(key) + '"]')];
+        const expandButton = header.querySelector('.dev-timestamp-expand-cities');
+        if (expandButton) {
+          expandButton.disabled = false;
+          expandButton.classList.remove('is-no-extra-cities');
+          const setCollapsed = (collapsed) => {
+            header.dataset.devCitiesCollapsed = collapsed ? 'true' : 'false';
+            expandButton.setAttribute('aria-expanded', String(!collapsed));
+            const label = document.documentElement.lang === 'en'
+              ? (collapsed ? 'Expand all cities' : 'Collapse all cities')
+              : (collapsed ? '展开全部城市' : '折叠全部城市');
+            expandButton.setAttribute('aria-label', label);
+            expandButton.title = label;
+            expandButton.innerHTML = collapsed
+              ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>'
+              : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 14 5-5 5 5"/></svg>';
+            cityCells.forEach((cell) => {
+              const card = cell.querySelector('.dev-timestamp-city-card[data-dev-city-id]');
+              const hidden = card && readHidden().has(card.dataset.devCityId);
+              const folded = Boolean(card && !hidden && collapsed);
+              cell.classList.toggle('is-country-cities-collapsed', folded);
+              cell.toggleAttribute('aria-hidden', Boolean(hidden || folded));
+            });
+          };
+          if (!expandButton.dataset.toggleBound) {
+            expandButton.dataset.toggleBound = 'true';
+            expandButton.addEventListener('click', (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setCollapsed(header.dataset.devCitiesCollapsed !== 'true');
+            });
+          }
+          setCollapsed(header.dataset.devCitiesCollapsed === 'true');
+        }
         cityCells.forEach((cell) => cell.classList.remove('is-country-last-city'));
         const cityCellsWithCards = cityCells.filter((cell) => {
           const card = cell.querySelector('.dev-timestamp-city-card[data-dev-city-id]');
@@ -401,8 +435,10 @@
           const card = cell.querySelector('.dev-timestamp-city-card[data-dev-city-id]');
           if (!card) return;
           const hidden = readHidden().has(card.dataset.devCityId);
+          const folded = !hidden && header.dataset.devCitiesCollapsed === 'true';
           cell.classList.toggle('is-deleted', hidden);
-          cell.toggleAttribute('aria-hidden', hidden);
+          cell.classList.toggle('is-country-cities-collapsed', folded);
+          cell.toggleAttribute('aria-hidden', Boolean(hidden || folded));
           const cityName = card.querySelector('.dev-timestamp-city-name');
           const zone = card.querySelector('.dev-timestamp-city-zone');
           const head = card.querySelector('.dev-timestamp-city-card-head');

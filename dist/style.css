@@ -10227,6 +10227,34 @@ body.dev-tools-fullscreen { overflow: hidden; }
 .dev-history-summary small { margin-top: 3px; color: var(--muted); font-size: 10px; }
 .dev-history-count { display: grid; min-width: 22px; height: 22px; place-items: center; border-radius: 8px; background: var(--soft); color: var(--primary); font-size: 10px; font-weight: 800; }
 .dev-history-content { margin-top: 10px; }
+.dev-history-modal.dialog {
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.dev-history-modal .dev-history-modal-card {
+  display: flex;
+  width: min(560px, 100%);
+  max-height: min(82vh, 720px);
+  flex-direction: column;
+  margin: 0;
+  overflow: hidden;
+}
+.dev-history-modal-card .dev-history-content {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  margin: 0;
+}
+.dev-history-modal-card .dev-record-list {
+  max-height: min(60vh, 520px);
+}
+@media (max-width: 560px) {
+  .dev-history-modal.dialog { padding: 12px; }
+  .dev-history-modal .dev-history-modal-card { padding: 16px; border-radius: 16px; }
+}
 .dev-history-content[hidden] { display: none !important; }
 .dev-history-content .dev-history-head { align-items: center; margin-bottom: 8px; }
 .dev-history-content .dev-history-head strong { font-size: 11px; }
