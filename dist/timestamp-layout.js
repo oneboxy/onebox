@@ -64,19 +64,41 @@
       .dev-timestamp-city-card.is-dragging { z-index: 3; box-shadow: 0 8px 24px #17255428; }
       .dev-timestamp-city-form-row.dev-timestamp-country-row.is-modal {
         position: fixed !important; inset: 0 !important; z-index: 9999 !important; display: grid !important;
-        align-content: center; justify-items: center; gap: 12px; padding: 24px !important;
-        margin: 0 !important; background: rgb(15 23 42 / .42) !important; backdrop-filter: blur(3px);
+        place-items: center; padding: 18px !important; margin: 0 !important;
+        background: rgb(15 23 42 / .34) !important; backdrop-filter: blur(4px);
       }
-      .dev-timestamp-city-form-row.is-modal > strong { display: block; width: min(100%, 440px); padding: 0 2px; color: #fff; font-size: 16px; }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form {
-        box-sizing: border-box; display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px;
-        width: min(100%, 440px); padding: 18px; border: 1px solid var(--line, #dce2ee);
-        border-radius: 14px; background: var(--panel, #fff); box-shadow: 0 20px 60px #0f172a35;
+        box-sizing: border-box; display: grid !important; grid-template-columns: 1fr 1fr; gap: 12px;
+        width: min(100%, 420px); padding: 22px; border: 1px solid var(--line, #dce2ee);
+        border-radius: 16px; background: var(--panel, #fff); color: var(--ink, #172033);
+        box-shadow: 0 18px 56px #0f172a30;
       }
-      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form input { min-width: 0; width: 100%; }
-      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button { min-height: 40px; }
-      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button:first-of-type { grid-column: 1; }
-      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button:last-of-type { grid-column: 2; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form > strong {
+        grid-column: 1 / -1; margin: 0 0 2px; font-size: 17px; font-weight: 650; color: var(--ink, #172033);
+      }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-country-select {
+        grid-column: 1 / -1; width: 100%; min-width: 0; height: 42px; padding: 0 12px;
+        border: 1px solid var(--line, #dce2ee); border-radius: 9px; background: var(--panel, #fff);
+        color: var(--ink, #172033); font: inherit;
+      }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form input {
+        box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; padding: 0 12px;
+        border: 1px solid var(--line, #dce2ee); border-radius: 9px; background: var(--panel, #fff);
+        color: var(--ink, #172033);
+      }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form button {
+        min-height: 40px; border-radius: 9px; cursor: pointer;
+      }
+      .dev-timestamp-city-form-row.is-modal [data-dev-action="timestamp-city-add"] {
+        border: 1px solid var(--accent, #465fff); background: var(--accent, #465fff); color: #fff;
+      }
+      .dev-timestamp-city-form-row.is-modal [data-dev-action="timestamp-city-add-cancel"] {
+        border: 1px solid var(--line, #dce2ee); background: transparent; color: var(--ink, #172033);
+      }
+      @media (max-width: 480px) {
+        .dev-timestamp-city-form-row.is-modal { padding: 14px !important; }
+        .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form { padding: 18px; gap: 10px; }
+      }
       @media (max-width: 720px) {
         .dev-timestamp-country-list { overflow-x: auto !important; }
         .dev-timestamp-country-matrix { min-width: max(100%, calc(var(--dev-timestamp-country-count, 1) * 210px)) !important; }
@@ -96,10 +118,41 @@
       if (!matrix) return;
       const addForm = list.querySelector('.dev-timestamp-city-form-row');
       if (addForm) {
+        const form = addForm.querySelector('.dev-timestamp-city-form');
+        const title = addForm.querySelector('strong');
         addForm.classList.add('dev-timestamp-country-row');
         addForm.setAttribute('role', 'dialog');
         addForm.setAttribute('aria-modal', 'true');
         addForm.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'Add a city' : '添加城市');
+        if (form && title && title.parentElement !== form) form.prepend(title);
+        if (form && !form.querySelector('.dev-timestamp-city-country-select')) {
+          const select = document.createElement('select');
+          select.className = 'dev-timestamp-city-country-select';
+          select.setAttribute('aria-label', document.documentElement.lang === 'en' ? 'Country' : '选择国家');
+          const currentKey = form.dataset.devCountryKey || form.querySelector('[data-dev-country-key]')?.dataset.devCountryKey || '';
+          for (const header of matrix.querySelectorAll('.dev-timestamp-country-header-cell[data-dev-country-key]')) {
+            const option = document.createElement('option');
+            option.value = header.dataset.devCountryKey;
+            option.textContent = header.querySelector('.dev-timestamp-country-name')?.textContent?.trim() || option.value;
+            select.append(option);
+          }
+          select.value = currentKey;
+          title.textContent = document.documentElement.lang === 'en' ? 'Add city' : '添加城市';
+          form.insertBefore(select, form.querySelector('.dev-timestamp-city-name-input'));
+        }
+        const select = form?.querySelector('.dev-timestamp-city-country-select');
+        const syncCountry = () => {
+          const key = select?.value || '';
+          if (form) form.dataset.devCountryKey = key;
+          form?.querySelectorAll('[data-dev-action="timestamp-city-add"], [data-dev-action="timestamp-city-add-cancel"]').forEach((button) => {
+            button.dataset.devCountryKey = key;
+          });
+        };
+        if (select && !select.dataset.bound) {
+          select.dataset.bound = 'true';
+          select.addEventListener('change', syncCountry);
+        }
+        syncCountry();
         if (!addForm.classList.contains('is-modal')) {
           addForm.classList.add('is-modal');
           document.body.append(addForm);
@@ -198,6 +251,8 @@
     const modal = event.target.closest?.('.dev-timestamp-city-form-row.is-modal');
     if (!modal) return;
     if (event.target === modal) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
       modal.querySelector('[data-dev-action="timestamp-city-add-cancel"]')?.click();
       return;
     }
@@ -205,8 +260,19 @@
     if (!action) return;
     const list = document.querySelector('.dev-timestamp-country-list');
     if (!list) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
     modal.classList.remove('is-modal');
     list.append(modal);
+    action.click();
+    if (action.dataset.devAction === 'timestamp-city-add') {
+      setTimeout(() => {
+        if (!modal.isConnected || !modal.closest('.dev-timestamp-country-list')) return;
+        modal.classList.add('is-modal');
+        document.body.append(modal);
+        modal.querySelector('.dev-timestamp-city-name-input')?.focus();
+      }, 0);
+    }
   }, true);
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
