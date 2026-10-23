@@ -15,7 +15,7 @@
     style.textContent = `
       .dev-timestamp-mode { border: 0 !important; border-radius: 0 !important; background: transparent !important; }
       .dev-timestamp-mode-bar { padding-inline: 12px; }
-      .dev-timestamp-mode button.active::after { bottom: -1px !important; }
+      .dev-timestamp-mode button.active::after { bottom: -5px !important; }
       .dev-timestamp-country-header-row, .dev-timestamp-city-row { column-gap: 10px !important; }
       .dev-timestamp-country-header-row { padding: 0 !important; border-bottom: 0 !important; background: transparent !important; }
       .dev-timestamp-country-header-cell {
