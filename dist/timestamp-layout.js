@@ -114,14 +114,104 @@
         .dev-timestamp-city-form-row.is-modal { padding: calc(var(--app-header-height, 56px) + 8px) 12px 12px !important; }
         .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form { width: 100%; }
       }
-      @media (max-width: 720px) {
-        .dev-timestamp-country-list { overflow-x: auto !important; }
-        .dev-timestamp-country-matrix { min-width: max(100%, calc(var(--dev-timestamp-country-count, 1) * 210px)) !important; }
-        .dev-timestamp-country-header-row, .dev-timestamp-city-row { column-gap: 8px !important; }
-        .dev-timestamp-city-cell { padding-inline: 8px !important; }
-        .dev-timestamp-city-card-head { gap: 4px; }
-        .dev-timestamp-city-heading { gap: 4px; }
-        .dev-timestamp-city-zone.is-inline { font-size: 8px !important; }
+      @media (max-width: 760px) {
+        body:has(#workspace[data-tool="development"]) #toolNav {
+          display: flex; justify-content: flex-start; overflow-x: auto; overflow-y: hidden;
+          overscroll-behavior-x: contain; scrollbar-width: none; touch-action: pan-x;
+        }
+        body:has(#workspace[data-tool="development"]) #toolNav::-webkit-scrollbar { display: none; }
+        body:has(#workspace[data-tool="development"]) #toolNav .tab { flex: 0 0 auto; min-width: max-content; }
+        #workspace[data-tool="development"] .dev-mode-tabs {
+          gap: 2px; margin-bottom: 8px; padding: 0; border: 0; border-bottom: 1px solid var(--line);
+          border-radius: 0; background: transparent; overscroll-behavior-x: contain;
+        }
+        #workspace[data-tool="development"] .dev-mode-tab {
+          flex: 1 0 auto; min-height: 38px; padding: 7px 6px; border-radius: 0;
+          font-size: 11px; white-space: nowrap;
+        }
+        #workspace[data-tool="development"] .dev-workbench.dev-timestamp { gap: 6px; }
+        .dev-timestamp-mode-bar { padding-inline: 0 !important; }
+        .dev-timestamp-mode { width: 100%; max-width: none; margin: 0 0 7px; padding: 2px; }
+        .dev-timestamp-mode button { min-height: 34px; padding: 6px 8px; }
+        .dev-timestamp-content { gap: 7px; }
+        .dev-timestamp-card, .dev-timestamp-output-card { padding: 7px 9px; gap: 5px; }
+        .dev-timestamp .dev-pane-head { margin: 0; }
+        .dev-timestamp .dev-pane-head h3 { font-size: 12px; }
+        .dev-timestamp .dev-pane-actions { gap: 4px; }
+        .dev-timestamp .dev-action { min-height: 32px; padding: 5px 8px; font-size: 11px; }
+        .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 82px; gap: 6px; }
+        .dev-timestamp-input-row .dev-action { width: auto; min-height: 32px; justify-self: end; padding-inline: 10px; }
+        .dev-timestamp-input-row .dev-plain-input { min-height: 40px; font-size: 14px; }
+        .dev-timestamp-output-card > .dev-pane-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; }
+        .dev-timestamp-output-card .dev-pane-actions { margin-left: auto; }
+        .dev-timestamp-standard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        .dev-timestamp-summary-card {
+          display: grid; grid-template-columns: minmax(0, 1fr) 20px; grid-template-rows: auto auto;
+          align-content: center; min-height: 58px; gap: 3px 4px; padding: 7px 7px 7px 8px;
+        }
+        .dev-timestamp-summary-card > span, .dev-timestamp-summary-card > code { grid-column: 1; min-width: 0; }
+        .dev-timestamp-summary-card > span { font-size: 10px; }
+        .dev-timestamp-summary-card > code {
+          overflow: visible; font-size: 10px; line-height: 1.3; text-overflow: clip;
+          white-space: normal; overflow-wrap: anywhere; word-break: break-word;
+        }
+        .dev-timestamp-summary-card .dev-timestamp-row-copy {
+          position: static; grid-column: 2; grid-row: 1 / span 2; align-self: center;
+          width: 20px; min-width: 20px; height: 20px; min-height: 20px; opacity: .7;
+        }
+        .dev-timestamp-country-list { display: block; max-width: 100%; overflow: visible !important; }
+        .dev-timestamp-country-matrix {
+          display: flex !important; flex-direction: column; gap: 0;
+          width: 100% !important; min-width: 0 !important; overflow: visible !important;
+        }
+        .dev-timestamp-country-header-row, .dev-timestamp-city-row { display: contents !important; }
+        .dev-timestamp-country-header-cell, .dev-timestamp-city-cell {
+          order: var(--dev-mobile-order, 0); width: 100%; min-width: 0; flex: 0 0 100%;
+          margin: 0; box-sizing: border-box;
+        }
+        .dev-timestamp-country-header-cell {
+          height: 42px; min-height: 42px; margin-top: 8px; padding-inline: 9px;
+          border: 1px solid var(--line) !important; border-bottom: 0 !important;
+          border-radius: 10px 10px 0 0 !important; background: var(--panel) !important;
+        }
+        .dev-timestamp-country-header-cell.is-cities-collapsed {
+          border-bottom: 1px solid var(--line) !important; border-radius: 10px !important;
+        }
+        .dev-timestamp-country-header-cell .dev-timestamp-country-flag { width: 26px; height: 18px; }
+        .dev-timestamp-country-header-cell .dev-timestamp-country-name { font-size: 13px; }
+        .dev-timestamp-country-header-cell .dev-timestamp-country-actions { gap: 2px; }
+        .dev-timestamp-country-header-cell .dev-timestamp-icon-button,
+        .dev-timestamp-country-header-cell .dev-timestamp-country-add {
+          width: 26px; min-width: 26px; height: 26px; min-height: 26px; padding: 0;
+        }
+        .dev-timestamp-city-cell {
+          min-height: 0; padding: 2px 10px 4px !important; border-left: 1px solid var(--line);
+          border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--panel);
+        }
+        .dev-timestamp-city-cell.is-empty,
+        .dev-timestamp-city-cell.is-deleted,
+        .dev-timestamp-city-cell.is-country-cities-collapsed { display: none !important; }
+        .dev-timestamp-city-cell.is-country-last-city { border-radius: 0 0 10px 10px; }
+        .dev-timestamp-city-card {
+          display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto;
+          align-items: center; min-height: 0; padding: 7px 0 !important; gap: 2px;
+        }
+        .dev-timestamp-city-card-head { grid-column: 1; grid-row: 1; align-items: center !important; justify-content: space-between; gap: 6px; }
+        .dev-timestamp-city-heading { min-width: 0; gap: 5px; overflow: visible; }
+        .dev-timestamp-city-name { font-size: 14px !important; }
+        .dev-timestamp-city-zone.is-inline {
+          flex: 0 1 auto; min-width: 0; overflow: visible; white-space: nowrap;
+          font-size: 10px !important; line-height: 1.3;
+        }
+        .dev-timestamp-city-time {
+          grid-column: 1; grid-row: 2; min-width: 0; margin-top: 2px;
+          overflow-wrap: anywhere; font-size: 12px !important; white-space: normal;
+        }
+        .dev-timestamp-city-actions { gap: 3px; }
+        .dev-timestamp-city-actions .dev-timestamp-city-copy,
+        .dev-timestamp-city-actions .dev-timestamp-city-delete {
+          flex-basis: 22px; width: 22px !important; min-width: 22px; height: 22px !important; min-height: 22px !important;
+        }
       }
     `;
     document.head.append(style);
@@ -369,6 +459,15 @@
       }
       matrix.querySelector('.dev-timestamp-city-row')?.classList.add('is-first-city-row');
       const headers = [...matrix.querySelectorAll('.dev-timestamp-country-header-cell[data-dev-country-key]')];
+      const cityRows = [...matrix.querySelectorAll('.dev-timestamp-city-row')];
+      headers.forEach((header, countryIndex) => {
+        const baseOrder = countryIndex * (cityRows.length + 1);
+        header.style.setProperty('--dev-mobile-order', String(baseOrder));
+        cityRows.forEach((row, rowIndex) => {
+          const cell = row.querySelector('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(header.dataset.devCountryKey) + '"]');
+          if (cell) cell.style.setProperty('--dev-mobile-order', String(baseOrder + rowIndex + 1));
+        });
+      });
       for (const header of headers) {
         const key = header.dataset.devCountryKey;
         if (!header.querySelector('.dev-timestamp-expand-cities')) {
@@ -387,6 +486,7 @@
           expandButton.classList.remove('is-no-extra-cities');
           const setCollapsed = (collapsed) => {
             header.dataset.devCitiesCollapsed = collapsed ? 'true' : 'false';
+            header.classList.toggle('is-cities-collapsed', collapsed);
             expandButton.setAttribute('aria-expanded', String(!collapsed));
             const label = document.documentElement.lang === 'en'
               ? (collapsed ? 'Expand all cities' : 'Collapse all cities')
