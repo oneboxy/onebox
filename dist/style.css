@@ -17091,6 +17091,26 @@ body.dev-tools-fullscreen .dev-tools-page.dev-is-fullscreen {
 .dev-timestamp-field > .dev-plain-input { min-height: 44px; font-size: 13px; }
 .dev-timestamp-field .dev-date-input { margin: 0; }
 .dev-timestamp-results { display: grid; }
+.dev-timestamp-city-heading {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  padding: 10px 2px 6px;
+  border-bottom: 1px solid var(--line);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.dev-timestamp-country-heading {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding: 6px 2px 3px;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+.dev-timestamp-result-row.is-city { min-height: 40px; }
+.dev-timestamp-result-row.is-city .dev-timestamp-result-label { color: var(--ink); }
+
 .dev-timestamp-result-row {
   display: grid;
   grid-template-columns: minmax(145px, .36fr) minmax(0, 1fr) 30px;
@@ -19354,7 +19374,7 @@ body.dev-pane-resizing * {
 }
 
  
-/* 2.18.715: use one button system across Developer tools. */
+/* 2.18.716: use one button system across Developer tools. */
 .dev-tools-page {
   --dev-button-border: color-mix(in srgb, var(--line) 88%, var(--muted) 12%);
   --dev-button-surface: var(--panel);
@@ -19641,3 +19661,5 @@ body.dev-pane-resizing * {
     min-height: 44px;
   }
 }
+
+/* 2.18.716: group converted city times and show each IANA zone and UTC offset. */

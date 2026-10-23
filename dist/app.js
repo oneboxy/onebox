@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.715';
+const APP_VERSION = '2.18.716';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8779,6 +8779,7 @@ function developerTimestampRelative(date) {
 }
 function developerTimestampRows(date, mode) {
   const locale = state.language === 'en' ? 'en-US' : 'zh-CN';
+  const english = state.language === 'en';
   const timeOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' };
   const milliseconds = date.getTime();
   const seconds = Number((milliseconds / 1000).toFixed(3)).toString();
@@ -8790,11 +8791,59 @@ function developerTimestampRows(date, mode) {
     milliseconds: String(milliseconds),
     relative: developerTimestampRelative(date),
   };
-  const labels = state.language === 'en'
+  const labels = english
     ? { local: 'Local time', utc: 'UTC time', iso: 'ISO 8601', seconds: 'Unix timestamp · seconds', milliseconds: 'Unix timestamp · milliseconds', relative: 'Relative time' }
     : { local: '本地时间', utc: 'UTC 时间', iso: 'ISO 8601', seconds: 'Unix 时间戳 · 秒', milliseconds: 'Unix 时间戳 · 毫秒', relative: '相对时间' };
   const order = mode === 'date' ? ['seconds', 'milliseconds', 'iso', 'local', 'utc', 'relative'] : ['local', 'utc', 'iso', 'seconds', 'milliseconds', 'relative'];
-  return order.map((key) => ({ key, label: labels[key], value: values[key], primary: mode === 'date' ? key === 'seconds' || key === 'milliseconds' : key === 'local' }));
+  const standardRows = order.map((key) => ({ key, label: labels[key], value: values[key], primary: mode === 'date' ? key === 'seconds' || key === 'milliseconds' : key === 'local', copyable: ['seconds', 'milliseconds', 'iso'].includes(key) }));
+  const cities = [
+    { country: ['美国', 'United States'], city: ['纽约', 'New York'], timeZone: 'America/New_York' },
+    { country: ['美国', 'United States'], city: ['洛杉矶', 'Los Angeles'], timeZone: 'America/Los_Angeles' },
+    { country: ['美国', 'United States'], city: ['芝加哥', 'Chicago'], timeZone: 'America/Chicago' },
+    { country: ['美国', 'United States'], city: ['丹佛', 'Denver'], timeZone: 'America/Denver' },
+    { country: ['美国', 'United States'], city: ['安克雷奇', 'Anchorage'], timeZone: 'America/Anchorage' },
+    { country: ['美国', 'United States'], city: ['檀香山', 'Honolulu'], timeZone: 'Pacific/Honolulu' },
+    { country: ['日本', 'Japan'], city: ['东京', 'Tokyo'], timeZone: 'Asia/Tokyo' },
+    { country: ['日本', 'Japan'], city: ['大阪', 'Osaka'], timeZone: 'Asia/Tokyo' },
+    { country: ['英国', 'United Kingdom'], city: ['伦敦', 'London'], timeZone: 'Europe/London' },
+    { country: ['英国', 'United Kingdom'], city: ['曼彻斯特', 'Manchester'], timeZone: 'Europe/London' },
+    { country: ['德国', 'Germany'], city: ['柏林', 'Berlin'], timeZone: 'Europe/Berlin' },
+    { country: ['德国', 'Germany'], city: ['慕尼黑', 'Munich'], timeZone: 'Europe/Berlin' },
+    { country: ['加拿大', 'Canada'], city: ['温哥华', 'Vancouver'], timeZone: 'America/Vancouver' },
+    { country: ['加拿大', 'Canada'], city: ['卡尔加里', 'Calgary'], timeZone: 'America/Edmonton' },
+    { country: ['加拿大', 'Canada'], city: ['温尼伯', 'Winnipeg'], timeZone: 'America/Winnipeg' },
+    { country: ['加拿大', 'Canada'], city: ['多伦多', 'Toronto'], timeZone: 'America/Toronto' },
+    { country: ['加拿大', 'Canada'], city: ['哈利法克斯', 'Halifax'], timeZone: 'America/Halifax' },
+    { country: ['加拿大', 'Canada'], city: ['圣约翰斯（纽芬兰）', "St. John's"], timeZone: 'America/St_Johns' },
+    { country: ['中国', 'China'], city: ['北京', 'Beijing'], timeZone: 'Asia/Shanghai' },
+    { country: ['中国', 'China'], city: ['上海', 'Shanghai'], timeZone: 'Asia/Shanghai' },
+    { country: ['中国', 'China'], city: ['广州', 'Guangzhou'], timeZone: 'Asia/Shanghai' },
+    { country: ['越南', 'Vietnam'], city: ['河内', 'Hanoi'], timeZone: 'Asia/Ho_Chi_Minh' },
+    { country: ['越南', 'Vietnam'], city: ['胡志明市', 'Ho Chi Minh City'], timeZone: 'Asia/Ho_Chi_Minh' },
+  ];
+  const citiesHeading = english ? 'Major city times' : '主要城市时间';
+  const cityRows = cities.map((city) => {
+    const formattedTime = new Intl.DateTimeFormat(locale, { ...timeOptions, timeZone: city.timeZone }).format(date);
+    let utcOffset = 'UTC';
+    try {
+      const offsetName = new Intl.DateTimeFormat(locale, { timeZone: city.timeZone, timeZoneName: 'longOffset' })
+        .formatToParts(date).find((part) => part.type === 'timeZoneName')?.value || 'GMT';
+      utcOffset = offsetName === 'GMT' ? 'UTC+00:00' : offsetName.replace(/^GMT/, 'UTC');
+    } catch {}
+    const country = city.country[english ? 1 : 0];
+    const cityName = city.city[english ? 1 : 0];
+    return {
+      key: 'city-' + city.timeZone.replace(/[^a-z0-9]+/gi, '-') + '-' + city.city[1].toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      label: country + ' · ' + cityName,
+      displayLabel: cityName,
+      group: country,
+      sectionLabel: citiesHeading,
+      value: formattedTime + ' · ' + utcOffset + ' · ' + city.timeZone,
+      copyable: true,
+      city: true,
+    };
+  });
+  return [...standardRows, ...cityRows];
 }
 function developerTimestampResult() {
   const dev = state.devTools;
@@ -9384,11 +9433,22 @@ function renderDeveloperTimestampResult() {
   const result = developerTimestampResult();
   if (!result.ok) return '<div class="dev-timestamp-error" role="alert">' + escapeHtml(result.message) + '</div>';
   const copyTitle = t('devCopy');
+  let previousGroup = '';
+  let cityHeadingShown = false;
   const rows = result.rows.map((row) => {
-    const copy = ['seconds', 'milliseconds', 'iso'].includes(row.key)
-      ? '<button type="button" class="dev-timestamp-row-copy" data-dev-action="timestamp-copy-value" data-dev-value="' + row.key + '" aria-label="' + escapeHtml(copyTitle + ' ' + row.label) + '" title="' + escapeHtml(copyTitle) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"></path></svg></button>'
+    let heading = '';
+    if (row.group) {
+      if (!cityHeadingShown) {
+        heading += '<div class="dev-timestamp-city-heading">' + escapeHtml(row.sectionLabel) + '</div>';
+        cityHeadingShown = true;
+      }
+      if (previousGroup !== row.group) heading += '<div class="dev-timestamp-country-heading">' + escapeHtml(row.group) + '</div>';
+      previousGroup = row.group;
+    } else previousGroup = '';
+    const copy = row.copyable
+      ? '<button type="button" class="dev-timestamp-row-copy" data-dev-action="timestamp-copy-value" data-dev-value="' + escapeHtml(row.key) + '" aria-label="' + escapeHtml(copyTitle + ' ' + row.label) + '" title="' + escapeHtml(copyTitle) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"></path></svg></button>'
       : '<span class="dev-timestamp-row-spacer" aria-hidden="true"></span>';
-    return '<div class="dev-timestamp-result-row ' + (row.primary ? 'is-primary' : '') + '"><span class="dev-timestamp-result-label">' + escapeHtml(row.label) + '</span><code>' + escapeHtml(row.value) + '</code>' + copy + '</div>';
+    return heading + '<div class="dev-timestamp-result-row ' + (row.primary ? 'is-primary' : '') + (row.city ? ' is-city' : '') + '"><span class="dev-timestamp-result-label">' + escapeHtml(row.displayLabel || row.label) + '</span><code>' + escapeHtml(row.value) + '</code>' + copy + '</div>';
   }).join('');
   return '<div class="dev-timestamp-results">' + rows + '</div>';
 }
