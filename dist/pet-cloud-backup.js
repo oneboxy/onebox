@@ -2,6 +2,29 @@
 (() => {
   'use strict';
 
+  let syncingAction = '';
+
+  function ensureStyles() {
+    if (document.getElementById('pet-cloud-backup-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'pet-cloud-backup-styles';
+    style.textContent = `
+      .pet-cloud-backup-section { grid-column: 1 / -1; }
+      .pet-cloud-backup-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+      .pet-cloud-backup-button { box-sizing: border-box; width: 100%; min-height: 64px; }
+      .pet-cloud-backup-button .pet-outfit-glyph svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+      .pet-cloud-backup-button .pet-outfit-copy small { line-height: 1.35; }
+      .pet-cloud-backup-connect { width: 100%; min-height: 42px; margin-top: 8px; }
+      .pet-cloud-backup-note, .pet-cloud-backup-status { margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+      .pet-cloud-backup-status { min-height: 1.45em; }
+      @media (max-width: 520px) {
+        .pet-cloud-backup-actions { grid-template-columns: 1fr; gap: 6px; }
+        .pet-cloud-backup-button { min-height: 56px; }
+      }
+    `;
+    document.head.append(style);
+  }
+
   const copy = () => {
     const forced = localStorage.getItem('onebox.language') || 'system';
     const english = forced === 'en' || (forced !== 'zh' && /^en/i.test(navigator.language || ''));
@@ -56,7 +79,7 @@
 
   function updateAvailability(section) {
     const user = account(), connected = Boolean(user.token && user.user?.login);
-    const busy = section.dataset.busy === 'true';
+    const busy = Boolean(syncingAction) || section.dataset.busy === 'true';
     section.querySelectorAll('[data-pet-cloud-backup-action]').forEach((button) => {
       button.disabled = !connected || busy;
       button.setAttribute('aria-disabled', String(button.disabled));
@@ -68,6 +91,7 @@
   }
 
   function install() {
+    ensureStyles();
     const dialog = document.querySelector('#petDialog');
     const body = dialog?.querySelector('.pet-dialog-body');
     if (!body) return;
@@ -122,27 +146,45 @@
       status.textContent = labels.failed;
       return;
     }
-    if (section.dataset.busy === 'true') {
+    if (syncingAction) {
       status.textContent = labels.busy;
       return;
     }
+
+    const login = String(user.user.login).trim().toLowerCase();
+    const initKey = 'onebox.github-sync-v2-initialized:' + login;
+    const previousInit = localStorage.getItem(initKey);
+    let resultMessage = action === 'backup' ? labels.workingBackup : labels.workingRestore;
+    syncingAction = action;
     section.dataset.busy = 'true';
     updateAvailability(section);
-    status.textContent = action === 'backup' ? labels.workingBackup : labels.workingRestore;
+    status.textContent = resultMessage;
+
+    // A requested backup must upload this device first, without applying an
+    // older cloud snapshot during the one-time Gist initialization path.
+    if (action === 'backup' && previousInit !== 'true') localStorage.setItem(initKey, 'true');
     try {
       const result = await sync.syncNow({ restore: action === 'restore' });
-      if (result?.error) status.textContent = result.error;
-      else if (result?.synced) status.textContent = action === 'backup' ? labels.backupDone : labels.restoreDone;
-      else if (result?.pending) status.textContent = labels.busy;
-      else status.textContent = labels.failed;
+      if (result?.error) resultMessage = result.error;
+      else if (result?.synced) resultMessage = action === 'backup' ? labels.backupDone : labels.restoreDone;
+      else if (result?.pending) resultMessage = labels.busy;
+      else resultMessage = labels.failed;
     } catch (error) {
-      status.textContent = String(error?.message || labels.failed);
+      resultMessage = String(error?.message || labels.failed);
     } finally {
+      syncingAction = '';
+      if (action === 'backup' && resultMessage !== labels.backupDone && previousInit !== 'true') {
+        if (previousInit === null) localStorage.removeItem(initKey);
+        else localStorage.setItem(initKey, previousInit);
+      }
       delete section.dataset.busy;
       updateAvailability(section);
+      const liveSection = document.querySelector('#petDialog .pet-cloud-backup-section');
+      const liveStatus = liveSection?.querySelector('[data-pet-cloud-backup-status]');
+      if (liveStatus) liveStatus.textContent = resultMessage;
+      if (liveSection) updateAvailability(liveSection);
     }
   }
-
   document.addEventListener('click', (event) => {
     const button = event.target.closest?.('[data-pet-cloud-backup-action]');
     if (!button) return;
