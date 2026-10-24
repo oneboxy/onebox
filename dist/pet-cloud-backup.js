@@ -9,18 +9,14 @@
     const style = document.createElement('style');
     style.id = 'pet-cloud-backup-styles';
     style.textContent = `
-      .pet-cloud-backup-section { grid-column: 1 / -1; }
-      .pet-cloud-backup-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
-      .pet-cloud-backup-button { box-sizing: border-box; width: 100%; min-height: 64px; }
-      .pet-cloud-backup-button .pet-outfit-glyph svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-      .pet-cloud-backup-button .pet-outfit-copy small { line-height: 1.35; }
-      .pet-cloud-backup-connect { width: 100%; min-height: 42px; margin-top: 8px; }
-      .pet-cloud-backup-note, .pet-cloud-backup-status { margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
-      .pet-cloud-backup-status { min-height: 1.45em; }
-      @media (max-width: 520px) {
-        .pet-cloud-backup-actions { grid-template-columns: 1fr; gap: 6px; }
-        .pet-cloud-backup-button { min-height: 56px; }
-      }
+      .onebox-mascot-cloud-backup { display: grid; gap: 5px; margin-top: 6px; }
+      .onebox-mascot-cloud-backup-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+      .onebox-mascot-cloud-backup button { box-sizing: border-box; width: 100%; min-height: 36px; justify-content: center; }
+      .onebox-mascot-cloud-backup button:disabled { opacity: .5; cursor: not-allowed; }
+      .onebox-mascot-cloud-backup-connect { justify-self: start; }
+      .onebox-mascot-cloud-backup-note, .onebox-mascot-cloud-backup-status { margin: 1px 1px 0; color: var(--muted); font-size: 9px; line-height: 1.35; }
+      .onebox-mascot-cloud-backup-status { min-height: 1.35em; }
+      .onebox-mascot-cloud-backup-note[hidden], .onebox-mascot-cloud-backup-status[hidden] { display: none !important; }
     `;
     document.head.append(style);
   }
@@ -87,39 +83,32 @@
     const connect = section.querySelector('[data-pet-cloud-backup-connect]');
     if (connect) connect.hidden = connected;
     const note = section.querySelector('[data-pet-cloud-backup-note]');
-    if (note) note.textContent = connected ? copy().note : copy().connect;
+    if (note) { note.textContent = connected ? copy().note : copy().connect; note.hidden = !connected; }
+    const status = section.querySelector('[data-pet-cloud-backup-status]');
+    if (status && syncingAction) { status.textContent = syncingAction === 'backup' ? copy().workingBackup : copy().workingRestore; status.hidden = false; }
   }
 
   function install() {
     ensureStyles();
-    const dialog = document.querySelector('#petDialog');
-    const body = dialog?.querySelector('.pet-dialog-body');
-    if (!body) return;
-    let section = body.querySelector('.pet-cloud-backup-section');
-    if (section) return updateAvailability(section);
+    const actions = document.querySelector('.onebox-mascot-panel .onebox-mascot-cloud-actions');
+    if (!actions) return;
+    let widget = actions.parentElement.querySelector('.onebox-mascot-cloud-backup');
+    if (widget) return updateAvailability(widget);
 
     const labels = copy();
-    section = document.createElement('section');
-    section.className = 'pet-outfits-section pet-cloud-backup-section';
-    section.innerHTML =
-      '<div class="pet-section-head"><h3>' + labels.title + '</h3></div>' +
-      '<div class="pet-cloud-backup-actions">' +
-        '<button type="button" class="pet-outfit-card pet-cloud-backup-button" data-pet-cloud-backup-action="backup" aria-disabled="false">' +
-          '<span class="pet-outfit-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5"/></svg></span>' +
-          '<span class="pet-outfit-copy"><strong>' + labels.backup + '</strong><small>' + labels.backupHint + '</small></span>' +
-        '</button>' +
-        '<button type="button" class="pet-outfit-card pet-cloud-backup-button" data-pet-cloud-backup-action="restore" aria-disabled="false">' +
-          '<span class="pet-outfit-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8V20m0 0 4.5-4.5M12 20l-4.5-4.5M5 10V5h14v5"/></svg></span>' +
-          '<span class="pet-outfit-copy"><strong>' + labels.restore + '</strong><small>' + labels.restoreHint + '</small></span>' +
-        '</button>' +
+    widget = document.createElement('div');
+    widget.className = 'onebox-mascot-cloud-backup';
+    widget.dataset.petCloudBackupRoot = 'true';
+    widget.innerHTML =
+      '<div class="onebox-mascot-cloud-backup-row">' +
+        '<button type="button" data-pet-cloud-backup-action="backup" aria-disabled="false"><span class="onebox-mascot-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5"/></svg></span><span>' + labels.backup + '</span></button>' +
+        '<button type="button" data-pet-cloud-backup-action="restore" aria-disabled="false"><span class="onebox-mascot-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8V20m0 0 4.5-4.5M12 20l-4.5-4.5M5 10V5h14v5"/></svg></span><span>' + labels.restore + '</span></button>' +
       '</div>' +
-      '<button type="button" class="pet-outfit-card pet-cloud-backup-connect" data-open-github-page data-pet-cloud-backup-connect hidden>' + labels.connect + '</button>' +
-      '<p class="pet-cloud-backup-note" data-pet-cloud-backup-note aria-live="polite">' + labels.note + '</p>' +
-      '<p class="pet-cloud-backup-status" data-pet-cloud-backup-status role="status" aria-live="polite">' + labels.ready + '</p>';
-    const settings = body.querySelector('.pet-settings-section');
-    if (settings) settings.insertAdjacentElement('afterend', section);
-    else body.append(section);
-    updateAvailability(section);
+      '<button type="button" class="onebox-mascot-cloud-backup-connect" data-open-github-page data-pet-cloud-backup-connect hidden>' + labels.connect + '</button>' +
+      '<small class="onebox-mascot-cloud-backup-note" data-pet-cloud-backup-note></small>' +
+      '<small class="onebox-mascot-cloud-backup-status" data-pet-cloud-backup-status role="status" aria-live="polite"></small>';
+    actions.insertAdjacentElement('afterend', widget);
+    updateAvailability(widget);
   }
 
   async function run(action, section) {
@@ -179,10 +168,11 @@
       }
       delete section.dataset.busy;
       updateAvailability(section);
-      const liveSection = document.querySelector('#petDialog .pet-cloud-backup-section');
-      const liveStatus = liveSection?.querySelector('[data-pet-cloud-backup-status]');
-      if (liveStatus) liveStatus.textContent = resultMessage;
-      if (liveSection) updateAvailability(liveSection);
+      document.querySelectorAll('[data-pet-cloud-backup-root]').forEach((liveSection) => {
+        const liveStatus = liveSection.querySelector('[data-pet-cloud-backup-status]');
+        if (liveStatus) liveStatus.textContent = resultMessage;
+        updateAvailability(liveSection);
+      });
     }
   }
   document.addEventListener('click', (event) => {
@@ -190,7 +180,7 @@
     if (!button) return;
     event.preventDefault();
     event.stopPropagation();
-    const section = button.closest('.pet-cloud-backup-section');
+    const section = button.closest('[data-pet-cloud-backup-root]');
     if (section) void run(button.dataset.petCloudBackupAction, section);
   });
 
