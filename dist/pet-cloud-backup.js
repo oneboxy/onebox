@@ -91,9 +91,9 @@
   function install() {
     ensureStyles();
     const actions = document.querySelector('.onebox-mascot-panel .onebox-mascot-cloud-actions');
-    if (!actions) return;
+    if (!actions) return false;
     let widget = actions.parentElement.querySelector('.onebox-mascot-cloud-backup');
-    if (widget) return updateAvailability(widget);
+    if (widget) return true;
 
     const labels = copy();
     widget = document.createElement('div');
@@ -109,6 +109,7 @@
       '<small class="onebox-mascot-cloud-backup-status" data-pet-cloud-backup-status role="status" aria-live="polite"></small>';
     actions.insertAdjacentElement('afterend', widget);
     updateAvailability(widget);
+    return true;
   }
 
   async function run(action, section) {
@@ -184,8 +185,8 @@
     if (section) void run(button.dataset.petCloudBackupAction, section);
   });
 
-  const observer = new MutationObserver(install);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
-  else install();
+  const observer = new MutationObserver(() => {
+    if (install()) observer.disconnect();
+  });
+  if (!install()) observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
