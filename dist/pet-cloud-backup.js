@@ -93,7 +93,7 @@
     const actions = document.querySelector('.onebox-mascot-panel .onebox-mascot-cloud-actions');
     if (!actions) return false;
     let widget = actions.parentElement.querySelector('.onebox-mascot-cloud-backup');
-    if (widget) return true;
+    if (widget) return false;
 
     const labels = copy();
     widget = document.createElement('div');
@@ -185,8 +185,23 @@
     if (section) void run(button.dataset.petCloudBackupAction, section);
   });
 
-  const observer = new MutationObserver(() => {
-    if (install()) observer.disconnect();
-  });
-  if (!install()) observer.observe(document.documentElement, { childList: true, subtree: true });
+  let panelObserver = null;
+  const watchPanel = (panel) => {
+    if (!panel || panelObserver) return;
+    panelObserver = new MutationObserver(install);
+    panelObserver.observe(panel, { childList: true, subtree: true });
+    install();
+  };
+  const panel = document.querySelector('.onebox-mascot-panel');
+  if (panel) {
+    watchPanel(panel);
+  } else {
+    const discoveryObserver = new MutationObserver(() => {
+      const discoveredPanel = document.querySelector('.onebox-mascot-panel');
+      if (!discoveredPanel) return;
+      discoveryObserver.disconnect();
+      watchPanel(discoveredPanel);
+    });
+    discoveryObserver.observe(document.body, { childList: true, subtree: true });
+  }
 })();
