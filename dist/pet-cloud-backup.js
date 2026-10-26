@@ -180,6 +180,22 @@
     }
   }
   document.addEventListener('click', (event) => {
+    const connectButton = event.target.closest?.('[data-pet-cloud-backup-connect]');
+    if (connectButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const workspace = document.querySelector('#workspace');
+      if (!workspace) return;
+      // The mascot is rendered outside #workspace, while the app's existing
+      // GitHub dialog click handler is delegated from #workspace.
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.dataset.openGithubPage = '';
+      trigger.hidden = true;
+      workspace.append(trigger);
+      try { trigger.click(); } finally { trigger.remove(); }
+      return;
+    }
     const button = event.target.closest?.('[data-pet-cloud-backup-action]');
     if (!button) return;
     event.preventDefault();
