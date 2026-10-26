@@ -205,6 +205,19 @@
     if (section) void run(button.dataset.petCloudBackupAction, section);
   });
 
+  const refreshConnectionLabel = () => {
+    const widget = document.querySelector('[data-pet-cloud-backup-root]');
+    if (widget) updateAvailability(widget);
+  };
+  const githubDialog = document.querySelector('#githubDialog');
+  if (githubDialog) {
+    const githubDialogObserver = new MutationObserver(refreshConnectionLabel);
+    githubDialogObserver.observe(githubDialog, { childList: true, subtree: true });
+  }
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'onebox.github') refreshConnectionLabel();
+  });
+
   let panelObserver = null;
   const watchPanel = (panel) => {
     if (!panel || panelObserver) return;
