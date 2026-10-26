@@ -11784,7 +11784,15 @@ function invalidateGithubToken(requestedToken = state.github.token) {
   const persisted = parseStored(STORAGE.github, {});
   const currentLogin = String(state.github.user?.login || '').trim().toLowerCase();
   const persistedLogin = String(persisted?.user?.login || '').trim().toLowerCase();
-  const ownsPersistedAccount = !persisted?.token || !persistedLogin || currentLogin === persistedLogin || requestedToken === persisted.token;
+  // A different tab may already have reconnected this same account. A 401
+  // from the stale token must never erase the newer persisted credentials.
+  if (persisted?.token && persisted.token !== requestedToken) {
+    if (currentLogin && persistedLogin === currentLogin) {
+      state.github = { ...state.github, ...persisted };
+      if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+    }
+    return;
+  }
   state.github.token = '';
   state.github.user = null;
   state.github.deviceCode = '';
@@ -11793,7 +11801,7 @@ function invalidateGithubToken(requestedToken = state.github.token) {
   state.github.verificationUriComplete = '';
   state.github.expiresAt = 0;
   state.github.manualTokenOpen = false;
-  saveGithub(ownsPersistedAccount);
+  saveGithub(true);
   if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
 }
 async function githubApiError(response, fallback = '') {
@@ -12538,7 +12546,7 @@ async function runGithubAutoSync({ restore = false, manual = false } = {}) {
     return { error: message };
   }
   githubAutoSyncRunning = true;
-  githubSyncQuiet = true;
+  githubSyncQuiet = !manual;
   setGithubAutoSyncStatus('syncing', t('githubAutoSyncSyncing'));
   let outcome = { synced: false };
   try {

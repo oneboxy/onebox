@@ -11,9 +11,12 @@
     style.textContent = `
       .onebox-mascot-cloud-backup { display: grid; gap: 5px; margin-top: 6px; }
       .onebox-mascot-cloud-backup-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-      .onebox-mascot-cloud-backup button { box-sizing: border-box; width: 100%; min-height: 36px; justify-content: center; }
-      .onebox-mascot-cloud-backup button:disabled { opacity: .5; cursor: not-allowed; }
-      .onebox-mascot-cloud-backup-connect { justify-self: start; }
+      .onebox-mascot-cloud-backup .github-action-button { box-sizing: border-box; min-width: 0; min-height: 34px; gap: 6px; padding: 5px 7px; border-radius: 10px; box-shadow: none; font-size: 11px; white-space: nowrap; }
+      .onebox-mascot-cloud-backup .github-action-button.is-primary { border-color: transparent; background: var(--primary); color: var(--primary-contrast, #fff); }
+      .onebox-mascot-cloud-backup .github-action-icon { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 7px; }
+      .onebox-mascot-cloud-backup .github-action-icon svg { width: 13px; height: 13px; }
+      .onebox-mascot-cloud-backup button:disabled { cursor: wait; opacity: .58; }
+      .onebox-mascot-cloud-backup .github-secondary-button { box-sizing: border-box; width: 100%; min-height: 32px; margin: 0; padding: 5px 8px; border-radius: 9px; font-size: 11px; }
       .onebox-mascot-cloud-backup-note, .onebox-mascot-cloud-backup-status { margin: 1px 1px 0; color: var(--muted); font-size: 9px; line-height: 1.35; }
       .onebox-mascot-cloud-backup-status { min-height: 1.35em; }
       .onebox-mascot-cloud-backup-note[hidden], .onebox-mascot-cloud-backup-status[hidden] { display: none !important; }
@@ -101,10 +104,10 @@
     widget.dataset.petCloudBackupRoot = 'true';
     widget.innerHTML =
       '<div class="onebox-mascot-cloud-backup-row">' +
-        '<button type="button" data-pet-cloud-backup-action="backup" aria-disabled="false"><span class="onebox-mascot-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5"/></svg></span><span>' + labels.backup + '</span></button>' +
-        '<button type="button" data-pet-cloud-backup-action="restore" aria-disabled="false"><span class="onebox-mascot-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8V20m0 0 4.5-4.5M12 20l-4.5-4.5M5 10V5h14v5"/></svg></span><span>' + labels.restore + '</span></button>' +
+        '<button type="button" class="github-action-button is-primary" data-pet-cloud-backup-action="backup" aria-disabled="false"><span class="github-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 20V10m0 0-3 3m3-3 3 3"/></svg></span><span class="github-action-copy"><strong>' + labels.backup + '</strong></span></button>' +
+        '<button type="button" class="github-action-button" data-pet-cloud-backup-action="restore" aria-disabled="false"><span class="github-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 7v10m0 0-3-3m3 3 3-3"/></svg></span><span class="github-action-copy"><strong>' + labels.restore + '</strong></span></button>' +
       '</div>' +
-      '<button type="button" class="onebox-mascot-cloud-backup-connect" data-open-github-page data-pet-cloud-backup-connect hidden>' + labels.connect + '</button>' +
+      '<button type="button" class="github-secondary-button onebox-mascot-cloud-backup-connect" data-open-github-page data-pet-cloud-backup-connect hidden>' + labels.connect + '</button>' +
       '<small class="onebox-mascot-cloud-backup-note" data-pet-cloud-backup-note></small>' +
       '<small class="onebox-mascot-cloud-backup-status" data-pet-cloud-backup-status role="status" aria-live="polite"></small>';
     actions.insertAdjacentElement('afterend', widget);
