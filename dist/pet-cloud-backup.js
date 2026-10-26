@@ -16,7 +16,7 @@
       .onebox-mascot-cloud-backup .github-action-icon { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 7px; }
       .onebox-mascot-cloud-backup .github-action-icon svg { width: 13px; height: 13px; }
       .onebox-mascot-cloud-backup button:disabled { cursor: wait; opacity: .58; }
-      .onebox-mascot-cloud-backup .github-secondary-button { box-sizing: border-box; width: 100%; min-height: 32px; margin: 0; padding: 5px 8px; border-radius: 9px; font-size: 11px; }
+      .onebox-mascot-cloud-backup .onebox-mascot-cloud-backup-connect { justify-content: flex-start; text-align: left; }
       .onebox-mascot-cloud-backup-status { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     `;
     document.head.append(style);
@@ -82,6 +82,13 @@
       button.setAttribute('aria-disabled', String(button.disabled));
     });
     const connect = section.querySelector('[data-pet-cloud-backup-connect]');
+    if (connect) {
+      const label = connect.querySelector('[data-pet-github-status]');
+      const login = String(user.user?.login || '').trim();
+      if (label) label.textContent = connected ? login : copy().connect;
+      connect.title = connected ? login : copy().connect;
+      connect.setAttribute('aria-label', connected ? 'GitHub · ' + login : copy().connect);
+    }
     const status = section.querySelector('[data-pet-cloud-backup-status]');
     if (status && syncingAction) { status.textContent = syncingAction === 'backup' ? copy().workingBackup : copy().workingRestore; status.hidden = false; }
   }
@@ -101,8 +108,8 @@
       '<div class="onebox-mascot-cloud-backup-row">' +
         '<button type="button" class="github-action-button is-primary" data-pet-cloud-backup-action="backup" aria-disabled="false"><span class="github-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 20V10m0 0-3 3m3-3 3 3"/></svg></span><span class="github-action-copy"><strong>' + labels.backup + '</strong></span></button>' +
         '<button type="button" class="github-action-button" data-pet-cloud-backup-action="restore" aria-disabled="false"><span class="github-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 17.5a4.5 4.5 0 0 1 .8-8.93A6.5 6.5 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 0 7H15"/><path d="M12 7v10m0 0-3-3m3 3 3-3"/></svg></span><span class="github-action-copy"><strong>' + labels.restore + '</strong></span></button>' +
+        '<button type="button" class="github-action-button onebox-mascot-cloud-backup-connect" data-open-github-page data-pet-cloud-backup-connect><span class="github-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18h10a3.5 3.5 0 0 0 .5-6.96A5.5 5.5 0 0 0 7 9.5a4.25 4.25 0 0 0 0 8.5Z"/><path d="m12 12 2-2m-2 2-2-2m2 2v4"/></svg></span><span class="github-action-copy"><strong data-pet-github-status>' + labels.connect + '</strong></span></button>' +
       '</div>' +
-      '<button type="button" class="github-secondary-button onebox-mascot-cloud-backup-connect" data-open-github-page data-pet-cloud-backup-connect>' + labels.connect + '</button>' +
       '<small class="onebox-mascot-cloud-backup-status" data-pet-cloud-backup-status role="status" aria-live="polite"></small>';
     actions.insertAdjacentElement('afterend', widget);
     updateAvailability(widget);
