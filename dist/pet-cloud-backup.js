@@ -10,11 +10,11 @@
     style.id = 'pet-cloud-backup-styles';
     style.textContent = `
       .onebox-mascot-cloud-backup { display: grid; gap: 5px; margin-top: 6px; }
-      .onebox-mascot-cloud-backup-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-      .onebox-mascot-cloud-backup .github-action-button { box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; min-height: 30px; justify-self: stretch; justify-content: center; gap: 5px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); color: var(--ink); box-shadow: none; font-size: 10px; white-space: nowrap; }
+      .onebox-mascot-cloud-backup-row { display: flex; align-items: stretch; justify-content: flex-start; gap: 6px; }
+      .onebox-mascot-cloud-backup .github-action-button { box-sizing: border-box; flex: 0 0 auto; width: max-content; max-width: 100%; min-width: 72px; min-height: 30px; justify-content: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); color: var(--ink); box-shadow: none; font-size: 10px; white-space: nowrap; }
       .onebox-mascot-cloud-backup .github-action-icon { flex: 0 0 17px; width: 17px; height: 17px; border-radius: 6px; }
       .onebox-mascot-cloud-backup .github-action-icon svg { width: 11px; height: 11px; }
-      .onebox-mascot-cloud-backup .github-action-copy { justify-content: center; text-align: center; }
+      .onebox-mascot-cloud-backup .github-action-copy { flex: 0 0 auto; justify-content: center; text-align: center; }
       .onebox-mascot-cloud-backup button:disabled { cursor: wait; opacity: .58; }
       .onebox-mascot-cloud-backup .onebox-mascot-cloud-backup-connect { justify-content: center; text-align: center; }
       .onebox-mascot-cloud-backup-status { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
