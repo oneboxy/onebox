@@ -361,6 +361,7 @@
     return result.filter((item) => item.blob.size <= 64 * 1024 * 1024 && item.key.length < 90 && fileIdentity(item.store, item.key).length <= 120);
   }
   async function getSession(force = false) {
+    await window.OneBoxGithubOAuth?.refresh?.();
     const token = await savedGithubToken();
     if (!token) { sessionToken = ''; sessionGithubToken = ''; return ''; }
     if (sessionGithubToken !== token) { sessionToken = ''; sessionExpiresAt = 0; }
