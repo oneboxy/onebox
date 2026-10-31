@@ -39,17 +39,21 @@
 @media (max-width: 760px) {
   .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups .ticket-wallet-stack.ticket-wallet-stack-tiled {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-    padding: 8px 0 16px !important;
+    gap: 4px !important;
+    padding: 6px 0 12px !important;
   }
   .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups .ticket-wallet-stack.ticket-wallet-stack-tiled > .ticket-wallet-swipe-row,
   .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups .ticket-wallet-stack.ticket-wallet-stack-tiled .ticket-wallet-card,
   .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups .ticket-wallet-stack.ticket-wallet-stack-tiled .ticket-wallet-train-card {
     min-width: 0 !important;
   }
-  .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups .ticket-wallet-stack.ticket-wallet-stack-tiled .ticket-wallet-card,
+  .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups .ticket-wallet-stack.ticket-wallet-stack-tiled .ticket-wallet-card {
+    zoom: .9;
+    width: 100% !important;
+    margin-inline: auto !important;
+  }
   .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups .ticket-wallet-stack.ticket-wallet-stack-tiled .ticket-wallet-train-card {
-    zoom: .84;
-    width: 119.05% !important;
+    zoom: 1;
+    width: 100% !important;
   }
 }
