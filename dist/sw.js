@@ -1,8 +1,8 @@
-const CACHE = 'onebox-v698';
+const CACHE = 'onebox-v699';
 const APP_SHELL = [
   './',
   'index.html',
-  'ticket-wallet-layout.js?v=2.18.761',
+  'ticket-wallet-layout.js?v=2.18.768',
   'dev-json-editor.js?v=2.18.761',
   'style.css?v=2.18.761',
   'app.js?v=2.18.761',
