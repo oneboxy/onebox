@@ -10565,9 +10565,15 @@ async function githubApiFetch(url, options = {}, retriedAfterRefresh = false) {
         return githubApiFetch(url, { ...options, headers: retryHeaders }, true);
       }
       if (response.status === 401 && !retriedAfterRefresh && requestToken && requestToken !== state.github.token) {
-        const retryHeaders = new Headers(options.headers || {});
-        retryHeaders.set('Authorization', 'Bearer ' + state.github.token);
-        return githubApiFetch(url, { ...options, headers: retryHeaders }, true);
+        const persisted = parseStored(STORAGE.github, {});
+        const persistedLogin = String(persisted?.user?.login || '').trim().toLowerCase();
+        const currentLogin = String(state.github.user?.login || '').trim().toLowerCase();
+        if (persisted?.token && persisted.token !== requestToken && currentLogin && persistedLogin === currentLogin) {
+          state.github = { ...state.github, ...persisted };
+          const retryHeaders = new Headers(options.headers || {});
+          retryHeaders.set('Authorization', 'Bearer ' + state.github.token);
+          return githubApiFetch(url, { ...options, headers: retryHeaders }, true);
+        }
       }
       if (response.status === 429) return response;
       const retryableStatus = [408, 425, 500, 502, 503, 504].includes(response.status);
