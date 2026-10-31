@@ -60,7 +60,8 @@ const APP_SHELL = [
   'file-compare-worker.js?v=2.18.761',
   'vendor/xlsx.full.min.js?v=2.18.761',
   'file-compare-polish.css?v=2.18.761',
-  'ticket-wallet-tiles.css?v=2.18.766',\n  'ticket-wallet-grid.js?v=2.18.766',
+  'ticket-wallet-tiles.css?v=2.18.766',
+  'ticket-wallet-grid.js?v=2.18.766',
 ];
 const CORE_APP_SHELL = APP_SHELL.slice(0, 10);
 const OPTIONAL_APP_SHELL = APP_SHELL.slice(7);
