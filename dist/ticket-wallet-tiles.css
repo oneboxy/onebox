@@ -1,0 +1,32 @@
+/* Ticket wallet flat layout: use the available width and keep every ticket in normal document flow. */
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)) !important;
+  grid-auto-flow: row !important;
+  align-items: start;
+  gap: 12px !important;
+  padding: 8px 0 16px !important;
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack > .ticket-wallet-swipe-row {
+  grid-area: auto !important;
+  width: 100% !important;
+  min-width: 0;
+}
+body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-page-swipe-stage {
+  height: auto !important;
+  min-height: 0;
+  overflow: visible !important;
+}
+@media (min-width: 761px) {
+  body:has(.ticket-wallet-page) main {
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+  }
+}
+@media (max-width: 760px) {
+  body:has(.ticket-wallet-page) main {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
