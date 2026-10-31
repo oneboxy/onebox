@@ -1,32 +1,69 @@
-/* Ticket wallet flat layout: use the available width and keep every ticket in normal document flow. */
-body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)) !important;
-  grid-auto-flow: row !important;
-  align-items: start;
-  gap: 12px !important;
-  padding: 8px 0 16px !important;
-}
-body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack > .ticket-wallet-swipe-row {
-  grid-area: auto !important;
+/* Tile layout is keyed off its active switch, so it stays in sync with the UI. */
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .shell {
   width: 100% !important;
-  min-width: 0;
+  max-width: none !important;
 }
-body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-page-swipe-stage {
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-page {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-date-groups,
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-page-swipe-stage,
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-page-swipe-panel {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
   height: auto !important;
-  min-height: 0;
   overflow: visible !important;
 }
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-stack {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)) !important;
+  grid-auto-flow: row !important;
+  align-items: start;
+  gap: 14px !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 8px 0 20px !important;
+}
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-stack > .ticket-wallet-swipe-row {
+  position: relative !important;
+  grid-area: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+  margin: 0 !important;
+  transform: none !important;
+}
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-stack .ticket-wallet-train-card,
+body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-stack .ticket-wallet-card {
+  width: 100% !important;
+  max-width: none !important;
+}
 @media (min-width: 761px) {
-  body:has(.ticket-wallet-page) main {
+  body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) main {
+    width: 100%;
+    height: calc(100dvh - var(--app-header-height));
+    max-height: none;
+    min-height: 0;
     overflow-x: hidden;
     overflow-y: auto !important;
     overscroll-behavior-y: contain;
   }
+  body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-page {
+    padding-inline: clamp(16px, 2vw, 36px);
+  }
 }
 @media (max-width: 760px) {
-  body:has(.ticket-wallet-page) main {
+  body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) main {
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+  body:has([data-ticket-wallet-layout-toggle][aria-pressed="true"]) .ticket-wallet-stack {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)) !important;
+    gap: 10px !important;
   }
 }
