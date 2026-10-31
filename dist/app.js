@@ -1420,7 +1420,7 @@ const state = {
   swRegistration: null, updateAvailable: false, updateChecking: false, updateApplying: false, updateReloading: false, updateError: false,
   githubAgreementAccepted: localStorage.getItem(STORAGE.githubAgreement) === 'true',
   githubSyncSelection: readGithubSyncSelection(),
-  github: (() => { const value = parseStored(STORAGE.github, {}) || {}; return { clientId: GITHUB_CLIENT_ID, token: value.token || '', user: value.user || null, gistId: value.gistId || '', deviceCode: '', userCode: '', verificationUri: '', verificationUriComplete: '', expiresAt: 0, interval: 5, manualTokenOpen: false }; })(),
+  github: (() => { const value = parseStored(STORAGE.github, {}) || {}; return { clientId: GITHUB_CLIENT_ID, token: value.token || '', refreshToken: value.refreshToken || '', tokenExpiresAt: Number(value.tokenExpiresAt) || 0, refreshTokenExpiresAt: Number(value.refreshTokenExpiresAt) || 0, user: value.user || null, gistId: value.gistId || '', deviceCode: '', userCode: '', verificationUri: '', verificationUriComplete: '', expiresAt: 0, interval: 5, manualTokenOpen: false }; })(),
   githubSync: { active: false, mode: '', progress: 0, message: '', error: '' },
 };
 const homeFeedRequests = new Map();
@@ -10411,6 +10411,90 @@ function saveGithub(allowAccountChange = false) {
   void oneBoxDbPut('snapshot', 'github-auth', { value: JSON.stringify(state.github), savedAt: Date.now() });
   return true;
 }
+
+const GITHUB_REFRESH_LOCK_KEY = 'onebox.github-oauth-refresh-lock';
+let githubRefreshPromise = null;
+async function withGithubRefreshLock(task) {
+  if (navigator.locks?.request) return navigator.locks.request('onebox-github-oauth-refresh', { mode: 'exclusive' }, task);
+  let storageAvailable = true;
+  try { localStorage.getItem(GITHUB_REFRESH_LOCK_KEY); } catch { storageAvailable = false; }
+  if (!storageAvailable) return task();
+  const owner = uid(), deadline = Date.now() + 20000;
+  while (Date.now() < deadline) {
+    const lock = parseStored(GITHUB_REFRESH_LOCK_KEY, {});
+    if (!lock?.owner || Number(lock.until) <= Date.now()) {
+      try {
+        localStorage.setItem(GITHUB_REFRESH_LOCK_KEY, JSON.stringify({ owner, until: Date.now() + 30000 }));
+        if (parseStored(GITHUB_REFRESH_LOCK_KEY, {}).owner === owner) {
+          try { return await task(); }
+          finally { if (parseStored(GITHUB_REFRESH_LOCK_KEY, {}).owner === owner) localStorage.removeItem(GITHUB_REFRESH_LOCK_KEY); }
+        }
+      } catch { return task(); }
+    }
+    await sleep(150);
+  }
+  throw Error(state.language === 'en' ? 'Another OneBox tab is refreshing GitHub sign-in. Please retry shortly.' : '另一个 OneBox 标签页正在续期 GitHub 登录，请稍后重试。');
+}
+async function refreshGithubAccessToken(force = false) {
+  if (!state.github.token || !state.github.refreshToken) return false;
+  if (!force && (!Number(state.github.tokenExpiresAt) || Number(state.github.tokenExpiresAt) > Date.now() + 5 * 60 * 1000)) return true;
+  if (githubRefreshPromise) return githubRefreshPromise;
+  const task = withGithubRefreshLock(async () => {
+    const originalLogin = String(state.github.user?.login || '').trim().toLowerCase();
+    const originalToken = state.github.token, originalRefreshToken = state.github.refreshToken;
+    const persisted = parseStored(STORAGE.github, {});
+    const persistedLogin = String(persisted?.user?.login || '').trim().toLowerCase();
+    if (originalLogin && persistedLogin === originalLogin && (persisted.token !== originalToken || persisted.refreshToken !== originalRefreshToken)) {
+      state.github = { ...state.github, ...persisted };
+      return true;
+    }
+    if (!state.github.token || !state.github.refreshToken) return false;
+    if (!force && (!Number(state.github.tokenExpiresAt) || Number(state.github.tokenExpiresAt) > Date.now() + 5 * 60 * 1000)) return true;
+    const usedToken = state.github.token, usedRefreshToken = state.github.refreshToken;
+    let response, result = {};
+    try {
+      response = await fetch(GITHUB_OAUTH_PROXY + '/auth/refresh', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ refresh_token: usedRefreshToken }),
+        cache: 'no-store'
+      });
+      result = await response.json().catch(() => ({}));
+    } catch (error) {
+      const failure = Error(githubBrowserError(error) || (state.language === 'en' ? 'Could not refresh GitHub sign-in. Check your connection and retry.' : '无法续期 GitHub 登录，请检查网络后重试。'));
+      failure.githubAuthRefreshError = true;
+      throw failure;
+    }
+    if (!response.ok || !result.access_token) {
+      if (response.status === 401 || result.error === 'invalid_grant') invalidateGithubToken(usedToken);
+      const failure = Error(result.error === 'invalid_grant' || response.status === 401
+        ? t('githubAuthExpired')
+        : (state.language === 'en' ? 'Could not refresh GitHub sign-in. Please retry.' : 'GitHub 登录续期失败，请稍后重试。'));
+      failure.githubAuthRefreshError = true;
+      throw failure;
+    }
+    const latest = parseStored(STORAGE.github, {});
+    const latestLogin = String(latest?.user?.login || '').trim().toLowerCase();
+    if (latestLogin && originalLogin && latestLogin !== originalLogin) return false;
+    if (latestLogin === originalLogin && latest.refreshToken && latest.refreshToken !== usedRefreshToken && latest.token !== usedToken) {
+      state.github = { ...state.github, ...latest };
+      return true;
+    }
+    const now = Date.now();
+    state.github.token = result.access_token;
+    state.github.refreshToken = result.refresh_token || usedRefreshToken;
+    state.github.tokenExpiresAt = Number(result.expires_in) > 0 ? now + Number(result.expires_in) * 1000 : 0;
+    state.github.refreshTokenExpiresAt = Number(result.refresh_token_expires_in) > 0
+      ? now + Number(result.refresh_token_expires_in) * 1000
+      : Number(state.github.refreshTokenExpiresAt) || 0;
+    saveGithub(true);
+    return true;
+  });
+  githubRefreshPromise = task.finally(() => { githubRefreshPromise = null; });
+  return githubRefreshPromise;
+}
+window.OneBoxGithubOAuth = { refresh: () => refreshGithubAccessToken(false) };
+
 const githubResponseTokens = new WeakMap();
 const githubDetailedGists = new WeakSet();
 let githubRateLimitUntil = 0;
@@ -10451,8 +10535,16 @@ function githubHeaders(withBody = false) {
   if (withBody) headers['Content-Type'] = 'application/json';
   return headers;
 }
-async function githubApiFetch(url, options = {}) {
+async function githubApiFetch(url, options = {}, retriedAfterRefresh = false) {
   if (activeGithubRateLimitUntil() > Date.now()) throw githubRateLimitError();
+  let requestHeaders = new Headers(options.headers || {});
+  let requestToken = requestHeaders.get('Authorization')?.replace(/^Bearer /i, '') || '';
+  if (String(url).startsWith('https://api.github.com/') && requestToken && requestToken === state.github.token && state.github.refreshToken && Number(state.github.tokenExpiresAt) > 0 && Number(state.github.tokenExpiresAt) <= Date.now() + 5 * 60 * 1000) {
+    await refreshGithubAccessToken(false);
+    requestHeaders.set('Authorization', 'Bearer ' + state.github.token);
+    requestToken = state.github.token;
+    options = { ...options, headers: requestHeaders };
+  }
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
@@ -10464,10 +10556,19 @@ async function githubApiFetch(url, options = {}) {
       let response;
       try { response = await fetch(url, { cache: 'no-store', ...options, signal: controller.signal }); }
       finally { clearTimeout(deadline); options.signal?.removeEventListener('abort', abort); }
-      const authorization = new Headers(options.headers).get('Authorization') || '';
+      const authorization = new Headers(options.headers || {}).get('Authorization') || '';
       githubResponseTokens.set(response, authorization.replace(/^Bearer /i, ''));
-      // Rate-limit responses are final for this request. Retrying them adds
-      // avoidable load and delays the useful reset-time message.
+      if (response.status === 401 && !retriedAfterRefresh && requestToken && requestToken === state.github.token && state.github.refreshToken) {
+        await refreshGithubAccessToken(true);
+        const retryHeaders = new Headers(options.headers || {});
+        retryHeaders.set('Authorization', 'Bearer ' + state.github.token);
+        return githubApiFetch(url, { ...options, headers: retryHeaders }, true);
+      }
+      if (response.status === 401 && !retriedAfterRefresh && requestToken && requestToken !== state.github.token) {
+        const retryHeaders = new Headers(options.headers || {});
+        retryHeaders.set('Authorization', 'Bearer ' + state.github.token);
+        return githubApiFetch(url, { ...options, headers: retryHeaders }, true);
+      }
       if (response.status === 429) return response;
       const retryableStatus = [408, 425, 500, 502, 503, 504].includes(response.status);
       if (!retryableStatus || attempt === 2) return response;
@@ -10475,6 +10576,7 @@ async function githubApiFetch(url, options = {}) {
       await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 900 * (attempt + 1));
     } catch (error) {
       lastError = error;
+      if (error?.githubAuthRefreshError) throw error;
       if (options.signal?.aborted) throw error;
       if (attempt === 2) {
         if (error?.name === 'AbortError') throw Error(state.language === 'en' ? 'GitHub API timed out. Please check your connection and retry.' : 'GitHub API 请求超时，请检查网络后重试。');
@@ -11057,6 +11159,9 @@ function githubAvatarMarkup(user) {
   return avatar ? '<img src="' + escapeHtml(avatar) + '" alt="" onerror="this.remove();this.parentElement.classList.add(\'is-fallback\')">' : '';
 }
 async function hydrateGithubUser() {
+  if (!state.github.token) return;
+  try { await refreshGithubAccessToken(false); }
+  catch (error) { setGithubAutoSyncStatus('error', githubBrowserError(error)); return; }
   if (!state.github.token) return;
   const requestedToken = state.github.token;
   try {
@@ -11794,6 +11899,9 @@ function invalidateGithubToken(requestedToken = state.github.token) {
     return;
   }
   state.github.token = '';
+  state.github.refreshToken = '';
+  state.github.tokenExpiresAt = 0;
+  state.github.refreshTokenExpiresAt = 0;
   state.github.user = null;
   state.github.deviceCode = '';
   state.github.userCode = '';
@@ -11946,10 +12054,13 @@ function consumeGithubOAuthCallback() {
   const marker = '#github-callback?';
   if (!location.hash.startsWith(marker)) return null;
   const params = new URLSearchParams(location.hash.slice(marker.length));
-  const result = { token: params.get('access_token') || '', login: params.get('login') || '', error: params.get('error') || '' };
+  const result = { token: params.get('access_token') || '', refreshToken: params.get('refresh_token') || '', expiresIn: Number(params.get('expires_in')) || 0, refreshTokenExpiresIn: Number(params.get('refresh_token_expires_in')) || 0, login: params.get('login') || '', error: params.get('error') || '' };
   history.replaceState(null, '', '#mine');
   if (result.token) {
     state.github.token = result.token;
+    state.github.refreshToken = result.refreshToken;
+    state.github.tokenExpiresAt = result.expiresIn ? Date.now() + result.expiresIn * 1000 : 0;
+    state.github.refreshTokenExpiresAt = result.refreshTokenExpiresIn ? Date.now() + result.refreshTokenExpiresIn * 1000 : 0;
     state.github.user = { login: result.login || 'GitHub' };
     state.github.deviceCode = '';
     state.github.userCode = '';
@@ -11984,7 +12095,7 @@ async function pollGithubLogin() {
         if (!userResponse.ok) throw await githubApiError(userResponse, t('githubAuthExpired'));
         const user = await userResponse.json();
         await window.OneBoxCloudSync?.switchAccount?.(user.login);
-        state.github.token = data.access_token; state.github.deviceCode = ''; state.github.verificationUriComplete = '';
+        state.github.token = data.access_token; state.github.refreshToken = data.refresh_token || ''; state.github.tokenExpiresAt = Number(data.expires_in) ? Date.now() + Number(data.expires_in) * 1000 : 0; state.github.refreshTokenExpiresAt = Number(data.refresh_token_expires_in) ? Date.now() + Number(data.refresh_token_expires_in) * 1000 : 0; state.github.deviceCode = ''; state.github.verificationUriComplete = '';
         state.github.user = user; saveGithub(true); renderGithubDialog(); queueReaderCloudSync(500);
         toast(state.language === 'en' ? 'GitHub connected' : 'GitHub 已连接'); return;
       }
@@ -12012,6 +12123,7 @@ async function githubUseAccessToken() {
     if (!response.ok || !data.login) throw Error(t('githubTokenInvalid'));
     await window.OneBoxCloudSync?.switchAccount?.(data.login);
     state.github.token = token;
+    state.github.refreshToken = ''; state.github.tokenExpiresAt = 0; state.github.refreshTokenExpiresAt = 0;
     state.github.user = data;
     state.github.manualTokenOpen = false;
     saveGithub(true); renderGithubDialog();
@@ -12603,7 +12715,7 @@ window.OneBoxGithubAutoSync = {
 
 function disconnectGithub() {
   if (!githubStateMatchesStoredAccount()) return toast(state.language === 'en' ? 'GitHub account changed in another tab. Refresh OneBox before disconnecting.' : 'GitHub 账号已在其他标签页切换，请刷新 OneBox 后再退出。', 'error');
-  state.github = { clientId: GITHUB_CLIENT_ID, token: '', user: null, gistId: '', deviceCode: '', userCode: '', verificationUri: '', verificationUriComplete: '', expiresAt: 0, interval: 5, manualTokenOpen: false };
+  state.github = { clientId: GITHUB_CLIENT_ID, token: '', refreshToken: '', tokenExpiresAt: 0, refreshTokenExpiresAt: 0, user: null, gistId: '', deviceCode: '', userCode: '', verificationUri: '', verificationUriComplete: '', expiresAt: 0, interval: 5, manualTokenOpen: false };
   window.OneBoxReaderCloudSync?.invalidateSession();
   saveGithub(true); renderGithubDialog(); toast(state.language === 'en' ? 'GitHub disconnected' : '已退出 GitHub');
 }
@@ -15964,7 +16076,7 @@ persistentRecovery.then((restored) => {
   if (!githubCallbackHandled && !state.github.token) {
     const account = parseStored(STORAGE.github, {});
     if (account?.token) {
-      Object.assign(state.github, { token: account.token, user: account.user || null, gistId: account.gistId || '' });
+      Object.assign(state.github, { ...account, token: account.token, refreshToken: account.refreshToken || '', tokenExpiresAt: Number(account.tokenExpiresAt) || 0, refreshTokenExpiresAt: Number(account.refreshTokenExpiresAt) || 0, user: account.user || null, gistId: account.gistId || '' });
       renderNav(); render();
       if (state.githubDialogOpen) renderGithubDialog();
       void hydrateGithubUser();
