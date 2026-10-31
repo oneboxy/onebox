@@ -1,38 +1,14 @@
-/* Tiled wallet layout. Target the page's own state marker without :has(). */
-.ticket-wallet-page[data-ticket-wallet-layout="tile"] {
-  box-sizing: border-box;
-  position: relative;
-  width: 100vw !important;
-  max-width: none !important;
-  margin-left: calc(50% - 50vw) !important;
-  max-height: calc(100dvh - var(--app-header-height) - 16px);
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
-.ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-date-groups,
-.ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-page-swipe-stage,
-.ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-page-swipe-panel {
-  box-sizing: border-box;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0;
-  height: auto !important;
-  overflow: visible !important;
-}
-.ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-page-swipe-stage {
-  min-height: 0;
-}
+/* Flat wallet mode: lay out ticket rows in a responsive grid without changing page navigation. */
 .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-stack {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)) !important;
   grid-auto-flow: row !important;
   align-items: start;
   gap: 14px !important;
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
-  padding: 8px 24px 20px !important;
+  padding: 8px 0 20px !important;
 }
 .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-stack > .ticket-wallet-swipe-row {
   position: relative !important;
@@ -48,13 +24,20 @@
   width: 100% !important;
   max-width: none !important;
 }
-@media (max-width: 760px) {
-  .ticket-wallet-page[data-ticket-wallet-layout="tile"] {
-    max-height: calc(100dvh - var(--app-header-height) - env(safe-area-inset-bottom));
+.ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-page-swipe-stage {
+  height: auto !important;
+  min-height: 0;
+  overflow: visible !important;
+}
+@media (min-width: 761px) {
+  .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-swipe-row-train {
+    width: 100% !important;
+    margin-inline: 0 !important;
   }
+}
+@media (max-width: 760px) {
   .ticket-wallet-page[data-ticket-wallet-layout="tile"] .ticket-wallet-stack {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)) !important;
     gap: 10px !important;
-    padding-inline: 14px !important;
   }
 }
