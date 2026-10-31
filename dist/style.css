@@ -18565,10 +18565,10 @@ body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle:focus-visible {
 body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle[aria-pressed="true"] { color:var(--primary); }
 body:has(.ticket-wallet-page) .ticket-wallet-layout-toggle:active { transform:translateY(1px); }
 body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack {
-  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px!important;padding:8px 0 16px!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;gap:16px!important;padding:8px 0 16px!important;padding-bottom:16px!important;
 }
 body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack > .ticket-wallet-swipe-row {
-  position:relative!important;width:100%!important;margin:0!important;overflow:hidden!important;transform:none!important;z-index:auto!important;
+  position:relative!important;grid-area:auto!important;width:100%!important;margin:0!important;overflow:hidden!important;transform:none!important;z-index:auto!important;
 }
 body:has(.ticket-wallet-page[data-ticket-wallet-layout="tile"]) .ticket-wallet-date-groups .ticket-wallet-stack .ticket-wallet-card { margin-top:0!important;z-index:auto!important; }
 @media (min-width:761px) {
