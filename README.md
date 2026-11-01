@@ -15,6 +15,13 @@ OneBox 是一个无构建依赖的静态 PWA，前端托管在 GitHub Pages。�
 
 首次启用云端同步时，打开 `cloud-sync.html`，先在前台恢复旧 Gist 备份，再在页面确认迁移范围并授权迁移。自动同步需要在此设备单独开启；自定义同步选项决定要同步的数据模块。
 
+## 阅读功能
+
+- 支持 Markdown、TXT、PDF、EPUB、FB2、MOBI 与 AZW3。MOBI/AZW3 解析在本机浏览器完成；含 DRM 的 Kindle 文件无法解密。
+- 阅读进度与书籍笔记同步在书架元数据中；原书文件与封面继续通过个人 GitHub Gist 同步。
+- 阅读时长统计按设备累积，并随“阅读”同步模块跨设备合并；OPDS 目录设置也会同步。
+- OPDS 目录可以浏览、搜索和下载。目录站点需要允许浏览器跨域访问，具体权限由目录站点控制。
+
 ## Cloudflare Worker 部署
 
 Worker 项目在 `cloudflare/reader-sync/`，Wrangler 配置使用已有 D1 数据库，并将 R2 绑定用于卡包图片。书籍不会上传到 Cloudflare。
