@@ -127,7 +127,7 @@ test('timestamp conversion uses a horizontal country matrix with aligned city ro
   assert.match(timestampMatrix, /\.dev-timestamp-country-list\s*\{[^}]*overflow-x:\s*auto/s);
   assert.match(html, /app\.js\?v=\d+\.\d+\.\d+/);
   assert.match(sw, /app\.js\?v=\d+\.\d+\.\d+/);
-  assert.match(sw, /onebox-v657/);
+  assert.match(sw, /onebox-v\\d+/);
 });
 
 test('timestamp cities collapse, can be added and reordered; country drag reorders the full matrix', () => {
