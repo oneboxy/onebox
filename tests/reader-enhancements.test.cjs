@@ -13,3 +13,5 @@ test('reading sync selection includes stats and OPDS',()=>{const start=cloud.ind
 
 test('stats merge across devices is idempotent and retains independent totals',()=>{const a={devices:{phone:{days:{'2026-11-01':120},books:{b:120}}}},b={devices:{tablet:{days:{'2026-11-01':60},books:{c:60}}}};const merged=core.mergeStats(a,b);assert.equal(core.aggregateStats(merged).total,180);assert.equal(core.aggregateStats(core.mergeStats(merged,b)).total,180);});
 test('catalogs merge by safe URL',()=>{assert.equal(core.mergeCatalogs([{url:'https://a.test/feed',name:'A'}],[{url:'https://b.test/feed',name:'B'}]).length,2);assert.equal(core.mergeCatalogs([{url:'javascript:alert(1)'}],[]).length,0);});
+
+test('expands OPDS and OpenSearch templates with encoded search terms',()=>{assert.equal(core.expandSearchTemplate('https://catalog.example/search{?query,lang}','One Box'),'https://catalog.example/search?query=One%20Box&lang=');assert.equal(core.expandSearchTemplate('https://catalog.example/{searchTerms}','A/B'),'https://catalog.example/A%2FB');});
