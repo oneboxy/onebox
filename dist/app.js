@@ -10265,8 +10265,13 @@ function unitOptions(category, selected) {
 }
 function conversionMarkup() {
   const category = units[conversion.category];
-  const categories = Object.entries(units).map(([key, item]) => '<option value="' + key + '" ' + (key === conversion.category ? 'selected' : '') + '>' + item.name + '</option>').join('');
-  return '<div class="converter-card"><div class="converter-category field"><select id="conversionCategory" aria-label="' + t('converterType') + '">' + categories + '</select></div><div class="conversion-layout">' +
+  const categories = Object.entries(units).map(([key, item]) => {
+    const labels = String(item.name || '').split(' / ');
+    const label = labels[state.language === 'en' ? 1 : 0] || item.name;
+    const active = key === conversion.category;
+    return '<button type="button" class="dev-converter-tab' + (active ? ' active' : '') + '" role="tab" aria-selected="' + active + '" tabindex="' + (active ? '0' : '-1') + '" data-conversion-category="' + key + '">' + escapeHtml(label) + '</button>';
+  }).join('');
+  return '<div class="converter-card"><div class="dev-timestamp-mode dev-converter-mode" role="tablist" aria-label="' + t('converterType') + '">' + categories + '</div><div class="conversion-layout">' +
     '<div class="conversion-pane conversion-source-pane"><label for="fromUnit">' + t('from') + '</label><select id="fromUnit" aria-label="' + t('from') + '">' + unitOptions(category, conversion.from) + '</select><input id="conversionValue" type="number" step="any" inputmode="decimal" value="' + escapeHtml(conversion.value) + '" aria-label="' + t('from') + '"></div>' +
     '<button class="swap" data-swap aria-label="' + t('swap') + '">⇄</button><div class="conversion-pane conversion-target-pane"><label for="toUnit">' + t('to') + '</label><select id="toUnit" aria-label="' + t('to') + '">' + unitOptions(category, conversion.to) + '</select><div class="conversion-result" aria-live="polite"><small>' + t('result') + '</small><strong>' + formatNumber(convertedValue()) + '</strong><span>' + category.units[conversion.to][1] + '</span><button class="conversion-copy" data-copy-conversion aria-label="' + t('copyResult') + '" title="' + t('copyResult') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button></div></div></div><span class="copy-status sr-only" id="copyStatus" aria-live="polite"></span></div>';
 }
@@ -15533,6 +15538,22 @@ workspace.addEventListener('click', async (event) => {
       state.weatherLoading = false; state.weatherError = weatherLocationError(error); render();
     }
   }
+  const conversionTab = event.target.closest('[data-conversion-category]');
+  if (conversionTab) {
+    const rail = conversionTab.closest('.dev-converter-mode');
+    const previousScrollLeft = rail?.scrollLeft || 0;
+    const category = conversionTab.dataset.conversionCategory;
+    if (!Object.hasOwn(units, category)) return;
+    conversion.category = category; conversion.from = 0; conversion.to = 1;
+    render();
+    requestAnimationFrame(() => {
+      const nextRail = workspace.querySelector('.dev-converter-mode');
+      if (!nextRail) return;
+      nextRail.scrollLeft = previousScrollLeft;
+      nextRail.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
+    return;
+  }
   if (event.target.closest('[data-swap]')) { [conversion.from, conversion.to] = [conversion.to, conversion.from]; return render(); }
   if (event.target.closest('[data-swap-language]')) {
     const source = state.translation.source === 'auto' ? 'en' : state.translation.source;
@@ -15671,7 +15692,6 @@ workspace.addEventListener('change', (event) => {
   if (event.target.id === 'ticketWalletFileInput') { importTicketWalletImage(event.target.files?.[0]); event.target.value = ''; return; }
   if (event.target.id === 'ticketWalletMemoryImageInput') { importTicketWalletImage(event.target.files?.[0]); event.target.value = ''; return; }
   if (event.target.id === 'ticketWalletJsonInput') { importTicketWalletJson(event.target.files?.[0]); event.target.value = ''; return; }
-  if (event.target.id === 'conversionCategory') { conversion.category = event.target.value; conversion.from = 0; conversion.to = 1; return render(); }
   if (event.target.id === 'fromUnit') { conversion.from = Number(event.target.value); return render(); }
   if (event.target.id === 'toUnit') { conversion.to = Number(event.target.value); return render(); }
   if (event.target.id === 'translationSource') { state.translation.source = event.target.value; return render(); }
