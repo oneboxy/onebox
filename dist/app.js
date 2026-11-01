@@ -7889,11 +7889,69 @@ const solarTermFor = (key) => {
   return solarTermCache[year][key] || '';
 };
 const zodiacFor = (yearName) => ({ 子: '鼠', 丑: '牛', 寅: '虎', 卯: '兔', 辰: '龙', 巳: '蛇', 午: '马', 未: '羊', 申: '猴', 酉: '鸡', 戌: '狗', 亥: '猪' }[yearName?.slice(-1)] || '');
+const INTERNATIONAL_FESTIVAL_NAMES = Object.freeze({
+  '1-1': ['元旦', "New Year's Day"],
+  '2-14': ['情人节', "Valentine's Day"],
+  '3-8': ['国际妇女节', "International Women's Day"],
+  '4-1': ['愚人节', "April Fools' Day"],
+  '4-22': ['世界地球日', 'Earth Day'],
+  '5-1': ['国际劳动节', "International Workers' Day"],
+  '5-4': ['星球大战日', 'Star Wars Day'],
+  '6-1': ['国际儿童节', "International Children's Day"],
+  '6-5': ['世界环境日', 'World Environment Day'],
+  '7-4': ['美国独立日', 'US Independence Day'],
+  '8-12': ['国际青年日', 'International Youth Day'],
+  '9-21': ['国际和平日', 'International Day of Peace'],
+  '10-1': ['国际咖啡日', 'International Coffee Day'],
+  '10-5': ['世界教师日', "World Teachers' Day"],
+  '10-31': ['万圣节', 'Halloween'],
+  '11-1': ['诸圣节', "All Saints' Day"],
+  '11-11': ['停战纪念日', 'Remembrance Day'],
+  '11-20': ['世界儿童日', "World Children's Day"],
+  '12-10': ['世界人权日', 'Human Rights Day'],
+  '12-24': ['平安夜', 'Christmas Eve'],
+  '12-25': ['圣诞节', 'Christmas Day'],
+  '12-31': ['跨年夜', "New Year's Eve"],
+});
+function nthWeekdayOfMonth(year, month, weekday, nth) {
+  const firstWeekday = new Date(year, month - 1, 1).getDay();
+  return 1 + ((weekday - firstWeekday + 7) % 7) + (nth - 1) * 7;
+}
+function westernEasterSunday(year) {
+  const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month - 1, day);
+}
+function internationalFestivalFor(date) {
+  const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
+  let names = INTERNATIONAL_FESTIVAL_NAMES[month + '-' + day];
+  if (!names && month === 5 && day === nthWeekdayOfMonth(year, 5, 0, 2)) names = ['母亲节', "Mother's Day"];
+  if (!names && month === 6 && day === nthWeekdayOfMonth(year, 6, 0, 3)) names = ['父亲节', "Father's Day"];
+  if (!names && month === 9 && day === nthWeekdayOfMonth(year, 9, 1, 1)) names = ['美国劳动节', 'US Labor Day'];
+  if (!names && month === 11 && day === nthWeekdayOfMonth(year, 11, 4, 4)) names = ['感恩节（美国）', 'Thanksgiving (US)'];
+  if (!names) {
+    const easter = westernEasterSunday(year);
+    if (month === easter.getMonth() + 1 && day === easter.getDate()) names = ['复活节', 'Easter Sunday'];
+    else {
+      const goodFriday = new Date(year, easter.getMonth(), easter.getDate() - 2);
+      if (month === goodFriday.getMonth() + 1 && day === goodFriday.getDate()) names = ['耶稣受难日', 'Good Friday'];
+    }
+  }
+  return names ? names[state.language === 'en' ? 1 : 0] : '';
+}
 function calendarMeta(key) {
-  const lunar = lunarFor(dateFromKey(key));
+  const date = dateFromKey(key);
+  const lunar = lunarFor(date);
   const holiday = holidayFor(key);
   const term = solarTermFor(key);
-  return { lunar, holiday, term, label: term || (holiday ? (holiday.isOffDay ? holiday.name : t('makeUpWorkday')) : lunar?.festival || '') };
+  const festival = internationalFestivalFor(date);
+  const label = term || (holiday ? (holiday.isOffDay ? holiday.name : t('makeUpWorkday')) : '') || festival || lunar?.festival || '';
+  return { lunar, holiday, term, festival, label };
 }
 const naYinNames = ['海中金', '海中金', '炉中火', '炉中火', '大林木', '大林木', '路旁土', '路旁土', '剑锋金', '剑锋金', '山头火', '山头火', '涧下水', '涧下水', '城头土', '城头土', '白蜡金', '白蜡金', '杨柳木', '杨柳木', '泉中水', '泉中水', '屋上土', '屋上土', '霹雳火', '霹雳火', '松柏木', '松柏木', '长流水', '长流水', '沙中金', '沙中金', '山下火', '山下火', '平地木', '平地木', '壁上土', '壁上土', '金箔金', '金箔金', '覆灯火', '覆灯火', '天河水', '天河水', '大驿土', '大驿土', '钗钏金', '钗钏金', '桑柘木', '桑柘木', '大溪水', '大溪水', '沙中土', '沙中土', '天上火', '天上火', '石榴木', '石榴木', '大海水', '大海水'];
 const mansionNames = ['角宿（角木蛟）', '亢宿（亢金龙）', '氐宿（氐土貉）', '房宿（房日兔）', '心宿（心月狐）', '尾宿（尾火虎）', '箕宿（箕水豹）', '斗宿（斗木獬）', '牛宿（牛金牛）', '女宿（女土蝠）', '虚宿（虚日鼠）', '危宿（危月燕）', '室宿（室火猪）', '壁宿（壁水獝）', '奎宿（奎木狼）', '娄宿（娄金狗）', '胃宿（胃土雉）', '昴宿（昴日鸡）', '毕宿（毕月乌）', '觜宿（觜火猴）', '参宿（参水猿）', '井宿（井木犴）', '鬼宿（鬼金羊）', '柳宿（柳土獐）', '星宿（星日马）', '张宿（张月鹿）', '翼宿（翼火蛇）', '轸宿（轸水蚓）'];
@@ -7986,7 +8044,7 @@ function almanacFor(key) {
   const clashPillar = clashIndex === undefined ? oppositeBranch : chineseStems[clashIndex % 10] + oppositeBranch;
   const sha = { 子: '南', 午: '南', 丑: '东', 未: '东', 寅: '北', 申: '北', 卯: '西', 酉: '西', 辰: '北', 戌: '北', 巳: '东', 亥: '东' }[dayBranch] || '—';
   const festivalMap = { '9-20': ['全国爱牙日', '世界爱牙日'], '9-21': ['国家网络安全宣传周', '世界阿尔茨海默病日', '国际和平日'], '10-1': ['国庆节'] };
-  const festivals = [...new Set([...(festivalMap[(date.getMonth() + 1) + '-' + date.getDate()] || []), meta.holiday?.name, lunar?.festival].filter(Boolean))];
+  const festivals = [...new Set([...(festivalMap[(date.getMonth() + 1) + '-' + date.getDate()] || []), meta.holiday?.name, meta.festival, lunar?.festival].filter(Boolean))];
   const suit = ['嫁娶', '纳采', '祭祀', '解除', '出行', '修造', '动土', '开市', '上梁', '安床', '整手足甲', '扫舍', '求医', '治病', '起基', '定磉', '造屋', '合脊'];
   const avoid = ['造庙', '行丧', '安葬', '伐木', '作灶', '造船'];
   const islamic = islamicDateFor(date);
@@ -8193,12 +8251,13 @@ function calendar() {
     const eventCount = eventsForDate(key).length;
     const holidayClass = meta.holiday ? (meta.holiday.isOffDay ? 'holiday' : 'workday') : '';
     const termClass = meta.term ? 'term-day' : '';
-    const label = meta.holiday && !meta.holiday.isOffDay ? t('makeUpWorkday') : (meta.term || meta.holiday?.name || meta.lunar?.festival || '');
-    const hasPriorityLabel = Boolean(meta.term || meta.holiday);
+    const festivalClass = meta.festival ? 'international-festival' : '';
+    const label = meta.holiday && !meta.holiday.isOffDay ? t('makeUpWorkday') : (meta.term || meta.holiday?.name || meta.festival || meta.lunar?.festival || '');
+    const hasPriorityLabel = Boolean(meta.term || meta.holiday || meta.festival);
     const lunarCell = !hasPriorityLabel && meta.lunar ? (meta.lunar.day === 1 ? meta.lunar.monthText + meta.lunar.dayText : meta.lunar.dayText) : '';
     const cellLabel = label || lunarCell;
     const eventBadge = eventCount ? (eventCount > 99 ? '…' : String(eventCount)) : '';
-    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + holidayClass + ' ' + termClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(formatDate(key) + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (label ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small>' + (eventCount ? '<i aria-label="' + eventCount + ' 个日程">' + eventBadge + '</i>' : '') + '</button>';
+    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + holidayClass + ' ' + termClass + ' ' + festivalClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(formatDate(key) + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (label ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small>' + (eventCount ? '<i aria-label="' + eventCount + ' 个日程">' + eventBadge + '</i>' : '') + '</button>';
   }
   const selectedEvents = eventsForDate(state.selectedDate).sort((a, b) => {
     const left = a.time || '00:00:00'; const right = b.time || '00:00:00';
