@@ -6994,6 +6994,7 @@ function renderReaderView(content, hint = '', toc = [], readingMode = 'pages') {
   scheduleReaderPositionRestore();
 }
 async function readerFoliateFormat(bytes, type, book) {
+  if (type !== 'fb2' && bytes.byteLength > 128 * 1024 * 1024) throw Error('MOBI/AZW3 files over 128 MB are not supported in the browser reader');
   const source = new Blob([bytes]);
   let parsed;
   if (type === 'fb2') {
@@ -7010,7 +7011,6 @@ async function readerFoliateFormat(bytes, type, book) {
   try {
     const sections = Array.isArray(parsed.sections) ? parsed.sections : [];
     if (!sections.length) throw Error('Book has no readable sections');
-    if (bytes.byteLength > 128 * 1024 * 1024 && type !== 'fb2') throw Error('MOBI/AZW3 files over 128 MB are not supported in the browser reader');
     const headings = [];
     const parts = [];
     for (const section of sections) {
