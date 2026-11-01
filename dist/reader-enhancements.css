@@ -358,3 +358,84 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 }
 
 }
+
+/* Mobile bookshelf header: give the title room and keep actions in a compact row. */
+@media (max-width: 600px) {
+  .reader-library-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 9px;
+  }
+  .reader-library-title-copy { width: 100%; max-width: 100%; }
+  .reader-library-title-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 3px;
+    overflow: visible;
+  }
+  .reader-library-title-row h2 {
+    min-width: 0;
+    font-size: 21px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .reader-library-title-row small {
+    min-width: 0;
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .reader-library-title-copy .reader-cloud-sync-status {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .reader-library-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 7px;
+  }
+  .reader-library-actions .reader-extra-action {
+    min-width: 56px;
+    min-height: 32px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 9px;
+    font-size: 12px;
+    line-height: 1;
+  }
+  .reader-library-actions .reader-layout-toggle {
+    width: 36px;
+    min-width: 36px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0;
+  }
+}
+/* GitHub-style contribution graph: one narrow column per week, seven days high. */
+.reader-stats-heatmap {
+  width: 100%;
+  aspect-ratio: 52 / 7;
+  grid-template-columns: repeat(52, minmax(0, 1fr));
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: 3px;
+}
+.reader-stats-heatmap i {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 2px;
+}
+.reader-stats-legend i { width: 10px; border-radius: 2px; }
+@media (max-width: 600px) {
+  .reader-stats-heatmap { gap: 2px; }
+  .reader-stats-legend { gap: 4px; }
+}
