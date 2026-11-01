@@ -3,6 +3,9 @@
 const CORE=window.OneBoxReaderEnhancementCore;
 const STATS_KEY='onebox.reader-stats', OPDS_KEY='onebox.reader-opds';
 let importer=null, currentBook='', lastTick=0, lastActivity=0, lastPersist=0, stats=CORE.normalizeStats(read(STATS_KEY,{})), sources=read(OPDS_KEY,[]);
+const DEVICE_KEY='onebox.reader-device-id';
+function readerDeviceId(){let id=localStorage.getItem(DEVICE_KEY);if(!id){id=window.crypto?.randomUUID?.()||('device-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));localStorage.setItem(DEVICE_KEY,id)}return id}
+const DEVICE_ID=readerDeviceId();
 let activeUrl='', feedItems=[], nextUrl='', prevUrl='', feedTitle='', opdsBusy=false;
 function read(key,fallback){try{return JSON.parse(localStorage.getItem(key)||'')}catch{return fallback}}
 function language(){return (localStorage.getItem('onebox.language')||document.documentElement.lang||'zh').startsWith('en')?'en':'zh'}
@@ -14,7 +17,7 @@ function duration(sec){const s=Math.max(0,Math.floor(sec||0));if(s<60)return s+'
 function dayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function start(bookId){stop();currentBook=String(bookId||'');lastTick=Date.now();lastActivity=lastTick}
 function stop(){tick(true);currentBook='';lastTick=0}
-function tick(force=false){if(!currentBook)return;const now=Date.now(),elapsed=Math.max(0,Math.min(30,Math.floor((now-lastTick)/1000)));lastTick=now;if(!document.hidden&&now-lastActivity<120000&&elapsed){stats=CORE.addSeconds(stats,dayKey(),currentBook,elapsed);saveStats(force)}}
+function tick(force=false){if(!currentBook)return;const now=Date.now(),elapsed=Math.max(0,Math.min(30,Math.floor((now-lastTick)/1000)));lastTick=now;if(!document.hidden&&now-lastActivity<120000&&elapsed){stats=CORE.addSeconds(stats,dayKey(),currentBook,elapsed,DEVICE_ID);saveStats(force)}}
 ['pointerdown','touchstart','keydown','wheel'].forEach(type=>document.addEventListener(type,()=>{if(currentBook)lastActivity=Date.now()},{passive:true,capture:true}));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)tick(true);else if(currentBook){lastTick=Date.now();lastActivity=Date.now()}});
 window.addEventListener('pagehide',()=>tick(true));
@@ -23,10 +26,10 @@ function actionsMarkup(){return '<button type="button" class="reader-extra-actio
 function modalShell(title,body){closeModal();const node=document.createElement('div');node.className='reader-extra-overlay';node.dataset.readerExtraOverlay='';node.innerHTML='<section class="reader-extra-dialog" role="dialog" aria-modal="true" aria-label="'+esc(title)+'"><header><strong>'+esc(title)+'</strong><button type="button" data-extra-close aria-label="'+tx('关闭','Close')+'">×</button></header><div class="reader-extra-body">'+body+'</div></section>';document.body.append(node);return node}
 function closeModal(){document.querySelector('[data-reader-extra-overlay]')?.remove()}
 function renderStats(){
-stats=CORE.normalizeStats(read(STATS_KEY,stats));const today=dayKey(),days=CORE.recentDays(new Date(),35),total=Object.values(stats.days).reduce((a,b)=>a+b,0),activeDays=Object.values(stats.days).filter(x=>x>0).length;
-const squares=days.map(d=>{const value=stats.days[d]||0;const level=value===0?0:value<300?1:value<1200?2:value<3600?3:4;return '<i title="'+d+' · '+duration(value)+'" data-level="'+level+'"></i>'}).join('');
-const top=Object.entries(stats.books).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([id,seconds])=>'<li><span>'+esc(getBookName(id))+'</span><b>'+duration(seconds)+'</b></li>').join('');
-const body='<div class="reader-stats-summary"><article><small>'+tx('累计阅读','Total reading')+'</small><strong>'+duration(total)+'</strong></article><article><small>'+tx('阅读天数','Reading days')+'</small><strong>'+activeDays+'</strong></article><article><small>'+tx('今天','Today')+'</small><strong>'+duration(stats.days[today]||0)+'</strong></article></div><h3>'+tx('最近 5 周','Last 5 weeks')+'</h3><div class="reader-stats-heatmap">'+squares+'</div><div class="reader-stats-legend"><span>'+tx('少','Less')+'</span><i data-level="0"></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><i data-level="4"></i><span>'+tx('多','More')+'</span></div><h3>'+tx('阅读最多','Top books')+'</h3><ol class="reader-stats-books">'+(top||'<li>'+tx('还没有阅读记录','No reading sessions yet')+'</li>')+'</ol>';
+stats=CORE.normalizeStats(read(STATS_KEY,stats));const aggregate=CORE.aggregateStats(stats),today=dayKey(),days=CORE.recentDays(new Date(),35),total=aggregate.total,activeDays=Object.values(aggregate.days).filter(x=>x>0).length;
+const squares=days.map(d=>{const value=aggregate.days[d]||0;const level=value===0?0:value<300?1:value<1200?2:value<3600?3:4;return '<i title="'+d+' · '+duration(value)+'" data-level="'+level+'"></i>'}).join('');
+const top=Object.entries(aggregate.books).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([id,seconds])=>'<li><span>'+esc(getBookName(id))+'</span><b>'+duration(seconds)+'</b></li>').join('');
+const body='<div class="reader-stats-summary"><article><small>'+tx('累计阅读','Total reading')+'</small><strong>'+duration(total)+'</strong></article><article><small>'+tx('阅读天数','Reading days')+'</small><strong>'+activeDays+'</strong></article><article><small>'+tx('今天','Today')+'</small><strong>'+duration(aggregate.days[today]||0)+'</strong></article></div><h3>'+tx('最近 5 周','Last 5 weeks')+'</h3><div class="reader-stats-heatmap">'+squares+'</div><div class="reader-stats-legend"><span>'+tx('少','Less')+'</span><i data-level="0"></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><i data-level="4"></i><span>'+tx('多','More')+'</span></div><h3>'+tx('阅读最多','Top books')+'</h3><ol class="reader-stats-books">'+(top||'<li>'+tx('还没有阅读记录','No reading sessions yet')+'</li>')+'</ol>';
 modalShell(tx('阅读统计','Reading statistics'),body);
 }
 function sourceList(){return Array.isArray(sources)?sources.filter(s=>s&&s.url):[]}
