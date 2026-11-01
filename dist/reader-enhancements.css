@@ -439,3 +439,70 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-stats-heatmap { gap: 2px; }
   .reader-stats-legend { gap: 4px; }
 }
+
+/* Shelf details and compact icon actions. */
+.reader-extra-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
+}
+.reader-extra-action svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+.reader-extra-action:active { transform: scale(.97); }
+.reader-auto-sync-action { min-width: 0; }
+.reader-sync-state-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #8a8f9a;
+}
+.reader-auto-sync-action[data-enabled="true"] .reader-sync-state-dot,
+.reader-auto-sync-action[data-state="enabled"] .reader-sync-state-dot,
+.reader-auto-sync-action[data-state="success"] .reader-sync-state-dot { background: #39a66a; }
+.reader-auto-sync-action[data-state="syncing"] .reader-sync-state-dot { background: #6077ff; box-shadow: 0 0 0 3px rgba(96,119,255,.16); }
+.reader-auto-sync-action:disabled { opacity: .62; cursor: not-allowed; }
+.reader-library-title-row > .reader-add-supported-formats { display: block !important; }
+.reader-book-grid .reader-add-card .reader-add-supported-formats {
+  display: block !important;
+  max-width: min(100%, 280px);
+  margin: 0 auto;
+  overflow: visible;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.reader-book-list .reader-add-card .reader-add-supported-formats { text-align: left; }
+.reader-library-title-copy .reader-cloud-sync-status { display: none !important; }
+@media (max-width: 600px) {
+  .reader-library-actions .reader-extra-action {
+    min-width: 0;
+    min-height: 34px;
+    height: 34px;
+    padding: 0 9px;
+    gap: 5px;
+    border-radius: 10px;
+    font-size: 11px;
+  }
+  .reader-library-actions .reader-extra-action svg { width: 13px; height: 13px; }
+}
+@media (max-width: 380px) {
+  .reader-library-actions { gap: 5px; }
+  .reader-library-actions .reader-extra-action { padding: 0 7px; gap: 4px; font-size: 10px; }
+}
