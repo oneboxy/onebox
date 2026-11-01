@@ -1,1 +1,179 @@
 .reader-extra-action{min-height:34px;padding:0 13px;border:1px solid var(--line,#e1e6f0);border-radius:10px;background:var(--surface,#fff);color:var(--ink,#252a35);font:inherit;font-size:13px;font-weight:600;cursor:pointer}.reader-extra-action:hover{border-color:var(--accent,#5267ff);color:var(--accent,#5267ff)}.reader-extra-overlay{position:fixed;inset:0;z-index:1800;display:grid;place-items:center;padding:18px;background:rgba(20,25,38,.48);backdrop-filter:blur(5px)}.reader-extra-dialog{width:min(720px,100%);max-height:min(82vh,760px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line,#e1e6f0);border-radius:18px;background:var(--panel,#fff);color:var(--ink,#252a35);box-shadow:0 24px 80px rgba(0,0,0,.24)}.reader-extra-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line,#e1e6f0)}.reader-extra-dialog>header strong{font-size:17px}.reader-extra-dialog>header button{width:32px;height:32px;border:1px solid var(--line,#e1e6f0);border-radius:50%;background:transparent;color:inherit;font-size:22px}.reader-extra-body{overflow:auto;padding:18px 20px}.reader-stats-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.reader-stats-summary article{display:grid;gap:8px;padding:14px;border:1px solid var(--line,#e1e6f0);border-radius:12px;background:var(--surface,#fff)}.reader-stats-summary small,.reader-stats-books span,.reader-opds-entry small{color:var(--muted,#737b8c)}.reader-stats-summary strong{font-size:20px}.reader-extra-body h3{margin:22px 0 10px;font-size:14px}.reader-stats-heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.reader-stats-heatmap i,.reader-stats-legend i{aspect-ratio:1;border-radius:4px;background:#eef0f5}.reader-stats-heatmap i[data-level="1"],.reader-stats-legend i[data-level="1"]{background:#c9d2ff}.reader-stats-heatmap i[data-level="2"],.reader-stats-legend i[data-level="2"]{background:#95a6ff}.reader-stats-heatmap i[data-level="3"],.reader-stats-legend i[data-level="3"]{background:#647cff}.reader-stats-heatmap i[data-level="4"],.reader-stats-legend i[data-level="4"]{background:#435af5}.reader-stats-legend{display:flex;align-items:center;gap:5px;margin-top:8px;color:var(--muted,#737b8c);font-size:11px}.reader-stats-legend i{width:12px}.reader-stats-books{display:grid;gap:8px;padding-left:24px}.reader-stats-books li{display:flex;justify-content:space-between;gap:12px}.reader-opds-source-row,.reader-opds-search{display:flex;gap:8px;margin-bottom:10px}.reader-opds-source-row input,.reader-opds-source-row select,.reader-opds-search input{min-width:0;flex:1;height:40px;padding:0 12px;border:1px solid var(--line,#e1e6f0);border-radius:10px;background:var(--surface,#fff);color:inherit;font:inherit}.reader-opds-source-row button,.reader-opds-search button,.reader-opds-entry button,.reader-opds-pagination button{flex:none;padding:0 13px;border:1px solid var(--line,#e1e6f0);border-radius:10px;background:var(--surface,#fff);color:inherit;font:inherit;cursor:pointer}.reader-opds-heading{margin:14px 0 8px;font-size:13px;font-weight:700}.reader-opds-list{display:grid;gap:8px;max-height:38vh;overflow:auto}.reader-opds-entry{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:12px;border:1px solid var(--line,#e1e6f0);border-radius:12px;background:var(--surface,#fff)}.reader-opds-entry>div{min-width:0}.reader-opds-entry strong{display:block;overflow-wrap:anywhere}.reader-opds-entry small{display:block;margin-top:4px}.reader-opds-entry p{margin:6px 0 0;color:var(--muted,#737b8c);font-size:12px}.reader-opds-empty,.reader-opds-hint{color:var(--muted,#737b8c);font-size:12px;line-height:1.6}.reader-opds-pagination{display:flex;justify-content:center;gap:8px;margin-top:12px}.reader-opds-pagination button{min-height:34px}.reader-opds-hint{margin-bottom:0}@media(max-width:600px){.reader-extra-overlay{padding:12px}.reader-extra-dialog{max-height:86dvh;border-radius:16px}.reader-extra-body{padding:14px}.reader-stats-summary{gap:6px}.reader-stats-summary article{padding:10px}.reader-stats-summary strong{font-size:16px}.reader-opds-entry{grid-template-columns:minmax(0,1fr) auto}.reader-opds-entry>[data-opds-download]{grid-column:2}.reader-opds-entry>[data-opds-open]{grid-column:2}.reader-extra-action{min-height:32px;padding:0 10px;font-size:12px}}
+
+/* Reader enhancements: explicit dark palette for system and selected dark themes. */
+html[data-theme="dark"] .reader-extra-action,
+html[data-theme-mode="dark-gray"] .reader-extra-action,
+html:not([data-theme="light"]) .reader-extra-action {
+  border-color: #383838;
+  background: #151515;
+  color: #f1f1f1;
+}
+html[data-theme="dark"] .reader-extra-action:hover,
+html[data-theme-mode="dark-gray"] .reader-extra-action:hover,
+html:not([data-theme="light"]) .reader-extra-action:hover {
+  border-color: #788aff;
+  background: #1b1b1b;
+  color: #aebaff;
+}
+html[data-theme="dark"] .reader-extra-overlay,
+html[data-theme-mode="dark-gray"] .reader-extra-overlay,
+html:not([data-theme="light"]) .reader-extra-overlay {
+  background: rgba(0, 0, 0, .72);
+}
+html[data-theme="dark"] .reader-extra-dialog,
+html[data-theme-mode="dark-gray"] .reader-extra-dialog,
+html:not([data-theme="light"]) .reader-extra-dialog {
+  border-color: #343434;
+  background: #0b0b0b;
+  color: #f3f3f3;
+}
+html[data-theme="dark"] .reader-extra-dialog > header,
+html[data-theme-mode="dark-gray"] .reader-extra-dialog > header,
+html:not([data-theme="light"]) .reader-extra-dialog > header {
+  border-color: #343434;
+}
+html[data-theme="dark"] .reader-extra-dialog > header button,
+html[data-theme-mode="dark-gray"] .reader-extra-dialog > header button,
+html:not([data-theme="light"]) .reader-extra-dialog > header button {
+  border-color: #3c3c3c;
+  background: #141414;
+  color: #f4f4f4;
+}
+html[data-theme="dark"] .reader-stats-summary article,
+html[data-theme-mode="dark-gray"] .reader-stats-summary article,
+html:not([data-theme="light"]) .reader-stats-summary article,
+html[data-theme="dark"] .reader-opds-entry,
+html[data-theme-mode="dark-gray"] .reader-opds-entry,
+html:not([data-theme="light"]) .reader-opds-entry {
+  border-color: #363636;
+  background: #151515;
+  color: #f1f1f1;
+}
+html[data-theme="dark"] .reader-stats-summary small,
+html[data-theme-mode="dark-gray"] .reader-stats-summary small,
+html:not([data-theme="light"]) .reader-stats-summary small,
+html[data-theme="dark"] .reader-stats-legend,
+html[data-theme-mode="dark-gray"] .reader-stats-legend,
+html:not([data-theme="light"]) .reader-stats-legend,
+html[data-theme="dark"] .reader-opds-entry small,
+html[data-theme-mode="dark-gray"] .reader-opds-entry small,
+html:not([data-theme="light"]) .reader-opds-entry small,
+html[data-theme="dark"] .reader-opds-entry p,
+html[data-theme-mode="dark-gray"] .reader-opds-entry p,
+html:not([data-theme="light"]) .reader-opds-entry p,
+html[data-theme="dark"] .reader-opds-empty,
+html[data-theme-mode="dark-gray"] .reader-opds-empty,
+html:not([data-theme="light"]) .reader-opds-empty,
+html[data-theme="dark"] .reader-opds-hint,
+html[data-theme-mode="dark-gray"] .reader-opds-hint,
+html:not([data-theme="light"]) .reader-opds-hint {
+  color: #b0b0b0;
+}
+html[data-theme="dark"] .reader-stats-summary strong,
+html[data-theme-mode="dark-gray"] .reader-stats-summary strong,
+html:not([data-theme="light"]) .reader-stats-summary strong,
+html[data-theme="dark"] .reader-stats-books,
+html[data-theme-mode="dark-gray"] .reader-stats-books,
+html:not([data-theme="light"]) .reader-stats-books {
+  color: #f4f4f4;
+}
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="0"],
+html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="0"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="0"],
+html[data-theme="dark"] .reader-stats-legend i[data-level="0"],
+html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="0"] {
+  background: #272727;
+}
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="0"] { background: #272727; }
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="1"],
+html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="1"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="1"],
+html[data-theme="dark"] .reader-stats-legend i[data-level="1"],
+html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="1"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="1"] { background: #34416e; }
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="2"],
+html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="2"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="2"],
+html[data-theme="dark"] .reader-stats-legend i[data-level="2"],
+html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="2"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="2"] { background: #465a9b; }
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="3"],
+html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="3"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="3"],
+html[data-theme="dark"] .reader-stats-legend i[data-level="3"],
+html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="3"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="3"] { background: #526bd0; }
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="4"],
+html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="4"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="4"],
+html[data-theme="dark"] .reader-stats-legend i[data-level="4"],
+html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="4"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="4"] { background: #7185ff; }
+html[data-theme="dark"] .reader-opds-source-row input,
+html[data-theme-mode="dark-gray"] .reader-opds-source-row input,
+html:not([data-theme="light"]) .reader-opds-source-row input,
+html[data-theme="dark"] .reader-opds-source-row select,
+html[data-theme-mode="dark-gray"] .reader-opds-source-row select,
+html:not([data-theme="light"]) .reader-opds-source-row select,
+html[data-theme="dark"] .reader-opds-search input,
+html[data-theme-mode="dark-gray"] .reader-opds-search input,
+html:not([data-theme="light"]) .reader-opds-search input {
+  border-color: #3a3a3a;
+  background: #101010;
+  color: #f2f2f2;
+  color-scheme: dark;
+}
+html[data-theme="dark"] .reader-opds-source-row input::placeholder,
+html[data-theme-mode="dark-gray"] .reader-opds-source-row input::placeholder,
+html:not([data-theme="light"]) .reader-opds-source-row input::placeholder,
+html[data-theme="dark"] .reader-opds-search input::placeholder,
+html[data-theme-mode="dark-gray"] .reader-opds-search input::placeholder,
+html:not([data-theme="light"]) .reader-opds-search input::placeholder { color: #929292; }
+html[data-theme="dark"] .reader-opds-source-row button,
+html[data-theme-mode="dark-gray"] .reader-opds-source-row button,
+html:not([data-theme="light"]) .reader-opds-source-row button,
+html[data-theme="dark"] .reader-opds-search button,
+html[data-theme-mode="dark-gray"] .reader-opds-search button,
+html:not([data-theme="light"]) .reader-opds-search button,
+html[data-theme="dark"] .reader-opds-entry button,
+html[data-theme-mode="dark-gray"] .reader-opds-entry button,
+html:not([data-theme="light"]) .reader-opds-entry button,
+html[data-theme="dark"] .reader-opds-pagination button,
+html[data-theme-mode="dark-gray"] .reader-opds-pagination button,
+html:not([data-theme="light"]) .reader-opds-pagination button {
+  min-height: 36px;
+  border-color: #414141;
+  background: #1a1a1a;
+  color: #f0f0f0;
+}
+html[data-theme="dark"] .reader-opds-source-row button:hover,
+html[data-theme-mode="dark-gray"] .reader-opds-source-row button:hover,
+html:not([data-theme="light"]) .reader-opds-source-row button:hover,
+html[data-theme="dark"] .reader-opds-search button:hover,
+html[data-theme-mode="dark-gray"] .reader-opds-search button:hover,
+html:not([data-theme="light"]) .reader-opds-search button:hover,
+html[data-theme="dark"] .reader-opds-entry button:hover,
+html[data-theme-mode="dark-gray"] .reader-opds-entry button:hover,
+html:not([data-theme="light"]) .reader-opds-entry button:hover,
+html[data-theme="dark"] .reader-opds-pagination button:hover,
+html[data-theme-mode="dark-gray"] .reader-opds-pagination button:hover,
+html:not([data-theme="light"]) .reader-opds-pagination button:hover {
+  border-color: #788aff;
+  background: #252a3d;
+  color: #c2cbff;
+}
+html[data-theme="dark"] .reader-opds-source-row button:disabled,
+html[data-theme-mode="dark-gray"] .reader-opds-source-row button:disabled,
+html:not([data-theme="light"]) .reader-opds-source-row button:disabled,
+html[data-theme="dark"] .reader-opds-entry button:disabled,
+html[data-theme-mode="dark-gray"] .reader-opds-entry button:disabled,
+html:not([data-theme="light"]) .reader-opds-entry button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+html[data-theme="dark"] .reader-extra-dialog :focus-visible,
+html[data-theme-mode="dark-gray"] .reader-extra-dialog :focus-visible,
+html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
+  outline: 2px solid #788aff;
+  outline-offset: 2px;
+}
