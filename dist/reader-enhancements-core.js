@@ -5,5 +5,6 @@ function normalizeStats(value){const source=value&&typeof value==='object'?value
 function addSeconds(value,day,bookId,seconds){const stats=normalizeStats(value);if(!validDay(day)||!bookId)return stats;const amount=Math.max(0,Math.min(300,Math.floor(Number(seconds)||0)));if(!amount)return stats;stats.days[day]=Math.min(86400,(stats.days[day]||0)+amount);const id=String(bookId).slice(0,120);stats.books[id]=(stats.books[id]||0)+amount;stats.updatedAt=Date.now();return stats;}
 function recentDays(endDate,count=35){const end=new Date(endDate);end.setHours(12,0,0,0);return Array.from({length:Math.max(1,Math.min(366,Number(count)||35))},(_,i)=>{const d=new Date(end);d.setDate(d.getDate()-(Math.max(1,Math.min(366,Number(count)||35))-1-i));return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');});}
 function safeHttpUrl(value,base){try{const url=new URL(String(value||''),base||undefined);return ['http:','https:'].includes(url.protocol)?url.href:'';}catch{return'';}}
-return{normalizeStats,addSeconds,recentDays,safeHttpUrl,validDay};
+function safeTemplateUrl(value,base){const tokens=[];const protectedValue=String(value||'').replace(/\{[^{}]+\}/g,token=>{const key='__ONEBOX_TEMPLATE_'+tokens.length+'__';tokens.push([key,token]);return key});let result=safeHttpUrl(protectedValue,base);if(!result)return'';for(const [key,token]of tokens)result=result.replace(key,token);return result;}
+return{normalizeStats,addSeconds,recentDays,safeHttpUrl,safeTemplateUrl,validDay};
 });
