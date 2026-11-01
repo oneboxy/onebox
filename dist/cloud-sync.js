@@ -23,7 +23,7 @@
   const GROUPS = {
     settings: new Set(['onebox.theme','onebox.language','onebox.layout','onebox.color','onebox.color-explicit','onebox.top-display','onebox.footprint','onebox.open-mode','onebox.mascot-position','onebox.mascot-visible','onebox.mascot-display-mode','onebox.pet-profile']),
     navigation: new Set(['onebox.tool-order','onebox.navigation','onebox.navigation-location','onebox.home-feed-order','onebox.home-feed-visibility','onebox.home-feed-active']),
-    reading: new Set(['onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-deleted','onebox.reader-preferences','onebox.reader-layout','onebox.library']),
+    reading: new Set(['onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-deleted','onebox.reader-preferences','onebox.reader-layout','onebox.reader-stats','onebox.reader-opds','onebox.library']),
     messages: new Set(['onebox.notifications','onebox.notification-preference']), calendar: new Set(['onebox.events']),
     weather: new Set(['onebox.weather-cards','onebox.weather']), translation: new Set(['onebox.translation-history','onebox.translation-history-open']),
     calculator: new Set(['onebox.calculator','onebox.dev-tools']),
