@@ -506,3 +506,29 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-library-actions { gap: 5px; }
   .reader-library-actions .reader-extra-action { padding: 0 7px; gap: 4px; font-size: 10px; }
 }
+
+/* Unit conversion categories follow the timestamp mode tabs. */
+.dev-converter-mode {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 14px;
+  padding: 0;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.dev-converter-mode::-webkit-scrollbar { display: none; }
+.dev-converter-mode button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 9px 7px;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .dev-converter-mode { gap: 6px; margin-bottom: 12px; }
+  .dev-converter-mode button { min-height: 30px; padding: 0 8px 6px; font-size: 11px; }
+}
