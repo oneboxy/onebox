@@ -13,37 +13,31 @@ const getLayout = () => {
   return context.window.OneBoxTicketWalletLayout;
 };
 
-test('layout preference defaults safely and toggles in both directions', () => {
+test('tile layout stays paused and safely defaults to stacked mode', () => {
   const layout = getLayout();
   assert.equal(layout.normalize(null), 'stack');
   assert.equal(layout.normalize('unknown'), 'stack');
-  assert.equal(layout.normalize('tile'), 'tile');
-  assert.equal(layout.next('stack'), 'tile');
+  assert.equal(layout.normalize('tile'), 'stack');
+  assert.equal(layout.next('stack'), 'stack');
   assert.equal(layout.next('tile'), 'stack');
 
   const saved = [];
   const storage = { setItem: (key, value) => saved.push([key, value]) };
   const state = { ticketWalletCardLayout: 'stack' };
-  assert.equal(layout.toggle(state, storage, 'wallet.layout'), 'tile');
-  assert.equal(state.ticketWalletCardLayout, 'tile');
-  assert.deepEqual(saved.pop(), ['wallet.layout', 'tile']);
+  assert.equal(layout.toggle(state, storage, 'wallet.layout'), 'stack');
+  assert.equal(state.ticketWalletCardLayout, 'stack');
+  assert.deepEqual(saved.pop(), ['wallet.layout', 'stack']);
   assert.equal(layout.toggle(state, storage, 'wallet.layout'), 'stack');
   assert.deepEqual(saved.pop(), ['wallet.layout', 'stack']);
 });
 
-test('view button exposes the action and current state accessibly', () => {
+test('tile layout switch stays hidden while the tiled view is paused', () => {
   const layout = getLayout();
   const stackMarkup = layout.toggleButtonMarkup('stack', 'zh-CN');
-  assert.match(stackMarkup, /data-ticket-wallet-layout-toggle/);
-  assert.match(stackMarkup, /aria-label="切换为平铺布局"/);
-  assert.match(stackMarkup, /title="切换为平铺布局"/);
-  assert.match(stackMarkup, /aria-pressed="false"/);
-  assert.match(stackMarkup, /<rect/);
+  assert.equal(stackMarkup, '');
 
   const tileMarkup = layout.toggleButtonMarkup('tile', 'en');
-  assert.match(tileMarkup, /aria-label="Switch to stacked layout"/);
-  assert.match(tileMarkup, /aria-pressed="true"/);
-  assert.match(tileMarkup, /<path/);
+  assert.equal(tileMarkup, '');
 });
 
 test('reordering uses actual card centers for variable-height tiled cards', () => {
