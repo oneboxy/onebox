@@ -14,7 +14,7 @@
   const DATA_KEYS = new Set([
     'onebox.theme','onebox.language','onebox.layout','onebox.color','onebox.color-explicit','onebox.top-display','onebox.footprint','onebox.open-mode','onebox.mascot-position','onebox.mascot-visible','onebox.mascot-display-mode','onebox.pet-profile',
     'onebox.tool-order','onebox.navigation','onebox.navigation-location','onebox.home-feed-order','onebox.home-feed-visibility','onebox.home-feed-active',
-    'onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-deleted','onebox.reader-preferences','onebox.reader-layout','onebox.library',
+    'onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-deleted','onebox.reader-preferences','onebox.reader-layout','onebox.reader-stats','onebox.reader-opds','onebox.library',
     'onebox.notifications','onebox.notification-preference','onebox.events','onebox.weather-cards','onebox.weather',
     'onebox.translation-history','onebox.translation-history-open','onebox.calculator','onebox.dev-tools',
     'onebox.ticket-wallet','onebox.ticket-wallet-display-order','onebox.ticket-wallet-type-filter','onebox.ticket-wallet-memories','onebox.ticket-wallet-deleted'
@@ -23,7 +23,7 @@
   const GROUPS = {
     settings: new Set(['onebox.theme','onebox.language','onebox.layout','onebox.color','onebox.color-explicit','onebox.top-display','onebox.footprint','onebox.open-mode','onebox.mascot-position','onebox.mascot-visible','onebox.mascot-display-mode','onebox.pet-profile']),
     navigation: new Set(['onebox.tool-order','onebox.navigation','onebox.navigation-location','onebox.home-feed-order','onebox.home-feed-visibility','onebox.home-feed-active']),
-    reading: new Set(['onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-deleted','onebox.reader-preferences','onebox.reader-layout','onebox.library']),
+    reading: new Set(['onebox.home-feed-read','onebox.home-feed-activity','onebox.reader-progress','onebox.reader-deleted','onebox.reader-preferences','onebox.reader-layout','onebox.reader-stats','onebox.reader-opds','onebox.library']),
     messages: new Set(['onebox.notifications','onebox.notification-preference']), calendar: new Set(['onebox.events']),
     weather: new Set(['onebox.weather-cards','onebox.weather']), translation: new Set(['onebox.translation-history','onebox.translation-history-open']),
     calculator: new Set(['onebox.calculator','onebox.dev-tools']),
@@ -40,6 +40,24 @@
   function parseActivityMap(value) {
     try { const parsed = typeof value === 'string' ? JSON.parse(value) : value; return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}; } catch { return {}; }
   }
+  function mergeReaderStats(localValue, remoteValue) {
+    const parse = (value) => { try { return typeof value === 'string' ? JSON.parse(value) : value || {}; } catch { return {}; } };
+    const local = parse(localValue), remote = parse(remoteValue), devices = {};
+    for (const id of new Set([...Object.keys(local.devices || {}), ...Object.keys(remote.devices || {})])) {
+      const left = local.devices?.[id] || {}, right = remote.devices?.[id] || {};
+      const maxMap = (a, b) => Object.fromEntries([...new Set([...Object.keys(a || {}), ...Object.keys(b || {})])].map((key) => [key, Math.max(Number(a?.[key]) || 0, Number(b?.[key]) || 0)]).filter(([, amount]) => amount > 0));
+      devices[id] = { days: maxMap(left.days, right.days), books: maxMap(left.books, right.books) };
+    }
+    return { devices, updatedAt: Math.max(Number(local.updatedAt) || 0, Number(remote.updatedAt) || 0) };
+  }
+  function mergeReaderCatalogs(localValue, remoteValue) {
+    const map = new Map();
+    for (const item of [...(Array.isArray(localValue) ? localValue : []), ...(Array.isArray(remoteValue) ? remoteValue : [])]) {
+      try { const url = new URL(String(item?.url || '')); if (!['http:', 'https:'].includes(url.protocol)) continue; map.set(url.href, { ...(map.get(url.href) || {}), ...item, url: url.href }); } catch {}
+    }
+    return [...map.values()].slice(0, 200);
+  }
+
   function mergeActivityMaps(localValue, remoteValue) {
     const local = parseActivityMap(localValue), remote = parseActivityMap(remoteValue), merged = {};
     [...new Set([...Object.keys(local), ...Object.keys(remote)])].forEach((id) => {
@@ -515,6 +533,19 @@
             const mergedValue = mergeLibraryMetadata(localValue, remoteValue);
             if (mergedValue !== localValue) localStorage.setItem(key, mergedValue);
             if (mergedValue !== remoteValue) { setClock(key, Math.max(Date.now(), localUpdatedAt, remoteUpdatedAt)); pendingKeys.add(key); }
+            else setClock(key, Math.max(localUpdatedAt, remoteUpdatedAt));
+            continue;
+          }
+          if ((key === 'onebox.reader-stats' || key === 'onebox.reader-opds') && localValue !== null) {
+            const remoteValue = typeof remoteItem.value === 'string' ? remoteItem.value : JSON.stringify(remoteItem.value);
+            const mergedValue = key === 'onebox.reader-stats'
+              ? JSON.stringify(mergeReaderStats(localValue, remoteValue))
+              : JSON.stringify(mergeReaderCatalogs(localValue, remoteValue));
+            const encodedRemote = key === 'onebox.reader-stats'
+              ? JSON.stringify(mergeReaderStats('{"devices":{}}', remoteValue))
+              : JSON.stringify(mergeReaderCatalogs([], remoteValue));
+            if (mergedValue !== localValue) localStorage.setItem(key, mergedValue);
+            if (mergedValue !== encodedRemote) { setClock(key, Math.max(Date.now(), localUpdatedAt, remoteUpdatedAt)); pendingKeys.add(key); }
             else setClock(key, Math.max(localUpdatedAt, remoteUpdatedAt));
             continue;
           }

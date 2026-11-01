@@ -1,0 +1,17 @@
+const test=require('node:test');const assert=require('node:assert/strict');const core=require('../dist/reader-enhancements-core.js');
+test('normalizes malformed and bounded reader statistics',()=>{const value=core.normalizeStats({days:{'2026-11-01':90000,bad:20,'2026-11-02':-4},books:{book:12,empty:0}});assert.equal(value.devices.legacy.days['2026-11-01'],86400);assert.equal(value.devices.legacy.books.book,12);});
+test('adds reading seconds to day and book totals',()=>{const value=core.addSeconds({devices:{}},'2026-11-01','local',30,'b1');assert.equal(value.devices.b1.days['2026-11-01'],30);assert.equal(value.devices.b1.books.local,30);assert.equal(core.aggregateStats(value).total,30);assert.equal(core.addSeconds(value,'bad','local',30,'b1').devices.b1.books.local,30);});
+test('builds stable local date keys and validates HTTP sources',()=>{assert.equal(core.recentDays(new Date(2026,10,1,1),3).join(','),'2026-10-30,2026-10-31,2026-11-01');assert.equal(core.safeHttpUrl('/catalog','https://example.org/root/'),'https://example.org/catalog');assert.equal(core.safeHttpUrl('javascript:alert(1)'), '');});
+
+const fs=require('node:fs');const path=require('node:path');const root=path.resolve(__dirname,'..');
+const app=fs.readFileSync(path.join(root,'dist/app.js'),'utf8');const cloud=fs.readFileSync(path.join(root,'dist/cloud-sync.js'),'utf8');const worker=fs.readFileSync(path.join(root,'cloudflare/reader-sync/src/index.js'),'utf8');
+test('reader keeps note/progress sync and adds FB2, MOBI, AZW3 imports',()=>{assert.match(app,/\['fb2', 'mobi', 'azw3'\]/);assert.match(app,/onebox:reader-session-start/);assert.match(app,/readerFoliateFormat/);assert.match(app,/book\.annotations/);});
+test('reader stats and OPDS settings join the existing reading sync group',()=>{for(const key of ['onebox.reader-stats','onebox.reader-opds']){assert.ok(cloud.includes(key));assert.ok(worker.includes(key));}});
+
+test('OPDS search templates retain placeholders and reject unsafe schemes',()=>{assert.equal(core.safeTemplateUrl('/search{?query}','https://catalog.example/opds'),'https://catalog.example/search{?query}');assert.equal(core.safeTemplateUrl('javascript:{query}'), '');});
+test('reading sync selection includes stats and OPDS',()=>{const start=cloud.indexOf('reading: new Set'),end=cloud.indexOf('messages:',start);const group=cloud.slice(start,end);assert.ok(group.includes('onebox.reader-stats'));assert.ok(group.includes('onebox.reader-opds'));});
+
+test('stats merge across devices is idempotent and retains independent totals',()=>{const a={devices:{phone:{days:{'2026-11-01':120},books:{b:120}}}},b={devices:{tablet:{days:{'2026-11-01':60},books:{c:60}}}};const merged=core.mergeStats(a,b);assert.equal(core.aggregateStats(merged).total,180);assert.equal(core.aggregateStats(core.mergeStats(merged,b)).total,180);});
+test('catalogs merge by safe URL',()=>{assert.equal(core.mergeCatalogs([{url:'https://a.test/feed',name:'A'}],[{url:'https://b.test/feed',name:'B'}]).length,2);assert.equal(core.mergeCatalogs([{url:'javascript:alert(1)'}],[]).length,0);});
+
+test('expands OPDS and OpenSearch templates with encoded search terms',()=>{assert.equal(core.expandSearchTemplate('https://catalog.example/search{?query,lang}','One Box'),'https://catalog.example/search?query=One%20Box&lang=');assert.equal(core.expandSearchTemplate('https://catalog.example/{searchTerms}','A/B'),'https://catalog.example/A%2FB');});

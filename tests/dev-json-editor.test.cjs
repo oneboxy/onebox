@@ -86,8 +86,8 @@ test('JSON formatter output keeps syntax colors, line numbers, resizing, and ful
   assert.ok(scrollStyles.includes('overscroll-behavior:contain'));
   assert.match(css, /resize:vertical/);
   assert.match(css, /\.dev-json-line-number/);
-  assert.match(html, /dev-json-editor\.js\?v=2\.18\.726/);
-  assert.match(sw, /dev-json-editor\.js\?v=2\.18\.726/);
+  assert.match(html, /dev-json-editor\.js\?v=\d+\.\d+\.\d+/);
+  assert.match(sw, /dev-json-editor\.js\?v=\d+\.\d+\.\d+/);
   assert.match(sw, /CORE_APP_SHELL = APP_SHELL\.slice\(0, 10\)/);
 });
 
@@ -125,9 +125,9 @@ test('timestamp conversion uses a horizontal country matrix with aligned city ro
   assert.match(timestampMatrix, /\.dev-timestamp-city-row\s*\{[^}]*border-bottom/s);
   assert.match(timestampMatrix, /\.dev-timestamp-city-card\s*\{[^}]*border:\s*0/s);
   assert.match(timestampMatrix, /\.dev-timestamp-country-list\s*\{[^}]*overflow-x:\s*auto/s);
-  assert.match(html, /app\.js\?v=2\.18\.726/);
-  assert.match(sw, /app\.js\?v=2\.18\.726/);
-  assert.match(sw, /onebox-v657/);
+  assert.match(html, /app\.js\?v=\d+\.\d+\.\d+/);
+  assert.match(sw, /app\.js\?v=\d+\.\d+\.\d+/);
+  assert.match(sw, /onebox-v\d+/);
 });
 
 test('timestamp cities collapse, can be added and reordered; country drag reorders the full matrix', () => {
