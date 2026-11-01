@@ -3,121 +3,121 @@
 /* Reader enhancements: explicit dark palette for system and selected dark themes. */
 html[data-theme="dark"] .reader-extra-action,
 html[data-theme-mode="dark-gray"] .reader-extra-action,
-html:not([data-theme="light"]) .reader-extra-action {
+html[data-theme="dark"] .reader-extra-action {
   border-color: #383838;
   background: #151515;
   color: #f1f1f1;
 }
 html[data-theme="dark"] .reader-extra-action:hover,
 html[data-theme-mode="dark-gray"] .reader-extra-action:hover,
-html:not([data-theme="light"]) .reader-extra-action:hover {
+html[data-theme="dark"] .reader-extra-action:hover {
   border-color: #788aff;
   background: #1b1b1b;
   color: #aebaff;
 }
 html[data-theme="dark"] .reader-extra-overlay,
 html[data-theme-mode="dark-gray"] .reader-extra-overlay,
-html:not([data-theme="light"]) .reader-extra-overlay {
+html[data-theme="dark"] .reader-extra-overlay {
   background: rgba(0, 0, 0, .72);
 }
 html[data-theme="dark"] .reader-extra-dialog,
 html[data-theme-mode="dark-gray"] .reader-extra-dialog,
-html:not([data-theme="light"]) .reader-extra-dialog {
+html[data-theme="dark"] .reader-extra-dialog {
   border-color: #343434;
   background: #0b0b0b;
   color: #f3f3f3;
 }
 html[data-theme="dark"] .reader-extra-dialog > header,
 html[data-theme-mode="dark-gray"] .reader-extra-dialog > header,
-html:not([data-theme="light"]) .reader-extra-dialog > header {
+html[data-theme="dark"] .reader-extra-dialog > header {
   border-color: #343434;
 }
 html[data-theme="dark"] .reader-extra-dialog > header button,
 html[data-theme-mode="dark-gray"] .reader-extra-dialog > header button,
-html:not([data-theme="light"]) .reader-extra-dialog > header button {
+html[data-theme="dark"] .reader-extra-dialog > header button {
   border-color: #3c3c3c;
   background: #141414;
   color: #f4f4f4;
 }
 html[data-theme="dark"] .reader-stats-summary article,
 html[data-theme-mode="dark-gray"] .reader-stats-summary article,
-html:not([data-theme="light"]) .reader-stats-summary article,
+html[data-theme="dark"] .reader-stats-summary article,
 html[data-theme="dark"] .reader-opds-entry,
 html[data-theme-mode="dark-gray"] .reader-opds-entry,
-html:not([data-theme="light"]) .reader-opds-entry {
+html[data-theme="dark"] .reader-opds-entry {
   border-color: #363636;
   background: #151515;
   color: #f1f1f1;
 }
 html[data-theme="dark"] .reader-stats-summary small,
 html[data-theme-mode="dark-gray"] .reader-stats-summary small,
-html:not([data-theme="light"]) .reader-stats-summary small,
+html[data-theme="dark"] .reader-stats-summary small,
 html[data-theme="dark"] .reader-stats-legend,
 html[data-theme-mode="dark-gray"] .reader-stats-legend,
-html:not([data-theme="light"]) .reader-stats-legend,
+html[data-theme="dark"] .reader-stats-legend,
 html[data-theme="dark"] .reader-opds-entry small,
 html[data-theme-mode="dark-gray"] .reader-opds-entry small,
-html:not([data-theme="light"]) .reader-opds-entry small,
+html[data-theme="dark"] .reader-opds-entry small,
 html[data-theme="dark"] .reader-opds-entry p,
 html[data-theme-mode="dark-gray"] .reader-opds-entry p,
-html:not([data-theme="light"]) .reader-opds-entry p,
+html[data-theme="dark"] .reader-opds-entry p,
 html[data-theme="dark"] .reader-opds-empty,
 html[data-theme-mode="dark-gray"] .reader-opds-empty,
-html:not([data-theme="light"]) .reader-opds-empty,
+html[data-theme="dark"] .reader-opds-empty,
 html[data-theme="dark"] .reader-opds-hint,
 html[data-theme-mode="dark-gray"] .reader-opds-hint,
-html:not([data-theme="light"]) .reader-opds-hint {
+html[data-theme="dark"] .reader-opds-hint {
   color: #b0b0b0;
 }
 html[data-theme="dark"] .reader-stats-summary strong,
 html[data-theme-mode="dark-gray"] .reader-stats-summary strong,
-html:not([data-theme="light"]) .reader-stats-summary strong,
+html[data-theme="dark"] .reader-stats-summary strong,
 html[data-theme="dark"] .reader-stats-books,
 html[data-theme-mode="dark-gray"] .reader-stats-books,
-html:not([data-theme="light"]) .reader-stats-books {
+html[data-theme="dark"] .reader-stats-books {
   color: #f4f4f4;
 }
 html[data-theme="dark"] .reader-stats-heatmap i[data-level="0"],
 html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="0"],
-html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="0"],
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="0"],
 html[data-theme="dark"] .reader-stats-legend i[data-level="0"],
 html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="0"] {
   background: #272727;
 }
-html:not([data-theme="light"]) .reader-stats-legend i[data-level="0"] { background: #272727; }
+html[data-theme="dark"] .reader-stats-legend i[data-level="0"] { background: #272727; }
 html[data-theme="dark"] .reader-stats-heatmap i[data-level="1"],
 html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="1"],
-html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="1"],
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="1"],
 html[data-theme="dark"] .reader-stats-legend i[data-level="1"],
 html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="1"],
-html:not([data-theme="light"]) .reader-stats-legend i[data-level="1"] { background: #34416e; }
+html[data-theme="dark"] .reader-stats-legend i[data-level="1"] { background: #34416e; }
 html[data-theme="dark"] .reader-stats-heatmap i[data-level="2"],
 html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="2"],
-html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="2"],
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="2"],
 html[data-theme="dark"] .reader-stats-legend i[data-level="2"],
 html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="2"],
-html:not([data-theme="light"]) .reader-stats-legend i[data-level="2"] { background: #465a9b; }
+html[data-theme="dark"] .reader-stats-legend i[data-level="2"] { background: #465a9b; }
 html[data-theme="dark"] .reader-stats-heatmap i[data-level="3"],
 html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="3"],
-html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="3"],
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="3"],
 html[data-theme="dark"] .reader-stats-legend i[data-level="3"],
 html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="3"],
-html:not([data-theme="light"]) .reader-stats-legend i[data-level="3"] { background: #526bd0; }
+html[data-theme="dark"] .reader-stats-legend i[data-level="3"] { background: #526bd0; }
 html[data-theme="dark"] .reader-stats-heatmap i[data-level="4"],
 html[data-theme-mode="dark-gray"] .reader-stats-heatmap i[data-level="4"],
-html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="4"],
+html[data-theme="dark"] .reader-stats-heatmap i[data-level="4"],
 html[data-theme="dark"] .reader-stats-legend i[data-level="4"],
 html[data-theme-mode="dark-gray"] .reader-stats-legend i[data-level="4"],
-html:not([data-theme="light"]) .reader-stats-legend i[data-level="4"] { background: #7185ff; }
+html[data-theme="dark"] .reader-stats-legend i[data-level="4"] { background: #7185ff; }
 html[data-theme="dark"] .reader-opds-source-row input,
 html[data-theme-mode="dark-gray"] .reader-opds-source-row input,
-html:not([data-theme="light"]) .reader-opds-source-row input,
+html[data-theme="dark"] .reader-opds-source-row input,
 html[data-theme="dark"] .reader-opds-source-row select,
 html[data-theme-mode="dark-gray"] .reader-opds-source-row select,
-html:not([data-theme="light"]) .reader-opds-source-row select,
+html[data-theme="dark"] .reader-opds-source-row select,
 html[data-theme="dark"] .reader-opds-search input,
 html[data-theme-mode="dark-gray"] .reader-opds-search input,
-html:not([data-theme="light"]) .reader-opds-search input {
+html[data-theme="dark"] .reader-opds-search input {
   border-color: #3a3a3a;
   background: #101010;
   color: #f2f2f2;
@@ -125,22 +125,22 @@ html:not([data-theme="light"]) .reader-opds-search input {
 }
 html[data-theme="dark"] .reader-opds-source-row input::placeholder,
 html[data-theme-mode="dark-gray"] .reader-opds-source-row input::placeholder,
-html:not([data-theme="light"]) .reader-opds-source-row input::placeholder,
+html[data-theme="dark"] .reader-opds-source-row input::placeholder,
 html[data-theme="dark"] .reader-opds-search input::placeholder,
 html[data-theme-mode="dark-gray"] .reader-opds-search input::placeholder,
-html:not([data-theme="light"]) .reader-opds-search input::placeholder { color: #929292; }
+html[data-theme="dark"] .reader-opds-search input::placeholder { color: #929292; }
 html[data-theme="dark"] .reader-opds-source-row button,
 html[data-theme-mode="dark-gray"] .reader-opds-source-row button,
-html:not([data-theme="light"]) .reader-opds-source-row button,
+html[data-theme="dark"] .reader-opds-source-row button,
 html[data-theme="dark"] .reader-opds-search button,
 html[data-theme-mode="dark-gray"] .reader-opds-search button,
-html:not([data-theme="light"]) .reader-opds-search button,
+html[data-theme="dark"] .reader-opds-search button,
 html[data-theme="dark"] .reader-opds-entry button,
 html[data-theme-mode="dark-gray"] .reader-opds-entry button,
-html:not([data-theme="light"]) .reader-opds-entry button,
+html[data-theme="dark"] .reader-opds-entry button,
 html[data-theme="dark"] .reader-opds-pagination button,
 html[data-theme-mode="dark-gray"] .reader-opds-pagination button,
-html:not([data-theme="light"]) .reader-opds-pagination button {
+html[data-theme="dark"] .reader-opds-pagination button {
   min-height: 36px;
   border-color: #414141;
   background: #1a1a1a;
@@ -148,32 +148,213 @@ html:not([data-theme="light"]) .reader-opds-pagination button {
 }
 html[data-theme="dark"] .reader-opds-source-row button:hover,
 html[data-theme-mode="dark-gray"] .reader-opds-source-row button:hover,
-html:not([data-theme="light"]) .reader-opds-source-row button:hover,
+html[data-theme="dark"] .reader-opds-source-row button:hover,
 html[data-theme="dark"] .reader-opds-search button:hover,
 html[data-theme-mode="dark-gray"] .reader-opds-search button:hover,
-html:not([data-theme="light"]) .reader-opds-search button:hover,
+html[data-theme="dark"] .reader-opds-search button:hover,
 html[data-theme="dark"] .reader-opds-entry button:hover,
 html[data-theme-mode="dark-gray"] .reader-opds-entry button:hover,
-html:not([data-theme="light"]) .reader-opds-entry button:hover,
+html[data-theme="dark"] .reader-opds-entry button:hover,
 html[data-theme="dark"] .reader-opds-pagination button:hover,
 html[data-theme-mode="dark-gray"] .reader-opds-pagination button:hover,
-html:not([data-theme="light"]) .reader-opds-pagination button:hover {
+html[data-theme="dark"] .reader-opds-pagination button:hover {
   border-color: #788aff;
   background: #252a3d;
   color: #c2cbff;
 }
 html[data-theme="dark"] .reader-opds-source-row button:disabled,
 html[data-theme-mode="dark-gray"] .reader-opds-source-row button:disabled,
-html:not([data-theme="light"]) .reader-opds-source-row button:disabled,
+html[data-theme="dark"] .reader-opds-source-row button:disabled,
 html[data-theme="dark"] .reader-opds-entry button:disabled,
 html[data-theme-mode="dark-gray"] .reader-opds-entry button:disabled,
-html:not([data-theme="light"]) .reader-opds-entry button:disabled {
+html[data-theme="dark"] .reader-opds-entry button:disabled {
   opacity: .55;
   cursor: not-allowed;
 }
 html[data-theme="dark"] .reader-extra-dialog :focus-visible,
 html[data-theme-mode="dark-gray"] .reader-extra-dialog :focus-visible,
+html[data-theme="dark"] .reader-extra-dialog :focus-visible {
+  outline: 2px solid #788aff;
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+/* Reader enhancements: explicit dark palette for system and selected dark themes. */
+html:not([data-theme="light"]) .reader-extra-action,
+html:not([data-theme="light"]) .reader-extra-action,
+html:not([data-theme="light"]) .reader-extra-action {
+  border-color: #383838;
+  background: #151515;
+  color: #f1f1f1;
+}
+html:not([data-theme="light"]) .reader-extra-action:hover,
+html:not([data-theme="light"]) .reader-extra-action:hover,
+html:not([data-theme="light"]) .reader-extra-action:hover {
+  border-color: #788aff;
+  background: #1b1b1b;
+  color: #aebaff;
+}
+html:not([data-theme="light"]) .reader-extra-overlay,
+html:not([data-theme="light"]) .reader-extra-overlay,
+html:not([data-theme="light"]) .reader-extra-overlay {
+  background: rgba(0, 0, 0, .72);
+}
+html:not([data-theme="light"]) .reader-extra-dialog,
+html:not([data-theme="light"]) .reader-extra-dialog,
+html:not([data-theme="light"]) .reader-extra-dialog {
+  border-color: #343434;
+  background: #0b0b0b;
+  color: #f3f3f3;
+}
+html:not([data-theme="light"]) .reader-extra-dialog > header,
+html:not([data-theme="light"]) .reader-extra-dialog > header,
+html:not([data-theme="light"]) .reader-extra-dialog > header {
+  border-color: #343434;
+}
+html:not([data-theme="light"]) .reader-extra-dialog > header button,
+html:not([data-theme="light"]) .reader-extra-dialog > header button,
+html:not([data-theme="light"]) .reader-extra-dialog > header button {
+  border-color: #3c3c3c;
+  background: #141414;
+  color: #f4f4f4;
+}
+html:not([data-theme="light"]) .reader-stats-summary article,
+html:not([data-theme="light"]) .reader-stats-summary article,
+html:not([data-theme="light"]) .reader-stats-summary article,
+html:not([data-theme="light"]) .reader-opds-entry,
+html:not([data-theme="light"]) .reader-opds-entry,
+html:not([data-theme="light"]) .reader-opds-entry {
+  border-color: #363636;
+  background: #151515;
+  color: #f1f1f1;
+}
+html:not([data-theme="light"]) .reader-stats-summary small,
+html:not([data-theme="light"]) .reader-stats-summary small,
+html:not([data-theme="light"]) .reader-stats-summary small,
+html:not([data-theme="light"]) .reader-stats-legend,
+html:not([data-theme="light"]) .reader-stats-legend,
+html:not([data-theme="light"]) .reader-stats-legend,
+html:not([data-theme="light"]) .reader-opds-entry small,
+html:not([data-theme="light"]) .reader-opds-entry small,
+html:not([data-theme="light"]) .reader-opds-entry small,
+html:not([data-theme="light"]) .reader-opds-entry p,
+html:not([data-theme="light"]) .reader-opds-entry p,
+html:not([data-theme="light"]) .reader-opds-entry p,
+html:not([data-theme="light"]) .reader-opds-empty,
+html:not([data-theme="light"]) .reader-opds-empty,
+html:not([data-theme="light"]) .reader-opds-empty,
+html:not([data-theme="light"]) .reader-opds-hint,
+html:not([data-theme="light"]) .reader-opds-hint,
+html:not([data-theme="light"]) .reader-opds-hint {
+  color: #b0b0b0;
+}
+html:not([data-theme="light"]) .reader-stats-summary strong,
+html:not([data-theme="light"]) .reader-stats-summary strong,
+html:not([data-theme="light"]) .reader-stats-summary strong,
+html:not([data-theme="light"]) .reader-stats-books,
+html:not([data-theme="light"]) .reader-stats-books,
+html:not([data-theme="light"]) .reader-stats-books {
+  color: #f4f4f4;
+}
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="0"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="0"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="0"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="0"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="0"] {
+  background: #272727;
+}
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="0"] { background: #272727; }
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="1"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="1"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="1"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="1"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="1"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="1"] { background: #34416e; }
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="2"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="2"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="2"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="2"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="2"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="2"] { background: #465a9b; }
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="3"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="3"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="3"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="3"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="3"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="3"] { background: #526bd0; }
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="4"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="4"],
+html:not([data-theme="light"]) .reader-stats-heatmap i[data-level="4"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="4"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="4"],
+html:not([data-theme="light"]) .reader-stats-legend i[data-level="4"] { background: #7185ff; }
+html:not([data-theme="light"]) .reader-opds-source-row input,
+html:not([data-theme="light"]) .reader-opds-source-row input,
+html:not([data-theme="light"]) .reader-opds-source-row input,
+html:not([data-theme="light"]) .reader-opds-source-row select,
+html:not([data-theme="light"]) .reader-opds-source-row select,
+html:not([data-theme="light"]) .reader-opds-source-row select,
+html:not([data-theme="light"]) .reader-opds-search input,
+html:not([data-theme="light"]) .reader-opds-search input,
+html:not([data-theme="light"]) .reader-opds-search input {
+  border-color: #3a3a3a;
+  background: #101010;
+  color: #f2f2f2;
+  color-scheme: dark;
+}
+html:not([data-theme="light"]) .reader-opds-source-row input::placeholder,
+html:not([data-theme="light"]) .reader-opds-source-row input::placeholder,
+html:not([data-theme="light"]) .reader-opds-source-row input::placeholder,
+html:not([data-theme="light"]) .reader-opds-search input::placeholder,
+html:not([data-theme="light"]) .reader-opds-search input::placeholder,
+html:not([data-theme="light"]) .reader-opds-search input::placeholder { color: #929292; }
+html:not([data-theme="light"]) .reader-opds-source-row button,
+html:not([data-theme="light"]) .reader-opds-source-row button,
+html:not([data-theme="light"]) .reader-opds-source-row button,
+html:not([data-theme="light"]) .reader-opds-search button,
+html:not([data-theme="light"]) .reader-opds-search button,
+html:not([data-theme="light"]) .reader-opds-search button,
+html:not([data-theme="light"]) .reader-opds-entry button,
+html:not([data-theme="light"]) .reader-opds-entry button,
+html:not([data-theme="light"]) .reader-opds-entry button,
+html:not([data-theme="light"]) .reader-opds-pagination button,
+html:not([data-theme="light"]) .reader-opds-pagination button,
+html:not([data-theme="light"]) .reader-opds-pagination button {
+  min-height: 36px;
+  border-color: #414141;
+  background: #1a1a1a;
+  color: #f0f0f0;
+}
+html:not([data-theme="light"]) .reader-opds-source-row button:hover,
+html:not([data-theme="light"]) .reader-opds-source-row button:hover,
+html:not([data-theme="light"]) .reader-opds-source-row button:hover,
+html:not([data-theme="light"]) .reader-opds-search button:hover,
+html:not([data-theme="light"]) .reader-opds-search button:hover,
+html:not([data-theme="light"]) .reader-opds-search button:hover,
+html:not([data-theme="light"]) .reader-opds-entry button:hover,
+html:not([data-theme="light"]) .reader-opds-entry button:hover,
+html:not([data-theme="light"]) .reader-opds-entry button:hover,
+html:not([data-theme="light"]) .reader-opds-pagination button:hover,
+html:not([data-theme="light"]) .reader-opds-pagination button:hover,
+html:not([data-theme="light"]) .reader-opds-pagination button:hover {
+  border-color: #788aff;
+  background: #252a3d;
+  color: #c2cbff;
+}
+html:not([data-theme="light"]) .reader-opds-source-row button:disabled,
+html:not([data-theme="light"]) .reader-opds-source-row button:disabled,
+html:not([data-theme="light"]) .reader-opds-source-row button:disabled,
+html:not([data-theme="light"]) .reader-opds-entry button:disabled,
+html:not([data-theme="light"]) .reader-opds-entry button:disabled,
+html:not([data-theme="light"]) .reader-opds-entry button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+html:not([data-theme="light"]) .reader-extra-dialog :focus-visible,
+html:not([data-theme="light"]) .reader-extra-dialog :focus-visible,
 html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   outline: 2px solid #788aff;
   outline-offset: 2px;
+}
+
 }
