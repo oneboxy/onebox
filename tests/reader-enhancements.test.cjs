@@ -25,3 +25,5 @@ test('mobile bookshelf header wraps description and aligns actions independently
 
 test('shelf moves supported formats to add card and removes sync status copy',()=>{const ui=fs.readFileSync(path.join(root,'dist/reader-enhancements.js'),'utf8');assert.match(ui,/reader-add-supported-formats/);assert.match(ui,/readerCloudSyncStatus.*remove/);assert.match(ui,/data-reader-auto-sync/);assert.match(ui,/data-reader-opds[^]*书源/);assert.match(ui,/modalShell\(tx\('书源','Sources'\),body\)/);});
 test('mobile shelf action buttons use compact icon and status styling',()=>{const css=fs.readFileSync(path.join(root,'dist/reader-enhancements.css'),'utf8');assert.match(css,/\.reader-library-actions \.reader-extra-action[^]*font-size:\s*11px/);assert.match(css,/\.reader-sync-state-dot/);assert.match(css,/reader-add-card \.reader-add-supported-formats/);});
+
+test('add document button shows a concise supported format hint',()=>{const ui=fs.readFileSync(path.join(root,'dist/reader-enhancements.js'),'utf8');assert.match(ui,/支持 MD、TXT、PDF、EPUB、FB2、MOBI、AZW3/);assert.match(ui,/reader-add-supported-formats/);});
