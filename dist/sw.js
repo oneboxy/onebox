@@ -1,4 +1,4 @@
-const CACHE = 'onebox-v700';
+const CACHE = 'onebox-v701';
 const APP_SHELL = [
   './',
   'index.html',
@@ -61,6 +61,7 @@ const APP_SHELL = [
   'vendor/xlsx.full.min.js?v=2.18.761',
   'file-compare-polish.css?v=2.18.761',
   'ticket-wallet-tiles.css?v=2.18.767',
+  'calendar-grid-fixed.css?v=2.18.771',
   'ticket-wallet-grid.js?v=2.18.766',
 ];
 const CORE_APP_SHELL = APP_SHELL.slice(0, 10);
