@@ -1,0 +1,30 @@
+/* Keep the seven calendar columns equal regardless of holiday label length. */
+#workspace[data-tool="calendar"] .calendar-grid {
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+}
+#workspace[data-tool="calendar"] .calendar-grid > .dow,
+#workspace[data-tool="calendar"] .calendar-grid > .day {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+#workspace[data-tool="calendar"] .calendar-grid > .dow {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#workspace[data-tool="calendar"] .calendar-grid > .day {
+  width: 100%;
+}
+#workspace[data-tool="calendar"] .day-meta {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
