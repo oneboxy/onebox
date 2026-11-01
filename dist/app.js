@@ -14919,6 +14919,19 @@ workspace.addEventListener('contextmenu', (event) => {
   readerShowSelectionMenu(range);
   scheduleReaderNativeSelectionMenuSync();
 });
+workspace.addEventListener('keydown', (event) => {
+  const current = event.target.closest('.dev-converter-mode [role="tab"]');
+  if (!current) return;
+  const tabs = [...current.closest('[role="tablist"]').querySelectorAll('[role="tab"]')];
+  if (!tabs.length) return;
+  const index = tabs.indexOf(current);
+  const nextIndex = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+  if (nextIndex < 0) return;
+  event.preventDefault();
+  const key = tabs[nextIndex].dataset.conversionCategory;
+  tabs[nextIndex].click();
+  requestAnimationFrame(() => workspace.querySelector('[data-conversion-category="' + key + '"]')?.focus({ preventScroll: true }));
+});
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
   const feedReactionButton = event.target.closest('[data-feed-reaction]');
@@ -15543,7 +15556,7 @@ workspace.addEventListener('click', async (event) => {
     const rail = conversionTab.closest('.dev-converter-mode');
     const previousScrollLeft = rail?.scrollLeft || 0;
     const category = conversionTab.dataset.conversionCategory;
-    if (!Object.hasOwn(units, category)) return;
+    if (!Object.prototype.hasOwnProperty.call(units, category)) return;
     conversion.category = category; conversion.from = 0; conversion.to = 1;
     render();
     requestAnimationFrame(() => {
