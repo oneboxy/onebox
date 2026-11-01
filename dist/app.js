@@ -8696,7 +8696,7 @@ function weather() {
     return '<div class="hour-card ' + (isCurrent ? 'current' : '') + '" ' + (isCurrent ? 'data-current-hour' : '') + '><small>' + label + '</small><strong>' + item[0] + '</strong><span>' + temperatureLabel + '</span><small>' + (Number.isFinite(Number(rainChance)) ? Number(rainChance) : 0) + '%</small></div>';
   }).join('');
   const dailyTimes = (active.daily?.time || []).slice(0, 19);
-  const currentDay = String(active.current?.time || '').slice(0, 10) || dateKey(today);
+  const currentDay = (() => { try { const parts = new Intl.DateTimeFormat('en-US', { timeZone: active.timezone || undefined, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()); const values = Object.fromEntries(parts.map((part) => [part.type, part.value])); return values.year + '-' + values.month + '-' + values.day; } catch { return dateKey(new Date()); } })();
   const days = dailyTimes.map((day, index) => {
     const item = weatherCode(active.daily.weather_code[index]);
     const isCurrent = day === currentDay;
