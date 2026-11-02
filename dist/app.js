@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.726';
+const APP_VERSION = '2.18.789';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -106,8 +106,8 @@ const HOME_FEED_PENDING_LIMIT = 30;
 // Keep the feed deadline long enough for the reader proxy to return fresh
 // content. The former 2.6/3 second cut-off made the active source look stale
 // even when its fallback was healthy, especially on mobile Safari.
-const HOME_FEED_REQUEST_TIMEOUT_MS = 4500;
-const HOME_FEED_SOURCE_DEADLINE_MS = 5500;
+const HOME_FEED_REQUEST_TIMEOUT_MS = 12000;
+const HOME_FEED_SOURCE_DEADLINE_MS = 13000;
 const HOME_FEED_CONCURRENCY = 6;
 const HOME_FEED_RENDER_LIMIT = 80;
 const RSS_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -2012,13 +2012,12 @@ function normalizeFeedItem(item, source, overrides = {}) {
   const publishedAt = item.pubDate || item.published || item.isoDate || item.date || '';
   return { id: source.id + ':' + link, source: source.id, title, link, description: feedText(item.description || item.content || '').slice(0, 180), thumbnail, publishedAt, publishedMs: parseFeedTimestamp(publishedAt), ...overrides };
 }
-function jinaReaderUrl(url, noCache = false) {
+function jinaReaderUrl(url) {
   const value = String(url || '').trim();
   if (!value) return '';
-  const separator = value.includes('?') ? '&' : '?';
-  const target = value.replace(/^https?:\/\//i, '');
-  // Bypass Reader's own cache for sources that must reflect the live page.
-  return 'https://r.jina.ai/http://' + target + (noCache ? '' : separator + '_onebox=' + Date.now());
+  // Keep Reader URLs stable so cacheable sources can reuse the proxy cache.
+  // Sources marked noCache bypass it through the X-No-Cache header instead.
+  return 'https://r.jina.ai/http://' + value.replace(/^https?:\/\//i, '');
 }
 function jinaContent(value) {
   const text = String(value || '').trim();
@@ -2370,10 +2369,19 @@ async function fetchFeedSource(source) {
   let successful;
   let deadlineTimer;
   try {
-    // Source fallbacks race each other. A slow or unavailable primary endpoint
-    // must not make the whole refresh wait before its fallback can respond.
-    const fallbackRequest = Promise.any(fetchers.map(fetchOne));
-    const sourceDeadlineMs = Math.max(HOME_FEED_SOURCE_DEADLINE_MS, ...fetchers.map((fetcher) => Number(fetcher.deadlineMs) || 0));
+    // Try one endpoint at a time. Racing every fallback for every source made
+    // each page load create a burst against Jina Reader's anonymous rate cap.
+    const fallbackRequest = (async () => {
+      let lastError = null;
+      for (const fetcher of fetchers) {
+        try { return await fetchOne(fetcher); }
+        catch (error) { lastError = error; }
+      }
+      throw lastError || Error('Feed unavailable');
+    })();
+    const configuredDeadline = Math.max(0, ...fetchers.map((fetcher) => Number(fetcher.deadlineMs) || 0));
+    const sequentialBudget = fetchers.reduce((total, fetcher) => total + (Number(fetcher.timeoutMs) || HOME_FEED_REQUEST_TIMEOUT_MS), 0);
+    const sourceDeadlineMs = configuredDeadline || Math.max(HOME_FEED_SOURCE_DEADLINE_MS, Math.min(sequentialBudget, 20000));
     const sourceDeadline = new Promise((_, reject) => {
       deadlineTimer = setTimeout(() => reject(Error('Feed timeout')), sourceDeadlineMs);
     });
