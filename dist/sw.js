@@ -1,10 +1,10 @@
-const CACHE = 'onebox-v715';
+const CACHE = 'onebox-v716';
 const APP_SHELL = [
   './',
   'index.html',
   'ticket-wallet-layout.js?v=2.18.768',
   'dev-json-editor.js?v=2.18.761',
-  'style.css?v=2.18.792',
+  'style.css?v=2.18.793',
   'app.js?v=2.18.790',
   'reader-enhancements-core.js?v=2.18.783',
   'reader-enhancements.js?v=2.18.785',
