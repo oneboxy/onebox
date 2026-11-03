@@ -20769,3 +20769,38 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
     box-shadow: none;
   }
 }
+
+
+/* Match the full-width timestamp mode bar above the unit converter controls. */
+#workspace[data-tool="dev"] .converter-panel {
+  width: 100%;
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar {
+  min-height: 44px;
+  margin: 0;
+  padding: 0 12px;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode {
+  width: 100%;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-layout {
+  width: min(100%, 980px);
+  margin: 18px auto 0;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .converter-panel { margin-bottom: 16px; }
+  #workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar {
+    min-height: 42px;
+    padding-inline: 8px;
+  }
+  #workspace[data-tool="dev"] .converter-panel .conversion-layout {
+    width: 100%;
+    margin-top: 14px;
+  }
+}
