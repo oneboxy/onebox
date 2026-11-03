@@ -20804,3 +20804,27 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
     margin-top: 14px;
   }
 }
+
+
+/* Keep unit category labels snug to the shared divider, matching timestamp tabs. */
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar {
+  min-height: 31px;
+  padding: 0 12px;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode {
+  align-items: flex-end;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode button {
+  min-height: 29px;
+  padding: 0 2px 7px;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar {
+    min-height: 31px;
+    padding-inline: 8px;
+  }
+  #workspace[data-tool="dev"] .converter-panel .dev-converter-mode button {
+    min-height: 29px;
+    padding-bottom: 7px;
+  }
+}
