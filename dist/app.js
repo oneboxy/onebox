@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.789';
+const APP_VERSION = '2.18.790';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10279,11 +10279,11 @@ function conversionMarkup() {
     const active = key === conversion.category;
     return '<button type="button" class="dev-converter-tab' + (active ? ' active' : '') + '" role="tab" aria-selected="' + active + '" tabindex="' + (active ? '0' : '-1') + '" data-conversion-category="' + key + '">' + escapeHtml(label) + '</button>';
   }).join('');
-  return '<div class="converter-card"><div class="dev-timestamp-mode dev-converter-mode" role="tablist" aria-label="' + t('converterType') + '">' + categories + '</div><div class="conversion-layout">' +
+  return '<div class="converter-card"><div class="dev-timestamp-mode-bar dev-converter-mode-bar"><div class="dev-segmented dev-timestamp-mode dev-converter-mode" role="tablist" aria-label="' + t('converterType') + '">' + categories + '</div></div><div class="conversion-layout">' +
     '<div class="conversion-pane conversion-source-pane"><label for="fromUnit">' + t('from') + '</label><select id="fromUnit" aria-label="' + t('from') + '">' + unitOptions(category, conversion.from) + '</select><input id="conversionValue" type="number" step="any" inputmode="decimal" value="' + escapeHtml(conversion.value) + '" aria-label="' + t('from') + '"></div>' +
     '<button class="swap" data-swap aria-label="' + t('swap') + '">⇄</button><div class="conversion-pane conversion-target-pane"><label for="toUnit">' + t('to') + '</label><select id="toUnit" aria-label="' + t('to') + '">' + unitOptions(category, conversion.to) + '</select><div class="conversion-result" aria-live="polite"><small>' + t('result') + '</small><strong>' + formatNumber(convertedValue()) + '</strong><span>' + category.units[conversion.to][1] + '</span><button class="conversion-copy" data-copy-conversion aria-label="' + t('copyResult') + '" title="' + t('copyResult') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button></div></div></div><span class="copy-status sr-only" id="copyStatus" aria-live="polite"></span></div>';
 }
-function convert() { return '<section class="language-tool-card converter-panel"><div class="language-tool-head"><h2>' + t('unitConvert') + '</h2><p>' + t('convertDesc') + '</p></div>' + conversionMarkup() + '</section>'; }
+function convert() { return '<section class="language-tool-card converter-panel">' + conversionMarkup() + '</section>'; }
 
 // Translation ---------------------------------------------------------------
 const languageOptions = [['auto', '自动检测 / Auto'], ['zh', '中文 / Chinese'], ['en', 'English'], ['ja', '日本語 / Japanese'], ['ko', '한국어 / Korean']];
