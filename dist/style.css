@@ -20828,3 +20828,32 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
     padding-bottom: 7px;
   }
 }
+
+
+/* Remove the extra vertical gap between unit labels and the divider. */
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar {
+  height: 28px;
+  min-height: 28px;
+  align-items: flex-end;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode button {
+  box-sizing: border-box;
+  height: 28px;
+  min-height: 28px;
+  padding: 0 2px 4px;
+  line-height: 1.1;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode button.active::after {
+  bottom: 0 !important;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar {
+    height: 28px;
+    min-height: 28px;
+  }
+  #workspace[data-tool="dev"] .converter-panel .dev-converter-mode button {
+    height: 28px;
+    min-height: 28px;
+    padding-bottom: 4px;
+  }
+}
