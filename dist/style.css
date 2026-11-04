@@ -20894,3 +20894,18 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="dev"] .converter-panel .dev-converter-mode button.active::after {
   transform: translateY(5px) !important;
 }
+
+
+/* Draw the selected unit tab with its own bottom border to avoid scroll clipping. */
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode button {
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  margin-bottom: -1px;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode button.active {
+  border-bottom-color: var(--primary, #425cf5) !important;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode button.active::after {
+  display: none !important;
+  transform: none !important;
+}
