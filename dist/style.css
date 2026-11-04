@@ -20888,3 +20888,9 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
     min-height: 30px;
   }
 }
+
+
+/* Shift the conversion indicator onto the shared divider line. */
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode button.active::after {
+  transform: translateY(5px) !important;
+}
