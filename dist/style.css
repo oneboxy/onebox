@@ -20909,3 +20909,20 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
   display: none !important;
   transform: none !important;
 }
+
+
+/* Align the full conversion divider with the selected tab's bottom border. */
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar {
+  position: relative;
+  border-bottom: 0;
+}
+#workspace[data-tool="dev"] .converter-panel .dev-converter-mode-bar::after {
+  position: absolute;
+  right: 0;
+  bottom: 5px;
+  left: 0;
+  height: 1px;
+  background: var(--line);
+  content: "";
+  pointer-events: none;
+}
