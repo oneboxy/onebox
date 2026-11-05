@@ -21305,3 +21305,46 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
   #workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result { grid-template-columns: auto minmax(0, 1fr) auto 18px; gap: 3px; padding-inline: 5px; }
   #workspace[data-tool="dev"] .converter-panel .conversion-result strong { font-size: 13px; }
 }
+
+
+/* Denser overview: three cards on wide screens, with tablet and phone breakpoints. */
+#workspace[data-tool="dev"] .converter-panel .conversion-rows {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 1320px);
+  gap: 10px;
+  margin-top: 12px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row {
+  gap: 8px;
+  padding: 10px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row-controls { gap: 8px; }
+#workspace[data-tool="dev"] .converter-panel .conversion-field {
+  grid-template-rows: auto 36px 36px;
+  gap: 5px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field select,
+#workspace[data-tool="dev"] .converter-panel .conversion-field input,
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  height: 36px;
+  min-height: 36px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  grid-template-columns: auto minmax(0, 1fr) auto 20px;
+  gap: 4px;
+  padding: 3px 5px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong { font-size: 14px; }
+@media (max-width: 1100px) {
+  #workspace[data-tool="dev"] .converter-panel .conversion-rows {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  #workspace[data-tool="dev"] .converter-panel .conversion-rows {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+  #workspace[data-tool="dev"] .converter-panel .conversion-row { padding: 10px; }
+  #workspace[data-tool="dev"] .converter-panel .conversion-row-controls { gap: 8px; }
+}
