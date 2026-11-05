@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.803';
+const APP_VERSION = '2.18.804';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10281,21 +10281,23 @@ function conversionRowMarkup(categoryKey) {
   const labels = String(category.name || '').split(' / ');
   const title = labels[state.language === 'en' ? 1 : 0] || category.name;
   const value = formatNumber(convertedValue(categoryKey, config));
-  return '<div class="conversion-row" data-conversion-row="' + categoryKey + '">' +
-    '<strong class="conversion-row-title">' + escapeHtml(title) + '</strong>' +
+  return '<article class="conversion-row" data-conversion-row="' + categoryKey + '">' +
+    '<div class="conversion-row-heading"><strong class="conversion-row-title">' + escapeHtml(title) + '</strong>' +
+      '<button class="conversion-row-swap" type="button" data-conversion-swap="' + categoryKey + '" aria-label="' + escapeHtml(t('swap')) + '" title="' + escapeHtml(t('swap')) + '">⇄</button></div>' +
     '<div class="conversion-row-controls">' +
-      '<span class="conversion-inline-label">' + t('from') + '</span>' +
-      '<select aria-label="' + escapeHtml(title + ' · ' + t('from')) + '" data-conversion-unit="from" data-conversion-category="' + categoryKey + '">' + unitOptions(category, config.from) + '</select>' +
-      '<input type="number" step="any" inputmode="decimal" value="' + escapeHtml(config.value) + '" aria-label="' + escapeHtml(title + ' · ' + t('from')) + '" data-conversion-value="' + categoryKey + '">' +
-      '<button class="conversion-row-swap" type="button" data-conversion-swap="' + categoryKey + '" aria-label="' + escapeHtml(t('swap')) + '">⇄</button>' +
-      '<span class="conversion-inline-label">' + t('to') + '</span>' +
-      '<select aria-label="' + escapeHtml(title + ' · ' + t('to')) + '" data-conversion-unit="to" data-conversion-category="' + categoryKey + '">' + unitOptions(category, config.to) + '</select>' +
-      '<div class="conversion-result" aria-live="polite" data-conversion-result="' + categoryKey + '">' +
-        '<small>' + t('result') + '</small><strong>' + value + '</strong><span>' + category.units[config.to][1] + '</span>' +
-        '<button class="conversion-copy" type="button" data-copy-conversion="' + categoryKey + '" aria-label="' + t('copyResult') + '" title="' + t('copyResult') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button>' +
+      '<div class="conversion-field conversion-source"><span class="conversion-inline-label">' + t('from') + '</span>' +
+        '<select aria-label="' + escapeHtml(title + ' · ' + t('from')) + '" data-conversion-unit="from" data-conversion-category="' + categoryKey + '">' + unitOptions(category, config.from) + '</select>' +
+        '<input type="number" step="any" inputmode="decimal" value="' + escapeHtml(config.value) + '" aria-label="' + escapeHtml(title + ' · ' + t('from')) + '" data-conversion-value="' + categoryKey + '">' +
+      '</div>' +
+      '<div class="conversion-field conversion-target"><span class="conversion-inline-label">' + t('to') + '</span>' +
+        '<select aria-label="' + escapeHtml(title + ' · ' + t('to')) + '" data-conversion-unit="to" data-conversion-category="' + categoryKey + '">' + unitOptions(category, config.to) + '</select>' +
+        '<div class="conversion-result" aria-live="polite" data-conversion-result="' + categoryKey + '">' +
+          '<small>' + t('result') + '</small><strong>' + value + '</strong><span>' + category.units[config.to][1] + '</span>' +
+          '<button class="conversion-copy" type="button" data-copy-conversion="' + categoryKey + '" aria-label="' + t('copyResult') + '" title="' + t('copyResult') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button>' +
+        '</div>' +
       '</div>' +
     '</div>' +
-  '</div>';
+  '</article>';
 }
 function conversionMarkup() {
   const rows = Object.keys(units).map(conversionRowMarkup).join('');
