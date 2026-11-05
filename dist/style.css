@@ -21445,3 +21445,27 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
     gap: 2px;
   }
 }
+
+
+/* Remove redundant result caption; let the converted value carry the hierarchy. */
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  grid-template-columns: minmax(0, 1fr) auto 18px;
+  justify-items: start;
+  padding: 0 2px;
+  border-color: transparent;
+  background: transparent;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result small { display: none; }
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong {
+  width: 100%;
+  overflow: hidden;
+  font-size: clamp(11px, 1vw, 13px);
+  text-overflow: clip;
+  white-space: nowrap;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result > span {
+  font-size: 9px;
+  white-space: nowrap;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-copy { opacity: .68; }
+#workspace[data-tool="dev"] .converter-panel .conversion-copy:hover { opacity: 1; }
