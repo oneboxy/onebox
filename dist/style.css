@@ -21469,3 +21469,128 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 }
 #workspace[data-tool="dev"] .converter-panel .conversion-copy { opacity: .68; }
 #workspace[data-tool="dev"] .converter-panel .conversion-copy:hover { opacity: 1; }
+
+
+/* Timestamp tool: show both conversion directions on one page. */
+.dev-workbench.dev-timestamp .dev-timestamp-mode-bar { display: none !important; }
+.dev-workbench.dev-timestamp .dev-timestamp-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-card,
+.dev-workbench.dev-timestamp .dev-timestamp-output-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-head { margin-bottom: 12px; }
+.dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card > span {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 138px;
+  gap: 8px;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row.dev-timestamp-date-row { grid-template-columns: minmax(0, 1fr); }
+.dev-workbench.dev-timestamp .dev-timestamp-input-row .dev-plain-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  min-height: 38px;
+  margin: 0;
+  border-radius: 9px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-overview-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block > h4 {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-results {
+  display: block;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-standard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-summary-card {
+  min-width: 0;
+  padding: 8px;
+  border-radius: 9px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-summary-card > span {
+  font-size: 10px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-summary-card > code {
+  overflow-wrap: anywhere;
+  font-size: 10px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-world-result {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-world-result .dev-timestamp-results {
+  display: block;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-world-result .dev-timestamp-city-section > h4 { margin-top: 0; }
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-grid,
+  .dev-workbench.dev-timestamp .dev-timestamp-overview-results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-content { gap: 10px; }
+  .dev-workbench.dev-timestamp .dev-timestamp-card,
+  .dev-workbench.dev-timestamp .dev-timestamp-output-card { padding: 11px; }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card { padding: 10px; }
+  .dev-workbench.dev-timestamp .dev-timestamp-result-block { padding: 10px; }
+}
+@media (max-width: 420px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row { grid-template-columns: minmax(0, 1fr) 104px; }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row.dev-timestamp-date-row { grid-template-columns: minmax(0, 1fr); }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row:not(.dev-timestamp-date-row) { grid-template-columns: minmax(0, 1fr) 104px;
+    gap: 6px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-standard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
