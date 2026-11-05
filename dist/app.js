@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.806';
+const APP_VERSION = '2.18.808';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9009,12 +9009,13 @@ function developerTimestampRows(date, mode) {
   });
   return [...standardRows, ...cityRows];
 }
-function developerTimestampResult() {
+function developerTimestampResult(mode = state.devTools.timestampMode) {
   const dev = state.devTools;
+  const resolvedMode = mode === 'date' ? 'date' : 'timestamp';
   const invalid = (message) => ({ ok: false, message, output: '', rows: [] });
   const english = state.language === 'en';
   let date, resolvedUnit = dev.timestampUnit;
-  if (dev.timestampMode === 'date') {
+  if (resolvedMode === 'date') {
     const rawDate = String(dev.timestampDate || '').trim();
     if (!rawDate) return invalid(english ? 'Choose a date and time.' : '请选择日期和时间。');
     date = new Date(rawDate);
@@ -9029,9 +9030,9 @@ function developerTimestampResult() {
   if (!Number.isFinite(date?.getTime()) || Math.abs(date.getTime()) > 8640000000000000) {
     return invalid(english ? 'This date is outside the supported range.' : '日期超出可转换范围。');
   }
-  const rows = developerTimestampRows(date, dev.timestampMode);
-  const output = rows.map((row) => row.label + ': ' + row.value).join('\n');
-  const message = dev.timestampMode === 'date'
+  const rows = developerTimestampRows(date, resolvedMode);
+  const output = rows.map((row) => row.label + ': ' + row.value).join(String.fromCharCode(10));
+  const message = resolvedMode === 'date'
     ? t('devDateToTimestamp')
     : (english ? 'Interpreted as ' : '已按') + (resolvedUnit === 'ms' ? (english ? 'milliseconds' : '毫秒') : (english ? 'seconds' : '秒')) + (english ? '' : '识别');
   return { ok: true, message, output, rows, resolvedUnit };
@@ -9339,13 +9340,14 @@ function renderDeveloperStats() {
 function renderDeveloperTimestamp() {
   const dev = state.devTools;
   const english = state.language === 'en';
-  const timestampMode = '<div class="dev-segmented dev-timestamp-mode" role="tablist" aria-label="' + (english ? 'Conversion mode' : '转换模式') + '"><button type="button" role="tab" aria-selected="' + (dev.timestampMode === 'timestamp') + '" class="' + (dev.timestampMode === 'timestamp' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="timestamp">' + t('devTimestampToDate') + '</button><button type="button" role="tab" aria-selected="' + (dev.timestampMode === 'date') + '" class="' + (dev.timestampMode === 'date' ? 'active' : '') + '" data-dev-action="timestamp-mode" data-dev-value="date">' + t('devDateToTimestamp') + '</button></div>';
   const inputActions = devActionButton('timestamp-now', t('devNow'), 'aria-pressed="' + String(dev.timestampLive === true) + '"') + devActionButton('timestamp-clear', t('devClear'));
-  const input = dev.timestampMode === 'timestamp'
-    ? '<label class="dev-timestamp-field"><span>' + (english ? 'Timestamp' : '时间戳') + '</span><div class="dev-timestamp-input-row"><input class="dev-plain-input" data-dev-field="timestampValue" inputmode="decimal" autocomplete="off" value="' + escapeHtml(dev.timestampValue) + '" placeholder="' + (english ? 'e.g. 1726905600' : '例如 1726905600') + '"><select class="dev-plain-input" data-dev-field="timestampUnit" aria-label="' + (english ? 'Timestamp unit' : '时间戳单位') + '"><option value="auto" ' + (dev.timestampUnit === 'auto' ? 'selected' : '') + '>' + (english ? 'Auto detect' : '自动识别') + '</option><option value="s" ' + (dev.timestampUnit === 's' ? 'selected' : '') + '>' + t('devSeconds') + '</option><option value="ms" ' + (dev.timestampUnit === 'ms' ? 'selected' : '') + '>' + t('devMilliseconds') + '</option></select>' + inputActions + '</div></label>'
-    : '<label class="dev-timestamp-field"><span>' + (english ? 'Date and time · device local time' : '日期和时间 · 设备本地时区') + '</span><div class="dev-timestamp-input-row dev-timestamp-date-row"><input class="dev-plain-input dev-date-input" data-dev-field="timestampDate" type="datetime-local" step="1" value="' + escapeHtml(dev.timestampDate) + '">' + inputActions + '</div></label>';
+  const timestampInput = '<label class="dev-timestamp-field dev-timestamp-input-card"><span>' + t('devTimestampToDate') + '</span><div class="dev-timestamp-input-row"><input class="dev-plain-input" data-dev-field="timestampValue" inputmode="decimal" autocomplete="off" value="' + escapeHtml(dev.timestampValue) + '" placeholder="' + (english ? 'e.g. 1726905600' : '例如 1726905600') + '"><select class="dev-plain-input" data-dev-field="timestampUnit" aria-label="' + (english ? 'Timestamp unit' : '时间戳单位') + '"><option value="auto" ' + (dev.timestampUnit === 'auto' ? 'selected' : '') + '>' + (english ? 'Auto detect' : '自动识别') + '</option><option value="s" ' + (dev.timestampUnit === 's' ? 'selected' : '') + '>' + t('devSeconds') + '</option><option value="ms" ' + (dev.timestampUnit === 'ms' ? 'selected' : '') + '>' + t('devMilliseconds') + '</option></select></div></label>';
+  const dateInput = '<label class="dev-timestamp-field dev-timestamp-input-card"><span>' + t('devDateToTimestamp') + '</span><div class="dev-timestamp-input-row dev-timestamp-date-row"><input class="dev-plain-input dev-date-input" data-dev-field="timestampDate" type="datetime-local" step="1" value="' + escapeHtml(dev.timestampDate) + '"></div></label>';
   const outputActions = devActionButton('timestamp-save', t('devSaveRecord')) + devActionButton('dev-copy-output', t('devCopy'));
-  return '<div class="dev-workbench dev-timestamp"><div class="dev-timestamp-mode-bar">' + timestampMode + '</div><div class="dev-timestamp-content"><section class="dev-pane dev-timestamp-card">' + devPaneHead(t('devInput')) + input + '</section><section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + developerLiveOutputMarkup() + '</div>' + devHistoryContent('timestamp') + '</section></div></div>';
+  return '<div class="dev-workbench dev-timestamp"><div class="dev-timestamp-content">' +
+    '<section class="dev-pane dev-timestamp-card"><div class="dev-pane-head dev-timestamp-input-head"><h3>' + escapeHtml(t('devInput')) + '</h3><div class="dev-pane-actions">' + inputActions + '</div></div><div class="dev-timestamp-input-grid">' + timestampInput + dateInput + '</div></section>' +
+    '<section class="dev-pane dev-output-pane dev-timestamp-output-card">' + devOutputPaneHead('timestamp', t('devOutput'), outputActions) + '<div class="dev-live-output" data-dev-live-output>' + renderDeveloperTimestampOverview() + '</div>' + devHistoryContent('timestamp') + '</section>' +
+  '</div></div>';
 }
 let lastDeveloperCompareResult = null;
 function developerCompareResult() {
@@ -9551,16 +9553,20 @@ function developerJsonFindPathRange(pathRanges, path) {
 
 function syncDeveloperTimestampOutput() {
   const dev = state.devTools;
-  const hasInput = dev.timestampMode === 'date' ? Boolean(dev.timestampDate) : Boolean(String(dev.timestampValue || '').trim());
-  if (!hasInput) { dev.timestampOutput = ''; dev.timestampStatus = ''; return; }
-  const result = developerTimestampResult(); dev.timestampOutput = result.output; dev.timestampStatus = result.message;
+  const timestamp = developerTimestampResult('timestamp');
+  const date = developerTimestampResult('date');
+  const outputs = [];
+  if (String(dev.timestampValue || '').trim() && timestamp.ok) outputs.push(timestamp.output);
+  if (String(dev.timestampDate || '').trim() && date.ok) outputs.push(date.output);
+  dev.timestampOutput = outputs.join(String.fromCharCode(10, 10));
+  dev.timestampStatus = outputs.length ? (String(dev.timestampDate || '').trim() && String(dev.timestampValue || '').trim() ? t('devDateToTimestamp') : timestamp.ok ? timestamp.message : date.message) : '';
 }
 function developerLiveOutputMarkup(comparison = null) {
   const dev = state.devTools;
   if (dev.active === 'json-format') return String(dev.formatInput || '').trim() && dev.formatStatus.startsWith(t('devInvalid')) ? devStatus(dev.formatStatus, true) : renderDeveloperJsonTree();
   if (dev.active === 'json-compare') return renderDeveloperCompareResult(comparison);
   if (dev.active === 'text-stats') return '<div class="dev-stat-grid">' + renderDeveloperStatsCards(dev.textOutput || developerTextStats(dev.textInput)) + '</div>';
-  return renderDeveloperTimestampResult();
+  return renderDeveloperTimestampOverview();
 }
 function renderDeveloperCompareResult(comparison = null) {
   const result = comparison || developerCompareResult();
@@ -9594,17 +9600,35 @@ function renderDeveloperCompareResult(comparison = null) {
   }).join('');
   return '<div class="dev-compare-summary">' + escapeHtml(result.status) + '</div><div class="dev-compare-diff-list">' + rows + '</div>';
 }
-function renderDeveloperTimestampResult() {
+function renderDeveloperTimestampOverview() {
   const dev = state.devTools;
   const english = state.language === 'en';
-  const hasInput = dev.timestampMode === 'date' ? Boolean(dev.timestampDate) : Boolean(String(dev.timestampValue || '').trim());
-  if (!hasInput) return '<div class="dev-timestamp-empty"><strong>' + (english ? 'Your result will appear here' : '转换结果会显示在这里') + '</strong><span>' + (english ? 'Enter a timestamp or choose a date and time to see local time, UTC, and ISO 8601.' : '输入时间戳或选择日期，即可查看本地时间、UTC 和 ISO 8601 格式。') + '</span></div>';
-  const result = developerTimestampResult();
+  const timestampResult = renderDeveloperTimestampResult('timestamp', { showCities: false });
+  const dateResult = renderDeveloperTimestampResult('date', { showCities: false });
+  const timestampValid = developerTimestampResult('timestamp').ok;
+  const dateValid = developerTimestampResult('date').ok;
+  const cityMode = dev.timestampMode === 'date' && dateValid ? 'date' : timestampValid ? 'timestamp' : 'date';
+  const cityResult = timestampValid || dateValid
+    ? renderDeveloperTimestampResult(cityMode, { showStandard: false, showCities: true })
+    : '';
+  return '<div class="dev-timestamp-overview-results">' +
+    '<section class="dev-timestamp-result-block"><h4>' + (english ? 'Timestamp → date' : t('devTimestampToDate')) + '</h4>' + timestampResult + '</section>' +
+    '<section class="dev-timestamp-result-block"><h4>' + (english ? 'Date → timestamp' : t('devDateToTimestamp')) + '</h4>' + dateResult + '</section>' +
+  '</div>' + (cityResult ? '<div class="dev-timestamp-world-result">' + cityResult + '</div>' : '');
+}
+function renderDeveloperTimestampResult(mode = state.devTools.timestampMode, options = {}) {
+  const dev = state.devTools;
+  const english = state.language === 'en';
+  const showStandard = options.showStandard !== false;
+  const showCities = options.showCities !== false;
+  const hasInput = mode === 'date' ? Boolean(dev.timestampDate) : Boolean(String(dev.timestampValue || '').trim());
+  if (!hasInput) return '<div class="dev-timestamp-empty"><span>' + (english ? 'Waiting for input' : '等待输入') + '</span></div>';
+  const result = developerTimestampResult(mode);
   if (!result.ok) return '<div class="dev-timestamp-error" role="alert">' + escapeHtml(result.message) + '</div>';
   const copyTitle = t('devCopy');
-  const copyButton = (row, className = 'dev-timestamp-row-copy') => '<button type="button" class="' + className + '" data-dev-action="timestamp-copy-value" data-dev-value="' + escapeHtml(row.key) + '" aria-label="' + escapeHtml(copyTitle + ' ' + row.label) + '" title="' + escapeHtml(copyTitle) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"></path></svg></button>';
+  const copyButton = (row, className = 'dev-timestamp-row-copy') => '<button type="button" class="' + className + '" data-dev-action="timestamp-copy-value" data-dev-value="' + escapeHtml(row.key) + '" data-dev-mode="' + mode + '" aria-label="' + escapeHtml(copyTitle + ' ' + row.label) + '" title="' + escapeHtml(copyTitle) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"></path></svg></button>';
   const standardRows = result.rows.filter((row) => !row.city);
-  const cityRows = result.rows.filter((row) => row.city);
+  const cityRows = showCities ? result.rows.filter((row) => row.city) : [];
   const standardMarkup = standardRows.map((row) => '<article class="dev-timestamp-summary-card ' + (row.primary ? 'is-primary' : '') + '" data-dev-timestamp-row="' + escapeHtml(row.key) + '"><span>' + escapeHtml(row.label) + '</span><code>' + escapeHtml(row.value) + '</code>' + (row.copyable ? copyButton(row) : '') + '</article>').join('');
   const countries = new Map();
   cityRows.forEach((row) => {
@@ -9681,7 +9705,7 @@ function renderDeveloperTimestampResult() {
     : '';
   const cityHeading = english ? 'Major city times' : '主要城市时间';
   const timezoneOptions = ['America/New_York', 'America/Los_Angeles', 'America/Chicago', 'America/Denver', 'America/Vancouver', 'America/Toronto', 'Europe/London', 'Europe/Berlin', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Ho_Chi_Minh', 'UTC'].map((zone) => '<option value="' + zone + '"></option>').join('');
-  return '<div class="dev-timestamp-results"><div class="dev-timestamp-standard-grid">' + standardMarkup + '</div><section class="dev-timestamp-city-section"><h4>' + escapeHtml(cityHeading) + '</h4><div class="dev-timestamp-country-list"><div class="dev-timestamp-country-matrix"' + matrixStyle + '>' + countryHeader + cityMatrixRows + '</div>' + addForm + '</div><datalist id="dev-timestamp-timezones">' + timezoneOptions + '</datalist></section></div>';
+  return '<div class="dev-timestamp-results">' + (showStandard ? '<div class="dev-timestamp-standard-grid">' + standardMarkup + '</div>' : '') + (showCities ? '<section class="dev-timestamp-city-section"><h4>' + escapeHtml(cityHeading) + '</h4><div class="dev-timestamp-country-list"><div class="dev-timestamp-country-matrix"' + matrixStyle + '>' + countryHeader + cityMatrixRows + '</div>' + addForm + '</div><datalist id="dev-timestamp-timezones">' + timezoneOptions + '</datalist></section>' : '') + '</div>';
 }
 function refreshDeveloperLiveOutput(comparison = null) {
   if (state.section !== 'tools' || state.tool !== 'dev') return;
@@ -9726,6 +9750,8 @@ function updateDeveloperLiveState(field) {
   } else if (dev.active === 'text-stats' && field === 'textInput') {
     dev.textOutput = developerTextStats(dev.textInput);
   } else if (dev.active === 'timestamp' && ['timestampValue', 'timestampUnit', 'timestampDate'].includes(field)) {
+    if (field === 'timestampValue') dev.timestampMode = 'timestamp';
+    else if (field === 'timestampDate') dev.timestampMode = 'date';
     if (dev.timestampLive && (field === 'timestampValue' || field === 'timestampDate')) {
       stopDeveloperTimestampLive();
       const liveButton = workspace.querySelector('[data-dev-action="timestamp-now"]');
@@ -9980,7 +10006,8 @@ function finishTimestampCityDrag(event = null) {
   document.body.classList.remove('dev-timestamp-city-dragging');
   if (!drag.activated || !drag.moved) return;
   const visibleOrder = timestampCityOrderInMatrix(drag.grid, drag.countryKey).map((card) => card.dataset.devCityId);
-  const allRows = developerTimestampResult().rows.filter((row) => row.city && row.countryKey === drag.countryKey).map((row) => row.key);
+  const cityMode = state.devTools.timestampMode === 'date' && developerTimestampResult('date').ok ? 'date' : 'timestamp';
+  const allRows = developerTimestampResult(cityMode).rows.filter((row) => row.city && row.countryKey === drag.countryKey).map((row) => row.key);
   const visible = new Set(visibleOrder);
   state.devTools.timestampCityOrder[drag.countryKey] = [...visibleOrder, ...allRows.filter((key) => !visible.has(key))];
   saveDevTools();
@@ -10120,8 +10147,8 @@ function stopDeveloperTimestampLive() {
 function setDeveloperTimestampToNow() {
   const dev = state.devTools;
   const now = Date.now();
-  if (dev.timestampMode === 'date') dev.timestampDate = localDateTimeValue(new Date(now));
-  else dev.timestampValue = String(dev.timestampUnit === 's' ? Math.floor(now / 1000) : now);
+  dev.timestampDate = localDateTimeValue(new Date(now));
+  dev.timestampValue = String(dev.timestampUnit === 's' ? Math.floor(now / 1000) : now);
 }
 function updateDeveloperTimestampLiveDisplay() {
   const dev = state.devTools;
@@ -10129,26 +10156,9 @@ function updateDeveloperTimestampLiveDisplay() {
   if (state.section !== 'tools' || state.tool !== 'dev' || dev.active !== 'timestamp') { stopDeveloperTimestampLive(); return; }
   setDeveloperTimestampToNow();
   syncDeveloperTimestampOutput();
-  const result = developerTimestampResult();
-  const host = workspace.querySelector('[data-dev-live-output]');
-  if (!result.ok || !host) return;
-  const nodes = new Map([...host.querySelectorAll('[data-dev-timestamp-row]')].map((node) => [node.dataset.devTimestampRow, node]));
-  result.rows.forEach((row) => {
-    const node = nodes.get(row.key);
-    if (!node) return;
-    if (row.city) {
-      const time = node.querySelector('.dev-timestamp-city-time');
-      const zone = node.querySelectorAll('.dev-timestamp-city-zone code');
-      if (time) time.textContent = row.localTime;
-      if (zone[0]) zone[0].textContent = row.utcOffset;
-      if (zone[1]) zone[1].textContent = row.timeZone;
-    } else {
-      const value = node.querySelector('code');
-      if (value) value.textContent = row.value;
-    }
-  });
-  const input = workspace.querySelector('[data-dev-field="timestampValue"], [data-dev-field="timestampDate"]');
-  if (input && document.activeElement !== input) input.value = dev.timestampMode === 'date' ? dev.timestampDate : dev.timestampValue;
+  refreshDeveloperLiveOutput();
+  const inputs = workspace.querySelectorAll('[data-dev-field="timestampValue"], [data-dev-field="timestampDate"]');
+  inputs.forEach((input) => { if (document.activeElement !== input) input.value = input.dataset.devField === 'timestampDate' ? dev.timestampDate : dev.timestampValue; });
 }
 function runDeveloperAction(action, sourceEvent = null) {
   const dev = state.devTools;
@@ -10209,8 +10219,15 @@ function runDeveloperAction(action, sourceEvent = null) {
     dev.timestampAddCityCountry = '';
     toast(state.language === 'en' ? 'City added.' : '城市已添加。', 'info');
   }
-  else if (action === 'timestamp-save' || action === 'timestamp-convert') { const result = developerTimestampResult(); dev.timestampOutput = result.output; dev.timestampStatus = result.message; if (result.ok) { addDevRecord('timestamp', { mode: dev.timestampMode, unit: dev.timestampUnit, value: dev.timestampValue, date: dev.timestampDate, output: devRecordText(result.output), status: result.message }); toast(state.language === 'en' ? 'Saved to history.' : '已保存到历史记录。'); } else toast(result.message, 'error'); }
-  else if (action === 'timestamp-copy-value') { const key = sourceEvent?.target?.closest?.('[data-dev-value]')?.dataset?.devValue; const row = developerTimestampResult().rows?.find((item) => item.key === key); if (row) navigator.clipboard?.writeText(row.value).then(() => toast(t('copied'))).catch(() => toast(state.language === 'en' ? 'Clipboard access was denied' : '浏览器不允许访问剪贴板，请手动复制', 'error')); }
+  else if (action === 'timestamp-save' || action === 'timestamp-convert') {
+    syncDeveloperTimestampOutput();
+    if (dev.timestampOutput) {
+      const mode = String(dev.timestampDate || '').trim() ? 'date' : 'timestamp';
+      addDevRecord('timestamp', { mode, unit: dev.timestampUnit, value: dev.timestampValue, date: dev.timestampDate, output: devRecordText(dev.timestampOutput), status: dev.timestampStatus });
+      toast(state.language === 'en' ? 'Saved to history.' : '已保存到历史记录。');
+    } else toast(state.language === 'en' ? 'Enter a valid timestamp or date first.' : '请先输入有效的时间戳或日期。', 'error');
+  }
+  else if (action === 'timestamp-copy-value') { const key = sourceEvent?.target?.closest?.('[data-dev-value]')?.dataset?.devValue; const mode = sourceEvent?.target?.closest?.('[data-dev-mode]')?.dataset?.devMode || dev.timestampMode; const row = developerTimestampResult(mode).rows?.find((item) => item.key === key); if (row) navigator.clipboard?.writeText(row.value).then(() => toast(t('copied'))).catch(() => toast(state.language === 'en' ? 'Clipboard access was denied' : '浏览器不允许访问剪贴板，请手动复制', 'error')); }
   const timestampPage = dev.active === 'timestamp' ? workspace.querySelector('.dev-tools-page') : null;
   const timestampPageScrollTop = timestampPage?.scrollTop;
   const timestampWindowScroll = timestampPage ? { x: window.scrollX, y: window.scrollY } : null;
