@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.805';
+const APP_VERSION = '2.18.806';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10292,7 +10292,7 @@ function conversionRowMarkup(categoryKey) {
       '<div class="conversion-field conversion-target"><span class="conversion-inline-label">' + t('to') + '</span>' +
         '<select aria-label="' + escapeHtml(title + ' · ' + t('to')) + '" data-conversion-unit="to" data-conversion-category="' + categoryKey + '">' + unitOptions(category, config.to) + '</select>' +
         '<div class="conversion-result" aria-live="polite" data-conversion-result="' + categoryKey + '">' +
-          '<small>' + t('result') + '</small><strong>' + value + '</strong><span>' + category.units[config.to][1] + '</span>' +
+          '<strong>' + value + '</strong><span>' + category.units[config.to][1] + '</span>' +
           '<button class="conversion-copy" type="button" data-copy-conversion="' + categoryKey + '" aria-label="' + t('copyResult') + '" title="' + t('copyResult') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button>' +
         '</div>' +
       '</div>' +
