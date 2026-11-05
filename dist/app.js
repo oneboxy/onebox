@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.790';
+const APP_VERSION = '2.18.802';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10257,12 +10257,20 @@ const units = {
   torque: { name: '扭矩 / Torque', units: [['牛顿·米', 'N·m', 1], ['千克力·米', 'kgf·m', 9.80665], ['磅力·英尺', 'lbf·ft', 1.355817948]] },
   temperature: { name: '温度 / Temperature', units: [['摄氏度', '°C', 'C'], ['华氏度', '°F', 'F'], ['开尔文', 'K', 'K']] },
 };
-const conversion = { category: 'length', from: 0, to: 1, value: '1' };
-function convertedValue() {
-  const category = units[conversion.category]; const value = Number(conversion.value);
-  if (!Number.isFinite(value)) return NaN;
-  const from = category.units[conversion.from]; const to = category.units[conversion.to];
-  if (conversion.category === 'temperature') {
+const conversion = { category: 'area', from: 0, to: 1, value: '1' };
+const conversionRows = {
+  length: { from: 0, to: 1, value: '1' },
+  weight: { from: 2, to: 0, value: '1' },
+};
+let activeConversionCategory = '';
+function conversionConfig(categoryKey) {
+  return conversionRows[categoryKey] || conversion;
+}
+function convertedValue(categoryKey = conversion.category, config = conversion) {
+  const category = units[categoryKey]; const value = Number(config.value);
+  if (!category || !Number.isFinite(value)) return NaN;
+  const from = category.units[config.from]; const to = category.units[config.to];
+  if (categoryKey === 'temperature') {
     const celsius = from[2] === 'F' ? (value - 32) * 5 / 9 : from[2] === 'K' ? value - 273.15 : value;
     return to[2] === 'F' ? celsius * 9 / 5 + 32 : to[2] === 'K' ? celsius + 273.15 : celsius;
   }
@@ -10271,17 +10279,37 @@ function convertedValue() {
 function unitOptions(category, selected) {
   return category.units.map((unit, index) => '<option value="' + index + '" ' + (index === selected ? 'selected' : '') + '>' + unit[0] + ' (' + unit[1] + ')</option>').join('');
 }
+function conversionRowMarkup(categoryKey) {
+  const category = units[categoryKey];
+  const config = conversionConfig(categoryKey);
+  const labels = String(category.name || '').split(' / ');
+  const title = labels[state.language === 'en' ? 1 : 0] || category.name;
+  const value = formatNumber(convertedValue(categoryKey, config));
+  return '<div class="conversion-row" data-conversion-row="' + categoryKey + '">' +
+    '<strong class="conversion-row-title">' + escapeHtml(title) + '</strong>' +
+    '<div class="conversion-row-controls">' +
+      '<span class="conversion-inline-label">' + t('from') + '</span>' +
+      '<select aria-label="' + escapeHtml(title + ' · ' + t('from')) + '" data-conversion-unit="from" data-conversion-category="' + categoryKey + '">' + unitOptions(category, config.from) + '</select>' +
+      '<input type="number" step="any" inputmode="decimal" value="' + escapeHtml(config.value) + '" aria-label="' + escapeHtml(title + ' · ' + t('from')) + '" data-conversion-value="' + categoryKey + '">' +
+      '<button class="conversion-row-swap" type="button" data-conversion-swap="' + categoryKey + '" aria-label="' + escapeHtml(t('swap')) + '">⇄</button>' +
+      '<span class="conversion-inline-label">' + t('to') + '</span>' +
+      '<select aria-label="' + escapeHtml(title + ' · ' + t('to')) + '" data-conversion-unit="to" data-conversion-category="' + categoryKey + '">' + unitOptions(category, config.to) + '</select>' +
+      '<div class="conversion-result" aria-live="polite" data-conversion-result="' + categoryKey + '">' +
+        '<small>' + t('result') + '</small><strong>' + value + '</strong><span>' + category.units[config.to][1] + '</span>' +
+        '<button class="conversion-copy" type="button" data-copy-conversion="' + categoryKey + '" aria-label="' + t('copyResult') + '" title="' + t('copyResult') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
 function conversionMarkup() {
-  const category = units[conversion.category];
-  const categories = Object.entries(units).map(([key, item]) => {
+  const categories = Object.entries(units).filter(([key]) => !['length', 'weight'].includes(key)).map(([key, item]) => {
     const labels = String(item.name || '').split(' / ');
     const label = labels[state.language === 'en' ? 1 : 0] || item.name;
-    const active = key === conversion.category;
+    const active = key === activeConversionCategory;
     return '<button type="button" class="dev-converter-tab' + (active ? ' active' : '') + '" role="tab" aria-selected="' + active + '" tabindex="' + (active ? '0' : '-1') + '" data-conversion-category="' + key + '">' + escapeHtml(label) + '</button>';
   }).join('');
-  return '<div class="converter-card"><div class="dev-timestamp-mode-bar dev-converter-mode-bar"><div class="dev-segmented dev-timestamp-mode dev-converter-mode" role="tablist" aria-label="' + t('converterType') + '">' + categories + '</div></div><div class="conversion-layout">' +
-    '<div class="conversion-pane conversion-source-pane"><label for="fromUnit">' + t('from') + '</label><select id="fromUnit" aria-label="' + t('from') + '">' + unitOptions(category, conversion.from) + '</select><input id="conversionValue" type="number" step="any" inputmode="decimal" value="' + escapeHtml(conversion.value) + '" aria-label="' + t('from') + '"></div>' +
-    '<button class="swap" data-swap aria-label="' + t('swap') + '">⇄</button><div class="conversion-pane conversion-target-pane"><label for="toUnit">' + t('to') + '</label><select id="toUnit" aria-label="' + t('to') + '">' + unitOptions(category, conversion.to) + '</select><div class="conversion-result" aria-live="polite"><small>' + t('result') + '</small><strong>' + formatNumber(convertedValue()) + '</strong><span>' + category.units[conversion.to][1] + '</span><button class="conversion-copy" data-copy-conversion aria-label="' + t('copyResult') + '" title="' + t('copyResult') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg></button></div></div></div><span class="copy-status sr-only" id="copyStatus" aria-live="polite"></span></div>';
+  const rows = ['length', 'weight', ...(activeConversionCategory ? [activeConversionCategory] : [])].map(conversionRowMarkup).join('');
+  return '<div class="converter-card"><div class="dev-timestamp-mode-bar dev-converter-mode-bar"><div class="dev-segmented dev-timestamp-mode dev-converter-mode" role="tablist" aria-label="' + t('converterType') + '">' + categories + '</div></div><div class="conversion-rows">' + rows + '</div><span class="copy-status sr-only" id="copyStatus" aria-live="polite"></span></div>';
 }
 function convert() { return '<section class="language-tool-card converter-panel">' + conversionMarkup() + '</section>'; }
 
@@ -15565,7 +15593,7 @@ workspace.addEventListener('click', async (event) => {
     const previousScrollLeft = rail?.scrollLeft || 0;
     const category = conversionTab.dataset.conversionCategory;
     if (!Object.prototype.hasOwnProperty.call(units, category)) return;
-    conversion.category = category; conversion.from = 0; conversion.to = 1;
+    activeConversionCategory = category; conversion.category = category; conversion.from = 0; conversion.to = 1;
     render();
     requestAnimationFrame(() => {
       const nextRail = workspace.querySelector('.dev-converter-mode');
@@ -15575,14 +15603,22 @@ workspace.addEventListener('click', async (event) => {
     });
     return;
   }
-  if (event.target.closest('[data-swap]')) { [conversion.from, conversion.to] = [conversion.to, conversion.from]; return render(); }
+  const conversionSwap = event.target.closest('[data-conversion-swap]');
+  if (conversionSwap) {
+    const config = conversionConfig(conversionSwap.dataset.conversionSwap);
+    [config.from, config.to] = [config.to, config.from];
+    return render();
+  }
   if (event.target.closest('[data-swap-language]')) {
     const source = state.translation.source === 'auto' ? 'en' : state.translation.source;
     const target = state.translation.target === 'auto' ? 'en' : state.translation.target;
     state.translation.source = target; state.translation.target = source; return render();
   }
-  if (event.target.closest('[data-copy-conversion]')) {
-    const value = formatNumber(convertedValue()) + ' ' + units[conversion.category].units[conversion.to][1];
+  const conversionCopy = event.target.closest('[data-copy-conversion]');
+  if (conversionCopy) {
+    const categoryKey = conversionCopy.dataset.copyConversion || conversion.category;
+    const config = conversionConfig(categoryKey);
+    const value = formatNumber(convertedValue(categoryKey, config)) + ' ' + units[categoryKey].units[config.to][1];
     try { await navigator.clipboard.writeText(value); const copyStatus = $('#copyStatus'); if (copyStatus) copyStatus.textContent = t('copied'); } catch { toast(state.language === 'en' ? 'Clipboard access was denied' : '浏览器不允许访问剪贴板，请手动复制', 'error'); }
     return;
   }
@@ -15683,7 +15719,14 @@ workspace.addEventListener('input', (event) => {
   }
   if (event.target.matches?.('[data-dev-line-numbered]')) syncDeveloperJsonLineNumbers(event.target);
   if (event.target.dataset.devField) { const field = event.target.dataset.devField; state.devTools[field] = event.target.type === 'checkbox' ? event.target.checked : event.target.value; updateDeveloperLiveState(field); }
-  if (event.target.id === 'conversionValue') { conversion.value = event.target.value; const output = $('.conversion-result strong'); if (output) output.textContent = formatNumber(convertedValue()); }
+  const conversionValue = event.target.closest('[data-conversion-value]');
+  if (conversionValue) {
+    const categoryKey = conversionValue.dataset.conversionValue;
+    const config = conversionConfig(categoryKey);
+    config.value = event.target.value;
+    const output = workspace.querySelector('[data-conversion-result="' + categoryKey + '"] strong');
+    if (output) output.textContent = formatNumber(convertedValue(categoryKey, config));
+  }
   if (event.target.id === 'translationInput') state.translation.input = event.target.value;
   if (event.target.id === 'cityInput') {
     state.weatherSearchQuery = event.target.value;
@@ -15713,8 +15756,12 @@ workspace.addEventListener('change', (event) => {
   if (event.target.id === 'ticketWalletFileInput') { importTicketWalletImage(event.target.files?.[0]); event.target.value = ''; return; }
   if (event.target.id === 'ticketWalletMemoryImageInput') { importTicketWalletImage(event.target.files?.[0]); event.target.value = ''; return; }
   if (event.target.id === 'ticketWalletJsonInput') { importTicketWalletJson(event.target.files?.[0]); event.target.value = ''; return; }
-  if (event.target.id === 'fromUnit') { conversion.from = Number(event.target.value); return render(); }
-  if (event.target.id === 'toUnit') { conversion.to = Number(event.target.value); return render(); }
+  if (event.target.matches?.('[data-conversion-unit]')) {
+    const categoryKey = event.target.dataset.conversionCategory;
+    const config = conversionConfig(categoryKey);
+    config[event.target.dataset.conversionUnit] = Number(event.target.value);
+    return render();
+  }
   if (event.target.id === 'translationSource') { state.translation.source = event.target.value; return render(); }
   if (event.target.id === 'translationTarget') { state.translation.target = event.target.value; return render(); }
 });
