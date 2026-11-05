@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.802';
+const APP_VERSION = '2.18.803';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10257,16 +10257,12 @@ const units = {
   torque: { name: '扭矩 / Torque', units: [['牛顿·米', 'N·m', 1], ['千克力·米', 'kgf·m', 9.80665], ['磅力·英尺', 'lbf·ft', 1.355817948]] },
   temperature: { name: '温度 / Temperature', units: [['摄氏度', '°C', 'C'], ['华氏度', '°F', 'F'], ['开尔文', 'K', 'K']] },
 };
-const conversion = { category: 'area', from: 0, to: 1, value: '1' };
-const conversionRows = {
-  length: { from: 0, to: 1, value: '1' },
-  weight: { from: 2, to: 0, value: '1' },
-};
-let activeConversionCategory = '';
+const conversionRows = Object.fromEntries(Object.keys(units).map((key) => [key, { from: 0, to: 1, value: '1' }]));
+conversionRows.weight = { from: 2, to: 0, value: '1' };
 function conversionConfig(categoryKey) {
-  return conversionRows[categoryKey] || conversion;
+  return conversionRows[categoryKey] || conversionRows.length;
 }
-function convertedValue(categoryKey = conversion.category, config = conversion) {
+function convertedValue(categoryKey, config = conversionConfig(categoryKey)) {
   const category = units[categoryKey]; const value = Number(config.value);
   if (!category || !Number.isFinite(value)) return NaN;
   const from = category.units[config.from]; const to = category.units[config.to];
@@ -10302,14 +10298,8 @@ function conversionRowMarkup(categoryKey) {
   '</div>';
 }
 function conversionMarkup() {
-  const categories = Object.entries(units).filter(([key]) => !['length', 'weight'].includes(key)).map(([key, item]) => {
-    const labels = String(item.name || '').split(' / ');
-    const label = labels[state.language === 'en' ? 1 : 0] || item.name;
-    const active = key === activeConversionCategory;
-    return '<button type="button" class="dev-converter-tab' + (active ? ' active' : '') + '" role="tab" aria-selected="' + active + '" tabindex="' + (active ? '0' : '-1') + '" data-conversion-category="' + key + '">' + escapeHtml(label) + '</button>';
-  }).join('');
-  const rows = ['length', 'weight', ...(activeConversionCategory ? [activeConversionCategory] : [])].map(conversionRowMarkup).join('');
-  return '<div class="converter-card"><div class="dev-timestamp-mode-bar dev-converter-mode-bar"><div class="dev-segmented dev-timestamp-mode dev-converter-mode" role="tablist" aria-label="' + t('converterType') + '">' + categories + '</div></div><div class="conversion-rows">' + rows + '</div><span class="copy-status sr-only" id="copyStatus" aria-live="polite"></span></div>';
+  const rows = Object.keys(units).map(conversionRowMarkup).join('');
+  return '<div class="converter-card"><div class="conversion-rows">' + rows + '</div><span class="copy-status sr-only" id="copyStatus" aria-live="polite"></span></div>';
 }
 function convert() { return '<section class="language-tool-card converter-panel">' + conversionMarkup() + '</section>'; }
 
@@ -15587,22 +15577,6 @@ workspace.addEventListener('click', async (event) => {
       state.weatherLoading = false; state.weatherError = weatherLocationError(error); render();
     }
   }
-  const conversionTab = event.target.closest('[data-conversion-category]');
-  if (conversionTab) {
-    const rail = conversionTab.closest('.dev-converter-mode');
-    const previousScrollLeft = rail?.scrollLeft || 0;
-    const category = conversionTab.dataset.conversionCategory;
-    if (!Object.prototype.hasOwnProperty.call(units, category)) return;
-    activeConversionCategory = category; conversion.category = category; conversion.from = 0; conversion.to = 1;
-    render();
-    requestAnimationFrame(() => {
-      const nextRail = workspace.querySelector('.dev-converter-mode');
-      if (!nextRail) return;
-      nextRail.scrollLeft = previousScrollLeft;
-      nextRail.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    });
-    return;
-  }
   const conversionSwap = event.target.closest('[data-conversion-swap]');
   if (conversionSwap) {
     const config = conversionConfig(conversionSwap.dataset.conversionSwap);
@@ -15616,7 +15590,7 @@ workspace.addEventListener('click', async (event) => {
   }
   const conversionCopy = event.target.closest('[data-copy-conversion]');
   if (conversionCopy) {
-    const categoryKey = conversionCopy.dataset.copyConversion || conversion.category;
+    const categoryKey = conversionCopy.dataset.copyConversion;
     const config = conversionConfig(categoryKey);
     const value = formatNumber(convertedValue(categoryKey, config)) + ' ' + units[categoryKey].units[config.to][1];
     try { await navigator.clipboard.writeText(value); const copyStatus = $('#copyStatus'); if (copyStatus) copyStatus.textContent = t('copied'); } catch { toast(state.language === 'en' ? 'Clipboard access was denied' : '浏览器不允许访问剪贴板，请手动复制', 'error'); }
