@@ -27,3 +27,70 @@
   box-sizing: border-box;
   margin: 0;
 }
+
+/* Align the timestamp direction forms to the full input column and remove nested card frames. */
+.dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+  width: 100% !important;
+  min-width: 0;
+  align-self: stretch !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card {
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 7px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card + .dev-timestamp-input-card {
+  border-top: 1px solid var(--line) !important;
+  padding-top: 12px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) 138px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row.dev-timestamp-date-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block + .dev-timestamp-result-block {
+  margin-top: 12px;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--line) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-overview-results {
+  align-items: start;
+  gap: 4px 12px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-summary-card {
+  min-width: 0;
+  padding: 8px 5px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 6px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card {
+    padding: 6px 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card + .dev-timestamp-input-card {
+    padding-top: 10px !important;
+  }
+}
