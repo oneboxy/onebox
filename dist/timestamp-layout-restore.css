@@ -1,0 +1,20 @@
+/* Timestamp converter: two stacked direction inputs, with input and output side by side on desktop. */
+.dev-workbench.dev-timestamp .dev-timestamp-content {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+}
