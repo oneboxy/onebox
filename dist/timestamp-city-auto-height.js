@@ -27,10 +27,22 @@
     content.style.setProperty('align-content', 'start', 'important');
     matrix.style.setProperty('align-content', 'start', 'important');
     matrix.style.setProperty('grid-auto-rows', 'max-content', 'important');
-    const rows = [...matrix.children].filter((node) =>
-      node.classList.contains('dev-timestamp-country-header-row') ||
+    const headerRows = [...matrix.children].filter((node) =>
+      node.classList.contains('dev-timestamp-country-header-row')
+    );
+    const cityRows = [...matrix.children].filter((node) =>
       node.classList.contains('dev-timestamp-city-row')
     );
+    const populatedCityRows = cityRows.filter((row) => {
+      const hasVisibleCity = [...row.querySelectorAll('.dev-timestamp-city-cell')].some((cell) => {
+        const card = cell.querySelector('.dev-timestamp-city-card[data-dev-city-id]');
+        return card && !cell.classList.contains('is-deleted') && !cell.classList.contains('is-country-cities-collapsed');
+      });
+      if (hasVisibleCity) row.style.removeProperty('display');
+      else row.style.setProperty('display', 'none', 'important');
+      return hasVisibleCity;
+    });
+    const rows = [...headerRows, ...populatedCityRows];
     if (!rows.length) return;
     const matrixStyle = getComputedStyle(matrix);
     const gap = parseFloat(matrixStyle.rowGap) || 0;
@@ -61,7 +73,7 @@
     frame = requestAnimationFrame(measure);
   }
   const mutations = new MutationObserver(schedule);
-  mutations.observe(document.documentElement, { childList: true, subtree: true });
+  mutations.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   window.addEventListener('resize', schedule, { passive: true });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
   else schedule();
