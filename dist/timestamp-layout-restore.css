@@ -18,3 +18,12 @@
     gap: 8px;
   }
 }
+
+/* Main city times are a separate full-width row beneath timestamp input and output. */
+.dev-workbench.dev-timestamp .dev-timestamp-world-result {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  margin: 0;
+}
