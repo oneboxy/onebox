@@ -94,3 +94,38 @@
     padding-top: 10px !important;
   }
 }
+
+/* Let the main city-time section grow only with its header and city rows. */
+.dev-workbench.dev-timestamp .dev-timestamp-content {
+  grid-template-rows: none !important;
+  grid-auto-rows: max-content !important;
+  align-content: start !important;
+  align-items: start !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-world-result,
+.dev-workbench.dev-timestamp .dev-timestamp-world-result .dev-timestamp-results,
+.dev-workbench.dev-timestamp .dev-timestamp-city-section,
+.dev-workbench.dev-timestamp .dev-timestamp-country-list,
+.dev-workbench.dev-timestamp .dev-timestamp-country-matrix {
+  height: max-content !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  align-self: start !important;
+  align-content: start !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-country-matrix {
+  grid-auto-rows: max-content !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-country-header-row {
+  height: 43px !important;
+  min-height: 43px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-city-row {
+  height: max-content !important;
+  min-height: 66px !important;
+  max-height: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-city-cell {
+  height: auto !important;
+  min-height: 66px !important;
+}
