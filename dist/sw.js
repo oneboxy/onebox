@@ -1,4 +1,4 @@
-const CACHE = 'onebox-v736';
+const CACHE = 'onebox-v737';
 const APP_SHELL = [
   './',
   'index.html',
@@ -14,7 +14,7 @@ const APP_SHELL = [
   'vendor/reader-formats/fb2.mjs?v=2.18.780',
   'vendor/reader-formats/fflate.mjs?v=2.18.780',
   'timestamp-layout.js?v=2.18.761',
-  'timestamp-direction-switch.js?v=2.18.812',
+  'timestamp-layout-restore.css?v=2.18.813',
   'pet-cloud-backup.js?v=2.18.761',
   'calendar-data.js?v=2.18.761',
   'reader-sync-config.js?v=2.18.761',
