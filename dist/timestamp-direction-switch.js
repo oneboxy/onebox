@@ -48,19 +48,19 @@
     const style = document.createElement('style');
     style.id = 'timestamp-single-input-style';
     style.textContent = [
-      '#workspace[data-tool="development"] .dev-timestamp-input-grid { grid-template-columns:minmax(0,1fr)!important; }',
-      '#workspace[data-tool="development"] .dev-timestamp-input-card.is-direction-inactive { display:none!important; }',
-      '#workspace[data-tool="development"] .dev-timestamp-direction-switch { display:inline-grid; flex:0 0 36px; width:36px; height:36px; place-items:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--primary); cursor:pointer; }',
-      '#workspace[data-tool="development"] .dev-timestamp-direction-switch svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }',
-      '#workspace[data-tool="development"] .dev-timestamp-direction-switch:hover { background:var(--soft); }',
-      '#workspace[data-tool="development"] .dev-timestamp-result-block.is-direction-inactive { display:none!important; }',
-      '@media(max-width:760px){#workspace[data-tool="development"] .dev-timestamp-input-grid{gap:0!important} #workspace[data-tool="development"] .dev-timestamp-direction-switch{width:34px;height:34px;flex-basis:34px}}'
+      '.dev-workbench.dev-timestamp .dev-timestamp-input-grid { grid-template-columns:minmax(0,1fr)!important; }',
+      '.dev-workbench.dev-timestamp .dev-timestamp-input-card.is-direction-inactive { display:none!important; }',
+      '.dev-workbench.dev-timestamp .dev-timestamp-direction-switch { display:inline-grid; flex:0 0 36px; width:36px; height:36px; place-items:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--primary); cursor:pointer; }',
+      '.dev-workbench.dev-timestamp .dev-timestamp-direction-switch svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }',
+      '.dev-workbench.dev-timestamp .dev-timestamp-direction-switch:hover { background:var(--soft); }',
+      '.dev-workbench.dev-timestamp .dev-timestamp-result-block.is-direction-inactive { display:none!important; }',
+      '@media(max-width:760px){.dev-workbench.dev-timestamp .dev-timestamp-input-grid{gap:0!important} .dev-workbench.dev-timestamp .dev-timestamp-direction-switch{width:34px;height:34px;flex-basis:34px}}'
     ].join('\n');
     document.head.appendChild(style);
   };
   const enhance = () => {
-    const grid = document.querySelector('#workspace[data-tool="development"] .dev-timestamp-input-grid');
-    const head = document.querySelector('#workspace[data-tool="development"] .dev-timestamp-input-head');
+    const grid = document.querySelector('.dev-workbench.dev-timestamp .dev-timestamp-input-grid');
+    const head = document.querySelector('.dev-workbench.dev-timestamp .dev-timestamp-input-head');
     if (!grid || !head) return;
     addStyles();
     const cards = cardsFor(grid);
@@ -89,7 +89,7 @@
       const button = head.querySelector('.dev-timestamp-direction-switch');
       button?.setAttribute('aria-label', direction === 'timestamp' ? '当前时间戳转日期，点击切换为日期转时间戳' : '当前日期转时间戳，点击切换为时间戳转日期');
       button?.setAttribute('title', direction === 'timestamp' ? '时间戳 → 日期' : '日期 → 时间戳');
-      const output = document.querySelector('#workspace[data-tool="development"] .dev-timestamp-output-card');
+      const output = document.querySelector('.dev-workbench.dev-timestamp .dev-timestamp-output-card');
       output?.querySelectorAll('.dev-timestamp-result-block').forEach((block) => {
         const title = block.querySelector(':scope > h4')?.textContent || '';
         const isDate = /日期\s*(?:→|->|至|到)\s*时间戳|date\s*(?:→|->|to)\s*timestamp/i.test(title);
@@ -103,7 +103,7 @@
   document.addEventListener('click', (event) => {
     const button = event.target.closest?.('.dev-timestamp-direction-switch');
     if (button) return;
-    const grid = document.querySelector('#workspace[data-tool="development"] .dev-timestamp-input-grid');
+    const grid = document.querySelector('.dev-workbench.dev-timestamp .dev-timestamp-input-grid');
     if (!grid) return;
     const cards = cardsFor(grid);
     const active = cards.find((card) => !card.classList.contains('is-direction-inactive'));
@@ -128,7 +128,7 @@
     if (!button) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    const grid = document.querySelector('#workspace[data-tool="development"] .dev-timestamp-input-grid');
+    const grid = document.querySelector('.dev-workbench.dev-timestamp .dev-timestamp-input-grid');
     const cards = grid ? cardsFor(grid) : [];
     const from = cards.find((card) => !card.classList.contains('is-direction-inactive'));
     const to = cards.find((card) => card !== from);
