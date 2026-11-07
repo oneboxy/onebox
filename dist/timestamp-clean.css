@@ -149,7 +149,7 @@
   font-weight: 600;
 }
 .dev-workbench.dev-timestamp .dev-timestamp-icon-button,
-.dev-workbench.dev-timestamp .dev-timestamp .dev-action {
+.dev-workbench.dev-timestamp .dev-action {
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--panel);
