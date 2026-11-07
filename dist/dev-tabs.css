@@ -1,0 +1,88 @@
+/* Developer mode navigation: compact segmented tabs on desktop, swipe rail on phones. */
+.dev-tools-page .dev-mode-tabs {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 3px;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+.dev-tools-page .dev-mode-tabs::-webkit-scrollbar {
+  display: none;
+}
+.dev-tools-page .dev-mode-tab {
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  min-width: max-content;
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .16s ease, background-color .16s ease, box-shadow .16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-tools-page .dev-mode-tab:hover {
+  background: var(--panel);
+  color: var(--ink);
+}
+.dev-tools-page .dev-mode-tab:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.dev-tools-page .dev-mode-tab.active,
+.dev-tools-page.dev-is-fullscreen .dev-mode-tab.active {
+  background: var(--panel);
+  color: var(--primary);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+.dev-tools-page .dev-mode-tab.active::after,
+.dev-tools-page.dev-is-fullscreen .dev-mode-tab.active::after {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .dev-tools-page .dev-mode-tabs {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 9px;
+    padding: 4px;
+    gap: 3px;
+    border-radius: 11px;
+    scroll-snap-type: x proximity;
+  }
+  .dev-tools-page .dev-mode-tab {
+    min-height: 44px;
+    padding: 8px 13px;
+    font-size: 13px;
+    scroll-snap-align: center;
+  }
+}
+@media (max-width: 390px) {
+  .dev-tools-page .dev-mode-tab {
+    padding-inline: 11px;
+    font-size: 12px;
+  }
+}
