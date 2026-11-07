@@ -1,0 +1,249 @@
+/* Timestamp page: three clear regions with light separators, and a mobile-first touch layout. */
+.dev-workbench.dev-timestamp .dev-timestamp-content {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-auto-rows: max-content !important;
+  gap: 16px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-output-frame {
+  grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr) !important;
+  align-items: start !important;
+  gap: 24px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-output-frame > .dev-timestamp-card,
+.dev-workbench.dev-timestamp .dev-timestamp-input-output-frame > .dev-timestamp-output-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-head,
+.dev-workbench.dev-timestamp .dev-timestamp-output-card > .dev-pane-head {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  margin: 0 0 10px !important;
+  padding: 0 0 8px !important;
+  border-bottom: 1px solid var(--line);
+}
+.dev-workbench.dev-timestamp .dev-pane-head h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+  width: 100% !important;
+  min-width: 0 !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 7px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card + .dev-timestamp-input-card {
+  padding-top: 11px !important;
+  border-top: 1px solid var(--line) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card > span {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) 112px !important;
+  gap: 8px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row.dev-timestamp-date-row {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row .dev-plain-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  box-shadow: none;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-overview-results {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 4px 18px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block {
+  min-width: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block + .dev-timestamp-result-block {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block > h4 {
+  margin: 0 0 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-standard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-summary-card {
+  min-width: 0;
+  min-height: 56px;
+  padding: 7px 3px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-summary-card > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-summary-card > code {
+  color: var(--ink);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-world-result {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-world-result .dev-timestamp-city-section > h4 {
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-icon-button,
+.dev-workbench.dev-timestamp .dev-timestamp .dev-action {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--muted);
+  box-shadow: none;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-icon-button:hover,
+.dev-workbench.dev-timestamp .dev-action:hover {
+  border-color: var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  box-shadow: none;
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-content {
+    gap: 18px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-output-frame {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-output-frame > .dev-timestamp-card {
+    padding: 0 0 14px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-output-frame > .dev-timestamp-output-card {
+    padding: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-head,
+  .dev-workbench.dev-timestamp .dev-timestamp-output-card > .dev-pane-head {
+    min-height: 38px;
+    margin-bottom: 9px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) 104px !important;
+    gap: 7px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row .dev-plain-input {
+    height: 44px;
+    min-height: 44px;
+    font-size: 16px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row select,
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row .dev-action {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-overview-results {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-result-block + .dev-timestamp-result-block {
+    padding-top: 10px !important;
+    border-top: 1px solid var(--line) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-standard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px 12px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-summary-card {
+    min-height: 62px;
+    padding: 7px 2px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-summary-card > code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    font-size: 10px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-world-result {
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-icon-button,
+  .dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-country-add {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-city-actions .dev-timestamp-icon-button {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+  }
+}
+@media (max-width: 380px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) 92px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-result-block .dev-timestamp-standard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
