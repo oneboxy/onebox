@@ -1,0 +1,104 @@
+/* Simplified unit converter: quieter cards, equal controls, clear output. */
+#workspace[data-tool="dev"] .converter-panel .conversion-rows {
+  gap: 14px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row {
+  gap: 9px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: none;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row-heading {
+  min-height: 25px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row-title {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row-controls {
+  gap: 7px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field {
+  grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 7px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-inline-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field select,
+#workspace[data-tool="dev"] .converter-panel .conversion-field input,
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  height: 38px;
+  min-height: 38px;
+  border-radius: 8px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field select,
+#workspace[data-tool="dev"] .converter-panel .conversion-field input {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: none;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field select {
+  padding-inline: 8px;
+  font-size: 12px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field input {
+  padding: 5px 9px;
+  font-size: 15px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  grid-template-columns: minmax(0, 1fr) auto 18px;
+  gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--line));
+  background: color-mix(in srgb, var(--primary) 5%, var(--panel));
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong {
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-copy {
+  opacity: .62;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-copy:hover {
+  opacity: 1;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row-swap {
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-row-swap:hover {
+  border-color: var(--line);
+  background: var(--panel-2);
+  color: var(--primary);
+}
+@media (max-width: 640px) {
+  #workspace[data-tool="dev"] .converter-panel .conversion-rows { gap: 9px; }
+  #workspace[data-tool="dev"] .converter-panel .conversion-row { padding: 10px; }
+  #workspace[data-tool="dev"] .converter-panel .conversion-field {
+    grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+@media (max-width: 360px) {
+  #workspace[data-tool="dev"] .converter-panel .conversion-field {
+    grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px;
+  }
+  #workspace[data-tool="dev"] .converter-panel .conversion-field select { padding-inline: 5px; }
+  #workspace[data-tool="dev"] .converter-panel .conversion-result strong { font-size: 13px; }
+}
