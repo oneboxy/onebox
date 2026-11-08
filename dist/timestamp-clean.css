@@ -2303,3 +2303,61 @@
     column-gap: 8px !important;
   }
 }
+
+/* Left-align the conversion row and give every result the same single-line layout. */
+@media (min-width: 1201px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+  justify-self: stretch !important;
+  grid-template-columns: 148px minmax(0, 1fr) 24px !important;
+  grid-template-rows: minmax(24px, auto) !important;
+  align-items: center !important;
+  column-gap: 8px !important;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span,
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+  min-width: 0 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: start !important;
+  align-self: center !important;
+}
+@media (max-width: 900px) and (min-width: 521px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    grid-template-columns: 132px minmax(0, 1fr) 24px !important;
+  }
+}
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    grid-template-columns: 112px minmax(0, 1fr) 24px !important;
+  }
+}
+@media (max-width: 380px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    grid-template-columns: 100px minmax(0, 1fr) 22px !important;
+    column-gap: 6px !important;
+  }
+}
