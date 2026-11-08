@@ -1978,7 +1978,7 @@
   height: 44px;
 }
 .dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger {
-  padding-right: 76px;
+  padding-right: 36px !important;
 }
 .dev-workbench.dev-timestamp .dev-timestamp-datetime-clear {
   position: absolute;
