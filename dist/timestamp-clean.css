@@ -776,3 +776,24 @@
   top: auto;
   bottom: calc(100% + 7px);
 }
+
+/* Tighten the calendar footer and align both input rows to the same edge. */
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 10px 10px 4px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-foot {
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-foot button {
+  min-height: 30px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-row:not(.dev-timestamp-date-row) {
+  width: 100% !important;
+  max-width: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-picker {
+  width: 100% !important;
+}
