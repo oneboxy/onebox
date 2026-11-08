@@ -2471,3 +2471,88 @@
     white-space: nowrap !important;
   }
 }
+
+/* Compact module internals, stronger labels, and clearer spacing between modules. */
+@media (min-width: 1800px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(6, max-content) !important;
+    justify-content: start !important;
+    gap: 14px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: max-content max-content auto !important;
+    column-gap: 4px !important;
+    padding-inline: 10px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+    color: var(--ink) !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+}
+@media (min-width: 1200px) and (max-width: 1799px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(3, max-content) !important;
+    justify-content: start !important;
+    gap: 12px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: max-content max-content auto !important;
+    column-gap: 4px !important;
+    padding-inline: 10px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+    color: var(--ink) !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    white-space: nowrap !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+}
+@media (max-width: 1199px) and (min-width: 521px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    gap: 10px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    column-gap: 4px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+    font-size: 11px !important;
+    font-weight: 650 !important;
+  }
+}
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    gap: 8px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    column-gap: 4px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+    font-size: 11px !important;
+    font-weight: 650 !important;
+  }
+}
