@@ -264,7 +264,7 @@
     ['日本', [['京都', 'Kyoto', 'Asia/Tokyo'], ['札幌', 'Sapporo', 'Asia/Tokyo'], ['福冈', 'Fukuoka', 'Asia/Tokyo']]],
     ['英国', [['曼彻斯特', 'Manchester', 'Europe/London'], ['爱丁堡', 'Edinburgh', 'Europe/London'], ['伯明翰', 'Birmingham', 'Europe/London']]],
     ['德国', [['慕尼黑', 'Munich', 'Europe/Berlin'], ['法兰克福', 'Frankfurt', 'Europe/Berlin'], ['汉堡', 'Hamburg', 'Europe/Berlin']]],
-    ['加拿大', [['蒙特利尔', 'Montreal', 'America/Toronto'], ['卡尔加里', 'Calgary', 'America/Edmonton'], ['温哥华', 'Vancouver', 'America/Vancouver'], ['渥太华', 'Ottawa', 'America/Toronto']]],
+    ['加拿大', [['多伦多', 'Toronto', 'America/Toronto'], ['蒙特利尔', 'Montreal', 'America/Toronto'], ['卡尔加里', 'Calgary', 'America/Edmonton'], ['温哥华', 'Vancouver', 'America/Vancouver'], ['渥太华', 'Ottawa', 'America/Toronto']],],
     ['中国', [['成都', 'Chengdu', 'Asia/Shanghai'], ['深圳', 'Shenzhen', 'Asia/Shanghai'], ['重庆', 'Chongqing', 'Asia/Shanghai'], ['乌鲁木齐', 'Urumqi', 'Asia/Urumqi']]],
     ['越南', [['河内', 'Hanoi', 'Asia/Ho_Chi_Minh'], ['岘港', 'Da Nang', 'Asia/Ho_Chi_Minh']]],
   ];
