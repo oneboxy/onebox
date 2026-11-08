@@ -111,6 +111,9 @@
         '<span class="dev-timestamp-datetime-value"></span>' +
         '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M4 9h16"/></svg>' +
       '</button>' +
+      '<button type="button" class="dev-timestamp-datetime-clear" data-datetime-clear aria-label="' + (english ? 'Clear date and time' : '清除时间') + '" title="' + (english ? 'Clear date and time' : '清除时间') + '">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="m9.2 9.2 5.6 5.6m0-5.6-5.6 5.6"/></svg>' +
+      '</button>' +
       '<section class="dev-timestamp-datetime-popover" role="dialog" aria-label="' + (english ? 'Choose date and time' : '选择日期和时间') + '" hidden>' +
         '<header class="dev-timestamp-datetime-head">' +
           '<button type="button" class="dev-timestamp-calendar-nav" data-calendar-prev aria-label="' + (english ? 'Previous month' : '上个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>' +
@@ -143,6 +146,7 @@
     row.insertBefore(wrapper, original);
 
     const trigger = wrapper.querySelector('[data-datetime-picker-toggle]');
+    const clearButton = wrapper.querySelector('[data-datetime-clear]');
     const popup = wrapper.querySelector('.dev-timestamp-datetime-popover');
     const visibleValue = wrapper.querySelector('.dev-timestamp-datetime-value');
     const title = wrapper.querySelector('[data-calendar-title]');
@@ -214,6 +218,13 @@
       original.dispatchEvent(new Event('change', { bubbles: true }));
       renderCalendar();
     }
+    clearButton.addEventListener('click', () => {
+      original.value = '';
+      original.dispatchEvent(new Event('input', { bubbles: true }));
+      original.dispatchEvent(new Event('change', { bubbles: true }));
+      sync();
+      if (activePopup === popup) closePopup();
+    });
     trigger.addEventListener('click', () => {
       const selected = parseDate(dateTimeParts(original.value).date);
       if (selected) visibleMonth = new Date(selected.getFullYear(), selected.getMonth(), 1);
