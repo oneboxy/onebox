@@ -2383,3 +2383,91 @@
     column-gap: 5px !important;
   }
 }
+
+/* Let timestamp result modules size to their text instead of equal empty tracks. */
+@media (min-width: 1500px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    display: grid !important;
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(6, max-content) !important;
+    justify-content: start !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: 96px max-content auto !important;
+    column-gap: 4px !important;
+    padding-inline: 6px !important;
+  }
+}
+@media (min-width: 1200px) and (max-width: 1499px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(3, max-content) !important;
+    justify-content: start !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: 96px max-content auto !important;
+    column-gap: 4px !important;
+    padding-inline: 6px !important;
+  }
+}
+@media (min-width: 901px) and (max-width: 1199px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(2, max-content) !important;
+    justify-content: start !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: 96px max-content auto !important;
+    column-gap: 4px !important;
+    padding-inline: 6px !important;
+  }
+}
+@media (min-width: 521px) and (max-width: 900px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(2, max-content) !important;
+    justify-content: start !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: max-content !important;
+    max-width: 100% !important;
+    grid-template-columns: 96px max-content auto !important;
+    column-gap: 4px !important;
+    padding-inline: 6px !important;
+  }
+}
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: 96px minmax(0, 1fr) auto !important;
+    column-gap: 4px !important;
+    padding-inline: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
