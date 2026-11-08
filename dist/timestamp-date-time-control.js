@@ -6,22 +6,11 @@
   let activeTrigger = null;
   let activeRoot = null;
 
-  function splitValue(value) {
-    const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(String(value || ''));
-    return match ? { date: match[1], hour: match[2], minute: match[3], second: match[4] || '00' } : { date: '', hour: '00', minute: '00', second: '00' };
-  }
-  function isoDate(date) {
-    return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-  }
-  function parseDate(value) {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
-    return match ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : null;
-  }
   function closePopup() {
     if (!activePopup) return;
     activePopup.hidden = true;
     activeTrigger?.setAttribute('aria-expanded', 'false');
-    activeRoot?.classList.remove('opens-up', 'is-open');
+    activeRoot?.classList.remove('is-open', 'opens-up');
     activePopup = activeTrigger = activeRoot = null;
   }
   function openPopup(root, popup, trigger) {
@@ -38,30 +27,10 @@
       const rect = popup.getBoundingClientRect();
       const above = rect.top;
       const below = window.innerHeight - rect.bottom;
-      root.classList.toggle('opens-up', below < 12 && above > rect.height + 12);
+      root.classList.toggle('opens-up', below < rect.height + 12 && above > below);
     });
   }
-  function updateTimeSelected(wrapper, part, value) {
-    const list = wrapper.querySelector('[data-time-list="' + part + '"]');
-    const trigger = wrapper.querySelector('[data-time-picker-toggle]');
-    if (!list || !trigger) return;
-    list.querySelectorAll('[data-time-value]').forEach((option) => {
-      const selected = option.dataset.timeValue === value;
-      option.setAttribute('aria-selected', String(selected));
-      option.classList.toggle('is-selected', selected);
-    });
-    const values = ['hour', 'minute', 'second'].map((key) =>
-      wrapper.querySelector('[data-time-list="' + key + '"] [aria-selected="true"]')?.dataset.timeValue || '00'
-    );
-    trigger.querySelector('.dev-timestamp-time-value').textContent = values.join(':');
-  }
-  function scrollTimeSelected(wrapper) {
-    wrapper.querySelectorAll('.dev-timestamp-time-list').forEach((list) => {
-      const selected = list.querySelector('[aria-selected="true"]');
-      if (selected) list.scrollTop = selected.offsetTop - (list.clientHeight - selected.offsetHeight) / 2;
-    });
-  }
-  function enhanceUnitSelect(row, english) {
+  function enhanceUnitSelect(row) {
     const select = row.querySelector('select');
     if (!select || select.dataset.customUnitReady === 'true') return;
     const root = document.createElement('div');
@@ -72,7 +41,8 @@
     trigger.setAttribute('aria-haspopup', 'listbox');
     trigger.setAttribute('aria-expanded', 'false');
     const label = document.createElement('span');
-    label.textContent = select.selectedOptions[0]?.textContent || '';
+    const updateLabel = () => { label.textContent = select.selectedOptions[0]?.textContent || ''; };
+    updateLabel();
     const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     chevron.setAttribute('viewBox', '0 0 24 24');
     chevron.setAttribute('aria-hidden', 'true');
@@ -90,7 +60,7 @@
       item.setAttribute('aria-selected', String(option.value === select.value));
       item.dataset.unitValue = option.value;
       item.textContent = option.textContent;
-      menu.append(item);
+      menu.appendChild(item);
     });
     root.append(trigger, menu);
     select.classList.add('dev-timestamp-unit-native');
@@ -101,63 +71,66 @@
       const item = event.target.closest('[data-unit-value]');
       if (!item) return;
       select.value = item.dataset.unitValue;
-      label.textContent = select.selectedOptions[0]?.textContent || item.textContent;
+      updateLabel();
       menu.querySelectorAll('[role="option"]').forEach((option) => option.setAttribute('aria-selected', String(option === item)));
       select.dispatchEvent(new Event('input', { bubbles: true }));
       select.dispatchEvent(new Event('change', { bubbles: true }));
       closePopup();
     });
-    select.addEventListener('change', () => { label.textContent = select.selectedOptions[0]?.textContent || ''; });
+    select.addEventListener('change', updateLabel);
   }
+  const isoDate = (date) =>
+    date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+  const parseDate = (value) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+    return match ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : null;
+  };
+  const dateTimeParts = (value) => {
+    const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(String(value || ''));
+    return match ? { date: match[1], hour: match[2], minute: match[3], second: match[4] || '00' } : { date: '', hour: '00', minute: '00', second: '00' };
+  };
+  const pad = (value) => String(value).padStart(2, '0');
 
   function enhance() {
     frame = 0;
     const original = document.querySelector(inputSelector);
     const row = original?.closest('.dev-timestamp-input-row');
-    if (!original || !row || original.dataset.splitPickerReady === 'true') return;
-    const english = /^en(?:-|$)/i.test(document.documentElement.lang || '');
-    enhanceUnitSelect(row, english);
+    if (!original || !row) return;
+    enhanceUnitSelect(row);
+    if (original.dataset.splitPickerReady === 'true') return;
 
+    const english = /^en(?:-|$)/i.test(document.documentElement.lang || '');
     const wrapper = document.createElement('div');
     wrapper.className = 'dev-timestamp-date-time-control';
-    const options = (part, count) => Array.from({ length: count }, (_, value) => {
-      const formatted = String(value).padStart(2, '0');
-      return '<button type="button" role="option" aria-selected="false" class="dev-timestamp-time-option" data-time-part="' + part + '" data-time-value="' + formatted + '">' + formatted + '</button>';
-    }).join('');
     wrapper.innerHTML =
-      '<div class="dev-timestamp-date-part">' +
-        '<div class="dev-timestamp-date-picker">' +
-          '<button type="button" class="dev-timestamp-date-trigger" data-date-picker-toggle aria-haspopup="dialog" aria-expanded="false">' +
-            '<span class="dev-timestamp-date-value"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M4 9h16"/></svg>' +
-          '</button>' +
-          '<section class="dev-timestamp-date-popover" role="dialog" aria-label="' + (english ? 'Choose a date' : '选择日期') + '" hidden>' +
-            '<header class="dev-timestamp-date-popover-head">' +
-              '<button type="button" class="dev-timestamp-calendar-nav" data-calendar-prev aria-label="' + (english ? 'Previous month' : '上个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>' +
-              '<strong data-calendar-title></strong>' +
-              '<button type="button" class="dev-timestamp-calendar-nav" data-calendar-next aria-label="' + (english ? 'Next month' : '下个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>' +
-            '</header>' +
-            '<div class="dev-timestamp-calendar-weekdays"></div><div class="dev-timestamp-calendar-days"></div>' +
-            '<footer class="dev-timestamp-date-popover-foot"><button type="button" data-calendar-clear>' + (english ? 'Clear' : '清除') + '</button><button type="button" data-calendar-today>' + (english ? 'Today' : '今天') + '</button></footer>' +
-          '</section>' +
-          '<input type="date" class="dev-timestamp-native-date" data-timestamp-date-part="date" tabindex="-1" aria-hidden="true">' +
+      '<button type="button" class="dev-timestamp-datetime-trigger" data-datetime-picker-toggle aria-haspopup="dialog" aria-expanded="false">' +
+        '<span class="dev-timestamp-datetime-value"></span>' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M4 9h16"/></svg>' +
+      '</button>' +
+      '<section class="dev-timestamp-datetime-popover" role="dialog" aria-label="' + (english ? 'Choose date and time' : '选择日期和时间') + '" hidden>' +
+        '<header class="dev-timestamp-datetime-head">' +
+          '<button type="button" class="dev-timestamp-calendar-nav" data-calendar-prev aria-label="' + (english ? 'Previous month' : '上个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>' +
+          '<strong data-calendar-title></strong>' +
+          '<button type="button" class="dev-timestamp-calendar-nav" data-calendar-next aria-label="' + (english ? 'Next month' : '下个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>' +
+        '</header>' +
+        '<div class="dev-timestamp-calendar-weekdays"></div><div class="dev-timestamp-calendar-days"></div>' +
+        '<div class="dev-timestamp-datetime-time">' +
+          '<span class="dev-timestamp-datetime-time-label">' + (english ? 'Time' : '时间') + '</span>' +
+          '<div class="dev-timestamp-datetime-time-inputs">' +
+            '<label><span>' + (english ? 'Hour' : '时') + '</span><input type="number" min="0" max="23" step="1" inputmode="numeric" data-datetime-part="hour" aria-label="' + (english ? 'Hour' : '小时') + '"></label>' +
+            '<b aria-hidden="true">:</b>' +
+            '<label><span>' + (english ? 'Minute' : '分') + '</span><input type="number" min="0" max="59" step="1" inputmode="numeric" data-datetime-part="minute" aria-label="' + (english ? 'Minute' : '分钟') + '"></label>' +
+            '<b aria-hidden="true">:</b>' +
+            '<label><span>' + (english ? 'Second' : '秒') + '</span><input type="number" min="0" max="59" step="1" inputmode="numeric" data-datetime-part="second" aria-label="' + (english ? 'Second' : '秒') + '"></label>' +
+          '</div>' +
         '</div>' +
-      '</div>' +
-      '<div class="dev-timestamp-time-part">' +
-        '<div class="dev-timestamp-time-picker">' +
-          '<button type="button" class="dev-timestamp-time-trigger" data-time-picker-toggle aria-haspopup="dialog" aria-expanded="false">' +
-            '<span class="dev-timestamp-time-value">00:00:00</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>' +
-          '</button>' +
-          '<section class="dev-timestamp-time-popover" role="dialog" aria-label="' + (english ? 'Choose a time' : '选择时间') + '" hidden>' +
-            '<header class="dev-timestamp-time-popover-head"><strong>' + (english ? 'Choose time' : '选择时间') + '</strong><button type="button" data-time-picker-done>' + (english ? 'Done' : '完成') + '</button></header>' +
-            '<div class="dev-timestamp-time-columns">' +
-              '<div class="dev-timestamp-time-column"><span>' + (english ? 'Hour' : '时') + '</span><div class="dev-timestamp-time-list" role="listbox" tabindex="0" aria-label="' + (english ? 'Hour' : '小时') + '" data-time-list="hour">' + options('hour', 24) + '</div></div>' +
-              '<div class="dev-timestamp-time-column"><span>' + (english ? 'Minute' : '分') + '</span><div class="dev-timestamp-time-list" role="listbox" tabindex="0" aria-label="' + (english ? 'Minute' : '分钟') + '" data-time-list="minute">' + options('minute', 60) + '</div></div>' +
-              '<div class="dev-timestamp-time-column"><span>' + (english ? 'Second' : '秒') + '</span><div class="dev-timestamp-time-list" role="listbox" tabindex="0" aria-label="' + (english ? 'Second' : '秒') + '" data-time-list="second">' + options('second', 60) + '</div></div>' +
-            '</div>' +
-          '</section>' +
-        '</div>' +
-      '</div>';
-
+        '<footer class="dev-timestamp-datetime-foot">' +
+          '<button type="button" data-datetime-clear>' + (english ? 'Clear' : '清除') + '</button>' +
+          '<span></span>' +
+          '<button type="button" data-datetime-today>' + (english ? 'Now' : '现在') + '</button>' +
+          '<button type="button" class="is-done" data-datetime-done>' + (english ? 'Done' : '完成') + '</button>' +
+        '</footer>' +
+      '</section>';
     original.dataset.splitPickerReady = 'true';
     original.classList.add('dev-timestamp-native-date');
     original.hidden = true;
@@ -165,17 +138,13 @@
     original.setAttribute('aria-hidden', 'true');
     row.insertBefore(wrapper, original);
 
-    const dateControl = wrapper.querySelector('[data-timestamp-date-part="date"]');
-    const dateRoot = wrapper.querySelector('.dev-timestamp-date-picker');
-    const dateTrigger = wrapper.querySelector('[data-date-picker-toggle]');
-    const datePopup = wrapper.querySelector('.dev-timestamp-date-popover');
-    const dateValue = wrapper.querySelector('.dev-timestamp-date-value');
-    const calendarTitle = wrapper.querySelector('[data-calendar-title]');
+    const trigger = wrapper.querySelector('[data-datetime-picker-toggle]');
+    const popup = wrapper.querySelector('.dev-timestamp-datetime-popover');
+    const visibleValue = wrapper.querySelector('.dev-timestamp-datetime-value');
+    const title = wrapper.querySelector('[data-calendar-title]');
     const weekdays = wrapper.querySelector('.dev-timestamp-calendar-weekdays');
-    const calendarDays = wrapper.querySelector('.dev-timestamp-calendar-days');
-    const timeRoot = wrapper.querySelector('.dev-timestamp-time-picker');
-    const timeTrigger = wrapper.querySelector('[data-time-picker-toggle]');
-    const timePopup = wrapper.querySelector('.dev-timestamp-time-popover');
+    const days = wrapper.querySelector('.dev-timestamp-calendar-days');
+    const partsInputs = Object.fromEntries(Array.from(wrapper.querySelectorAll('[data-datetime-part]')).map((input) => [input.dataset.datetimePart, input]));
     let visibleMonth = new Date();
     const weekdayNames = english ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['一', '二', '三', '四', '五', '六', '日'];
     weekdays.innerHTML = weekdayNames.map((name) => '<span>' + name + '</span>').join('');
@@ -183,13 +152,13 @@
     function renderCalendar() {
       const year = visibleMonth.getFullYear();
       const month = visibleMonth.getMonth();
-      calendarTitle.textContent = english
+      title.textContent = english
         ? new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(visibleMonth)
         : year + '年' + (month + 1) + '月';
       const first = new Date(year, month, 1);
       const start = new Date(year, month, 1 - ((first.getDay() + 6) % 7));
       const today = isoDate(new Date());
-      const selected = dateControl.value;
+      const selected = dateTimeParts(original.value).date;
       const fragment = document.createDocumentFragment();
       for (let index = 0; index < 42; index += 1) {
         const day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + index);
@@ -206,43 +175,55 @@
         button.setAttribute('aria-pressed', String(iso === selected));
         fragment.append(button);
       }
-      calendarDays.replaceChildren(fragment);
+      days.replaceChildren(fragment);
     }
-    function syncControls() {
+    function sync() {
       if (!original.isConnected) return;
-      const parts = splitValue(original.value);
-      dateControl.value = parts.date;
-      dateValue.textContent = parts.date ? parts.date.replaceAll('-', '/') : (english ? 'Select date' : '选择日期');
-      const parsed = parseDate(parts.date);
-      if (parsed) visibleMonth = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
-      updateTimeSelected(wrapper, 'hour', parts.hour);
-      updateTimeSelected(wrapper, 'minute', parts.minute);
-      updateTimeSelected(wrapper, 'second', parts.second);
+      const p = dateTimeParts(original.value);
+      const date = parseDate(p.date);
+      if (date) visibleMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+      visibleValue.textContent = p.date
+        ? p.date.replaceAll('-', '/') + ' ' + p.hour + ':' + p.minute + ':' + p.second
+        : (english ? 'Select date and time' : '选择日期和时间');
+      Object.entries({ hour: p.hour, minute: p.minute, second: p.second }).forEach(([key, value]) => {
+        const input = partsInputs[key];
+        if (input && document.activeElement !== input) input.value = value;
+      });
       renderCalendar();
     }
     function writeOriginal() {
-      const hour = wrapper.querySelector('[data-time-list="hour"] [aria-selected="true"]')?.dataset.timeValue || '00';
-      const minute = wrapper.querySelector('[data-time-list="minute"] [aria-selected="true"]')?.dataset.timeValue || '00';
-      const second = wrapper.querySelector('[data-time-list="second"] [aria-selected="true"]')?.dataset.timeValue || '00';
-      const next = dateControl.value ? dateControl.value + 'T' + hour + ':' + minute + ':' + second : '';
+      const date = dateTimeParts(original.value).date;
+      if (!date) return;
+      const values = {};
+      Object.entries(partsInputs).forEach(([key, input]) => {
+        const max = key === 'hour' ? 23 : 59;
+        let value = Number(input.value);
+        if (!Number.isFinite(value)) value = 0;
+        value = Math.max(0, Math.min(max, Math.trunc(value)));
+        input.value = pad(value);
+        values[key] = pad(value);
+      });
+      const next = date + 'T' + values.hour + ':' + values.minute + ':' + values.second;
       if (original.value === next) return;
       original.value = next;
       original.dispatchEvent(new Event('input', { bubbles: true }));
+      original.dispatchEvent(new Event('change', { bubbles: true }));
+      renderCalendar();
     }
-    dateTrigger.addEventListener('click', () => {
-      const selected = parseDate(dateControl.value);
+    trigger.addEventListener('click', () => {
+      const selected = parseDate(dateTimeParts(original.value).date);
       if (selected) visibleMonth = new Date(selected.getFullYear(), selected.getMonth(), 1);
       renderCalendar();
-      openPopup(dateRoot, datePopup, dateTrigger);
+      openPopup(wrapper, popup, trigger);
     });
-    datePopup.addEventListener('click', (event) => {
-      const dayButton = event.target.closest('[data-calendar-date]');
-      if (dayButton) {
-        dateControl.value = dayButton.dataset.calendarDate;
-        renderCalendar();
-        dateValue.textContent = dateControl.value.replaceAll('-', '/');
-        writeOriginal();
-        closePopup();
+    popup.addEventListener('click', (event) => {
+      const day = event.target.closest('[data-calendar-date]');
+      if (day) {
+        const current = dateTimeParts(original.value);
+        original.value = day.dataset.calendarDate + 'T' + current.hour + ':' + current.minute + ':' + current.second;
+        original.dispatchEvent(new Event('input', { bubbles: true }));
+        original.dispatchEvent(new Event('change', { bubbles: true }));
+        sync();
         return;
       }
       if (event.target.closest('[data-calendar-prev]')) {
@@ -251,59 +232,38 @@
       } else if (event.target.closest('[data-calendar-next]')) {
         visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
         renderCalendar();
-      } else if (event.target.closest('[data-calendar-today]')) {
-        dateControl.value = isoDate(new Date());
-        visibleMonth = new Date();
-        renderCalendar();
-        dateValue.textContent = dateControl.value.replaceAll('-', '/');
-        writeOriginal();
-        closePopup();
-      } else if (event.target.closest('[data-calendar-clear]')) {
-        dateControl.value = '';
-        renderCalendar();
-        dateValue.textContent = english ? 'Select date' : '选择日期';
-        writeOriginal();
-        closePopup();
-      }
+      } else if (event.target.closest('[data-datetime-clear]')) {
+        original.value = '';
+        original.dispatchEvent(new Event('input', { bubbles: true }));
+        original.dispatchEvent(new Event('change', { bubbles: true }));
+        sync();
+      } else if (event.target.closest('[data-datetime-today]')) {
+        const now = new Date();
+        original.value = localDateTime(now);
+        original.dispatchEvent(new Event('input', { bubbles: true }));
+        original.dispatchEvent(new Event('change', { bubbles: true }));
+        sync();
+      } else if (event.target.closest('[data-datetime-done]')) closePopup();
     });
-    timeTrigger.addEventListener('click', () => {
-      openPopup(timeRoot, timePopup, timeTrigger);
-      requestAnimationFrame(() => { if (!timePopup.hidden) scrollTimeSelected(wrapper); });
+    Object.values(partsInputs).forEach((input) => {
+      input.addEventListener('input', writeOriginal);
+      input.addEventListener('change', writeOriginal);
+      input.addEventListener('blur', writeOriginal);
     });
-    timePopup.addEventListener('click', (event) => {
-      const option = event.target.closest('[data-time-part][data-time-value]');
-      if (option) {
-        updateTimeSelected(wrapper, option.dataset.timePart, option.dataset.timeValue);
-        writeOriginal();
-      } else if (event.target.closest('[data-time-picker-done]')) closePopup();
-    });
-    timePopup.addEventListener('keydown', (event) => {
-      const list = event.target.closest('[data-time-list]');
-      if (!list || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
-      event.preventDefault();
-      const part = list.dataset.timeList;
-      const count = part === 'hour' ? 24 : 60;
-      const current = Number(list.querySelector('[aria-selected="true"]')?.dataset.timeValue || '0');
-      const next = event.key === 'Home' ? 0 : event.key === 'End' ? count - 1 : (current + (event.key === 'ArrowDown' ? 1 : -1) + count) % count;
-      updateTimeSelected(wrapper, part, String(next).padStart(2, '0'));
-      writeOriginal();
-      scrollTimeSelected(wrapper);
-    });
-    original.addEventListener('input', syncControls);
-    original.addEventListener('change', syncControls);
+    original.addEventListener('input', sync);
+    original.addEventListener('change', sync);
     try {
       const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
       if (descriptor?.get && descriptor?.set) {
         Object.defineProperty(original, 'value', {
           configurable: true,
           get() { return descriptor.get.call(this); },
-          set(value) { descriptor.set.call(this, value); requestAnimationFrame(syncControls); }
+          set(value) { descriptor.set.call(this, value); requestAnimationFrame(sync); }
         });
       }
     } catch {}
-    syncControls();
+    sync();
   }
-
   function schedule() {
     if (frame) return;
     frame = requestAnimationFrame(enhance);
