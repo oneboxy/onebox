@@ -1111,3 +1111,35 @@
     grid-template-columns: minmax(0, 1fr) 82px !important;
   }
 }
+
+/* Softer clock and clear controls with a visible selected state. */
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 5px !important;
+  border-radius: 50% !important;
+  color: color-mix(in srgb, var(--muted) 88%, var(--ink)) !important;
+  transition: color .15s ease, background-color .15s ease, box-shadow .15s ease !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-now {
+  right: 39px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-clear {
+  right: 7px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 1.65;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-now.is-selected {
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent) !important;
+  color: var(--accent) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-clear:hover {
+  background: color-mix(in srgb, var(--muted) 10%, var(--panel)) !important;
+  color: var(--ink) !important;
+}
