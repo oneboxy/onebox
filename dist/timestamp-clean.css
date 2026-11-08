@@ -2592,3 +2592,126 @@
     gap: 18px !important;
   }
 }
+
+
+/* Mobile timestamp layout: stack labels, fields and results without clipping. */
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    display: grid !important;
+    width: 100% !important;
+    max-width: none !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-rows: auto !important;
+    row-gap: 10px !important;
+    column-gap: 0 !important;
+    margin: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .dev-timestamp-bidirectional-field {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-column: 1 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    row-gap: 6px !important;
+    column-gap: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-label {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: start !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field > .dev-timestamp-input-row {
+    display: grid !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 8px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-datetime,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-timestamp {
+    grid-row: 1 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap {
+    display: grid !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: center !important;
+    align-self: center !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    transform: rotate(90deg) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-datetime {
+    grid-row: 3 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-datetime > .dev-timestamp-input-row,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-date-time-control,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell {
+    grid-column: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-live-button {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    width: max-content !important;
+    min-width: 112px !important;
+    min-height: 40px !important;
+    height: 40px !important;
+    margin: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 26px !important;
+    grid-template-rows: auto auto !important;
+    align-items: start !important;
+    row-gap: 4px !important;
+    column-gap: 8px !important;
+    min-height: 0 !important;
+    padding: 9px 10px !important;
+    white-space: normal !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    text-overflow: clip !important;
+    font-size: 12px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    justify-self: end !important;
+    align-self: center !important;
+  }
+}
