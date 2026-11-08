@@ -1,4 +1,4 @@
-const CACHE = 'onebox-v758';
+const CACHE = 'onebox-v759';
 const APP_SHELL = [
   './',
   'index.html',
@@ -18,9 +18,9 @@ const APP_SHELL = [
   'timestamp-city-compact.js?v=2.18.821',
   'converter-clean.css?v=2.18.824',
   'dev-tabs.css?v=2.18.825',
-  'timestamp-clean.css?v=2.18.836',
+  'timestamp-clean.css?v=2.18.837',
   'select-focus-clean.css?v=2.18.828',
-  'timestamp-clean.css?v=2.18.836',
+  'timestamp-clean.css?v=2.18.837',
   'timestamp-input-output-frame.js?v=2.18.836',
   'timestamp-city-auto-height.js?v=2.18.819',
   'timestamp-date-time-control.js?v=2.18.834',
