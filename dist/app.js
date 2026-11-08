@@ -533,12 +533,12 @@ const storedMascotVisible = localStorage.getItem(STORAGE.mascotVisible) !== 'fal
 const storedMascotDisplayMode = localStorage.getItem(STORAGE.mascotDisplayMode) === 'full' ? 'full' : 'half';
 const DEV_TOOL_IDS = ['json-format', 'json-compare', 'text-stats', 'timestamp', 'file-compare', 'unit-convert'];
 const DEV_TIMESTAMP_COUNTRIES = Object.freeze([
+  { key: 'China', zh: '中国', en: 'China' },
   { key: 'United States', zh: '美国', en: 'United States' },
-  { key: 'Japan', zh: '日本', en: 'Japan' },
   { key: 'United Kingdom', zh: '英国', en: 'United Kingdom' },
   { key: 'Germany', zh: '德国', en: 'Germany' },
   { key: 'Canada', zh: '加拿大', en: 'Canada' },
-  { key: 'China', zh: '中国', en: 'China' },
+  { key: 'Japan', zh: '日本', en: 'Japan' },
   { key: 'Vietnam', zh: '越南', en: 'Vietnam' },
 ]);
 function validDeveloperTimeZone(value) {
@@ -554,7 +554,11 @@ function normalizeDevTools(value) {
   const timestampCustomCities = (Array.isArray(source.timestampCustomCities) ? source.timestampCustomCities : []).map((item) => ({ id: String(item?.id || '').trim().slice(0, 80), countryKey: String(item?.countryKey || ''), name: String(item?.name || '').trim().slice(0, 60), timeZone: String(item?.timeZone || '').trim().slice(0, 100) })).filter((item) => /^[a-zA-Z0-9_-]{1,80}$/.test(item.id) && countryKeys.has(item.countryKey) && item.name && validDeveloperTimeZone(item.timeZone)).slice(0, 100);
   const timestampCityOrder = Object.fromEntries(DEV_TIMESTAMP_COUNTRIES.map((country) => [country.key, Array.isArray(source.timestampCityOrder?.[country.key]) ? [...new Set(source.timestampCityOrder[country.key].map((key) => String(key).slice(0, 120)))].slice(0, 120) : []]));
   const timestampExpandedCountries = Array.isArray(source.timestampExpandedCountries) ? [...new Set(source.timestampExpandedCountries.map(String).filter((key) => countryKeys.has(key)))] : [];
-  const timestampCountryOrder = Array.isArray(source.timestampCountryOrder) ? [...new Set(source.timestampCountryOrder.map(String).filter((key) => countryKeys.has(key)))].slice(0, DEV_TIMESTAMP_COUNTRIES.length) : [];
+  const legacyTimestampCountryOrder = ['United States', 'Japan', 'United Kingdom', 'Germany', 'Canada', 'China', 'Vietnam'];
+  const preferredTimestampCountryOrder = DEV_TIMESTAMP_COUNTRIES.map((country) => country.key);
+  const storedTimestampCountryOrder = Array.isArray(source.timestampCountryOrder) ? [...new Set(source.timestampCountryOrder.map(String).filter((key) => countryKeys.has(key)))].slice(0, DEV_TIMESTAMP_COUNTRIES.length) : [];
+  const isLegacyDefaultCountryOrder = storedTimestampCountryOrder.length === legacyTimestampCountryOrder.length && storedTimestampCountryOrder.every((key, index) => key === legacyTimestampCountryOrder[index]);
+  const timestampCountryOrder = isLegacyDefaultCountryOrder ? preferredTimestampCountryOrder : storedTimestampCountryOrder;
   return {
     active: DEV_TOOL_IDS.includes(source.active) ? source.active : DEV_TOOL_IDS[0],
     fullscreen: source.fullscreen === true, formatInput: String(source.formatInput || ''), formatOutput: String(source.formatOutput || ''), formatStatus: String(source.formatStatus || ''), formatCompact: source.formatCompact === true, formatUnescape: source.formatUnescape !== false, formatCollapsed: Array.isArray(source.formatCollapsed) ? [...new Set(source.formatCollapsed.map((item) => String(item)))] : [],
@@ -8936,27 +8940,18 @@ function developerTimestampRows(date, mode) {
   const order = mode === 'date' ? ['seconds', 'milliseconds', 'iso', 'local', 'utc', 'relative'] : ['local', 'utc', 'iso', 'seconds', 'milliseconds', 'relative'];
   const standardRows = order.map((key) => ({ key, label: labels[key], value: values[key], primary: mode === 'date' ? key === 'seconds' || key === 'milliseconds' : key === 'local', copyable: ['seconds', 'milliseconds', 'iso'].includes(key) }));
   const cities = [
+    { country: ['中国', 'China'], city: ['北京', 'Beijing'], timeZone: 'Asia/Shanghai' },
+    { country: ['中国', 'China'], city: ['乌鲁木齐', 'Urumqi'], timeZone: 'Asia/Urumqi' },
     { country: ['美国', 'United States'], city: ['纽约', 'New York'], timeZone: 'America/New_York' },
     { country: ['美国', 'United States'], city: ['洛杉矶', 'Los Angeles'], timeZone: 'America/Los_Angeles' },
-    { country: ['美国', 'United States'], city: ['芝加哥', 'Chicago'], timeZone: 'America/Chicago' },
-    { country: ['美国', 'United States'], city: ['丹佛', 'Denver'], timeZone: 'America/Denver' },
-    { country: ['美国', 'United States'], city: ['安克雷奇', 'Anchorage'], timeZone: 'America/Anchorage' },
-    { country: ['美国', 'United States'], city: ['檀香山', 'Honolulu'], timeZone: 'Pacific/Honolulu' },
-    { country: ['日本', 'Japan'], city: ['东京', 'Tokyo'], timeZone: 'Asia/Tokyo' },
-    { country: ['日本', 'Japan'], city: ['大阪', 'Osaka'], timeZone: 'Asia/Tokyo' },
     { country: ['英国', 'United Kingdom'], city: ['伦敦', 'London'], timeZone: 'Europe/London' },
     { country: ['英国', 'United Kingdom'], city: ['曼彻斯特', 'Manchester'], timeZone: 'Europe/London' },
     { country: ['德国', 'Germany'], city: ['柏林', 'Berlin'], timeZone: 'Europe/Berlin' },
     { country: ['德国', 'Germany'], city: ['慕尼黑', 'Munich'], timeZone: 'Europe/Berlin' },
     { country: ['加拿大', 'Canada'], city: ['温哥华', 'Vancouver'], timeZone: 'America/Vancouver' },
-    { country: ['加拿大', 'Canada'], city: ['卡尔加里', 'Calgary'], timeZone: 'America/Edmonton' },
-    { country: ['加拿大', 'Canada'], city: ['温尼伯', 'Winnipeg'], timeZone: 'America/Winnipeg' },
     { country: ['加拿大', 'Canada'], city: ['多伦多', 'Toronto'], timeZone: 'America/Toronto' },
-    { country: ['加拿大', 'Canada'], city: ['哈利法克斯', 'Halifax'], timeZone: 'America/Halifax' },
-    { country: ['加拿大', 'Canada'], city: ['圣约翰斯（纽芬兰）', "St. John's"], timeZone: 'America/St_Johns' },
-    { country: ['中国', 'China'], city: ['北京', 'Beijing'], timeZone: 'Asia/Shanghai' },
-    { country: ['中国', 'China'], city: ['上海', 'Shanghai'], timeZone: 'Asia/Shanghai' },
-    { country: ['中国', 'China'], city: ['广州', 'Guangzhou'], timeZone: 'Asia/Shanghai' },
+    { country: ['日本', 'Japan'], city: ['东京', 'Tokyo'], timeZone: 'Asia/Tokyo' },
+    { country: ['日本', 'Japan'], city: ['大阪', 'Osaka'], timeZone: 'Asia/Tokyo' },
     { country: ['越南', 'Vietnam'], city: ['河内', 'Hanoi'], timeZone: 'Asia/Ho_Chi_Minh' },
     { country: ['越南', 'Vietnam'], city: ['胡志明市', 'Ho Chi Minh City'], timeZone: 'Asia/Ho_Chi_Minh' },
   ];
