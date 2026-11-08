@@ -949,3 +949,52 @@
     width: 82px !important;
   }
 }
+
+/* Put every output label and value on one shared row. */
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-result-block .dev-timestamp-standard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-summary-card {
+  display: grid !important;
+  grid-template-columns: minmax(88px, 104px) minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  align-content: center !important;
+  column-gap: 9px !important;
+  row-gap: 0 !important;
+  min-height: 38px !important;
+  padding: 5px 2px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-summary-card > span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-summary-card > code {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-summary-card > button {
+  position: static !important;
+  justify-self: end;
+  align-self: center;
+}
+@media (max-width: 900px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-result-block .dev-timestamp-standard-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-summary-card {
+    grid-template-columns: minmax(86px, 104px) minmax(0, 1fr) auto !important;
+    min-height: 38px !important;
+    padding: 5px 2px !important;
+  }
+}
