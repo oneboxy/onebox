@@ -2340,3 +2340,46 @@
     column-gap: 6px !important;
   }
 }
+
+/* Show all six timestamp formats on one clean, equal-width row on wide screens. */
+@media (min-width: 1500px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: 100% !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: 100% !important;
+    grid-template-columns: 108px minmax(0, 1fr) 22px !important;
+    column-gap: 4px !important;
+    padding-inline: 6px !important;
+  }
+}
+@media (max-width: 1499px) and (min-width: 901px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: 100% !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: 100% !important;
+    grid-template-columns: 112px minmax(0, 1fr) 22px !important;
+    column-gap: 5px !important;
+    padding-inline: 6px !important;
+  }
+}
+@media (max-width: 900px) and (min-width: 521px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    width: 100% !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: 100% !important;
+    grid-template-columns: 112px minmax(0, 1fr) 22px !important;
+    column-gap: 5px !important;
+  }
+}
