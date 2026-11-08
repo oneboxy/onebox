@@ -2715,3 +2715,27 @@
     align-self: center !important;
   }
 }
+
+/* Borderless icon controls for timestamp cities and row actions. */
+.dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-country-add,
+.dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-expand-cities,
+.dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-icon-button,
+.dev-workbench.dev-timestamp .dev-timestamp-city-add-inline,
+.dev-workbench.dev-timestamp .dev-timestamp-city-actions .dev-timestamp-city-copy,
+.dev-workbench.dev-timestamp .dev-timestamp-city-actions .dev-timestamp-city-delete,
+.dev-workbench.dev-timestamp .dev-timestamp-city-card .dev-timestamp-city-copy {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-country-add:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-expand-cities:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-country-header-cell .dev-timestamp-icon-button:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-city-add-inline:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-city-actions .dev-timestamp-city-copy:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-city-actions .dev-timestamp-city-delete:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-city-card .dev-timestamp-city-copy:hover {
+  border: 0 !important;
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel)) !important;
+  box-shadow: none !important;
+}
