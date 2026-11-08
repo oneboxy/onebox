@@ -1331,3 +1331,524 @@
     width: 82px !important;
   }
 }
+
+/* Inline field labels, centered swap, and a single clean results grid. */
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field {
+  display: grid !important;
+  grid-template-columns: 68px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-label {
+  color: var(--ink) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-swap {
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  align-self: center;
+  box-sizing: border-box;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-swap:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-swap[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  color: var(--accent);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-swap svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-datetime {
+  grid-column: 3;
+  grid-row: 1;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-timestamp {
+  grid-column: 1;
+  grid-row: 1;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap {
+  grid-column: 2;
+  grid-row: 1;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-time-control {
+  display: block !important;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: none;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger:hover {
+  border-color: color-mix(in srgb, var(--muted) 42%, var(--line));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-value {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-swap:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--muted) 36%, transparent);
+  outline-offset: 2px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp > .dev-timestamp-input-row {
+  display: block !important;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell {
+  width: 100%;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+  height: 44px;
+  min-height: 44px;
+  padding-right: 184px !important;
+  font-variant-numeric: tabular-nums;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-timestamp-unit-picker {
+  position: absolute !important;
+  top: 50% !important;
+  right: 72px !important;
+  z-index: 2;
+  width: 94px !important;
+  min-width: 0;
+  transform: translateY(-50%);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger {
+  height: 32px;
+  min-height: 32px;
+  padding: 5px 7px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger:hover {
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-field-icon.is-now {
+  right: 39px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-field-icon.is-clear {
+  right: 7px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-popover {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 8px);
+  left: 0;
+  box-sizing: border-box;
+  width: min(390px, calc(100vw - 24px));
+  max-height: min(78vh, 620px);
+  overflow-y: auto;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 12px 32px rgb(25 35 55 / 14%);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-popover[hidden],
+.dev-workbench.dev-timestamp .dev-timestamp-unit-menu[hidden] {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-time-control.opens-up .dev-timestamp-datetime-popover,
+.dev-workbench.dev-timestamp .dev-timestamp-unit-picker.opens-up .dev-timestamp-unit-menu {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-head {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-head strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav:hover {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--muted) 7%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-weekdays,
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-weekdays {
+  margin-bottom: 4px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-weekdays span {
+  display: grid;
+  place-items: center;
+  min-height: 28px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day:hover {
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day.is-outside-month {
+  color: color-mix(in srgb, var(--muted) 55%, var(--panel));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day.is-today {
+  border-color: var(--line);
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day.is-selected {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+  color: var(--accent);
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 550;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr) 10px minmax(0, 1fr);
+  align-items: end;
+  gap: 5px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 5px 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs input::-webkit-inner-spin-button,
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs b {
+  padding-bottom: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  text-align: center;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-foot > span {
+  flex: 1 1 auto;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-foot button {
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-foot button.is-done {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--line));
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  color: var(--accent);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional > .dev-timestamp-result-block {
+  padding-top: 12px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 28px !important;
+  grid-template-rows: auto auto !important;
+  align-items: start !important;
+  align-content: start !important;
+  gap: 5px 8px !important;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 74px !important;
+  padding: 9px 10px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 10px !important;
+  background: color-mix(in srgb, var(--line) 9%, var(--panel)) !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy {
+  position: static !important;
+  inset: auto !important;
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  box-sizing: border-box !important;
+  width: 26px !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  border: 0 !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  transform: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy:hover {
+  background: color-mix(in srgb, var(--muted) 9%, var(--panel)) !important;
+  color: var(--ink) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy svg {
+  width: 16px;
+  height: 16px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs input:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-foot button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--muted) 35%, transparent);
+  outline-offset: 2px;
+}
+@media (max-width: 900px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field {
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    gap: 7px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    padding-right: 170px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-timestamp-unit-picker {
+    width: 84px !important;
+    right: 69px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional {
+    gap: 12px;
+    padding: 13px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 7px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .dev-timestamp-bidirectional-field {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    grid-template-columns: 72px minmax(0, 1fr) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-timestamp {
+    grid-row: 1 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-datetime {
+    grid-row: 3 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-datetime-popover {
+    width: min(390px, calc(100vw - 24px));
+    max-height: min(76vh, 590px);
+    padding: 10px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .dev-timestamp-bidirectional-field {
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+    gap: 7px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    padding-right: 164px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-timestamp-unit-picker {
+    right: 67px !important;
+    width: 80px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    min-height: 64px !important;
+  }
+}
