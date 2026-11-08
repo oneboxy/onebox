@@ -38,8 +38,9 @@
       .dev-timestamp-city-row.is-first-city-row .dev-timestamp-city-cell.is-country-dragging { box-shadow: inset 2px 0 var(--accent), inset -2px 0 var(--accent); }
       .dev-timestamp-city-cell.is-country-last-city.is-country-dragging { box-shadow: inset 2px 0 var(--accent), inset -2px 0 var(--accent), inset 0 -2px var(--accent); }
       .dev-timestamp-country-name { flex: 0 0 auto; }
-      .dev-timestamp-country-add { flex: 0 0 auto; }
-      .dev-timestamp-expand-cities { flex: 0 0 23px; margin-left: auto; }
+      .dev-timestamp-country-add { flex: 0 0 auto; margin-left: auto; }
+      .dev-timestamp-country-grip { flex: 0 0 auto; }
+      .dev-timestamp-expand-cities { flex: 0 0 23px; margin-left: 0; }
       .dev-timestamp-expand-cities { opacity: .82; cursor: pointer; }
       .dev-timestamp-expand-cities:hover { opacity: 1; color: var(--accent); }
       .dev-timestamp-city-cell.is-country-cities-collapsed { visibility: hidden !important; pointer-events: none !important; }
@@ -302,7 +303,11 @@
       if (!name || !timeZone || seen.has(name.toLocaleLowerCase())) return;
       seen.add(name.toLocaleLowerCase());
       const extraAliases = CITY_SEARCH_ALIASES[name] || [];
-      options.push({ name, timeZone, existing: isExisting, restoreCityId, aliases: [name, timeZone, timeZone.split('/').pop().replace(/_/g, ' '), ...extraAliases, ...aliases] });
+      options.push({
+        name, timeZone, existing: isExisting, restoreCityId,
+        aliases: [name, ...extraAliases, ...aliases],
+        timeZoneAliases: [timeZone, timeZone.split('/').pop().replace(/_/g, ' ')],
+      });
     };
     matrix.querySelectorAll('.dev-timestamp-city-cell[data-dev-country-key="' + CSS.escape(countryKey) + '"] .dev-timestamp-city-card[data-dev-city-id]').forEach((card) => {
       const name = card.querySelector('.dev-timestamp-city-name')?.textContent?.trim();
@@ -350,8 +355,10 @@
         closeResults();
         return;
       }
-      const matches = options.map((option) => ({ option, score: Math.max(...option.aliases.map((alias) => fuzzyScore(query, alias))) }))
-        .filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+      const matches = options.map((option) => {
+        const aliases = query.includes('/') ? [...option.aliases, ...option.timeZoneAliases] : option.aliases;
+        return { option, score: Math.max(0, ...aliases.map((alias) => fuzzyScore(query, alias))) };
+      }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
       results.replaceChildren();
       if (!matches.length) {
         if (query) {
