@@ -1,4 +1,4 @@
-const CACHE = 'onebox-v777';
+const CACHE = 'onebox-v778';
 const APP_SHELL = [
   './',
   'index.html',
@@ -13,7 +13,7 @@ const APP_SHELL = [
   'vendor/reader-formats/mobi.mjs?v=2.18.780',
   'vendor/reader-formats/fb2.mjs?v=2.18.780',
   'vendor/reader-formats/fflate.mjs?v=2.18.780',
-  'timestamp-layout.js?v=2.18.761',
+  'timestamp-layout.js?v=2.18.855',
   'timestamp-city-row.js?v=2.18.814',
   'timestamp-city-compact.js?v=2.18.821',
   'converter-clean.css?v=2.18.824',
