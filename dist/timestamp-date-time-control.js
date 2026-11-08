@@ -90,6 +90,9 @@
     return match ? { date: match[1], hour: match[2], minute: match[3], second: match[4] || '00' } : { date: '', hour: '00', minute: '00', second: '00' };
   };
   const pad = (value) => String(value).padStart(2, '0');
+  const localDateTime = (date) =>
+    date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' +
+    pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
 
   function enhance() {
     frame = 0;
