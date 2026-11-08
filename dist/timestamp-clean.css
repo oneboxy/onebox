@@ -797,3 +797,155 @@
 .dev-workbench.dev-timestamp .dev-timestamp-unit-picker {
   width: 100% !important;
 }
+
+/* Timestamp workspace: keep each direction and its outputs together. */
+.dev-workbench.dev-timestamp .dev-timestamp-content {
+  gap: 12px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-output-frame {
+  display: block !important;
+  width: 100% !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-card {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-shared-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  min-height: 30px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-head,
+.dev-workbench.dev-timestamp .dev-timestamp-output-card > .dev-pane-head {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: none !important;
+  align-items: start;
+  gap: 14px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card {
+  display: grid !important;
+  align-content: start !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 14px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px !important;
+  background: var(--panel) !important;
+  box-shadow: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card + .dev-timestamp-input-card {
+  padding-top: 14px !important;
+  border-top: 1px solid var(--line) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card > span {
+  color: var(--ink) !important;
+  font-size: 15px !important;
+  font-weight: 650 !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto 112px !important;
+  align-items: center;
+  gap: 8px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row.dev-timestamp-date-row {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-inline-actions button {
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-inline-actions button:hover {
+  background: color-mix(in srgb, var(--muted) 7%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-unit-picker {
+  width: 112px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-overview-results {
+  display: block !important;
+  min-width: 0;
+  margin: 0 !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-result-block {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 10px 0 0 !important;
+  border-top: 1px solid var(--line) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-result-block > h4 {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-result-block .dev-timestamp-standard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px 14px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-summary-card {
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-summary-card code {
+  overflow-wrap: anywhere;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-output-card {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card {
+    padding: 13px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card + .dev-timestamp-input-card {
+    padding-top: 13px !important;
+    border-top: 1px solid var(--line) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) auto 94px !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-unit-picker {
+    width: 94px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-inline-actions {
+    gap: 4px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-inline-actions button {
+    min-height: 38px;
+    padding-inline: 7px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 380px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) auto 82px !important;
+    gap: 5px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card .dev-timestamp-unit-picker {
+    width: 82px !important;
+  }
+}
