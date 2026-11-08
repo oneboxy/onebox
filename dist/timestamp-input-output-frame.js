@@ -59,18 +59,24 @@
         timestampRow.insertBefore(shell, timestampInput);
         shell.appendChild(timestampInput);
       }
-      const setupIcon = (button, kind, label, svg) => {
-        if (!button) return;
-        button.type = 'button';
-        button.classList.add('dev-timestamp-field-icon', 'is-' + kind);
-        button.dataset.timestampFieldAction = kind;
-        button.setAttribute('aria-label', label);
-        button.title = label;
-        button.innerHTML = svg;
-        shell.appendChild(button);
-      };
-      setupIcon(nowButton, 'now', '当前时间', '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="M12 7.25v4.9l3.35 1.95"/></svg>');
-      setupIcon(clearButton, 'clear', '清空', '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="m9.2 9.2 5.6 5.6m0-5.6-5.6 5.6"/></svg>');
+      if (clearButton) {
+        clearButton.type = 'button';
+        clearButton.classList.add('dev-timestamp-field-icon', 'is-clear');
+        clearButton.dataset.timestampFieldAction = 'clear';
+        clearButton.setAttribute('aria-label', '清空');
+        clearButton.title = '清空';
+        clearButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="m9.2 9.2 5.6 5.6m0-5.6-5.6 5.6"/></svg>';
+        shell.appendChild(clearButton);
+      }
+      if (nowButton) {
+        nowButton.type = 'button';
+        nowButton.classList.add('dev-timestamp-live-button');
+        nowButton.dataset.timestampFieldAction = 'now';
+        nowButton.setAttribute('aria-label', '当前时间');
+        nowButton.title = '当前时间';
+        nowButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="M12 7.25v4.9l3.35 1.95"/></svg><span>当前时间</span>';
+        timestampRow.appendChild(nowButton);
+      }
 
       let timer = 0;
       let writingNow = false;
