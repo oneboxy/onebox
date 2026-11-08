@@ -1033,3 +1033,81 @@
 .dev-workbench.dev-timestamp .dev-timestamp-shared-actions {
   display: none !important;
 }
+
+/* Compact timestamp actions live inside the input control. */
+.dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row {
+  grid-template-columns: minmax(0, 1fr) 112px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row.dev-timestamp-date-row {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell {
+  position: relative;
+  grid-column: 1;
+  width: 100%;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+  width: 100%;
+  padding-right: 76px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon {
+  position: absolute !important;
+  z-index: 1;
+  top: 50% !important;
+  display: grid !important;
+  place-items: center;
+  box-sizing: border-box;
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  margin: 0 !important;
+  padding: 5px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  box-shadow: none !important;
+  transform: translateY(-50%) !important;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-clear {
+  right: 7px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-now {
+  right: 39px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon:hover {
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel)) !important;
+  color: var(--ink) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-now.is-selected {
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel)) !important;
+  color: var(--accent) !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--muted) 35%, transparent);
+  outline-offset: 1px;
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) 94px !important;
+  }
+}
+@media (max-width: 380px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-card > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) 82px !important;
+  }
+}
