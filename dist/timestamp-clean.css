@@ -1978,7 +1978,15 @@
   height: 44px;
 }
 .dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger {
-  padding-right: 36px !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  padding: 8px 44px 8px 11px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger svg {
+  order: -1;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-value {
+  flex: 1 1 auto;
 }
 .dev-workbench.dev-timestamp .dev-timestamp-datetime-clear {
   position: absolute;
