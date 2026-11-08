@@ -135,11 +135,11 @@
   display: none !important;
 }
 .dev-workbench.dev-timestamp .dev-timestamp-overview-results {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: repeat(2, minmax(142px, auto));
-  align-items: stretch;
-  gap: 8px;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: repeat(2, minmax(142px, auto)) !important;
+  align-items: stretch !important;
+  gap: 8px !important;
 }
 .dev-workbench.dev-timestamp .dev-timestamp-result-block {
   display: grid;
@@ -283,8 +283,9 @@
     gap: 8px;
   }
   .dev-workbench.dev-timestamp .dev-timestamp-overview-results {
-    grid-template-rows: auto auto;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: 8px !important;
   }
   .dev-workbench.dev-timestamp .dev-timestamp-result-block {
     min-height: 0;
