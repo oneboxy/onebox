@@ -1,0 +1,11 @@
+/* Remove purple focus rings from every select while preserving keyboard focus. */
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  border-color: var(--line) !important;
+}
+select {
+  -webkit-tap-highlight-color: transparent;
+}
