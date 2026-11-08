@@ -333,3 +333,177 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Quiet, page-matched custom time picker. */
+.dev-workbench.dev-timestamp .dev-timestamp-time-picker {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  min-height: 42px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: none;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-trigger:hover {
+  border-color: color-mix(in srgb, var(--muted) 45%, var(--line));
+  background: var(--panel);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-trigger:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-time-option:focus-visible,
+.dev-workbench.dev-timestamp [data-time-picker-done]:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--muted) 40%, transparent);
+  outline-offset: 1px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-value {
+  overflow: hidden;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  font-weight: 550;
+  letter-spacing: .025em;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-trigger svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.7;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-popover {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 7px);
+  right: 0;
+  box-sizing: border-box;
+  width: min(304px, calc(100vw - 32px));
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 10px 28px rgb(25 35 55 / 12%);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-popover[hidden] {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-time-control.opens-up .dev-timestamp-time-popover {
+  top: auto;
+  bottom: calc(100% + 7px);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-popover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 30px;
+  margin: 0 0 8px;
+  padding: 0 2px 7px;
+  border-bottom: 1px solid var(--line);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-popover-head strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp [data-time-picker-done] {
+  min-height: 30px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.dev-workbench.dev-timestamp [data-time-picker-done]:hover {
+  background: color-mix(in srgb, var(--muted) 7%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-column {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-column > span {
+  padding: 0 0 3px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-list {
+  height: 180px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 3px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--line) 20%, var(--panel));
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 30%, transparent) transparent;
+  scroll-snap-type: y proximity;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-option {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 32px;
+  margin: 0 0 2px;
+  padding: 4px 2px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  cursor: pointer;
+  scroll-snap-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-option:hover {
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-time-option.is-selected {
+  background: color-mix(in srgb, var(--muted) 14%, var(--panel));
+  color: var(--ink);
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-time-popover {
+    width: min(304px, calc(100vw - 32px));
+    padding: 9px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-time-list {
+    height: 190px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-time-option {
+    min-height: 36px;
+  }
+}
