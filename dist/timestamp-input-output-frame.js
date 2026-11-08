@@ -78,7 +78,7 @@
               }
               const unitSelect = timestampRow.querySelector('select');
               const unitHint = ((unitSelect?.value || '') + ' ' + (unitSelect?.selectedOptions?.[0]?.textContent || '')).toLowerCase();
-              const milliseconds = /毫秒|milli|\\bms\\b/.test(unitHint);
+              const milliseconds = /毫秒|milli|(^|[^a-z])ms([^a-z]|$)/.test(unitHint);
               timestampInput.value = String(milliseconds ? Date.now() : Math.floor(Date.now() / 1000));
               timestampInput.dispatchEvent(new Event('input', { bubbles: true }));
               timestampInput.dispatchEvent(new Event('change', { bubbles: true }));
