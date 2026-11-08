@@ -99,7 +99,8 @@
     const original = document.querySelector(inputSelector);
     const row = original?.closest('.dev-timestamp-input-row');
     if (!original || !row) return;
-    enhanceUnitSelect(row);
+    const unitRow = document.querySelector('.dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-row') || row;
+    enhanceUnitSelect(unitRow);
     if (original.dataset.splitPickerReady === 'true') return;
 
     const english = /^en(?:-|$)/i.test(document.documentElement.lang || '');
