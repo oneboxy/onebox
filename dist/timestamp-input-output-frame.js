@@ -58,12 +58,38 @@
             button.innerHTML = svg;
             shell.appendChild(button);
           };
-          setupIcon(nowButton, 'now', '当前时间', '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>');
-          setupIcon(clearButton, 'clear', '清空', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>');
+          setupIcon(nowButton, 'now', '当前时间', '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="M12 7.25v4.9l3.35 1.95"/></svg>');
+          setupIcon(clearButton, 'clear', '清空', '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.25"/><path d="m9.2 9.2 5.6 5.6m0-5.6-5.6 5.6"/></svg>');
+          let currentTimeTimer = 0;
+          let writingCurrentTime = false;
+          const writeCurrentTime = () => {
+            if (!timestampInput.isConnected) {
+              if (currentTimeTimer) window.clearInterval(currentTimeTimer);
+              currentTimeTimer = 0;
+              return;
+            }
+            const unitSelect = timestampRow.querySelector('select');
+            const unitHint = ((unitSelect?.value || '') + ' ' + (unitSelect?.selectedOptions?.[0]?.textContent || '')).toLowerCase();
+            const milliseconds = /毫秒|milli|(^|[^a-z])ms([^a-z]|$)/.test(unitHint);
+            writingCurrentTime = true;
+            timestampInput.value = String(milliseconds ? Date.now() : Math.floor(Date.now() / 1000));
+            timestampInput.dispatchEvent(new Event('input', { bubbles: true }));
+            timestampInput.dispatchEvent(new Event('change', { bubbles: true }));
+            writingCurrentTime = false;
+          };
           const setNowSelected = (selected) => {
             if (nowButton) {
               nowButton.setAttribute('aria-pressed', String(selected));
               nowButton.classList.toggle('is-selected', selected);
+            }
+            if (selected) {
+              if (!currentTimeTimer) {
+                writeCurrentTime();
+                currentTimeTimer = window.setInterval(writeCurrentTime, 1000);
+              }
+            } else if (currentTimeTimer) {
+              window.clearInterval(currentTimeTimer);
+              currentTimeTimer = 0;
             }
           };
           if (nowButton && nowButton.dataset.toggleReady !== 'true') {
@@ -72,20 +98,18 @@
             nowButton.addEventListener('click', (event) => {
               event.preventDefault();
               event.stopImmediatePropagation();
-              if (nowButton.getAttribute('aria-pressed') === 'true') {
-                setNowSelected(false);
-                return;
-              }
-              const unitSelect = timestampRow.querySelector('select');
-              const unitHint = ((unitSelect?.value || '') + ' ' + (unitSelect?.selectedOptions?.[0]?.textContent || '')).toLowerCase();
-              const milliseconds = /毫秒|milli|(^|[^a-z])ms([^a-z]|$)/.test(unitHint);
-              timestampInput.value = String(milliseconds ? Date.now() : Math.floor(Date.now() / 1000));
-              timestampInput.dispatchEvent(new Event('input', { bubbles: true }));
-              timestampInput.dispatchEvent(new Event('change', { bubbles: true }));
-              setNowSelected(true);
+              setNowSelected(nowButton.getAttribute('aria-pressed') !== 'true');
             }, true);
-            timestampInput.addEventListener('input', () => setNowSelected(false));
-            timestampInput.addEventListener('change', () => setNowSelected(false));
+            timestampInput.addEventListener('input', () => {
+              if (!writingCurrentTime) setNowSelected(false);
+            });
+            timestampInput.addEventListener('change', () => {
+              if (!writingCurrentTime) setNowSelected(false);
+            });
+            const unitSelect = timestampRow.querySelector('select');
+            unitSelect?.addEventListener('change', () => {
+              if (nowButton.getAttribute('aria-pressed') === 'true') writeCurrentTime();
+            });
           }
           if (clearButton && clearButton.dataset.clearToggleReady !== 'true') {
             clearButton.dataset.clearToggleReady = 'true';
