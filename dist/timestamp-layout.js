@@ -21,7 +21,7 @@
       .dev-timestamp-country-header-cell {
         box-sizing: border-box; min-width: 0; border: 1px solid var(--line, #dce2ee) !important;
         border-bottom: 0 !important; border-radius: 10px 10px 0 0 !important; background: var(--panel, #fff) !important;
-        padding: 0 10px !important; gap: 7px; transition: box-shadow .18s ease, transform .18s ease;
+        padding: 0 10px !important; gap: 4px; transition: box-shadow .18s ease, transform .18s ease;
       }
       .dev-timestamp-country-header-cell.is-empty-country { border-bottom: 1px solid var(--line, #dce2ee) !important; border-radius: 10px !important; }
       .dev-timestamp-country-header-cell.is-dragging,
@@ -40,7 +40,7 @@
       .dev-timestamp-country-name { flex: 0 0 auto; }
       .dev-timestamp-country-add { flex: 0 0 auto; margin-left: auto; }
       .dev-timestamp-country-grip { flex: 0 0 auto; }
-      .dev-timestamp-expand-cities { flex: 0 0 23px; margin-left: 0; }
+      .dev-timestamp-country-header-cell .dev-timestamp-expand-cities { flex: 0 0 23px; margin-left: 0 !important; }
       .dev-timestamp-expand-cities { opacity: .82; cursor: pointer; }
       .dev-timestamp-expand-cities:hover { opacity: 1; color: var(--accent); }
       .dev-timestamp-city-cell.is-country-cities-collapsed { visibility: hidden !important; pointer-events: none !important; }
