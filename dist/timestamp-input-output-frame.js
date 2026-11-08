@@ -51,19 +51,7 @@
       inputHead.remove();
     }
 
-    if (outputHead) {
-      const actions = outputHead.querySelector('.dev-pane-actions');
-      if (actions?.children.length) {
-        let toolbar = input.querySelector('.dev-timestamp-shared-actions');
-        if (!toolbar) {
-          toolbar = document.createElement('div');
-          toolbar.className = 'dev-timestamp-shared-actions';
-          input.insertBefore(toolbar, inputGrid || input.firstChild);
-        }
-        while (actions.firstChild) toolbar.appendChild(actions.firstChild);
-      }
-      outputHead.remove();
-    }
+    if (outputHead) outputHead.remove();
 
     resultBlocks.slice(0, cards.length).forEach((block, index) => {
       const heading = block.querySelector(':scope > h4');
