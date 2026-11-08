@@ -1,29 +1,21 @@
 (function () {
   'use strict';
   const scope = '.dev-workbench.dev-timestamp';
-  if (!document.getElementById('timestamp-input-output-frame-style')) {
+  const styleId = 'timestamp-input-output-frame-style';
+  if (!document.getElementById(styleId)) {
     const style = document.createElement('style');
-    style.id = 'timestamp-input-output-frame-style';
-    style.textContent = [
-      scope + ' .dev-timestamp-content { grid-template-columns:minmax(0,1fr)!important; grid-auto-rows:max-content!important; align-content:start!important; gap:12px; }',
-      scope + ' .dev-timestamp-input-output-frame { display:grid; grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr); align-items:start; gap:24px; width:100%; min-width:0; box-sizing:border-box; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }',
-      scope + ' .dev-timestamp-input-output-frame > .dev-timestamp-card, ' + scope + ' .dev-timestamp-input-output-frame > .dev-timestamp-output-card { box-sizing:border-box; width:100%; min-width:0; margin:0; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; }',
-      scope + ' .dev-timestamp-input-output-frame > .dev-timestamp-card { padding-right:0!important; border-right:0!important; }',
-      '@media(max-width:760px){' +
-        scope + ' .dev-timestamp-content{gap:9px!important}' +
-        scope + ' .dev-timestamp-input-output-frame{grid-template-columns:minmax(0,1fr);gap:14px;padding:0;border:0;border-radius:0;background:transparent}' +
-        scope + ' .dev-timestamp-input-output-frame > .dev-timestamp-card{padding:0 0 14px!important;border-right:0!important;border-bottom:1px solid var(--line)!important}' +
-        scope + ' .dev-timestamp-input-output-frame > .dev-timestamp-output-card{padding-top:2px!important}' +
-      '}'
-    ].join('\n');
+    style.id = styleId;
+    style.textContent =
+      scope + ' .dev-timestamp-content { display:grid; grid-template-columns:minmax(0,1fr)!important; grid-auto-rows:max-content!important; align-content:start!important; gap:12px!important; }' +
+      scope + ' .dev-timestamp-input-output-frame { display:block; width:100%; min-width:0; box-sizing:border-box; padding:0; border:0; background:transparent; box-shadow:none; }';
     document.head.appendChild(style);
   }
-  function wrap() {
+  function pairGroups() {
     const content = document.querySelector(scope + ' .dev-timestamp-content');
     if (!content) return;
     const input = content.querySelector('.dev-timestamp-card');
     const output = content.querySelector('.dev-timestamp-output-card');
-    if (!input || !output) return;
+    if (!input) return;
     let frame = content.querySelector(':scope > .dev-timestamp-input-output-frame');
     if (!frame) {
       frame = document.createElement('div');
@@ -31,10 +23,65 @@
       content.insertBefore(frame, input);
     }
     if (input.parentElement !== frame) frame.appendChild(input);
-    if (output.parentElement !== frame) frame.appendChild(output);
+    if (output && output.parentElement !== frame) frame.appendChild(output);
+    if (!output || input.dataset.pairedLayout === 'true') return;
+
+    const inputGrid = input.querySelector('.dev-timestamp-input-grid');
+    const cards = Array.from(input.querySelectorAll('.dev-timestamp-input-card'));
+    const resultBlocks = Array.from(output.querySelectorAll('.dev-timestamp-overview-results > .dev-timestamp-result-block'));
+    const inputHead = input.querySelector('.dev-timestamp-input-head');
+    const outputHead = output.querySelector(':scope > .dev-pane-head');
+
+    if (inputHead) {
+      const buttons = Array.from(inputHead.querySelectorAll('button'));
+      const timestampCard = cards.find((card) => /时间戳|timestamp/i.test(card.textContent || '')) || cards[0];
+      const timestampRow = timestampCard?.querySelector('.dev-timestamp-input-row:not(.dev-timestamp-date-row)');
+      if (timestampRow && buttons.length) {
+        let actionGroup = timestampRow.querySelector('.dev-timestamp-inline-actions');
+        if (!actionGroup) {
+          actionGroup = document.createElement('div');
+          actionGroup.className = 'dev-timestamp-inline-actions';
+          timestampRow.appendChild(actionGroup);
+        }
+        buttons.forEach((button) => {
+          const text = (button.textContent || '').trim();
+          if (/当前时间|现在|now|current/i.test(text) || /清空|clear/i.test(text)) actionGroup.appendChild(button);
+        });
+      }
+      inputHead.remove();
+    }
+
+    if (outputHead) {
+      const actions = outputHead.querySelector('.dev-pane-actions');
+      if (actions?.children.length) {
+        let toolbar = input.querySelector('.dev-timestamp-shared-actions');
+        if (!toolbar) {
+          toolbar = document.createElement('div');
+          toolbar.className = 'dev-timestamp-shared-actions';
+          input.insertBefore(toolbar, inputGrid || input.firstChild);
+        }
+        while (actions.firstChild) toolbar.appendChild(actions.firstChild);
+      }
+      outputHead.remove();
+    }
+
+    resultBlocks.slice(0, cards.length).forEach((block, index) => {
+      const heading = block.querySelector(':scope > h4');
+      if (heading) heading.remove();
+      cards[index].appendChild(block);
+    });
+    if (inputGrid) inputGrid.dataset.paired = 'true';
+    input.dataset.pairedLayout = 'true';
+    output.remove();
   }
-  const observer = new MutationObserver(() => requestAnimationFrame(wrap));
+  let scheduled = false;
+  const schedule = () => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; pairGroups(); });
+  };
+  const observer = new MutationObserver(schedule);
   observer.observe(document.documentElement, { childList:true, subtree:true });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wrap, { once:true });
-  else wrap();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
 })();
