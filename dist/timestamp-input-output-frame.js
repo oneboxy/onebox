@@ -70,19 +70,33 @@
             nowButton.dataset.toggleReady = 'true';
             nowButton.setAttribute('aria-pressed', 'false');
             nowButton.addEventListener('click', (event) => {
+              event.preventDefault();
+              event.stopImmediatePropagation();
               if (nowButton.getAttribute('aria-pressed') === 'true') {
-                event.preventDefault();
-                event.stopImmediatePropagation();
                 setNowSelected(false);
+                return;
               }
+              const unitSelect = timestampRow.querySelector('select');
+              const unitHint = ((unitSelect?.value || '') + ' ' + (unitSelect?.selectedOptions?.[0]?.textContent || '')).toLowerCase();
+              const milliseconds = /毫秒|milli|\\bms\\b/.test(unitHint);
+              timestampInput.value = String(milliseconds ? Date.now() : Math.floor(Date.now() / 1000));
+              timestampInput.dispatchEvent(new Event('input', { bubbles: true }));
+              timestampInput.dispatchEvent(new Event('change', { bubbles: true }));
+              setNowSelected(true);
             }, true);
-            nowButton.addEventListener('click', () => requestAnimationFrame(() => setNowSelected(true)));
             timestampInput.addEventListener('input', () => setNowSelected(false));
             timestampInput.addEventListener('change', () => setNowSelected(false));
           }
           if (clearButton && clearButton.dataset.clearToggleReady !== 'true') {
             clearButton.dataset.clearToggleReady = 'true';
-            clearButton.addEventListener('click', () => setNowSelected(false));
+            clearButton.addEventListener('click', (event) => {
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              timestampInput.value = '';
+              timestampInput.dispatchEvent(new Event('input', { bubbles: true }));
+              timestampInput.dispatchEvent(new Event('change', { bubbles: true }));
+              setNowSelected(false);
+            }, true);
           }
         }
       }
