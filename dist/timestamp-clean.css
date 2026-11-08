@@ -507,3 +507,266 @@
     min-height: 36px;
   }
 }
+
+
+/* Matching date calendar and a compact unit selector for the timestamp form. */
+.dev-workbench.dev-timestamp .dev-timestamp-input-row:not(.dev-timestamp-date-row) {
+  max-width: 560px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-native {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-picker,
+.dev-workbench.dev-timestamp .dev-timestamp-date-picker {
+  position: relative;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-picker {
+  width: 112px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-trigger,
+.dev-workbench.dev-timestamp .dev-timestamp-date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: none;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-trigger:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-date-trigger:hover {
+  border-color: color-mix(in srgb, var(--muted) 45%, var(--line));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-trigger svg {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-menu {
+  position: absolute;
+  z-index: 90;
+  top: calc(100% + 6px);
+  right: 0;
+  width: max(100%, 148px);
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 10px 28px rgb(25 35 55 / 12%);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-menu[hidden] {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-picker.opens-up .dev-timestamp-unit-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-option {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-option:hover,
+.dev-workbench.dev-timestamp .dev-timestamp-unit-option[aria-selected="true"] {
+  background: color-mix(in srgb, var(--muted) 10%, var(--panel));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-trigger {
+  height: 42px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-value {
+  overflow: hidden;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-trigger svg {
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover {
+  position: absolute;
+  z-index: 85;
+  top: calc(100% + 7px);
+  right: 0;
+  box-sizing: border-box;
+  width: min(304px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 10px 28px rgb(25 35 55 / 12%);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover[hidden] {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-picker.opens-up .dev-timestamp-date-popover {
+  top: auto;
+  bottom: calc(100% + 7px);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-head {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-head strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav:hover {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--muted) 7%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-weekdays,
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-weekdays {
+  margin-bottom: 4px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-weekdays span {
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day:hover {
+  background: color-mix(in srgb, var(--muted) 9%, var(--panel));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day.is-outside-month {
+  color: color-mix(in srgb, var(--muted) 55%, var(--panel));
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day.is-today {
+  border-color: var(--line);
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day.is-selected {
+  border-color: color-mix(in srgb, var(--muted) 28%, var(--line));
+  background: color-mix(in srgb, var(--muted) 14%, var(--panel));
+  color: var(--ink);
+  font-weight: 600;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-foot button {
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-foot button:hover {
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-unit-trigger:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-unit-option:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-date-trigger:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-nav:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-calendar-day:focus-visible,
+.dev-workbench.dev-timestamp .dev-timestamp-date-popover-foot button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--muted) 40%, transparent);
+  outline-offset: 1px;
+}
+@media (max-width: 700px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-input-row:not(.dev-timestamp-date-row) {
+    max-width: none;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-unit-picker {
+    width: 104px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-date-popover {
+    width: min(304px, calc(100vw - 32px));
+    padding: 10px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-calendar-day {
+    min-height: 38px;
+  }
+}
