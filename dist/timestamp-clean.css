@@ -2248,3 +2248,58 @@
     column-gap: 6px !important;
   }
 }
+
+/* Compact wide timestamp fields and keep each result tile close to its content. */
+@media (min-width: 1201px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    box-sizing: border-box;
+    width: min(100%, 1154px) !important;
+    max-width: 1154px !important;
+    margin-inline: auto !important;
+    grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr) !important;
+    column-gap: 16px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field {
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+}
+@media (min-width: 901px) and (max-width: 1200px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+    grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr) !important;
+    column-gap: 10px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field {
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+}
+@media (min-width: 521px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    box-sizing: border-box;
+    width: fit-content !important;
+    max-width: 100% !important;
+    justify-self: start !important;
+    grid-template-columns: max-content minmax(0, max-content) 24px !important;
+    column-gap: 8px !important;
+    padding-inline: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy {
+    justify-self: start !important;
+  }
+}
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    width: 100% !important;
+    grid-template-columns: minmax(96px, 122px) minmax(0, 1fr) 24px !important;
+    column-gap: 8px !important;
+  }
+}
