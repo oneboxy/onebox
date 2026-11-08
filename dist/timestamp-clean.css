@@ -770,3 +770,9 @@
     min-height: 38px;
   }
 }
+
+/* Position each picker relative to its own compact trigger. */
+.dev-workbench.dev-timestamp .dev-timestamp-time-picker.opens-up .dev-timestamp-time-popover {
+  top: auto;
+  bottom: calc(100% + 7px);
+}
