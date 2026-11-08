@@ -124,10 +124,8 @@
       const formatted = String(value).padStart(2, '0');
       return '<button type="button" role="option" aria-selected="false" class="dev-timestamp-time-option" data-time-part="' + part + '" data-time-value="' + formatted + '">' + formatted + '</button>';
     }).join('');
-    const dateLabel = english ? 'Date' : '日期';
-    const timeLabel = english ? 'Time' : '时间';
     wrapper.innerHTML =
-      '<div class="dev-timestamp-date-part"><span>' + dateLabel + '</span>' +
+      '<div class="dev-timestamp-date-part">' +
         '<div class="dev-timestamp-date-picker">' +
           '<button type="button" class="dev-timestamp-date-trigger" data-date-picker-toggle aria-haspopup="dialog" aria-expanded="false">' +
             '<span class="dev-timestamp-date-value"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M4 9h16"/></svg>' +
@@ -144,7 +142,7 @@
           '<input type="date" class="dev-timestamp-native-date" data-timestamp-date-part="date" tabindex="-1" aria-hidden="true">' +
         '</div>' +
       '</div>' +
-      '<div class="dev-timestamp-time-part"><span>' + timeLabel + '</span>' +
+      '<div class="dev-timestamp-time-part">' +
         '<div class="dev-timestamp-time-picker">' +
           '<button type="button" class="dev-timestamp-time-trigger" data-time-picker-toggle aria-haspopup="dialog" aria-expanded="false">' +
             '<span class="dev-timestamp-time-value">00:00:00</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>' +
