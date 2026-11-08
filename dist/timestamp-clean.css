@@ -1852,3 +1852,293 @@
     min-height: 64px !important;
   }
 }
+
+/* Tight inline labels, symmetric swap, and input actions. */
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+  grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr) !important;
+  gap: 0 !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field {
+  grid-template-columns: max-content minmax(0, 1fr) !important;
+  gap: 6px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-label {
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-swap {
+  justify-self: center !important;
+  align-self: center !important;
+  margin: 0 auto !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp > .dev-timestamp-input-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center;
+  gap: 8px !important;
+  width: 100%;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell {
+  grid-column: 1;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+  height: 44px;
+  min-height: 44px;
+  padding-right: 142px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-picker {
+  top: 50% !important;
+  right: 39px !important;
+  width: 86px !important;
+  transform: translateY(-50%);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger {
+  height: 30px;
+  min-height: 30px;
+  padding: 4px 5px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger:hover {
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-clear {
+  right: 5px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 5px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-input-shell .dev-timestamp-field-icon.is-now {
+  display: none !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-live-button {
+  display: inline-flex !important;
+  grid-column: 2;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  min-width: 112px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--muted);
+  box-shadow: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-live-button svg {
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-live-button:hover {
+  border-color: color-mix(in srgb, var(--muted) 40%, var(--line));
+  background: color-mix(in srgb, var(--muted) 5%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-live-button.is-selected,
+.dev-workbench.dev-timestamp .dev-timestamp-live-button[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+  background: color-mix(in srgb, var(--accent) 9%, var(--panel));
+  color: var(--accent);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-live-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--muted) 35%, transparent);
+  outline-offset: 2px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-date-time-control {
+  display: block !important;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-trigger {
+  padding-right: 76px;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-clear {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 39px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  transform: translateY(-50%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-clear:hover {
+  background: color-mix(in srgb, var(--muted) 9%, var(--panel));
+  color: var(--ink);
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-clear svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+  grid-template-columns: minmax(112px, 142px) minmax(0, 1fr) 26px !important;
+  grid-template-rows: auto !important;
+  align-items: center !important;
+  column-gap: 9px !important;
+  min-height: 44px !important;
+  padding: 7px 8px !important;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 3px !important;
+}
+@media (max-width: 900px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 760px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr) !important;
+    gap: 0 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-live-button {
+    min-width: 0;
+    width: 100%;
+    grid-column: 1 / -1;
+    height: 36px;
+    min-height: 36px;
+    margin-top: 6px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field,
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .dev-timestamp-bidirectional-field {
+    grid-column: 1 !important;
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    transform: rotate(90deg);
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-timestamp {
+    grid-row: 1 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.is-reversed > .is-datetime {
+    grid-row: 3 !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 6px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-live-button {
+    grid-column: 2;
+    width: auto;
+    min-width: 94px;
+    height: 44px;
+    min-height: 44px;
+    margin: 0;
+    padding-inline: 8px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    padding-right: 126px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    grid-template-columns: minmax(112px, 128px) minmax(0, 1fr) 24px !important;
+    min-height: 42px !important;
+    padding: 6px !important;
+  }
+}
+@media (max-width: 380px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    gap: 4px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-live-button {
+    min-width: 84px;
+    font-size: 11px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    padding-right: 120px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    grid-template-columns: minmax(104px, 118px) minmax(0, 1fr) 22px !important;
+  }
+}
