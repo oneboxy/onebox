@@ -2142,3 +2142,27 @@
     grid-template-columns: minmax(104px, 118px) minmax(0, 1fr) 22px !important;
   }
 }
+
+@media (max-width: 520px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp > .dev-timestamp-input-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    padding-right: 126px !important;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-live-button {
+    grid-column: 1;
+    justify-self: start;
+    width: auto;
+    min-width: 104px;
+  }
+  .dev-workbench.dev-timestamp .dev-timestamp-datetime-clear:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--muted) 35%, transparent);
+    outline-offset: 2px;
+  }
+}
+@media (max-width: 380px) {
+  .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    padding-right: 120px !important;
+  }
+}
