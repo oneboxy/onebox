@@ -21,9 +21,13 @@
       .converter-select-menu {
         position: fixed; z-index: 10050; box-sizing: border-box; max-width: calc(100vw - 24px);
         max-height: min(280px, calc(100dvh - 24px)); overflow: auto; overscroll-behavior: contain;
+        scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 36%, transparent) transparent;
         padding: 4px; border: 1px solid var(--line); border-radius: 10px;
         background: var(--panel); color: var(--ink); box-shadow: 0 10px 28px rgb(15 23 42 / .14);
       }
+      .converter-select-menu::-webkit-scrollbar { width: 5px; height: 5px; }
+      .converter-select-menu::-webkit-scrollbar-track { background: transparent; }
+      .converter-select-menu::-webkit-scrollbar-thumb { border: 1px solid transparent; border-radius: 99px; background: color-mix(in srgb, var(--muted) 36%, transparent); background-clip: padding-box; }
       .converter-select-option {
         display: block; box-sizing: border-box; width: 100%; min-height: 34px; padding: 7px 10px;
         border: 0; border-radius: 6px; background: transparent; color: var(--ink);
