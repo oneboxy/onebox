@@ -301,3 +301,29 @@
   grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr);
   gap: 6px;
 }
+
+
+/* Fit unit controls to their labels so the value field uses the freed width. */
+#workspace[data-tool="dev"] .converter-panel .conversion-field {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 5px;
+}
+#workspace[data-tool="dev"] .converter-panel .converter-select-wrap {
+  width: fit-content;
+  max-width: 100%;
+}
+#workspace[data-tool="dev"] .converter-panel .converter-select-trigger {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  justify-content: flex-start;
+  gap: 6px;
+  padding-inline: 7px;
+  white-space: nowrap;
+}
+#workspace[data-tool="dev"] .converter-panel .converter-select-trigger-label {
+  flex: 0 0 auto;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
