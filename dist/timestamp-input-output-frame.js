@@ -88,11 +88,13 @@
           timer = 0;
           return;
         }
+        const now = Date.now();
         const milliseconds = /毫秒|milli|(^|[^a-z])ms([^a-z]|$)/.test(unitHint());
         writingNow = true;
-        timestampInput.value = String(milliseconds ? Date.now() : Math.floor(Date.now() / 1000));
+        timestampInput.value = String(milliseconds ? now : Math.floor(now / 1000));
+        dateInput.value = localDateTime(new Date(now));
         timestampInput.dispatchEvent(new Event('input', { bubbles: true }));
-        timestampInput.dispatchEvent(new Event('change', { bubbles: true }));
+        dateInput.dispatchEvent(new Event('input', { bubbles: true }));
         writingNow = false;
       };
       const selectNow = (selected) => {
