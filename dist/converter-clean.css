@@ -291,3 +291,13 @@
   min-height: 24px;
   padding: 0;
 }
+
+
+/* Remove redundant field captions; the controls identify their own roles. */
+#workspace[data-tool="dev"] .converter-panel .conversion-inline-label {
+  display: none !important;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field {
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr);
+  gap: 6px;
+}
