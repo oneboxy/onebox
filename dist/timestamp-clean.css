@@ -2806,3 +2806,14 @@
     margin-bottom: -12px !important;
   }
 }
+/* Compact time inputs in the custom calendar popup. */
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs {
+  align-items: center;
+}
+.dev-workbench.dev-timestamp .dev-timestamp-datetime-time-inputs label {
+  display: block;
+}
