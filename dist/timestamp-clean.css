@@ -2741,3 +2741,25 @@
     column-gap: 4px !important;
   }
 }
+
+/* Final borderless timestamp city actions, on every country card. */
+#workspace[data-tool="dev"] .dev-timestamp-country-header-cell button.dev-timestamp-country-add,
+#workspace[data-tool="dev"] .dev-timestamp-country-header-cell button.dev-timestamp-expand-cities,
+#workspace[data-tool="dev"] .dev-timestamp-city-actions button.dev-timestamp-city-copy,
+#workspace[data-tool="dev"] .dev-timestamp-city-actions button.dev-timestamp-city-delete,
+#workspace[data-tool="dev"] .dev-timestamp-city-card button.dev-timestamp-city-copy {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+#workspace[data-tool="dev"] .dev-timestamp-country-header-cell button.dev-timestamp-country-add:hover,
+#workspace[data-tool="dev"] .dev-timestamp-country-header-cell button.dev-timestamp-country-add:focus-visible,
+#workspace[data-tool="dev"] .dev-timestamp-country-header-cell button.dev-timestamp-expand-cities:hover,
+#workspace[data-tool="dev"] .dev-timestamp-country-header-cell button.dev-timestamp-expand-cities:focus-visible,
+#workspace[data-tool="dev"] .dev-timestamp-city-actions button.dev-timestamp-city-copy:hover,
+#workspace[data-tool="dev"] .dev-timestamp-city-actions button.dev-timestamp-city-delete:hover,
+#workspace[data-tool="dev"] .dev-timestamp-city-card button.dev-timestamp-city-copy:hover {
+  border: none !important;
+  outline: none !important;
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel)) !important;
+}
