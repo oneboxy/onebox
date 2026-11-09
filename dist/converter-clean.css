@@ -252,3 +252,9 @@
     font-size: 16px;
   }
 }
+
+@media (min-width: 641px) and (max-width: 899px) {
+  #workspace[data-tool="dev"] .converter-panel .conversion-rows {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
