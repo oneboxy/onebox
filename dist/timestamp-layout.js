@@ -71,8 +71,8 @@
         margin: 0 !important; background: rgb(17 19 26 / .28) !important; backdrop-filter: blur(2px);
       }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form {
-        box-sizing: border-box; display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 7px;
-        width: min(100%, 400px); padding: 4px; border: 1px solid var(--line);
+        box-sizing: border-box; display: grid !important; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px;
+        width: min(100%, 320px); padding: 4px; border: 1px solid var(--line);
         border-radius: 10px; background: color-mix(in srgb, var(--soft) 10%, var(--panel));
         color: var(--ink); box-shadow: var(--shadow);
       }
@@ -87,6 +87,16 @@
         color: var(--ink); font: inherit; font-size: 12px;
       }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-country-select { grid-column: 1 / -1; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form > button:first-of-type { grid-column: 2; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form > button:last-of-type { grid-column: 3; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form > button { width: auto; min-width: 64px; padding-inline: 10px; justify-self: end; }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-country-select:focus,
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form input:focus {
+        outline: none !important; box-shadow: none !important; border-color: var(--line) !important;
+      }
+      .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-form > button:focus-visible {
+        outline: none !important; box-shadow: none !important;
+      }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-search-wrap { position: relative; grid-column: 1 / -1; min-width: 0; }
       .dev-timestamp-city-form-row.is-modal .dev-timestamp-city-search-wrap > input { width: 100%; }
       .dev-timestamp-city-search-results {
@@ -250,8 +260,8 @@
     modal.style.setProperty('backdrop-filter', 'blur(2px)', 'important');
     const panel = modal.querySelector('.dev-timestamp-city-form');
     if (!panel) return;
-    panel.style.setProperty('flex', '0 1 400px', 'important');
-    panel.style.setProperty('width', 'min(100%, 400px)', 'important');
+    panel.style.setProperty('flex', '0 1 320px', 'important');
+    panel.style.setProperty('width', 'min(100%, 320px)', 'important');
     panel.style.setProperty('max-height', 'calc(100dvh - 80px)', 'important');
     panel.style.setProperty('overflow-y', 'auto', 'important');
   };
