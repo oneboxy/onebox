@@ -138,7 +138,7 @@
         }
         #workspace[data-tool="development"] .dev-mode-tab {
           flex: 1 0 auto; min-height: 38px; padding: 7px 6px; border-radius: 0;
-          font-size: 11px; white-space: nowrap;
+          font-size: 14px; white-space: nowrap;
         }
         #workspace[data-tool="development"] .dev-workbench.dev-timestamp { gap: 6px; }
         .dev-timestamp-mode-bar {
