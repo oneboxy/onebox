@@ -2788,3 +2788,21 @@
   border: 0 !important;
   box-shadow: none !important;
 }
+
+/* Extend the converter frame to the same horizontal and lower edges as city cards. */
+#workspace[data-tool="dev"] .dev-timestamp-input-output-frame > .dev-timestamp-card > .dev-timestamp-bidirectional {
+  box-sizing: border-box !important;
+  width: calc(100% + 28px) !important;
+  max-width: none !important;
+  margin-left: -14px !important;
+  margin-right: -14px !important;
+  margin-bottom: -14px !important;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame > .dev-timestamp-card > .dev-timestamp-bidirectional {
+    width: calc(100% + 24px) !important;
+    margin-left: -12px !important;
+    margin-right: -12px !important;
+    margin-bottom: -12px !important;
+  }
+}
