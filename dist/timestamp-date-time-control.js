@@ -122,13 +122,12 @@
         '</header>' +
         '<div class="dev-timestamp-calendar-weekdays"></div><div class="dev-timestamp-calendar-days"></div>' +
         '<div class="dev-timestamp-datetime-time">' +
-          '<span class="dev-timestamp-datetime-time-label">' + (english ? 'Time' : '时间') + '</span>' +
           '<div class="dev-timestamp-datetime-time-inputs">' +
-            '<label><span>' + (english ? 'Hour' : '时') + '</span><input type="number" min="0" max="23" step="1" inputmode="numeric" data-datetime-part="hour" aria-label="' + (english ? 'Hour' : '小时') + '"></label>' +
+            '<label><input type="number" min="0" max="23" step="1" inputmode="numeric" data-datetime-part="hour" aria-label="' + (english ? 'Hour' : '小时') + '"></label>' +
             '<b aria-hidden="true">:</b>' +
-            '<label><span>' + (english ? 'Minute' : '分') + '</span><input type="number" min="0" max="59" step="1" inputmode="numeric" data-datetime-part="minute" aria-label="' + (english ? 'Minute' : '分钟') + '"></label>' +
+            '<label><input type="number" min="0" max="59" step="1" inputmode="numeric" data-datetime-part="minute" aria-label="' + (english ? 'Minute' : '分钟') + '"></label>' +
             '<b aria-hidden="true">:</b>' +
-            '<label><span>' + (english ? 'Second' : '秒') + '</span><input type="number" min="0" max="59" step="1" inputmode="numeric" data-datetime-part="second" aria-label="' + (english ? 'Second' : '秒') + '"></label>' +
+            '<label><input type="number" min="0" max="59" step="1" inputmode="numeric" data-datetime-part="second" aria-label="' + (english ? 'Second' : '秒') + '"></label>' +
           '</div>' +
         '</div>' +
         '<footer class="dev-timestamp-datetime-foot">' +
