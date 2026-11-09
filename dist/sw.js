@@ -1,4 +1,4 @@
-const CACHE = 'onebox-v794';
+const CACHE = 'onebox-v795';
 const APP_SHELL = [
   './',
   'index.html',
@@ -13,16 +13,16 @@ const APP_SHELL = [
   'vendor/reader-formats/mobi.mjs?v=2.18.780',
   'vendor/reader-formats/fb2.mjs?v=2.18.780',
   'vendor/reader-formats/fflate.mjs?v=2.18.780',
-  'timestamp-layout.js?v=2.18.856',
+  'timestamp-layout.js?v=2.18.875',
   'timestamp-city-row.js?v=2.18.814',
   'timestamp-city-compact.js?v=2.18.821',
   'converter-clean.css?v=2.18.824',
   'dev-tabs.css?v=2.18.825',
-  'timestamp-clean.css?v=2.18.871',
+  'timestamp-clean.css?v=2.18.873',
   'select-focus-clean.css?v=2.18.828',
-    'timestamp-input-output-frame.js?v=2.18.869',
+    'timestamp-input-output-frame.js?v=2.18.874',
   'timestamp-city-auto-height.js?v=2.18.819',
-  'timestamp-date-time-control.js?v=2.18.840',
+  'timestamp-date-time-control.js?v=2.18.876',
   'timestamp-layout-restore.css?v=2.18.816',
   'pet-cloud-backup.js?v=2.18.761',
   'calendar-data.js?v=2.18.761',
