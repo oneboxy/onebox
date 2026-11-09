@@ -329,3 +329,5 @@
 }
 
 #workspace[data-tool="dev"] .converter-panel .conversion-result strong { font-weight: 400 !important; }
+
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong { color: var(--primary) !important; }
