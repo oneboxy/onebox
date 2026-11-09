@@ -392,6 +392,7 @@
   font-size: 13px !important;
 }
 #workspace[data-tool="dev"] .converter-panel .conversion-result > span {
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
 }
