@@ -2763,3 +2763,9 @@
   outline: none !important;
   background: color-mix(in srgb, var(--muted) 8%, var(--panel)) !important;
 }
+
+/* Add Chinese separators to the two bidirectional input labels. */
+#workspace[data-tool="dev"] .dev-timestamp-bidirectional-label::after {
+  content: "：";
+  margin-inline-start: 2px;
+}
