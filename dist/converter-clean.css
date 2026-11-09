@@ -331,3 +331,22 @@
 #workspace[data-tool="dev"] .converter-panel .conversion-result strong { font-weight: 400 !important; }
 
 #workspace[data-tool="dev"] .converter-panel .conversion-result strong { color: var(--primary) !important; }
+
+
+/* Show four conversion categories per desktop row; reduce columns on smaller screens. */
+#workspace[data-tool="dev"] .converter-panel .conversion-rows {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px;
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  #workspace[data-tool="dev"] .converter-panel .conversion-rows {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+}
+@media (max-width: 640px) {
+  #workspace[data-tool="dev"] .converter-panel .conversion-rows {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px;
+  }
+}
