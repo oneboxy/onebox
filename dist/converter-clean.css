@@ -327,3 +327,5 @@
   text-overflow: clip;
   white-space: nowrap;
 }
+
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong { font-weight: 400 !important; }
