@@ -350,3 +350,29 @@
     gap: 10px;
   }
 }
+
+
+/* Reserve a separate right-aligned lane for result units. */
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center;
+  gap: 4px;
+  padding-inline: 6px;
+  overflow: hidden;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong {
+  grid-column: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result > span {
+  grid-column: 2;
+  justify-self: end;
+  white-space: nowrap;
+  font-size: 11px;
+}
