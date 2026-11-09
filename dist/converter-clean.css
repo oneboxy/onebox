@@ -376,3 +376,22 @@
   white-space: nowrap;
   font-size: 11px;
 }
+
+
+/* Fit long conversion values to their cell instead of clipping them. */
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 2px;
+  padding-inline: 4px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  font-size: 13px !important;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result > span {
+  font-size: 10px;
+  white-space: nowrap;
+}
