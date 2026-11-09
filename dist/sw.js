@@ -1,4 +1,4 @@
-const CACHE = 'onebox-v808';
+const CACHE = 'onebox-v809';
 const APP_SHELL = [
   './',
   'index.html',
@@ -9,6 +9,7 @@ const APP_SHELL = [
   'converter-mobile-fix.js?v=2.18.810',
   'converter-select-popup.js?v=2.18.885',
   'converter-result-fit.js?v=2.18.891',
+  'converter-row-drag.js?v=2.18.893',
   'reader-enhancements-core.js?v=2.18.783',
   'reader-enhancements.js?v=2.18.785',
   'reader-enhancements.css?v=2.18.787',
