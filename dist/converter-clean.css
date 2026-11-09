@@ -258,3 +258,36 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* Keep result number, unit, and optional copy action in separate tracks. */
+#workspace[data-tool="dev"] .converter-panel .conversion-field {
+  grid-template-columns: 34px minmax(0, .9fr) minmax(0, 1.3fr);
+  gap: 5px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 3px;
+  padding-inline: 6px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result strong {
+  grid-column: 1;
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  font-size: 14px;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result > span {
+  grid-column: 2;
+  justify-self: end;
+  white-space: nowrap;
+}
+#workspace[data-tool="dev"] .converter-panel .conversion-result .conversion-copy {
+  grid-column: 3;
+  width: 16px;
+  min-width: 16px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+}
