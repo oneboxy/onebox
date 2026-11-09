@@ -27,8 +27,13 @@
     result.dataset.valueFitReady = 'true';
     const value = result.querySelector('strong');
     if (!value) return;
-    if (window.ResizeObserver) new ResizeObserver(() => schedule(result)).observe(result);
-    new MutationObserver(() => schedule(result)).observe(value, { childList: true, characterData: true, subtree: true });
+    if (window.ResizeObserver) {
+      const sizeObserver = new ResizeObserver(() => schedule(result));
+      sizeObserver.observe(result);
+      const unit = result.querySelector(':scope > span');
+      if (unit) sizeObserver.observe(unit);
+    }
+    new MutationObserver(() => schedule(result)).observe(result, { childList: true, characterData: true, subtree: true });
     schedule(result);
   };
   const patch = () => document.querySelectorAll(selector).forEach(observe);
