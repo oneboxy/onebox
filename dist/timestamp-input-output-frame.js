@@ -17,6 +17,21 @@
     String(date.getMinutes()).padStart(2, '0') + ':' +
     String(date.getSeconds()).padStart(2, '0');
 
+  const updateCityClocks = (date) => {
+    document.querySelectorAll('.dev-timestamp-city-card').forEach((card) => {
+      const time = card.querySelector('.dev-timestamp-city-time');
+      const zoneText = card.querySelector('.dev-timestamp-city-zone')?.textContent || '';
+      const zone = zoneText.match(/(?:Africa|America|Antarctica|Asia|Atlantic|Australia|Europe|Indian|Pacific)\/[A-Za-z0-9_+.-]+(?:\/[A-Za-z0-9_+.-]+)*/)?.[0];
+      if (!time || !zone) return;
+      try {
+        const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+          timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+        }).formatToParts(date).map((part) => [part.type, part.value]));
+        time.textContent = parts.year + '/' + parts.month + '/' + parts.day + ' ' + parts.hour + ':' + parts.minute + ':' + parts.second;
+      } catch {}
+    });
+  };
   function build() {
     const content = document.querySelector(scope + ' .dev-timestamp-content');
     if (!content) return;
@@ -94,7 +109,10 @@
         timestampInput.value = String(milliseconds ? now : Math.floor(now / 1000));
         dateInput.value = localDateTime(new Date(now));
         timestampInput.dispatchEvent(new Event('input', { bubbles: true }));
+        timestampInput.dispatchEvent(new Event('change', { bubbles: true }));
         dateInput.dispatchEvent(new Event('input', { bubbles: true }));
+        dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+        updateCityClocks(new Date(now));
         writingNow = false;
       };
       const selectNow = (selected) => {
