@@ -2782,3 +2782,9 @@
   outline: none !important;
   background: color-mix(in srgb, var(--muted) 8%, var(--panel)) !important;
 }
+
+/* Remove the redundant outer border around the timestamp converter card. */
+#workspace[data-tool="dev"] .dev-timestamp-input-output-frame > .dev-timestamp-card {
+  border: 0 !important;
+  box-shadow: none !important;
+}
