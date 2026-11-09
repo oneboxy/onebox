@@ -2769,3 +2769,16 @@
   content: "：";
   margin-inline-start: 2px;
 }
+
+/* Keep the bidirectional swap control visually light and borderless. */
+#workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+#workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap:hover,
+#workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap:focus-visible {
+  border: none !important;
+  outline: none !important;
+  background: color-mix(in srgb, var(--muted) 8%, var(--panel)) !important;
+}
