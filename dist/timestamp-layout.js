@@ -261,7 +261,7 @@
     ['flex', 'width', 'max-height', 'overflow-y'].forEach((property) => panel?.style.removeProperty(property));
   };
   const EXTRA_CITY_OPTIONS = [
-    ['美国', [['西雅图', 'Seattle', 'America/Los_Angeles'], ['旧金山', 'San Francisco', 'America/Los_Angeles'], ['拉斯维加斯', 'Las Vegas', 'America/Los_Angeles'], ['凤凰城', 'Phoenix', 'America/Phoenix'], ['休斯敦', 'Houston', 'America/Chicago'], ['迈阿密', 'Miami', 'America/New_York'], ['波士顿', 'Boston', 'America/New_York']]],
+    ['美国', [['西雅图', 'Seattle', 'America/Los_Angeles'], ['旧金山', 'San Francisco', 'America/Los_Angeles'], ['拉斯维加斯', 'Las Vegas', 'America/Los_Angeles'], ['凤凰城', 'Phoenix', 'America/Phoenix'], ['休斯敦', 'Houston', 'America/Chicago'], ['迈阿密', 'Miami', 'America/New_York'], ['波士顿', 'Boston', 'America/New_York'], ['芝加哥', 'Chicago', 'America/Chicago']]],
     ['日本', [['京都', 'Kyoto', 'Asia/Tokyo'], ['札幌', 'Sapporo', 'Asia/Tokyo'], ['福冈', 'Fukuoka', 'Asia/Tokyo']]],
     ['英国', [['曼彻斯特', 'Manchester', 'Europe/London'], ['爱丁堡', 'Edinburgh', 'Europe/London'], ['伯明翰', 'Birmingham', 'Europe/London']]],
     ['德国', [['慕尼黑', 'Munich', 'Europe/Berlin'], ['法兰克福', 'Frankfurt', 'Europe/Berlin'], ['汉堡', 'Hamburg', 'Europe/Berlin']]],
