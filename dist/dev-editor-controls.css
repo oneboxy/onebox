@@ -52,3 +52,81 @@
     font-size: 9px;
   }
 }
+
+/* Keep only the primary actions beside the Input/Output title; put editor
+   typography controls on their own full-width row below. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-pane-head,
+  #workspace[data-tool="dev"] .dev-output-pane-head {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > h3,
+  #workspace[data-tool="dev"] .dev-output-pane-head > h3,
+  #workspace[data-tool="dev"] .dev-output-title {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin: 0;
+    white-space: nowrap;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > .dev-pane-actions,
+  #workspace[data-tool="dev"] .dev-output-pane-head > .dev-pane-actions {
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    min-width: 0;
+    max-width: 100%;
+    gap: 4px;
+    margin-left: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  #workspace[data-tool="dev"] .dev-pane-actions::-webkit-scrollbar { display: none; }
+  #workspace[data-tool="dev"] .dev-pane-tools-row {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 6px 0 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  #workspace[data-tool="dev"] .dev-pane-tools-row::-webkit-scrollbar { display: none; }
+  #workspace[data-tool="dev"] .dev-pane-tools-row > * {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-action,
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-inline-toggle {
+    flex: 0 0 auto;
+    min-height: 30px;
+    height: 30px;
+    padding: 4px 7px;
+    border-radius: 8px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 390px) {
+  #workspace[data-tool="dev"] .dev-pane-head,
+  #workspace[data-tool="dev"] .dev-output-pane-head { gap: 4px; }
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-action,
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-inline-toggle {
+    min-height: 28px;
+    height: 28px;
+    padding-inline: 5px;
+    font-size: 9px;
+  }
+}
