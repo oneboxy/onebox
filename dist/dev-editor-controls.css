@@ -203,3 +203,35 @@
     height: 20px;
   }
 }
+
+/* Keep the two font controls directly after the Input/Output label. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-pane-head > h3,
+  #workspace[data-tool="dev"] .dev-output-pane-head > .dev-output-title {
+    order: 0;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > .dev-pane-font-buttons,
+  #workspace[data-tool="dev"] .dev-output-pane-head > .dev-pane-font-buttons {
+    order: 1;
+    gap: 0;
+    margin: 0 0 0 2px;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > .dev-pane-actions,
+  #workspace[data-tool="dev"] .dev-output-pane-head > .dev-pane-actions {
+    order: 2;
+    margin-left: auto;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"] {
+    width: 26px;
+    min-width: 26px;
+    height: 28px;
+    padding: 5px;
+    color: var(--text-secondary, #667085);
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button svg,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"] svg {
+    width: 16px;
+    height: 16px;
+  }
+}
