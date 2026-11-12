@@ -1,0 +1,54 @@
+/* Mobile developer editor: keep pane labels and their actions on one line. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-pane-head {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    align-items: center !important;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > h3 {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin: 0;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > .dev-pane-actions {
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap;
+    min-width: 0;
+    max-width: 100%;
+    gap: 4px;
+    margin-left: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > .dev-pane-actions::-webkit-scrollbar { display: none; }
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-action,
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-inline-toggle {
+    flex: 0 0 auto;
+    min-height: 30px;
+    height: 30px;
+    padding: 4px 7px;
+    border-radius: 8px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-inline-toggle { gap: 4px; }
+}
+@media (max-width: 390px) {
+  #workspace[data-tool="dev"] .dev-pane-head { gap: 4px; }
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-action,
+  #workspace[data-tool="dev"] .dev-pane-actions > .dev-inline-toggle {
+    min-height: 28px;
+    height: 28px;
+    padding-inline: 5px;
+    font-size: 9px;
+  }
+}
