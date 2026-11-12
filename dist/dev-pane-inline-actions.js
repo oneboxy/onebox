@@ -10,7 +10,7 @@
     while (current && current.parentElement !== ancestor) current = current.parentElement;
     return current && current.parentElement === ancestor ? current : null;
   };
-  const icon = (plus) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 19 9 5h2l5.5 14M6.2 12.2h8.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="${plus ? 'M18.5 9.5v6M15.5 12.5h6' : 'M15.5 12.5h6'}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+  const icon = (plus) => `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="${plus ? 'M10 4v12M4 10h12' : 'M4 10h12'}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
   const relocate = () => {
     document.querySelectorAll('#workspace[data-tool="dev"] .dev-pane').forEach((pane) => {
       const head = pane.querySelector('.dev-pane-head, .dev-output-pane-head');
