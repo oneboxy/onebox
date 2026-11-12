@@ -166,3 +166,40 @@
     order: 1;
   }
 }
+
+/* Keep only clean font-size icon buttons beside the editor pane headings. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-pane-tools-row,
+  #workspace[data-tool="dev"] .dev-pane-extra-font-controls {
+    display: none !important;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 2px;
+    margin: 0 2px;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    padding: 4px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--text-secondary, #667085);
+    line-height: 1;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button svg,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"] svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+}
