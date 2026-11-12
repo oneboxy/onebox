@@ -130,3 +130,39 @@
     font-size: 9px;
   }
 }
+
+/* Mobile editor: show only font size controls beside the pane title. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-pane-tools-row {
+    display: none !important;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 2px;
+    margin-left: 2px;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 6px;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--text-secondary, #667085);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head > .dev-pane-font-buttons,
+  #workspace[data-tool="dev"] .dev-output-pane-head > .dev-pane-font-buttons {
+    order: 1;
+  }
+}
