@@ -1,3 +1,4 @@
+// Mobile editor toolbar assets use the current compact controls.
 const CACHE = 'onebox-v815';
 const APP_SHELL = [
   './',
