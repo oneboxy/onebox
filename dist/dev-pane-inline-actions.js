@@ -38,7 +38,7 @@
       if (fontButtons.parentElement !== head) title.insertAdjacentElement('afterend', fontButtons);
 
       // Turn the JSON comparison's editable size field into the same two-button control.
-      const sizeFields = [...pane.querySelectorAll('input')].filter((input) => /^\\d{1,2}\\s*px$/i.test(input.value.trim()) && !input.dataset.fontStepperEnhanced);
+      const sizeFields = [...pane.querySelectorAll('input')].filter((input) => /^\d{1,2}\s*px$/i.test((input.value || input.placeholder || '').trim()) && !input.dataset.fontStepperEnhanced);
       sizeFields.forEach((input) => {
         const existingGroup = head.querySelector(':scope > .dev-pane-font-buttons');
         if (existingGroup && existingGroup.querySelectorAll('button').length >= 2) return;
