@@ -235,3 +235,52 @@
     height: 16px;
   }
 }
+
+/* Unified font size controls for JSON formatting and comparison editors. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-font-size-source {
+    display: none !important;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 2px;
+    margin: 0 0 0 4px;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"] {
+    display: inline-flex;
+    flex: 0 0 28px;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    padding: 5px;
+    border: 0 !important;
+    border-radius: 7px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--muted, #7b8495);
+    line-height: 1;
+    transition: color .15s ease, background-color .15s ease;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button:hover,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"]:hover {
+    color: var(--primary, #5267ff);
+    background: color-mix(in srgb, var(--primary, #5267ff) 9%, transparent) !important;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > button:active,
+  #workspace[data-tool="dev"] .dev-pane-font-buttons > [role="button"]:active {
+    background: color-mix(in srgb, var(--primary, #5267ff) 15%, transparent) !important;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+  #workspace[data-tool="dev"] .dev-pane-font-buttons + .dev-pane-actions {
+    margin-left: auto;
+  }
+}
