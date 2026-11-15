@@ -1,0 +1,10 @@
+/* Slightly squarer navigation icons, with their size and spacing unchanged. */
+#workspace[data-tool="navigation"] .navigation-site-icon,
+#workspace[data-tool="navigation"] .navigation-folder-preview,
+#workspace[data-tool="navigation"] .navigation-add-glyph {
+  border-radius: 16px;
+}
+
+#navigationDialog .navigation-folder-sites .navigation-site-icon {
+  border-radius: 11px;
+}
