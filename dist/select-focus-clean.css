@@ -9,3 +9,25 @@ select:focus-visible {
 select {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Global form focus policy: keep the normal border and surface on focus.
+   Do not add colored borders, outlines, or glow effects to text-entry fields. */
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+  textarea,
+  select,
+  [contenteditable="true"],
+  [role="textbox"]
+):focus,
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+  textarea,
+  select,
+  [contenteditable="true"],
+  [role="textbox"]
+):focus-visible {
+  border-color: var(--line) !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
