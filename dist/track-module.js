@@ -48,7 +48,6 @@ function moduleText(){
         ? `<button type="button" class="track-button track-hold" data-track-finish-hold><span>${text('按住结束录制','Hold to finish')}</span></button>`
         : `<button type="button" class="track-button track-start" data-track-start>${text('开始录制','Start recording')}</button>`}
       </div>
-      <p class="track-map-hint">${text('录制期间请保持页面在前台；按住结束按钮约 1 秒以保存。','Keep this page in the foreground. Hold Finish for about 1 second to save.')}</p>
       <div class="track-toast" data-track-toast role="status" hidden></div>
     </section>
   </section>`;

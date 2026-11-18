@@ -38,7 +38,7 @@
   min-height: 30px;
   padding: 0;
   border: 1px solid var(--track-line);
-  border-radius: 50%;
+  border-radius: 5px;
   background: var(--track-panel);
   color: var(--track-muted);
   cursor: pointer;
@@ -60,7 +60,7 @@
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--track-line);
-  border-radius: 14px;
+  border-radius: 6px;
   background: var(--track-panel);
 }
 .track-map {
@@ -98,7 +98,7 @@
   height: 30px;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--track-line) 84%, transparent);
-  border-radius: 7px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--track-panel) 88%, transparent);
   color: var(--track-ink);
   cursor: pointer;
@@ -140,9 +140,10 @@
 .track-stats > div {
   min-width: 0;
   padding: 9px 11px;
-  border: 1px solid var(--track-line);
-  border-radius: 9px;
-  background: var(--track-panel);
+  border: 0;
+  border-bottom: 1px solid var(--track-line);
+  border-radius: 0;
+  background: transparent;
 }
 .track-stats span { display: block; margin-bottom: 4px; color: var(--track-muted); font-size: 11px; }
 .track-stats strong { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -155,7 +156,7 @@
   min-height: 42px;
   padding: 9px 16px;
   border: 1px solid var(--track-line);
-  border-radius: 9px;
+  border-radius: 4px;
   background: var(--track-panel);
   color: var(--track-ink);
   font: inherit;
@@ -182,12 +183,11 @@
   transition: transform 1s linear;
 }
 .track-hold.is-holding:before { transform: scaleX(1); }
-.track-map-hint { margin: 7px 12px 12px; color: var(--track-muted); font-size: 11px; line-height: 1.5; }
 .track-toast {
   margin: 8px 12px 12px;
   padding: 8px 10px;
   border: 1px solid var(--track-line);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--track-panel);
   color: var(--track-ink);
   font-size: 12px;
@@ -196,15 +196,14 @@
   .track-module { width: 100%; max-width: none; margin: 0; padding: 0; }
   .track-page-head { min-height: 38px; margin-bottom: 10px; padding: 0 2px 8px; }
   .track-page-title { font-size: 14px; }
-  .track-map-panel { border-radius: 12px; }
+  .track-map-panel { border-radius: 6px; }
   .track-map { height: 48svh; min-height: 300px; max-height: 560px; }
   .track-map-actions { right: 8px; bottom: 8px; gap: 3px; }
-  .track-map-actions button { width: 28px; height: 28px; border-radius: 6px; }
+  .track-map-actions button { width: 28px; height: 28px; border-radius: 4px; }
   .track-map-actions svg { width: 14px; height: 14px; }
   .track-stats { gap: 6px; padding: 8px 8px 0; }
-  .track-stats > div { padding: 8px 7px; border-radius: 7px; }
+  .track-stats > div { padding: 8px 7px; }
   .track-stats span { font-size: 10px; }
   .track-stats strong { font-size: 14px; }
   .track-record-controls { padding: 8px 8px 0; }
-  .track-map-hint { margin: 7px 8px 10px; }
 }
