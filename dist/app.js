@@ -1675,7 +1675,7 @@ function renderTopNav() {
   if (!layoutNav) return;
   const unread = state.notifications.filter((item) => !item.read).length;
   const renderEntries = (entries) => entries.map((item) => {
-    const active = state.section === item.key;
+    const active = state.tool === 'track' ? item.key === 'mine' : state.section === item.key;
     const homeUpdateDot = item.key === 'home' && state.homeFeed.hasNew ? '<i class="nav-update-dot" aria-label="' + (state.language === 'en' ? 'New updates' : '有新内容') + '"></i>' : '';
     return '<button class="layout-nav-button ' + (active ? 'active' : '') + '" data-section="' + item.key + '" aria-current="' + (active ? 'page' : 'false') + '" aria-label="' + t(item.key) + '" title="' + t(item.key) + '"><span class="layout-nav-icon" aria-hidden="true">' + sectionIcon(item, active) + homeUpdateDot + '</span>' + (item.key === 'messages' && unread ? '<sup>' + (unread > 99 ? '99+' : unread) + '</sup>' : '') + '</button>';
   }).join('');
@@ -1697,7 +1697,7 @@ function renderBottomNav() {
     bottomNav.classList.remove('is-blurred');
   }
   bottomNav.innerHTML = mainSectionEntries().map((item) => {
-    const active = state.section === item.key;
+    const active = state.tool === 'track' ? item.key === 'mine' : state.section === item.key;
     const homeUpdateDot = item.key === 'home' && state.homeFeed.hasNew ? '<i class="nav-update-dot" aria-label="' + (state.language === 'en' ? 'New updates' : '有新内容') + '"></i>' : '';
     return '<button class="bottom-tab ' + (active ? 'active' : '') + '" data-section="' + item.key + '" aria-current="' + (active ? 'page' : 'false') + '" aria-label="' + t(item.key) + '"><span class="bottom-tab-icon" aria-hidden="true">' + sectionIcon(item, active) + homeUpdateDot + '</span><span>' + t(item.key) + '</span>' + (item.key === 'messages' && unread ? '<sup>' + (unread > 99 ? '99+' : unread) + '</sup>' : '') + '</button>';
   }).join('');
@@ -13250,7 +13250,7 @@ function render() {
   applyLanguage();
   if (state.section === 'home') loadHomeFeeds();
   const developerFullscreen = state.section === 'tools' && state.tool === 'dev';
-  nav.hidden = state.section !== 'tools';
+  nav.hidden = state.section !== 'tools' || state.tool === 'track';
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation, track: () => window.OneBoxTrack.render() };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
   workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
