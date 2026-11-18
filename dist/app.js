@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.808';
+const APP_VERSION = '2.18.809';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -78,6 +78,7 @@ const TOOL_DEFS = {
   weather: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>', key: 'weather' },
   translate: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 8 6l4 12M5.5 14h5M14 8h6M17 5v3M14 16h6M17 13v3"/></svg>', key: 'convert' },
   reader: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5c2.2-.9 4.6-.4 7.5 1.4v12.2c-2.9-1.8-5.3-2.3-7.5-1.4z"/><path d="M19.5 5.5c-2.2-.9-4.6-.4-7.5 1.4v12.2c2.9-1.8 5.3-2.3 7.5-1.4z"/><path d="M12 6.9v12.2"/></svg>', key: 'reader' },
+  track: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.2"/></svg>', key: 'track' },
   navigation: { icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2.1 5-4.9 2 2-4.9 5-2.1Z"/></svg>', activeIcon: '<svg class="filled-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12 2.5Zm4.55 6.32-2.19 5.47-5.36 2.2a.9.9 0 0 1-1.18-1.17l2.15-5.34 5.41-2.27a.9.9 0 0 1 1.17 1.11Z"/></svg>', key: 'navigation' },
 };
 // Homepage subscriptions live in one registry. Set enabled:false to retire a
@@ -119,7 +120,7 @@ function boundedHomeFeedIdMap(value, limit = HOME_FEED_PENDING_LIMIT) {
 const DEFAULT_HOME_FEED_ORDER = RSS_SOURCES.map((source) => source.id);
 const DEFAULT_HOME_FEED_VISIBLE = RSS_SOURCES.filter((source) => source.visibleByDefault !== false).map((source) => source.id);
 const NAVIGATION_SESSION_KEY = 'onebox-navigation-position';
-const DEFAULT_TOOL_ORDER = Object.keys(TOOL_DEFS).filter((id) => id !== 'navigation');
+const DEFAULT_TOOL_ORDER = Object.keys(TOOL_DEFS).filter((id) => id !== 'navigation' && id !== 'track');
 const nav = $('#toolNav');
 const desktopPageTabs = $('#desktopPageTabs');
 const toolNavPlaceholder = document.createComment('tool navigation position');
@@ -367,7 +368,7 @@ const toast = (message, kind = 'info', options = {}) => {
 
 const DICT = {
   zh: {
-    calculator: '计算', development: '开发', calendar: '日历', weather: '天气', convert: '转换', unitConvert: '换算', translate: '翻译', translateConvert: '转换', reader: '阅读',
+    calculator: '计算', development: '开发', calendar: '日历', weather: '天气', convert: '转换', unitConvert: '换算', translate: '翻译', translateConvert: '转换', reader: '阅读', track: '路记',
     online: '在线', offline: '离线', install: '安装应用', settings: '设置', notifications: '消息提示',
     heroSubtitle: '快速、清爽、可离线。你的数据优先保存在当前设备。',
     calculatorDesc: '支持括号、百分比、科学函数和键盘输入，并自动保留最近计算记录。',
@@ -414,7 +415,7 @@ const DICT = {
     bookshelf: '书架', addBook: '添加文档', noBooks: '还没有本地文档。', readerHint: '支持 Markdown、TXT、PDF、EPUB、FB2、MOBI、AZW3；书籍文件走个人 GitHub Gist，同步进度与笔记走 OneBox 云端。', readerMissingSource: '原文件未备份', readerFileMissing: '这份备份没有包含原书文件。请在仍保存原书的设备重新上传，或重新导入同名文件。', openBook: '打开阅读', deleteBook: '删除文档', annotations: '笔记', readerComments: '笔记', readerNotesHint: '已保存的阅读笔记', addAnnotation: '笔记', annotationPlaceholder: '添加你的感受…', saveAnnotation: '保存', annotationHint: '选择文字后长按或点击笔记按钮。', noAnnotations: '还没有笔记。', reading: '正在阅读', closeReader: '关闭阅读', unsupportedFile: '请选择 .md、.markdown、.txt、.pdf、.epub、.fb2、.mobi 或 .azw3 文件。', importFailed: '文档读取失败，请重试。', deleteConfirm: '确定删除这本文档吗？', pdfHint: 'PDF 使用浏览器原生阅读器打开。', epubHint: 'EPUB 已转换为适合 OneBox 的阅读视图。', readerContents: '目录', readerSettings: '阅读设置', readerReadingMethod: '阅读方式', readerTheme: '阅读背景', readerThemePaper: '纸张', readerThemeSepia: '墨水屏', readerThemeGreen: '护眼绿', readerThemeDark: '夜间', readerFontSize: '字号', readerFontFamily: '字体', readerLineHeight: '行距', readerParagraphSpacing: '段落间距', readerLetterSpacing: '字间距', readerAnimation: '翻页动画', readerAnimationSlide: '滑动', readerAnimationCover: '覆盖', readerAnimationNone: '无', readerScroll: '上下滚动', readerPages: '模拟翻页', readerProgress: '进度', readerFullscreen: '全屏', readerExitFullscreen: '退出全屏', readerFullscreenOnOpen: '是否全屏', readerFullscreenOnOpenHint: '下次打开文档时按此设置进入', readerNoContents: '暂无章节目录。', readerSettingsHint: '设置仅作用于当前设备上的阅读内容。', readerTocHint: '选择章节后跳转到对应位置。',
   },
   en: {
-    calculator: 'Calculator', development: 'Dev', calendar: 'Calendar', weather: 'Weather', convert: 'Convert', unitConvert: 'Convert', translate: 'Translate', translateConvert: 'Convert', reader: 'Reader',
+    calculator: 'Calculator', development: 'Dev', calendar: 'Calendar', weather: 'Weather', convert: 'Convert', unitConvert: 'Convert', translate: 'Translate', translateConvert: 'Convert', reader: 'Reader', track: 'Track',
     online: 'Online', offline: 'Offline', install: 'Install', settings: 'Settings', notifications: 'Notifications',
     heroSubtitle: 'Fast, calm and offline-ready. Your data stays on this device first.',
     calculatorDesc: 'Parentheses, percentages, scientific functions, keyboard input and history.',
@@ -3870,6 +3871,7 @@ function renderMine() {
     agreement: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4v13H6z"/><path d="M14 3.5v4h4M9 12h6M9 15h3M14 16.5l1.5 1.5 2.5-3"/></svg>',
     pet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 1.5-4L12 7l4.5-2L18 9v5.2c0 3.4-2.7 5.8-6 5.8s-6-2.4-6-5.8Z"/><circle cx="9.2" cy="12.2" r=".8"/><circle cx="14.8" cy="12.2" r=".8"/><path d="M9.5 15.2c1.5 1.2 3.5 1.2 5 0"/></svg>',
     wallet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h9a2 2 0 0 1 2 2v9"/><rect x="5" y="8" width="12" height="11" rx="2"/><path d="M8 12h4"/></svg>',
+    route: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.2"/></svg>',
     cloud: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 18.5h9a4 4 0 0 0 .5-7.97A6 6 0 0 0 5.2 9.2a4.7 4.7 0 0 0 2.3 9.3Z"/><path d="M12 15v-6m-2.5 2.5L12 9l2.5 2.5"/></svg>',
   })[name];
   const row = (action, glyph, title, description) => '<button class="mine-row" ' + action + '><span class="mine-row-icon">' + icon(glyph) + '</span><span class="mine-row-copy"><strong>' + title + '</strong><small class="mine-row-description">' + description + '</small></span><span>›</span></button>';
@@ -3878,7 +3880,7 @@ function renderMine() {
   const updateProgress = updateBusy ? '<span class="update-progress" role="status" aria-label="' + escapeHtml(updateStatus) + '"><span class="update-progress-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>' : '<span class="update-status-label">' + escapeHtml(updateStatus) + '</span>';
   const updateButton = state.updateAvailable ? '<button class="primary mine-update-button" data-apply-update ' + (state.updateApplying ? 'disabled' : '') + '>' + (state.updateApplying ? t('updateApplying') : t('applyUpdate')) + '</button>' : '<button class="primary mine-update-button" data-check-update ' + (state.updateChecking || state.updateApplying ? 'disabled' : '') + '>' + t('checkUpdate') + '</button>';
   const updateRow = '<div class="mine-row mine-update-row"><span class="mine-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4M5 19h14"/></svg></span><span class="mine-row-copy mine-update-copy"><strong>' + t('appUpdate') + '</strong><small class="mine-row-description">v' + APP_VERSION + (updateBusy ? ' ' : ' · ') + updateProgress + '</small></span><span class="mine-row-action">' + updateButton + '</span></div>';
-  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-open-github-page', 'github', t('accountLogin'), escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
+  return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-track-entry', 'route', t('track'), state.language === 'en' ? 'Record routes on a map' : '地图记录我的路线') + row('data-open-github-page', 'github', t('accountLogin'), escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
 }
 
 function openTicketWallet() {
@@ -13249,7 +13251,7 @@ function render() {
   if (state.section === 'home') loadHomeFeeds();
   const developerFullscreen = state.section === 'tools' && state.tool === 'dev';
   nav.hidden = state.section !== 'tools';
-  const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation };
+  const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation, track: () => window.OneBoxTrack.render() };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
   workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
   $('#settingsBtn').hidden = !cloudModuleEnabled('settings');
