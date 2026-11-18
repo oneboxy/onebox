@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.810';
+const APP_VERSION = '2.18.811';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -627,7 +627,7 @@ const storedToolActive = localStorage.getItem(STORAGE.toolActive) || '';
 const rawWeatherCards = parseStored(STORAGE.weatherCards, []);
 const legacyWeather = parseStored(STORAGE.legacyWeather, null);
 const normalizeToolOrder = (value, includeNavigation = false, navigationFirst = false) => {
-  const allowed = includeNavigation ? Object.keys(TOOL_DEFS) : DEFAULT_TOOL_ORDER;
+  const allowed = includeNavigation ? Object.keys(TOOL_DEFS).filter((id) => id !== 'track') : DEFAULT_TOOL_ORDER;
   const order = Array.isArray(value) ? value.map((id) => id === 'convert' ? 'translate' : id).filter((id) => allowed.includes(id)) : [];
   const normalized = [...new Set(order.concat(allowed))];
   if (includeNavigation && navigationFirst) return ['navigation', ...normalized.filter((id) => id !== 'navigation')].slice(0, allowed.length);
@@ -1608,7 +1608,7 @@ function firstAvailableRoute() {
     const key = section === 'mine' ? 'settings' : section;
     if (cloudModuleEnabled(key) && (section !== 'navigation' || state.navigationLocation === 'main')) return section;
   }
-  const tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && cloudModuleEnabled(toolModuleKey(id)));
+  const tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && id !== 'track' && cloudModuleEnabled(toolModuleKey(id)));
   return tool ? tool : '';
 }
 function renderNav() {
