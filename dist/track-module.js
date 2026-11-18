@@ -1,8 +1,8 @@
 (function(){
 'use strict';
 const DB='onebox-track-v1',API=String(window.ONEBOX_TRACK_API||'').replace(/\/$/,'');
-const s={watch:null,active:false,start:0,points:[],distance:0,current:null};
-let map=null,line=null,pin=null,timer=null,leaflet=null,holdTimer=null,holdButton=null,feedRequest=0,mapResizeObserver=null;
+const s={watch:null,active:false,start:0,points:[],distance:0,current:null,address:''};
+let map=null,line=null,pin=null,timer=null,leaflet=null,holdTimer=null,holdButton=null,feedRequest=0,mapResizeObserver=null,geocodeRequest=0,lastGeocodeAt=0;const addressCache=new Map();
 const en=()=>document.documentElement.lang.toLowerCase().startsWith('en');
 const text=(zh,english)=>en()?english:zh;
 const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -21,22 +21,23 @@ function moduleText(){
         <button type="button" class="ticket-wallet-back track-back" data-track-back aria-label="${text('返回上一页','Go back')}" title="${text('返回上一页','Go back')}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
         </button>
+        <span class="track-address" data-track-address aria-live="polite"${s.address ? '' : ' hidden'}>${esc(s.address)}</span>
       </nav>
     </header>
     <section class="track-map-panel" aria-label="${text('路线地图','Route map')}">
       <div class="track-map" data-track-map>
         <div class="track-map-placeholder">${text('地图加载中…','Loading map…')}</div>
-        <div class="track-map-actions" aria-label="${text('地图操作','Map controls')}">
+        <div class="track-map-zoom-actions" aria-label="${text('地图缩放','Map zoom')}">
           <button type="button" data-track-zoom="1" aria-label="${text('放大地图','Zoom in')}" title="${text('放大地图','Zoom in')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           </button>
           <button type="button" data-track-zoom="-1" aria-label="${text('缩小地图','Zoom out')}" title="${text('缩小地图','Zoom out')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
           </button>
-          <button type="button" data-track-locate aria-label="${text('定位当前位置','Locate me')}" title="${text('定位当前位置','Locate me')}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-          </button>
         </div>
+        <button type="button" class="track-map-locate" data-track-locate aria-label="${text('定位当前位置','Locate me')}" title="${text('定位当前位置','Locate me')}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        </button>
       </div>
       <div class="track-stats">
         <div><span>${text('用时','Time')}</span><strong data-track-time>00:00:00</strong></div>
@@ -59,7 +60,9 @@ function updateStats(){const r=root();if(!r)return;const t=r.querySelector('[dat
 function initPage(){if(!root())return;initMap();updateStats()}
 function stopWatch(){if(s.watch!==null&&navigator.geolocation){navigator.geolocation.clearWatch(s.watch);s.watch=null}if(timer){clearInterval(timer);timer=null}}
 function startWatch(){if(!navigator.geolocation){alert(text('此浏览器不支持定位。','Geolocation is not supported by this browser.'));return}stopWatch();s.watch=navigator.geolocation.watchPosition(p=>{if(!s.active||p.coords.accuracy>120)return;const x={lat:p.coords.latitude,lng:p.coords.longitude,at:p.timestamp||Date.now()};if(s.points.length){const d=distance(s.points[s.points.length-1],x);if(d<3)return;if(d>150){s.current=x;showPin(x);updateStats();return}s.distance+=d}s.points.push(x);s.current=x;if(line)line.setLatLngs(s.points.map(q=>[q.lat,q.lng]));showPin(x);updateStats()},err=>{const q=root()?.querySelector('[data-track-status]');if(q)q.textContent=err.code===1?text('请允许 OneBox 使用定位','Allow OneBox to access your location'):text('定位信号较弱','Weak location signal')},{enableHighAccuracy:true,maximumAge:1000,timeout:15000});if(!timer)timer=setInterval(updateStats,1000)}
-function locate(){if(!navigator.geolocation){alert(text('此浏览器不支持定位。','Geolocation is not supported.'));return}const q=root()?.querySelector('[data-track-status]');if(q)q.textContent=text('正在定位…','Locating…');navigator.geolocation.getCurrentPosition(p=>{s.current={lat:p.coords.latitude,lng:p.coords.longitude,at:p.timestamp||Date.now()};initMap();if(map){showPin(s.current);map.setView([s.current.lat,s.current.lng],16)}updateStats()},err=>{if(q)q.textContent=err.code===1?text('定位权限未开启','Location permission is off'):text('无法获取当前位置','Could not get your location')},{enableHighAccuracy:true,timeout:15000,maximumAge:1000})}
+async function reverseGeocode(point){const key=point.lat.toFixed(4)+','+point.lng.toFixed(4);if(addressCache.has(key))return addressCache.get(key);const wait=Math.max(0,1100-(Date.now()-lastGeocodeAt));if(wait)await new Promise(resolve=>setTimeout(resolve,wait));lastGeocodeAt=Date.now();const params=new URLSearchParams({format:'jsonv2',lat:String(point.lat),lon:String(point.lng),zoom:'18',addressdetails:'1','accept-language':en()?'en':'zh-CN'});const response=await fetch('https://nominatim.openstreetmap.org/reverse?'+params.toString(),{headers:{Accept:'application/json'},cache:'no-store'});if(!response.ok)throw Error('reverse geocoding failed');const data=await response.json(),address=data.address||{},street=address.road||address.pedestrian||address.residential||address.neighbourhood||address.suburb||data.name||'',area=address.suburb||address.city_district||address.city||address.town||address.village||'';const parts=[street,area].filter((value,index,array)=>value&&array.indexOf(value)===index);const result=parts.join(' · ')||String(data.display_name||'').split(',').slice(0,2).join(' · ');if(result)addressCache.set(key,result);return result}
+function showAddress(){const el=root()?.querySelector('[data-track-address]');if(!el)return;el.textContent=s.address||'';el.hidden=!s.address}
+function locate(){if(!navigator.geolocation){alert(text('此浏览器不支持定位。','Geolocation is not supported.'));return}const q=root()?.querySelector('[data-track-status]'),request=++geocodeRequest;if(q)q.textContent=text('正在定位…','Locating…');s.address=text('正在获取地址…','Finding address…');showAddress();navigator.geolocation.getCurrentPosition(p=>{const point={lat:p.coords.latitude,lng:p.coords.longitude,at:p.timestamp||Date.now()};s.current=point;initMap();if(map){showPin(point);map.setView([point.lat,point.lng],16)}updateStats();reverseGeocode(point).then(address=>{if(request!==geocodeRequest)return;s.address=address||text('地址暂不可用','Address unavailable');showAddress()}).catch(()=>{if(request!==geocodeRequest)return;s.address=text('地址暂不可用','Address unavailable');showAddress()})},err=>{s.address='';showAddress();if(q)q.textContent=err.code===1?text('定位权限未开启','Location permission is off'):text('无法获取当前位置','Could not get your location')},{enableHighAccuracy:true,timeout:15000,maximumAge:1000})}
 async function startRecording(){if(!navigator.geolocation){alert(text('此浏览器不支持定位。','Geolocation is not supported.'));return}s.start=Date.now();s.points=[];s.distance=0;s.active=true;const controls=root()?.querySelector('.track-record-controls');if(controls)controls.innerHTML='<button type="button" class="track-button track-hold" data-track-finish-hold><span>'+text('按住结束录制','Hold to finish')+'</span></button>';updateStats();startWatch()}
 async function finishRecording(){clearHold();stopWatch();if(!s.active)return;s.active=false;let saved=false;if(s.points.length){try{await saveTrack({id:crypto.randomUUID(),name:text('路游路线 ','Track ') +new Date(s.start).toLocaleString(),start:s.start,duration:Date.now()-s.start,distance:s.distance,points:s.points,saved:Date.now()});saved=true}catch(err){alert(text('保存失败：','Could not save: ')+err.message)}}else alert(text('没有收到有效定位点，本次未保存。','No valid location points were recorded.'));s.points=[];s.start=0;s.distance=0;const controls=root()?.querySelector('.track-record-controls');if(controls)controls.innerHTML='<button type="button" class="track-button track-start" data-track-start>'+text('开始录制','Start recording')+'</button>';updateStats();loadRecords();if(saved)announce(text('路线已保存在本机。','Route saved on this device.'))}
 function announce(message){const node=root()?.querySelector('[data-track-toast]');if(node){node.textContent=message;node.hidden=false;setTimeout(()=>node.hidden=true,2500)}}

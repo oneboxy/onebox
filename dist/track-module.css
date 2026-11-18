@@ -24,6 +24,7 @@
   grid-template-columns: none;
   align-items: center;
   gap: 10px;
+  flex: 1 1 auto;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -54,7 +55,17 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.track-page-title { color: var(--track-ink); font-size: 14px; font-weight: 700; }
+.track-address {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--track-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.track-address[hidden] { display: none; }
 .track-map-panel {
   width: 100%;
   min-width: 0;
@@ -82,16 +93,18 @@
   color: var(--track-muted);
   text-align: center;
 }
-.track-map-actions {
+.track-map-zoom-actions {
   position: absolute;
   z-index: 800;
+  top: 50%;
   right: 10px;
-  bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transform: translateY(-50%);
 }
-.track-map-actions button {
+.track-map-zoom-actions button,
+.track-map-locate {
   display: grid;
   place-items: center;
   width: 30px;
@@ -105,11 +118,21 @@
   touch-action: manipulation;
   box-shadow: none;
 }
-.track-map-actions button:hover,
-.track-map-actions button:active { background: var(--track-panel); }
-.track-map-actions button:focus-visible,
+.track-map-locate {
+  position: absolute;
+  z-index: 800;
+  right: 10px;
+  bottom: 10px;
+}
+.track-map-zoom-actions button:hover,
+.track-map-zoom-actions button:active,
+.track-map-locate:hover,
+.track-map-locate:active { background: var(--track-panel); }
+.track-map-zoom-actions button:focus-visible,
+.track-map-locate:focus-visible,
 .track-page-nav .track-back:focus-visible { outline: 2px solid var(--track-line); outline-offset: 2px; }
-.track-map-actions svg {
+.track-map-zoom-actions svg,
+.track-map-locate svg {
   width: 15px;
   height: 15px;
   fill: none;
@@ -195,12 +218,12 @@
 @media (max-width: 760px) {
   .track-module { width: 100%; max-width: none; margin: 0; padding: 0; }
   .track-page-head { min-height: 38px; margin-bottom: 10px; padding: 0 2px 8px; }
-  .track-page-title { font-size: 14px; }
   .track-map-panel { border-radius: 6px; }
-  .track-map { height: 48svh; min-height: 300px; max-height: 560px; }
-  .track-map-actions { right: 8px; bottom: 8px; gap: 3px; }
-  .track-map-actions button { width: 28px; height: 28px; border-radius: 4px; }
-  .track-map-actions svg { width: 14px; height: 14px; }
+  .track-map { height: min(560px, calc(100svh - 260px)); min-height: 360px; max-height: 560px; }
+  .track-map-zoom-actions { right: 8px; gap: 3px; }
+  .track-map-locate { right: 8px; bottom: 8px; }
+  .track-map-zoom-actions button, .track-map-locate { width: 28px; height: 28px; border-radius: 4px; }
+  .track-map-zoom-actions svg, .track-map-locate svg { width: 14px; height: 14px; }
   .track-stats { gap: 6px; padding: 8px 8px 0; }
   .track-stats > div { padding: 8px 7px; }
   .track-stats span { font-size: 10px; }
@@ -208,11 +231,6 @@
   .track-record-controls { padding: 8px 8px 0; }
 }
 
-.track-map-actions {
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%);
-}
 @media (max-width: 760px) {
   .shell:has(#workspace[data-tool="track"]) { padding-inline: 6px; }
   main:not(:has(#workspace[data-tool="home"])):not(:has(#workspace[data-tool="messages"])):not(:has(#workspace[data-tool="mine"])):has(#workspace[data-tool="track"]) {
