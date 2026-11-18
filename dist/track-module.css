@@ -7,7 +7,7 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0;
+  padding: 0 12px;
   color: var(--track-ink);
 }
 .track-module * { box-sizing: border-box; }
@@ -292,7 +292,7 @@
   font-size: 12px;
 }
 @media (max-width: 760px) {
-  .track-module { width: 100%; max-width: none; margin: 0; padding: 0; }
+  .track-module { width: 100%; max-width: none; margin: 0; padding: 0 12px; }
   .track-page-head { min-height: 38px; margin-bottom: 10px; padding: 0 2px 8px; }
   .track-map-panel { border-radius: 0; }
   .track-map { height: min(560px, calc(100svh - 260px)); min-height: 360px; max-height: 560px; }
