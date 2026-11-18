@@ -21,21 +21,20 @@ function moduleText(){
         <button type="button" class="ticket-wallet-back track-back" data-track-back aria-label="${text('返回上一页','Go back')}" title="${text('返回上一页','Go back')}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
         </button>
-        <span class="track-page-title" aria-current="page">${text('路游','Track')}</span>
       </nav>
     </header>
     <section class="track-map-panel" aria-label="${text('路线地图','Route map')}">
       <div class="track-map" data-track-map>
         <div class="track-map-placeholder">${text('地图加载中…','Loading map…')}</div>
         <div class="track-map-actions" aria-label="${text('地图操作','Map controls')}">
-          <button type="button" data-track-locate aria-label="${text('定位当前位置','Locate me')}" title="${text('定位当前位置','Locate me')}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-          </button>
           <button type="button" data-track-zoom="1" aria-label="${text('放大地图','Zoom in')}" title="${text('放大地图','Zoom in')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           </button>
           <button type="button" data-track-zoom="-1" aria-label="${text('缩小地图','Zoom out')}" title="${text('缩小地图','Zoom out')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+          </button>
+          <button type="button" data-track-locate aria-label="${text('定位当前位置','Locate me')}" title="${text('定位当前位置','Locate me')}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
           </button>
         </div>
       </div>

@@ -207,3 +207,30 @@
   .track-stats strong { font-size: 14px; }
   .track-record-controls { padding: 8px 8px 0; }
 }
+
+.track-map-actions {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+@media (max-width: 760px) {
+  .shell:has(#workspace[data-tool="track"]) { padding-inline: 6px; }
+  main:not(:has(#workspace[data-tool="home"])):not(:has(#workspace[data-tool="messages"])):not(:has(#workspace[data-tool="mine"])):has(#workspace[data-tool="track"]) {
+    padding-top: calc(var(--app-header-height) + 4px);
+    padding-bottom: 0;
+  }
+  #workspace[data-tool="track"] {
+    min-height: 0;
+    padding: 6px;
+    border-radius: 10px;
+  }
+  #workspace[data-tool="track"] > .section-page {
+    min-height: 0;
+    padding: 0 0 4px;
+  }
+  .track-page-head {
+    min-height: 32px;
+    margin-bottom: 6px;
+    padding: 0 2px 2px;
+  }
+}
