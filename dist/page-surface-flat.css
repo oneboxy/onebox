@@ -1,41 +1,51 @@
-/* Keep every top-level OneBox view on a flat, borderless page surface. */
-#workspace,
-#workspace[data-tool="home"],
-#workspace[data-tool="navigation"],
-#workspace[data-tool="messages"],
-#workspace[data-tool="mine"] {
+/* Flat OneBox surfaces: use a faint outline on working pages, while the
+   homepage and navigation remain open canvases. */
+#workspace {
   background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--line) 68%, transparent) !important;
+  border-radius: 6px !important;
   box-shadow: none !important;
 }
 
-#workspace .home-section,
-#workspace .message-panel,
-#workspace .mine-list,
-#workspace[data-tool="reader"] .reader-library-panel {
-  background: transparent !important;
+#workspace[data-tool="home"],
+#workspace[data-tool="navigation"],
+#workspace[data-tool="track"],
+#workspace[data-tool="messages"],
+#workspace[data-tool="mine"],
+#workspace[data-tool="reader"] {
   border: 0 !important;
   border-radius: 0 !important;
-  box-shadow: none !important;
 }
+
+#workspace[data-tool="home"] .home-section,
+#workspace[data-tool="messages"] .message-panel,
+#workspace[data-tool="mine"] .mine-list,
+#workspace[data-tool="reader"] .reader-library-panel {
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--line) 68%, transparent);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+#workspace[data-tool="messages"] .message-panel { padding: 12px; }
+#workspace[data-tool="mine"] .mine-list { padding: 8px; }
 
 #workspace[data-tool="home"] .feed-panel,
 #workspace .home-tool-card,
 #workspace .mine-row,
 #workspace[data-tool="navigation"] .navigation-card {
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  border-radius: 6px;
+  box-shadow: none;
 }
 
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  border: 1px solid color-mix(in srgb, var(--reader-line, var(--line)) 68%, transparent);
+  border-radius: 6px;
+  box-shadow: none;
 }
 
-.ticket-wallet-page {
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+body:has(.ticket-wallet-page) .ticket-wallet-page {
+  border: 1px solid color-mix(in srgb, var(--line) 68%, transparent);
+  border-radius: 6px;
+  box-shadow: none;
 }
