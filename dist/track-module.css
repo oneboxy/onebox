@@ -285,6 +285,27 @@
 .track-stats span { display: block; margin-bottom: 4px; color: var(--track-muted); font-size: 11px; }
 .track-stats strong { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .track-record-controls { display: flex; gap: 8px; padding: 10px 12px 0; }
+.track-waypoint-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 76px;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--track-line);
+  border-radius: 8px;
+  background: var(--track-panel);
+  color: var(--track-ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.track-waypoint-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.track-waypoint-button:disabled { opacity: .48; cursor: not-allowed; }
+.track-waypoint-button:not(:disabled):hover { background: var(--track-panel2); }
 .track-button {
   position: relative;
   isolation: isolate;
@@ -308,7 +329,7 @@
   color: var(--primary-contrast, #fff);
   font-weight: 600;
 }
-.track-hold { border-color: var(--danger, #d14d5b); color: var(--danger, #d14d5b); touch-action: none; }
+.track-hold { flex: 1; width: auto; border-color: var(--danger, #d14d5b); color: var(--danger, #d14d5b); touch-action: none; }
 .track-hold:before {
   position: absolute;
   z-index: -1;
