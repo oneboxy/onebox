@@ -210,6 +210,7 @@
   color: var(--track-muted);
   font-size: 9px;
 }
+.track-map.track-map-dark-fallback .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.72) contrast(.88) saturate(.62); }
 .track-map .leaflet-div-icon.track-heading-marker { border: 0; background: transparent; pointer-events: none; }
 .track-heading-marker span {
   display: grid;
