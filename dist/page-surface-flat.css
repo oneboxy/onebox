@@ -1,9 +1,9 @@
-/* Flat OneBox surfaces: use a faint outline on working pages, while the
-   homepage and navigation remain open canvases. */
+/* Tool workspaces use the page canvas; their own content panels provide
+   structure, while the inset keeps the layout from feeling edge-clipped. */
 #workspace {
   background: transparent !important;
-  border: 1px solid var(--line) !important;
-  border-radius: 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
   padding: 18px !important;
 }
