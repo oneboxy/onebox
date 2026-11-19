@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.824';
+const APP_VERSION = '2.18.825';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1412,7 +1412,7 @@ const state = {
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
   homeFeedActivity: storedHomeFeedActivity && typeof storedHomeFeedActivity === 'object' ? storedHomeFeedActivity : {},
-  notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, githubDialogOpen: false, recentReadingOpen: false,
+  notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, settingsPageOpen: false, githubDialogOpen: false, recentReadingOpen: false,
   notificationPreference: storedNotificationPreference === 'deny' ? 'deny' : 'allow',
   topDisplay: { theme: storedTopDisplay.theme !== false, language: storedTopDisplay.language !== false, messages: storedTopDisplay.messages !== false },
   footprint: storedFootprint,
@@ -1728,9 +1728,11 @@ function selectTool(id) {
 }
 function selectSection(section) {
   if (!SECTION_DEFS[section]) section = 'tools';
+  const wasSettingsPage = state.settingsPageOpen;
   if (section !== 'tools' && !cloudModuleEnabled(section === 'mine' ? 'settings' : section)) { toast(state.language === 'en' ? 'This module is currently unavailable' : '此模块暂不可用'); const fallback = firstAvailableRoute(); if (fallback) selectSection(fallback); return; }
   if (section === 'navigation' && state.navigationLocation === 'tools') return selectTool('navigation');
-  if (section !== 'mine') { state.ticketWalletOpen = false; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null; }
+  if (section !== 'mine') { state.ticketWalletOpen = false; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null; state.settingsPageOpen = false; }
+  else if (state.settingsPageOpen) state.settingsPageOpen = false;
   const previousTool = state.tool;
   if (section === 'tools') {
     if (state.navigationLocation === 'tools' && cloudModuleEnabled('navigation')) state.tool = 'navigation';
@@ -1744,7 +1746,7 @@ function selectSection(section) {
   if (state.tool !== previousTool) saveActiveToolPreference();
   const route = section === 'tools' ? state.tool : section;
   if (location.hash.slice(1) !== route) history.replaceState(null, '', '#' + route);
-  if (unchanged) { renderBottomNav(); return; }
+  if (unchanged) { renderBottomNav(); if (wasSettingsPage) render(); return; }
   renderNav(); renderBottomNav(); render();
 }
 function saveActiveToolPreference() {
@@ -3891,7 +3893,7 @@ function renderMine() {
 }
 
 function openTicketWallet() {
-  state.section = 'mine'; state.ticketWalletOpen = true; state.ticketWalletTypeFilter = normalizeTicketWalletFilter(state.ticketWalletTypeFilter); state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
+  state.section = 'mine'; state.settingsPageOpen = false; state.ticketWalletOpen = true; state.ticketWalletTypeFilter = normalizeTicketWalletFilter(state.ticketWalletTypeFilter); state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
   history.replaceState(null, '', '#ticket-wallet'); window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages();
 }
 function closeTicketWallet() {
@@ -12942,7 +12944,8 @@ function renderGithubDialog() {
   dialog.hidden = false; state.githubDialogOpen = true;
 }
 function closeGithubDialog() { const dialog = $('#githubDialog'); if (dialog) dialog.hidden = true; state.githubDialogOpen = false; }
-function renderSettings() {
+function renderSettings(asPageContent = false) {
+  if (state.settingsPageOpen && !asPageContent) return render();
   const dialog = $('#settingsDialog');
   const notificationPreference = state.notificationPreference === 'deny' ? 'deny' : 'allow';
   const openMode = '<div class="settings-preference-row"><h3>' + t('openMode') + '</h3><div class="settings-preference-control"><select id="settingsOpenMode"><option value="current" ' + (state.openMode === 'current' ? 'selected' : '') + '>' + t('openCurrent') + '</option><option value="new-tab" ' + (state.openMode === 'new-tab' ? 'selected' : '') + '>' + t('openNewTab') + '</option></select></div></div>';
@@ -12966,6 +12969,15 @@ function renderSettings() {
     const option = document.createElement('option'); option.value = 'dark-gray'; option.textContent = t('darkGray'); themeSelect.append(option);
   }
   if (themeSelect) themeSelect.value = state.theme;
+}
+function renderSettingsPage() {
+  renderSettings(true);
+  const dialog = $('#settingsDialog');
+  const preferences = dialog.querySelector('.settings-preferences')?.outerHTML || '';
+  dialog.hidden = true;
+  dialog.innerHTML = '';
+  state.settingsOpen = false;
+  return '<section class="mine-settings-page"><div class="settings-page-card"><header class="settings-page-head"><button type="button" class="settings-page-back" data-settings-page-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button><h1>' + escapeHtml(t('settings')) + '</h1></header>' + preferences + '</div></section>';
 }
 function closeSettings() { $('#settingsDialog').hidden = true; state.settingsOpen = false; }
 function refreshUpdateIndicator() {
@@ -13260,7 +13272,7 @@ function render() {
   nav.hidden = state.section !== 'tools' || state.tool === 'track';
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation, track: () => window.OneBoxTrack.render() };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
-  workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
+  workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.settingsPageOpen ? renderSettingsPage() : state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
   $('#settingsBtn').hidden = !cloudModuleEnabled('settings');
   injectCloudContent();
   workspace.setAttribute('aria-busy', 'false');
@@ -15496,7 +15508,8 @@ workspace.addEventListener('click', async (event) => {
     const book = readerBookById(state.readerBookId); if (book) { book.annotations = (book.annotations || []).filter((note) => note.id !== deleteAnnotation.dataset.deleteAnnotation); saveLibrary(); render(); }
     return;
   }
-  if (event.target.closest('[data-open-settings-page]')) return renderSettings();
+  if (event.target.closest('[data-settings-page-back]')) { state.settingsPageOpen = false; state.settingsOpen = false; render(); return; }
+  if (event.target.closest('[data-open-settings-page]')) { state.settingsPageOpen = true; state.settingsOpen = false; render(); return; }
   if (event.target.closest('[data-open-cloud-sync]')) { location.href = new URL('cloud-sync.html', document.baseURI).href; return; }
   if (event.target.closest('[data-open-pet-page]')) return renderPetDialog();
   if (event.target.closest('[data-check-update]')) return checkForUpdate();
@@ -16000,7 +16013,7 @@ document.addEventListener('keydown', (event) => {
 
 $('#themeBtn').addEventListener('click', cycleTheme);
 $('#languageBtn').addEventListener('click', cycleLanguage);
-$('#settingsBtn').addEventListener('click', () => renderSettings());
+$('#settingsBtn').addEventListener('click', () => { if (state.settingsPageOpen) { state.settingsPageOpen = false; render(); } renderSettings(); });
 $('#notifyBtn').addEventListener('click', () => {
   state.notificationOpen = !state.notificationOpen;
   if (state.notificationOpen) { state.notifications.forEach((item) => { if (item.at <= Date.now()) item.read = true; }); saveNotifications(); renderNotifications(); }
@@ -16078,7 +16091,7 @@ $('#navigationDialog').addEventListener('submit', (event) => {
   }
   if (event.target.id === 'navigationCreateFolderForm') return createNavigationFolder($('#navigationFolderName', event.target)?.value, state.navigationFolderDraft?.firstId, state.navigationFolderDraft?.secondId);
 });
-$('#settingsDialog').addEventListener('change', (event) => {
+function handleSettingsChange(event) {
   if (event.target.id === 'settingsLayout') { state.layoutMode = event.target.value === 'simple' ? 'simple' : 'classic'; saveLayoutPreference(); render(); renderSettings(); }
   if (event.target.id === 'settingsNavigationLocation') {
     state.navigationLocation = event.target.value === 'tools' ? 'tools' : 'main';
@@ -16097,7 +16110,9 @@ $('#settingsDialog').addEventListener('change', (event) => {
   if (event.target.id === 'settingsNotifications') { state.notificationPreference = event.target.value; saveStored(STORAGE.notificationPreference, state.notificationPreference); if (state.notificationPreference === 'allow') requestNotifications(); }
   if (event.target.id === 'settingsOpenMode') { state.openMode = event.target.value === 'new-tab' ? 'new-tab' : 'current'; saveStored(STORAGE.openMode, state.openMode); }
   if (event.target.dataset.topDisplay) { state.topDisplay[event.target.dataset.topDisplay] = event.target.checked; saveTopDisplay(); renderHeaderControls(); renderSettings(); }
-});
+}
+$('#settingsDialog').addEventListener('change', handleSettingsChange);
+$('#workspace').addEventListener('change', (event) => { if (state.settingsPageOpen) handleSettingsChange(event); });
 $('#settingsDialog').addEventListener('input', () => {});
 $('#petDialog').addEventListener('click', (event) => {
   if (event.target === $('#petDialog') || event.target.closest('[data-close-pet]')) return closePetDialog();
@@ -16220,7 +16235,7 @@ window.addEventListener('online', () => { $('#connectionStatus').textContent = t
 window.addEventListener('offline', () => { $('#connectionStatus').textContent = t('offline'); toast(state.language === 'en' ? 'Offline mode' : '已切换到离线模式'); });
 window.addEventListener('hashchange', () => {
   const route = location.hash.slice(1);
-  if (route === 'ticket-wallet') { state.section = 'mine'; state.ticketWalletOpen = true; window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages(); }
+  if (route === 'ticket-wallet') { state.section = 'mine'; state.settingsPageOpen = false; state.ticketWalletOpen = true; window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages(); }
   else if (['home', 'navigation', 'messages', 'mine'].includes(route)) selectSection(route);
   else selectTool(route);
 });
