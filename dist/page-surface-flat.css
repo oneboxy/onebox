@@ -226,49 +226,48 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
 #workspace[data-tool="mine"] .mine-settings-page {
   width: min(680px, 100%);
   margin: 0 auto;
-  padding: 0 12px 28px;
+  padding: 0 0 24px;
 }
 #workspace[data-tool="mine"] .settings-page-card {
-  width: min(560px, 100%);
-  margin: 0 auto;
-  padding: 18px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   border: 0;
-  border-radius: 14px;
-  background: var(--panel);
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
   box-shadow: none;
 }
 .settings-page-head {
   display: flex;
   align-items: center;
-  gap: 11px;
-  min-height: 52px;
-  margin: -18px -18px 14px;
-  padding: 14px 18px 12px;
+  gap: 10px;
+  min-height: 50px;
+  margin: 0;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
-.settings-page-head h1 { margin: 0; font-size: 18px; font-weight: 650; }
+.settings-page-head h1 { margin: 0; font-size: 15px; font-weight: 650; }
 .settings-page-back {
   display: grid;
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
   place-items: center;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
 }
 .settings-page-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.settings-page-card .settings-preferences { width: 100%; }
-.settings-page-card .settings-preference-row { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 8px; min-height: 54px; }
-.settings-page-card .settings-preference-row:first-child { border-top: 1px solid var(--line); }
-.settings-page-card .settings-preference-row:last-child { border-bottom: 0; }
+.settings-page-card .settings-preferences { width: 100%; max-width: none; margin: 0; }
+.settings-page-card .settings-preference-row { display: grid; grid-template-columns: minmax(112px, 1fr) minmax(0, 1.2fr); gap: 12px; min-height: 56px; padding: 10px; border-bottom: 1px solid var(--line); }
 .settings-page-card .settings-preference-row h3 { min-width: 0; margin: 0; font-size: 14px; }
-.settings-page-card .settings-preference-control { min-width: 0; justify-content: flex-start; gap: 8px; flex-wrap: nowrap; }
-.settings-page-card .settings-preference-control select { width: auto; min-width: 124px; height: 36px; padding: 7px 26px 7px 10px; font-size: 13px; }
+.settings-page-card .settings-preference-control { min-width: 0; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.settings-page-card .settings-preference-control select { width: min(100%, 220px); min-width: 0; height: 36px; padding: 7px 26px 7px 10px; font-size: 13px; }
 .settings-page-card .setting-toggle { display: inline-flex; align-items: center; flex: 0 0 auto; gap: 6px; font-size: 11px; }
 .settings-page-card .setting-toggle input {
   appearance: none;
@@ -457,12 +456,11 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-head,
     max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   #petDialog .pet-dialog-body { padding-inline: 14px; }
-  #workspace[data-tool="mine"] .mine-settings-page { padding: 0 8px 20px; }
-  #workspace[data-tool="mine"] .settings-page-card { padding: 14px; border-radius: 12px; }
-  .settings-page-head { min-height: 48px; margin: -14px -14px 12px; padding: 12px 14px 10px; }
-  .settings-page-card .settings-preference-row { grid-template-columns: 64px minmax(0, 1fr); gap: 6px; }
+  #workspace[data-tool="mine"] .mine-settings-page { padding: 0 0 20px; }
+  .settings-page-head { min-height: 48px; padding: 8px 10px; }
+  .settings-page-card .settings-preference-row { grid-template-columns: minmax(76px, .8fr) minmax(0, 1.2fr); gap: 8px; min-height: 54px; padding: 9px 10px; }
   .settings-page-card .settings-preference-control { gap: 6px; }
-  .settings-page-card .settings-preference-control select { min-width: 112px; }
+  .settings-page-card .settings-preference-control select { width: 100%; min-width: 0; }
   #workspace[data-tool="track"] > .section-page {
     width: calc(100% - 16px) !important;
     margin-bottom: 12px !important;
