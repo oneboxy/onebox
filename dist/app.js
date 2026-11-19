@@ -1731,11 +1731,17 @@ function selectSection(section) {
   if (section !== 'tools' && !cloudModuleEnabled(section === 'mine' ? 'settings' : section)) { toast(state.language === 'en' ? 'This module is currently unavailable' : '此模块暂不可用'); const fallback = firstAvailableRoute(); if (fallback) selectSection(fallback); return; }
   if (section === 'navigation' && state.navigationLocation === 'tools') return selectTool('navigation');
   if (section !== 'mine') { state.ticketWalletOpen = false; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null; }
-  if (section === 'tools' && state.tool === 'track') return selectTool('calculator');
-  const unchanged = state.section === section;
+  const previousTool = state.tool;
+  if (section === 'tools') {
+    if (state.navigationLocation === 'tools' && cloudModuleEnabled('navigation')) state.tool = 'navigation';
+    else if (!TOOL_DEFS[state.tool] || state.tool === 'track' || !cloudModuleEnabled(toolModuleKey(state.tool))) {
+      state.tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && id !== 'track' && cloudModuleEnabled(toolModuleKey(id))) || 'calculator';
+    }
+  }
+  const unchanged = state.section === section && state.tool === previousTool;
   state.section = section;
   if (section === 'home') state.homeFeed.hasNew = false;
-  if (section === 'tools' && !TOOL_DEFS[state.tool]) state.tool = 'calculator';
+  if (state.tool !== previousTool) saveActiveToolPreference();
   const route = section === 'tools' ? state.tool : section;
   if (location.hash.slice(1) !== route) history.replaceState(null, '', '#' + route);
   if (unchanged) { renderBottomNav(); return; }
