@@ -1731,6 +1731,7 @@ function selectSection(section) {
   if (section !== 'tools' && !cloudModuleEnabled(section === 'mine' ? 'settings' : section)) { toast(state.language === 'en' ? 'This module is currently unavailable' : '此模块暂不可用'); const fallback = firstAvailableRoute(); if (fallback) selectSection(fallback); return; }
   if (section === 'navigation' && state.navigationLocation === 'tools') return selectTool('navigation');
   if (section !== 'mine') { state.ticketWalletOpen = false; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null; }
+  if (section === 'tools' && state.tool === 'track') return selectTool('calculator');
   const unchanged = state.section === section;
   state.section = section;
   if (section === 'home') state.homeFeed.hasNew = false;
@@ -11989,7 +11990,7 @@ function hydrateGithubRuntimeState() {
   state.notificationPreference = parseStored(STORAGE.notificationPreference, 'allow') === 'deny' ? 'deny' : 'allow';
   state.openMode = readOpenModePreference();
   const activeTool = localStorage.getItem(STORAGE.toolActive);
-  if (Object.keys(TOOL_DEFS).includes(activeTool)) state.tool = activeTool;
+  if (Object.keys(TOOL_DEFS).includes(activeTool) && activeTool !== 'track') state.tool = activeTool;
   const activeHomeFeed = localStorage.getItem(STORAGE.homeFeedActive);
   if (activeHomeFeed && homeTabIds().includes(activeHomeFeed)) state.homeFeed.active = activeHomeFeed;
   syncTicketWalletCalendarEvents();
