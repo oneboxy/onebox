@@ -86,6 +86,17 @@
   #workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event { top: 16px; }
 }
 
+/* Keep weather forecast rails inside the same content gutters as the rest
+   of the page; the old right-side bleed made them look abruptly clipped. */
+#workspace[data-tool="weather"] .weather-card-list,
+#workspace[data-tool="weather"] .weather-days,
+#workspace[data-tool="weather"] .hourly-strip,
+#workspace[data-tool="weather"] .advice-strip {
+  margin-right: 0;
+  padding-right: 2px;
+  scroll-padding-inline: 2px;
+}
+
 #workspace[data-tool="home"] .feed-panel,
 #workspace .home-tool-card,
 #workspace .mine-row,
