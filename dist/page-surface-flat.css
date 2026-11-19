@@ -221,9 +221,109 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
 #petDialog .pet-outfits-section,
 #petDialog .pet-unlocks-section { border-top: 1px solid var(--line); }
 
+/* Card Wallet and Track are Mine pages too. Give them the same centered panel,
+   inset, and title row as Settings instead of their former full-width layouts. */
+body:has(.ticket-wallet-page) .ticket-wallet-page {
+  width: min(560px, calc(100% - 24px)) !important;
+  max-width: 560px !important;
+  margin: 0 auto 24px !important;
+  padding: 18px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: var(--panel) !important;
+  box-shadow: 0 14px 42px color-mix(in srgb, var(--ink) 16%, transparent) !important;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'breadcrumb actions' 'filters filters';
+  gap: 8px 10px;
+  margin: -18px -18px 14px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb { gap: 11px; }
+body:has(.ticket-wallet-page) .ticket-wallet-page-title { color: var(--ink); font-size: 17px; font-weight: 650; }
+body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb .ticket-wallet-back {
+  display: grid;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+  grid-area: filters;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll { border: 0; padding: 0; mask-image: none; -webkit-mask-image: none; }
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+  min-width: max-content;
+  gap: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category {
+  position: relative;
+  min-width: auto;
+  min-height: 34px;
+  padding: 6px 1px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active {
+  background: transparent;
+  box-shadow: inset 0 -2px var(--primary);
+  color: var(--primary);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-head-actions { gap: 10px; }
+body:has(.ticket-wallet-page) .ticket-wallet-page-swipe-stage { min-width: 0; }
+
+#workspace[data-tool="track"] > .section-page {
+  width: min(560px, calc(100% - 24px)) !important;
+  max-width: 560px !important;
+  margin: 0 auto 24px !important;
+  padding: 18px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: var(--panel) !important;
+  box-shadow: 0 14px 42px color-mix(in srgb, var(--ink) 16%, transparent) !important;
+}
+#workspace[data-tool="track"] .track-module { padding: 0; }
+#workspace[data-tool="track"] .track-page-head {
+  min-height: 52px;
+  margin: -18px -18px 14px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+#workspace[data-tool="track"] .track-address { color: var(--ink); font-size: 17px; font-weight: 650; }
+#workspace[data-tool="track"] .track-map { height: clamp(340px, 54vh, 560px); min-height: 300px; }
+
 @media (max-width: 760px) {
   #workspace { padding: 14px !important; }
-  body:has(.ticket-wallet-page) .ticket-wallet-page { padding-inline: 12px !important; }
+  body:has(.ticket-wallet-page) .ticket-wallet-page {
+    width: calc(100% - 16px) !important;
+    margin-bottom: 12px !important;
+    padding: 14px !important;
+    border-radius: 12px !important;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+    margin: -14px -14px 12px;
+    padding: 12px 14px 10px;
+  }
   #settingsDialog .settings-dialog-card,
   #petDialog .pet-dialog-card,
   #githubDialog .github-dialog-card,
@@ -239,6 +339,14 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
     max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   #petDialog .pet-dialog-body { padding-inline: 14px; }
+  #workspace[data-tool="track"] > .section-page {
+    width: calc(100% - 16px) !important;
+    margin-bottom: 12px !important;
+    padding: 14px !important;
+    border-radius: 12px !important;
+  }
+  #workspace[data-tool="track"] .track-page-head { margin: -14px -14px 12px; padding: 12px 14px 10px; }
+  #workspace[data-tool="track"] .track-map { height: min(54vh, 540px); min-height: 300px; }
   #workspace[data-tool="reader"] .reader-library-view { padding-top: 0 !important; }
 }
 

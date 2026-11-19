@@ -25,7 +25,7 @@ function moduleText(){
         <button type="button" class="ticket-wallet-back track-back" data-track-back aria-label="${text('返回上一页','Go back')}" title="${text('返回上一页','Go back')}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
         </button>
-        <span class="track-address" data-track-address aria-live="polite"${history||(!detail&&!s.address) ? ' hidden' : ''}>${esc(detail?s.selectedTrack?.name||text('历史路线','Saved route'):s.address)}</span>
+        <span class="track-address" data-track-address aria-live="polite">${esc(detail?s.selectedTrack?.name||text('历史路线','Saved route'):s.address||text('轨迹','Track'))}</span>
       </nav>
       ${history||detail?'':`<button type="button" class="track-history-button" data-track-history><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h10"/><circle cx="18" cy="17.5" r="3.5"/><path d="M18 15.7v2l1.3.8"/></svg><span>${text('历史记录','History')}</span></button>`}
       <button type="button" class="track-history-button track-minimize-button" data-track-minimize aria-label="${text('缩小到边缘浮窗','Minimize to edge')}" title="${text('缩小到边缘浮窗','Minimize to edge')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5z"/><path d="M9 15 5 19m4-4H6m3 0v3"/></svg></button>
