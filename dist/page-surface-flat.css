@@ -141,14 +141,65 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 }
 
 body:has(.ticket-wallet-page) .ticket-wallet-page {
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 0;
+  border-radius: 0;
   box-shadow: none;
   padding-inline: 16px !important;
 }
 
+/* Mine subpages share the same quiet, flat surface as the Mine list. Keep the
+   modal backdrop for focus, but use one restrained shell and shared dividers. */
+#settingsDialog .settings-dialog-card,
+#petDialog .pet-dialog-card,
+#githubDialog .github-dialog-card,
+#agreementDialog .agreement-dialog-card {
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: var(--panel);
+  box-shadow: 0 14px 42px color-mix(in srgb, var(--ink) 16%, transparent) !important;
+}
+
+#settingsDialog .dialog-head,
+#githubDialog .dialog-head,
+#agreementDialog .dialog-head,
+#petDialog .pet-dialog-head {
+  border-bottom: 1px solid var(--line);
+}
+
+#settingsDialog .settings-preferences { width: 100%; }
+#settingsDialog .settings-preference-row { min-height: 50px; }
+#settingsDialog .settings-preference-row:first-child { border-top: 1px solid var(--line); }
+#settingsDialog .settings-preference-row:last-child { border-bottom: 0; }
+
+#petDialog .pet-dialog-body { padding-inline: 18px; }
+#petDialog .pet-profile-card,
+#petDialog .pet-outfits-section,
+#petDialog .pet-unlocks-section { border-color: var(--line); }
+#petDialog .pet-settings-section { border-left-color: var(--line); }
+
+#githubDialog .github-status-card,
+#githubDialog .github-summary {
+  border-color: var(--line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+#githubDialog .github-dialog-body { border-color: var(--line); }
+
+#agreementDialog .agreement-body { padding-inline: 18px; }
+#agreementDialog .agreement-updated {
+  margin: 0;
+  padding: 10px 18px 16px;
+  border-top: 1px solid var(--line);
+}
+
 @media (max-width: 760px) {
   #workspace { padding: 14px !important; }
+  body:has(.ticket-wallet-page) .ticket-wallet-page { padding-inline: 12px !important; }
+  #settingsDialog .settings-dialog-card,
+  #petDialog .pet-dialog-card,
+  #githubDialog .github-dialog-card,
+  #agreementDialog .agreement-dialog-card { border-radius: 12px !important; }
+  #petDialog .pet-dialog-body { padding-inline: 14px; }
   #workspace[data-tool="reader"] .reader-library-view { padding-top: 0 !important; }
 }
 
