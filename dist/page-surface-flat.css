@@ -69,6 +69,21 @@
   box-shadow: none;
 }
 
+/* Keep the homepage stream on the page canvas; separators span each full row. */
+main:has(#workspace[data-tool="home"]) { background: transparent !important; }
+#workspace[data-tool="home"],
+#workspace[data-tool="home"] .feed-home,
+#workspace[data-tool="home"] .feed-panel,
+#workspace[data-tool="home"] .feed-list { background: transparent !important; }
+#workspace[data-tool="home"] .feed-item,
+#workspace[data-tool="home"] .feed-item.is-read {
+  background: transparent !important;
+  border-bottom: 1px solid var(--line);
+}
+#workspace[data-tool="home"] .feed-item:first-child { border-top: 1px solid var(--line); }
+#workspace[data-tool="home"] .feed-item:hover,
+#workspace[data-tool="home"] .feed-item:focus-visible { background: transparent !important; }
+
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
   border: 1px solid var(--line) !important;
   border-radius: 12px !important;
