@@ -61,6 +61,31 @@
 }
 #workspace[data-tool="reader"] .reader-book-grid { padding-top: 12px; }
 
+/* The calendar is an open canvas, so align the agenda with it using a
+   simple divider instead of leaving one boxed column beside one open one. */
+#workspace[data-tool="calendar"] .agenda-panel {
+  min-width: 0;
+  padding: 0 0 0 22px;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+}
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event {
+  top: 0;
+  right: 0;
+}
+
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .agenda-panel {
+    padding: 16px 0 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+  #workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event { top: 16px; }
+}
+
 #workspace[data-tool="home"] .feed-panel,
 #workspace .home-tool-card,
 #workspace .mine-row,
