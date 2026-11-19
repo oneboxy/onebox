@@ -192,6 +192,35 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
   border-top: 1px solid var(--line);
 }
 
+/* Keep every Mine child view aligned to the Settings page: same top anchor,
+   readable content width, quiet shell, and matching header/divider rhythm. */
+#settingsDialog,
+#petDialog,
+#githubDialog,
+#agreementDialog {
+  align-items: flex-start !important;
+  justify-content: center;
+  padding: calc(58px + env(safe-area-inset-top) + 12px) 12px 24px !important;
+}
+#settingsDialog .settings-dialog-card,
+#petDialog .pet-dialog-card,
+#githubDialog .github-dialog-card,
+#agreementDialog .agreement-dialog-card {
+  width: min(560px, 100%) !important;
+  max-height: calc(100vh - 110px - env(safe-area-inset-top));
+}
+#petDialog .pet-dialog-head,
+#githubDialog .github-dialog-head,
+#agreementDialog .dialog-head,
+#settingsDialog .dialog-head {
+  min-height: 52px;
+}
+#agreementDialog .agreement-body { gap: 0; }
+#agreementDialog .agreement-section { padding-block: 12px; }
+#agreementDialog .agreement-section + .agreement-section { margin-top: 0; }
+#petDialog .pet-outfits-section,
+#petDialog .pet-unlocks-section { border-top: 1px solid var(--line); }
+
 @media (max-width: 760px) {
   #workspace { padding: 14px !important; }
   body:has(.ticket-wallet-page) .ticket-wallet-page { padding-inline: 12px !important; }
@@ -199,6 +228,16 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
   #petDialog .pet-dialog-card,
   #githubDialog .github-dialog-card,
   #agreementDialog .agreement-dialog-card { border-radius: 12px !important; }
+  #settingsDialog,
+  #petDialog,
+  #githubDialog,
+  #agreementDialog { padding-top: calc(58px + env(safe-area-inset-top) + 8px) !important; }
+  #settingsDialog .settings-dialog-card,
+  #petDialog .pet-dialog-card,
+  #githubDialog .github-dialog-card,
+  #agreementDialog .agreement-dialog-card {
+    max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
   #petDialog .pet-dialog-body { padding-inline: 14px; }
   #workspace[data-tool="reader"] .reader-library-view { padding-top: 0 !important; }
 }

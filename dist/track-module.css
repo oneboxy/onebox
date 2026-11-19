@@ -405,3 +405,47 @@
   box-shadow: none !important;
   background: transparent !important;
 }
+
+.track-minimize-button svg { width: 17px; height: 17px; }
+.track-mini-window {
+  position: fixed;
+  z-index: 1200;
+  top: 47%;
+  right: max(0px, env(safe-area-inset-right));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 94px;
+  min-height: 46px;
+  padding: 7px 10px 7px 9px;
+  border: 1px solid var(--track-line);
+  border-right: 0;
+  border-radius: 10px 0 0 10px;
+  background: color-mix(in srgb, var(--track-panel) 94%, transparent);
+  color: var(--track-ink);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--track-ink) 12%, transparent);
+  cursor: pointer;
+  text-align: left;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.track-mini-window > svg { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: var(--primary, #4568dd); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.track-mini-window > span { display: grid; gap: 2px; min-width: 0; }
+.track-mini-window strong { font-size: 11px; font-weight: 650; line-height: 1.15; }
+.track-mini-window small { color: var(--track-muted); font-size: 9px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.track-mini-window.is-recording > svg { animation: track-mini-pulse 1.8s ease-in-out infinite; }
+.track-mini-window:focus-visible { outline: 2px solid var(--primary, #4568dd); outline-offset: 2px; }
+@keyframes track-mini-pulse { 50% { opacity: .52; } }
+.track-route {
+  border: 0;
+  border-top: 1px solid var(--track-line);
+  border-radius: 0;
+  background: transparent;
+  padding-inline: 0;
+}
+.track-route:last-child { border-bottom: 1px solid var(--track-line); }
+.track-route-open { padding-inline: 0 !important; }
+@media (max-width: 760px) {
+  .track-mini-window { top: 48%; min-width: 86px; min-height: 42px; padding: 6px 8px; }
+  .track-mini-window > svg { width: 16px; height: 16px; flex-basis: 16px; }
+}

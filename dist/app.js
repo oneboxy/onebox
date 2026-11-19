@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.821';
+const APP_VERSION = '2.18.822';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -368,7 +368,7 @@ const toast = (message, kind = 'info', options = {}) => {
 
 const DICT = {
   zh: {
-    calculator: '计算', development: '开发', calendar: '日历', weather: '天气', convert: '转换', unitConvert: '换算', translate: '翻译', translateConvert: '转换', reader: '阅读', track: '游迹',
+    calculator: '计算', development: '开发', calendar: '日历', weather: '天气', convert: '转换', unitConvert: '换算', translate: '翻译', translateConvert: '转换', reader: '阅读', track: '轨迹',
     online: '在线', offline: '离线', install: '安装应用', settings: '设置', notifications: '消息提示',
     heroSubtitle: '快速、清爽、可离线。你的数据优先保存在当前设备。',
     calculatorDesc: '支持括号、百分比、科学函数和键盘输入，并自动保留最近计算记录。',
@@ -415,7 +415,7 @@ const DICT = {
     bookshelf: '书架', addBook: '添加文档', noBooks: '还没有本地文档。', readerHint: '支持 Markdown、TXT、PDF、EPUB、FB2、MOBI、AZW3；书籍文件走个人 GitHub Gist，同步进度与笔记走 OneBox 云端。', readerMissingSource: '原文件未备份', readerFileMissing: '这份备份没有包含原书文件。请在仍保存原书的设备重新上传，或重新导入同名文件。', openBook: '打开阅读', deleteBook: '删除文档', annotations: '笔记', readerComments: '笔记', readerNotesHint: '已保存的阅读笔记', addAnnotation: '笔记', annotationPlaceholder: '添加你的感受…', saveAnnotation: '保存', annotationHint: '选择文字后长按或点击笔记按钮。', noAnnotations: '还没有笔记。', reading: '正在阅读', closeReader: '关闭阅读', unsupportedFile: '请选择 .md、.markdown、.txt、.pdf、.epub、.fb2、.mobi 或 .azw3 文件。', importFailed: '文档读取失败，请重试。', deleteConfirm: '确定删除这本文档吗？', pdfHint: 'PDF 使用浏览器原生阅读器打开。', epubHint: 'EPUB 已转换为适合 OneBox 的阅读视图。', readerContents: '目录', readerSettings: '阅读设置', readerReadingMethod: '阅读方式', readerTheme: '阅读背景', readerThemePaper: '纸张', readerThemeSepia: '墨水屏', readerThemeGreen: '护眼绿', readerThemeDark: '夜间', readerFontSize: '字号', readerFontFamily: '字体', readerLineHeight: '行距', readerParagraphSpacing: '段落间距', readerLetterSpacing: '字间距', readerAnimation: '翻页动画', readerAnimationSlide: '滑动', readerAnimationCover: '覆盖', readerAnimationNone: '无', readerScroll: '上下滚动', readerPages: '模拟翻页', readerProgress: '进度', readerFullscreen: '全屏', readerExitFullscreen: '退出全屏', readerFullscreenOnOpen: '是否全屏', readerFullscreenOnOpenHint: '下次打开文档时按此设置进入', readerNoContents: '暂无章节目录。', readerSettingsHint: '设置仅作用于当前设备上的阅读内容。', readerTocHint: '选择章节后跳转到对应位置。',
   },
   en: {
-    calculator: 'Calculator', development: 'Dev', calendar: 'Calendar', weather: 'Weather', convert: 'Convert', unitConvert: 'Convert', translate: 'Translate', translateConvert: 'Convert', reader: 'Reader', track: 'Journeys',
+    calculator: 'Calculator', development: 'Dev', calendar: 'Calendar', weather: 'Weather', convert: 'Convert', unitConvert: 'Convert', translate: 'Translate', translateConvert: 'Convert', reader: 'Reader', track: 'Track',
     online: 'Online', offline: 'Offline', install: 'Install', settings: 'Settings', notifications: 'Notifications',
     heroSubtitle: 'Fast, calm and offline-ready. Your data stays on this device first.',
     calculatorDesc: 'Parentheses, percentages, scientific functions, keyboard input and history.',
