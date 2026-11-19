@@ -50,7 +50,7 @@
   border-radius: 0;
 }
 #workspace[data-tool="mine"] .mine-row:first-child { border-top: 1px solid var(--line); }
-#workspace[data-tool="mine"] .mine-row:last-child { border-bottom: 0; }
+#workspace[data-tool="mine"] .mine-row:last-child { border-bottom: 1px solid var(--line); }
 #workspace[data-tool="mine"] .mine-row:hover,
 #workspace[data-tool="mine"] .mine-row:focus-visible {
   background: color-mix(in srgb, var(--panel-2) 64%, transparent);
