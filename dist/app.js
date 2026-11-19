@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.828';
+const APP_VERSION = '2.18.836';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1412,7 +1412,7 @@ const state = {
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
   homeFeedActivity: storedHomeFeedActivity && typeof storedHomeFeedActivity === 'object' ? storedHomeFeedActivity : {},
-  notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, settingsPageOpen: false, githubDialogOpen: false, recentReadingOpen: false,
+  notifications: parseStored(STORAGE.notifications, []), notificationOpen: false, settingsOpen: false, settingsPageOpen: false, minePage: '', githubDialogOpen: false, recentReadingOpen: false,
   notificationPreference: storedNotificationPreference === 'deny' ? 'deny' : 'allow',
   topDisplay: { theme: storedTopDisplay.theme !== false, language: storedTopDisplay.language !== false, messages: storedTopDisplay.messages !== false },
   footprint: storedFootprint,
@@ -1728,11 +1728,11 @@ function selectTool(id) {
 }
 function selectSection(section) {
   if (!SECTION_DEFS[section]) section = 'tools';
-  const wasSettingsPage = state.settingsPageOpen;
+  const wasMineSubpage = state.settingsPageOpen || state.ticketWalletOpen || Boolean(state.minePage);
   if (section !== 'tools' && !cloudModuleEnabled(section === 'mine' ? 'settings' : section)) { toast(state.language === 'en' ? 'This module is currently unavailable' : '此模块暂不可用'); const fallback = firstAvailableRoute(); if (fallback) selectSection(fallback); return; }
   if (section === 'navigation' && state.navigationLocation === 'tools') return selectTool('navigation');
-  if (section !== 'mine') { state.ticketWalletOpen = false; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null; state.settingsPageOpen = false; }
-  else if (state.settingsPageOpen) state.settingsPageOpen = false;
+  if (section !== 'mine') { state.ticketWalletOpen = false; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null; state.settingsPageOpen = false; state.minePage = ''; }
+  else if (state.settingsPageOpen || state.ticketWalletOpen || state.minePage) { state.ticketWalletOpen = false; state.settingsPageOpen = false; state.minePage = ''; }
   const previousTool = state.tool;
   if (section === 'tools') {
     if (state.navigationLocation === 'tools' && cloudModuleEnabled('navigation')) state.tool = 'navigation';
@@ -1746,7 +1746,7 @@ function selectSection(section) {
   if (state.tool !== previousTool) saveActiveToolPreference();
   const route = section === 'tools' ? state.tool : section;
   if (location.hash.slice(1) !== route) history.replaceState(null, '', '#' + route);
-  if (unchanged) { renderBottomNav(); if (wasSettingsPage) render(); return; }
+  if (unchanged) { renderBottomNav(); if (wasMineSubpage) render(); return; }
   renderNav(); renderBottomNav(); render();
 }
 function saveActiveToolPreference() {
@@ -3892,13 +3892,56 @@ function renderMine() {
   return '<div class="section-page mine-page"><div class="mine-list">' + row('data-open-settings-page', 'settings', t('settings'), state.language === 'en' ? 'Theme, language, color and display' : '主题、语言、颜色与显示设置') + row('data-open-pet-page', 'pet', t('mascot'), t('petDescription')) + row('data-open-ticket-wallet', 'wallet', t('ticketWallet'), t('ticketWalletDescription')) + row('data-track-entry', 'route', t('track'), state.language === 'en' ? 'Plan and record your journeys' : '地图定位与路线记录') + row('data-open-github-page', 'github', t('accountLogin'), escapeHtml(githubStatus)) + updateRow + row('data-open-agreement-page', 'agreement', t('userAgreement'), state.language === 'en' ? 'Learn how OneBox handles data' : '了解 OneBox 如何处理数据') + '</div></div>';
 }
 
+function mineSubpageFrame(title, content, pageClass = '') {
+  const back = '<button type="button" class="settings-page-back" data-mine-page-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>';
+  return '<section class="mine-settings-page mine-subpage ' + pageClass + '"><div class="settings-page-card"><header class="settings-page-head">' + back + '<h1>' + escapeHtml(title) + '</h1></header>' + content + '</div></section>';
+}
+function openMineSubpage(page) {
+  state.section = 'mine';
+  state.minePage = page;
+  state.settingsPageOpen = page === 'settings';
+  state.ticketWalletOpen = page === 'wallet';
+  state.petDialogOpen = false;
+  state.githubDialogOpen = false;
+  state.settingsOpen = false;
+  ['petDialog', 'githubDialog', 'agreementDialog', 'settingsDialog'].forEach((id) => { const dialog = $('#' + id); if (dialog) dialog.hidden = true; });
+  if (page === 'wallet') {
+    state.ticketWalletTypeFilter = normalizeTicketWalletFilter(state.ticketWalletTypeFilter);
+    state.ticketWalletSelectedId = '';
+    state.ticketWalletEditorOpen = false;
+    state.ticketWalletMemoryDraft = null;
+  }
+  history.replaceState(null, '', page === 'wallet' ? '#ticket-wallet' : '#mine');
+  renderNav(); renderBottomNav(); render();
+  if (page === 'wallet') { scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages(); }
+  window.scrollTo(0, 0);
+}
+function closeMineSubpage() {
+  state.minePage = '';
+  state.settingsPageOpen = false;
+  state.settingsOpen = false;
+  state.ticketWalletOpen = false;
+  state.ticketWalletSelectedId = '';
+  state.ticketWalletEditorOpen = false;
+  state.ticketWalletMemoryDraft = null;
+  state.petDialogOpen = false;
+  state.githubDialogOpen = false;
+  history.replaceState(null, '', '#mine');
+  renderNav(); renderBottomNav(); render();
+  window.scrollTo(0, 0);
+}
+window.OneBoxMinePages = {
+  open: openMineSubpage,
+  back: closeMineSubpage,
+  isTrackPage: () => state.section === 'mine' && state.minePage === 'track',
+};
+
 function openTicketWallet() {
-  state.section = 'mine'; state.settingsPageOpen = false; state.ticketWalletOpen = true; state.ticketWalletTypeFilter = normalizeTicketWalletFilter(state.ticketWalletTypeFilter); state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
-  history.replaceState(null, '', '#ticket-wallet'); window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages();
+  openMineSubpage('wallet');
 }
 function closeTicketWallet() {
   ticketWalletMapReturnContext = null;
-  state.ticketWalletOpen = false; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
+  state.minePage = ''; state.ticketWalletOpen = false; state.ticketWalletSelectedId = ''; state.ticketWalletEditorOpen = false; state.ticketWalletMemoryDraft = null;
   ticketWalletMapFocusId = '';
   closeTicketWalletOriginal();
   history.replaceState(null, '', '#mine'); renderNav(); renderBottomNav(); render();
@@ -5812,10 +5855,11 @@ function renderTicketWallet() {
   const ticketWalletViewSwitcher = '<div class="ticket-wallet-tabs ticket-wallet-view-switcher" role="tablist" aria-label="' + escapeHtml(t('ticketWallet')) + '"><button class="' + (state.ticketWalletView === 'tickets' ? 'active' : '') + '" data-ticket-wallet-view="tickets" role="tab" aria-selected="' + (state.ticketWalletView === 'tickets' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg></span><span>' + escapeHtml(t('ticketWalletTickets')) + '</span></button><button class="' + (state.ticketWalletView === 'journeys' ? 'active' : '') + '" data-ticket-wallet-view="journeys" role="tab" aria-selected="' + (state.ticketWalletView === 'journeys' ? 'true' : 'false') + '"><span class="ticket-wallet-view-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c4-1 6-4 7-7s3-6 7-7"></path><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="5" r="2"></circle></svg></span><span>' + escapeHtml(t('ticketWalletJourneys')) + '</span></button></div>';
   const ticketWalletTopAdd = state.ticketWalletView === 'tickets' && !state.ticketWalletEditorOpen ? '<button class="ticket-wallet-header-add" data-ticket-wallet-add aria-label="' + escapeHtml(t('ticketWalletAdd')) + '" title="' + escapeHtml(t('ticketWalletAdd')) + '"><span aria-hidden="true">＋</span></button>' : '';
   const ticketWalletLayoutToggle = state.ticketWalletView === 'tickets' && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft && !state.ticketWalletSelectedId ? TicketWalletLayout.toggleButtonMarkup(ticketWalletCardLayout, state.language) : '';
-  return '<div class="section-page ticket-wallet-page" ' + TicketWalletLayout.pageAttribute(ticketWalletCardLayout) + '><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="ticket-wallet-dialog-card" role="dialog" aria-modal="true"><div class="ticket-wallet-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button><strong class="ticket-wallet-page-title">' + escapeHtml(t('ticketWallet')) + '</strong></nav>' + ticketWalletFilterRow + '<div class="ticket-wallet-head-actions">' + ticketWalletTopAdd + ticketWalletViewSwitcher + ticketWalletLayoutToggle + '</div></div><div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletView === 'journeys' && ticketWalletMapReturnContext ? '<button type="button" class="ticket-wallet-map-return" data-ticket-wallet-map-return><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg>' + (state.language === 'en' ? 'Back to ticket' : '返回当前票据') + '</button>' : '') + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div></div>';
+  return '<div class="section-page ticket-wallet-page" ' + TicketWalletLayout.pageAttribute(ticketWalletCardLayout) + '><input id="ticketWalletFileInput" type="file" accept="image/*,.pkpass" hidden><input id="ticketWalletJsonInput" type="file" accept="application/json,.json" hidden><div class="settings-page-card ticket-wallet-content"><div class="ticket-wallet-page-head settings-page-head"><nav class="ticket-wallet-breadcrumb" aria-label="面包屑"><button class="ticket-wallet-back settings-page-back" data-ticket-wallet-back aria-label="' + escapeHtml(t('close')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button><strong class="ticket-wallet-page-title">' + escapeHtml(t('ticketWallet')) + '</strong></nav>' + ticketWalletFilterRow + '<div class="ticket-wallet-head-actions">' + ticketWalletTopAdd + ticketWalletViewSwitcher + ticketWalletLayoutToggle + '</div></div><div class="ticket-wallet-page-swipe-stage" data-ticket-wallet-swipe-stage><div class="ticket-wallet-page-swipe-panel" data-ticket-wallet-swipe-panel>' + (state.ticketWalletView === 'journeys' && ticketWalletMapReturnContext ? '<button type="button" class="ticket-wallet-map-return" data-ticket-wallet-map-return><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg>' + (state.language === 'en' ? 'Back to ticket' : '返回当前票据') + '</button>' : '') + (state.ticketWalletEditorOpen ? renderTicketWalletEditor() : state.ticketWalletMemoryDraft ? renderTicketWalletMemoryEditor() : ticketWalletPageBody) + '</div></div></div></div>';
 }
 
-function renderPetDialog() {
+function renderPetDialog(asPageContent = false) {
+  if (!asPageContent && state.section === 'mine' && state.minePage === 'pet') return render();
   const dialog = $('#petDialog');
   if (!dialog) return;
   bindPetProfileToCurrentUser();
@@ -5838,6 +5882,11 @@ function renderPetDialog() {
   const stats = state.language === 'en' ? (profile.stats.articles + ' articles · ' + profile.stats.books + ' books · ' + profile.stats.tools + ' tools') : ('文章 ' + profile.stats.articles + ' · 书籍 ' + profile.stats.books + ' · 工具 ' + profile.stats.tools);
   const progressLabel = next ? petText('petNextLevel', { points: Math.max(0, next.minPoints - profile.points) }) : petText('petMaxLevel');
   dialog.innerHTML = '<div class="dialog-card pet-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head pet-dialog-head"><div><h2>' + escapeHtml(t('mascot')) + '</h2></div><button class="icon-btn small" data-close-pet aria-label="' + escapeHtml(t('close')) + '">×</button></div><div class="pet-dialog-body"><section class="pet-profile-card"><div class="pet-profile-avatar"><img src="' + petImage + '" alt=""><span>' + outfit.glyph + '</span></div><div class="pet-profile-copy"><strong>' + escapeHtml(petText('petLevel', { level: current.level, name: current.name[state.language] || current.name.zh })) + '</strong><p>' + escapeHtml(petText('petPoints', { points: profile.points })) + '</p><small>' + escapeHtml(petText('petOwner', { owner: petOwnerLabel() })) + '</small></div></section><section class="pet-progress-card"><div class="pet-progress-head"><strong>' + escapeHtml(petText('petPoints', { points: profile.points })) + '</strong><span>' + escapeHtml(progressLabel) + '</span></div><div class="pet-progress-track"><i style="width:' + progress.toFixed(1) + '%"></i></div><p>' + escapeHtml(t('petEarnHint')) + '</p><div class="pet-earn-list"><span>' + escapeHtml(t('petArticlePoints')) + '</span><span>' + escapeHtml(t('petBookPoints')) + '</span><span>' + escapeHtml(t('petToolPoints')) + '</span></div><small class="pet-stat-line">' + escapeHtml(stats) + '</small></section><section class="pet-settings-section"><h3>' + escapeHtml(t('petSettings')) + '</h3><div class="pet-setting-row"><span>' + escapeHtml(t('mascot')) + '</span><select id="petVisibility"><option value="show" ' + (state.mascotVisible ? 'selected' : '') + '>' + escapeHtml(t('showMascot')) + '</option><option value="hide" ' + (!state.mascotVisible ? 'selected' : '') + '>' + escapeHtml(t('hideMascot')) + '</option></select></div><div class="pet-setting-row"><span>' + escapeHtml(t('mascotDisplay')) + '</span><select id="petDisplayMode"><option value="half" ' + (state.mascotDisplayMode === 'half' ? 'selected' : '') + '>' + escapeHtml(t('mascotHalfBody')) + '</option><option value="full" ' + (state.mascotDisplayMode === 'full' ? 'selected' : '') + '>' + escapeHtml(t('mascotFullBody')) + '</option></select></div></section><section class="pet-outfits-section"><div class="pet-section-head"><h3>' + escapeHtml(t('petOutfits')) + '</h3><small>' + escapeHtml(petText('petLevel', { level: current.level, name: current.name[state.language] || current.name.zh })) + '</small></div><div class="pet-outfit-grid">' + outfitCards + '</div></section><section class="pet-unlocks-section"><div class="pet-section-head"><h3>' + escapeHtml(t('petInteractions')) + '</h3><small>' + escapeHtml(t('petEarnHint')) + '</small></div><div class="pet-unlock-list">' + interactionCards + '</div></section></div></div>';
+  if (asPageContent) {
+    const content = dialog.querySelector('.pet-dialog-body')?.innerHTML || '';
+    dialog.hidden = true; dialog.innerHTML = ''; state.petDialogOpen = false;
+    return mineSubpageFrame(t('mascot'), content, 'mine-pet-page');
+  }
   dialog.hidden = false;
   state.petDialogOpen = true;
 }
@@ -11356,7 +11405,7 @@ async function hydrateGithubUser() {
       render();
       if ($('#petDialog') && !$('#petDialog').hidden) renderPetDialog();
     }
-    if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+    if (githubPageIsVisible()) renderGithubDialog();
   } catch (error) {
     setGithubAutoSyncStatus('error', githubBrowserError(error) || (state.language === 'en' ? 'Could not safely switch GitHub sync account' : '无法安全切换 GitHub 同步账号'));
   }
@@ -12067,7 +12116,7 @@ function invalidateGithubToken(requestedToken = state.github.token) {
   if (persisted?.token && persisted.token !== requestedToken) {
     if (currentLogin && persistedLogin === currentLogin) {
       state.github = { ...state.github, ...persisted };
-      if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+      if (githubPageIsVisible()) renderGithubDialog();
     }
     return;
   }
@@ -12083,7 +12132,7 @@ function invalidateGithubToken(requestedToken = state.github.token) {
   state.github.expiresAt = 0;
   state.github.manualTokenOpen = false;
   saveGithub(true);
-  if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+  if (githubPageIsVisible()) renderGithubDialog();
 }
 async function githubApiError(response, fallback = '') {
   let message = '';
@@ -12196,14 +12245,14 @@ function updateGithubSync(mode, progress, message, error = '') {
   state.githubSync = { active: !error && progress < 100, mode, progress: Math.max(0, Math.min(100, Math.round(progress))), message: message || '', error: error || '' };
   if (!githubSyncQuiet) {
     renderGithubSyncIndicator();
-    if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+    if (githubPageIsVisible()) renderGithubDialog();
   }
 }
 function finishGithubSync(mode, message, error = '') {
   state.githubSync = { active: false, mode, progress: error ? state.githubSync.progress : 100, message: message || '', error: error || '' };
   if (!githubSyncQuiet) {
     renderGithubSyncIndicator();
-    if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+    if (githubPageIsVisible()) renderGithubDialog();
   }
   clearTimeout(githubSyncDismissTimer);
   githubSyncDismissTimer = githubSyncQuiet ? 0 : window.setTimeout(dismissGithubSyncIndicator, error ? 12000 : 5000);
@@ -12213,7 +12262,7 @@ function dismissGithubSyncIndicator() {
   githubSyncDismissTimer = 0;
   state.githubSync = { active: false, mode: '', progress: 0, message: '', error: '' };
   renderGithubSyncIndicator();
-  if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+  if (githubPageIsVisible()) renderGithubDialog();
 }
 function githubSyncProgressMarkup(sync) {
   if (!sync?.active && !sync?.error) return '';
@@ -12805,7 +12854,7 @@ function githubStateMatchesStoredAccount() {
 function setGithubAutoSyncStatus(stateName, message = '') {
   githubAutoSyncStatus = { state: stateName, message };
   window.dispatchEvent(new CustomEvent('onebox:gist-sync-status', { detail: githubAutoSyncStatus }));
-  if (state.githubDialogOpen && !$('#githubDialog')?.hidden) renderGithubDialog();
+  if (githubPageIsVisible()) renderGithubDialog();
 }
 function queueGithubAutoSync(delay = 1800, restore = false) {
   if (!githubAutoSyncEnabled() || !state.github.token || !navigator.onLine) return;
@@ -12892,12 +12941,17 @@ function disconnectGithub() {
   window.OneBoxReaderCloudSync?.invalidateSession();
   saveGithub(true); renderGithubDialog(); toast(state.language === 'en' ? 'GitHub disconnected' : '已退出 GitHub');
 }
-function renderAgreementDialog() {
+function renderAgreementDialog(asPageContent = false) {
   const dialog = $('#agreementDialog');
   if (!dialog) return;
   const sections = ['agreementIntro', 'agreementLocal', 'agreementNetwork', 'agreementGithub', 'agreementPermissions', 'agreementDisclaimer'];
   const body = sections.map((key, index) => index === 0 ? '<p class="agreement-intro">' + escapeHtml(t(key)) + '</p>' : '<section class="agreement-section"><h3>' + escapeHtml(t(key).split('：')[0].split(':')[0]) + '</h3><p>' + escapeHtml(t(key)) + '</p></section>').join('');
   dialog.innerHTML = '<div class="dialog-card agreement-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + t('agreementTitle') + '</h2></div><button class="icon-btn small" data-close-agreement aria-label="' + t('close') + '">×</button></div><div class="agreement-body">' + body + '</div><p class="settings-note agreement-updated">' + t('agreementUpdated') + ' · OneBox ' + APP_VERSION + '</p></div>';
+  if (asPageContent) {
+    const content = dialog.querySelector('.agreement-body')?.outerHTML + dialog.querySelector('.agreement-updated')?.outerHTML;
+    dialog.hidden = true; dialog.innerHTML = '';
+    return mineSubpageFrame(t('agreementTitle'), content || '', 'mine-agreement-page');
+  }
   dialog.hidden = false;
 }
 function closeAgreementDialog() { const dialog = $('#agreementDialog'); if (dialog) dialog.hidden = true; }
@@ -12914,7 +12968,9 @@ function accountProviderIcon(providerId) {
   };
   return '<span class="account-provider-icon account-provider-icon-' + escapeHtml(providerId) + '" aria-hidden="true">' + (icons[providerId] || '') + '</span>';
 }
-function renderGithubDialog() {
+function githubPageIsVisible() { return (state.section === 'mine' && state.minePage === 'account') || (state.githubDialogOpen && !$('#githubDialog')?.hidden); }
+function renderGithubDialog(asPageContent = false) {
+  if (!asPageContent && state.section === 'mine' && state.minePage === 'account') return render();
   const dialog = $('#githubDialog');
   if (!dialog) return;
   const connected = Boolean(state.github.token && state.github.user);
@@ -12941,6 +12997,11 @@ function renderGithubDialog() {
     ? '<div class="github-action-grid">' + actionButton('upload', t('githubBackup'), uploadIcon, true) + actionButton('download', t('githubRestore'), downloadIcon) + actionButton('logout', t('githubLogout'), logoutIcon) + '</div>'
     : '';
   dialog.innerHTML = '<div class="dialog-card github-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head github-dialog-head"><div class="github-dialog-title"><h2>' + t('oneboxAccountTitle') + '</h2></div><button class="icon-btn small github-dialog-close" data-close-github aria-label="' + t('close') + '">×</button></div><div class="github-dialog-body"><section class="github-status-section">' + account + '</section>' + code + manualToken + customSync + syncProgress + '</div>' + (actions ? '<section class="github-actions">' + actions + '</section>' : '') + '</div>';
+  if (asPageContent) {
+    const content = (dialog.querySelector('.github-dialog-body')?.outerHTML || '') + (dialog.querySelector('.github-actions')?.outerHTML || '');
+    dialog.hidden = true; dialog.innerHTML = ''; state.githubDialogOpen = false;
+    return mineSubpageFrame(t('accountLogin'), content, 'mine-account-page');
+  }
   dialog.hidden = false; state.githubDialogOpen = true;
 }
 function closeGithubDialog() { const dialog = $('#githubDialog'); if (dialog) dialog.hidden = true; state.githubDialogOpen = false; }
@@ -13272,7 +13333,7 @@ function render() {
   nav.hidden = state.section !== 'tools' || state.tool === 'track';
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation, track: () => window.OneBoxTrack.render() };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
-  workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.settingsPageOpen ? renderSettingsPage() : state.ticketWalletOpen ? renderTicketWallet() : renderMine()) : (renderers[state.tool] || calculator)();
+  workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.settingsPageOpen ? renderSettingsPage() : state.ticketWalletOpen ? renderTicketWallet() : state.minePage === 'pet' ? renderPetDialog(true) : state.minePage === 'account' ? renderGithubDialog(true) : state.minePage === 'agreement' ? renderAgreementDialog(true) : state.minePage === 'track' ? window.OneBoxTrack.render() : renderMine()) : (renderers[state.tool] || calculator)();
   $('#settingsBtn').hidden = !cloudModuleEnabled('settings');
   injectCloudContent();
   workspace.setAttribute('aria-busy', 'false');
@@ -14995,6 +15056,22 @@ workspace.addEventListener('keydown', (event) => {
 });
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
+  if (event.target.closest('[data-mine-page-back]')) { closeMineSubpage(); return; }
+  if (state.minePage === 'pet') {
+    const outfit = event.target.closest('[data-pet-outfit]');
+    if (outfit) { if (setPetOutfit(outfit.dataset.petOutfit)) toast(state.language === 'en' ? 'Outfit equipped' : '服饰已换上', 'info'); render(); return; }
+  }
+  if (state.minePage === 'account') {
+    if (event.target.closest('[data-open-agreement]')) { event.preventDefault(); return openMineSubpage('agreement'); }
+    const providerButton = event.target.closest('[data-auth-provider]');
+    if (providerButton) return startAccountLogin(providerButton.dataset.authProvider);
+    if (event.target.closest('[data-github-login]')) return githubLogin();
+    if (event.target.closest('[data-github-cancel]')) return cancelGithubLogin();
+    if (event.target.closest('[data-github-token]')) return githubUseAccessToken();
+    if (event.target.closest('[data-github-upload]')) return githubUpload();
+    if (event.target.closest('[data-github-download]')) return githubDownload();
+    if (event.target.closest('[data-github-logout]')) return disconnectGithub();
+  }
   const feedReactionButton = event.target.closest('[data-feed-reaction]');
   if (feedReactionButton) {
     event.preventDefault(); event.stopPropagation();
@@ -15508,15 +15585,16 @@ workspace.addEventListener('click', async (event) => {
     const book = readerBookById(state.readerBookId); if (book) { book.annotations = (book.annotations || []).filter((note) => note.id !== deleteAnnotation.dataset.deleteAnnotation); saveLibrary(); render(); }
     return;
   }
-  if (event.target.closest('[data-settings-page-back]')) { state.settingsPageOpen = false; state.settingsOpen = false; render(); return; }
-  if (event.target.closest('[data-open-settings-page]')) { state.settingsPageOpen = true; state.settingsOpen = false; render(); return; }
+  if (event.target.closest('[data-mine-page-back]')) { closeMineSubpage(); return; }
+  if (event.target.closest('[data-settings-page-back]')) { state.settingsPageOpen = false; state.minePage = ''; state.settingsOpen = false; render(); return; }
+  if (event.target.closest('[data-open-settings-page]')) { openMineSubpage('settings'); return; }
   if (event.target.closest('[data-open-cloud-sync]')) { location.href = new URL('cloud-sync.html', document.baseURI).href; return; }
-  if (event.target.closest('[data-open-pet-page]')) return renderPetDialog();
+  if (event.target.closest('[data-open-pet-page]')) return openMineSubpage('pet');
   if (event.target.closest('[data-check-update]')) return checkForUpdate();
   if (event.target.closest('[data-apply-update]')) return applyUpdate();
-  if (event.target.closest('[data-open-github-page]')) return renderGithubDialog();
+  if (event.target.closest('[data-open-github-page]')) return openMineSubpage('account');
   if (event.target.closest('[data-open-recent-reading]')) return renderRecentReading();
-  if (event.target.closest('[data-open-agreement-page]')) return renderAgreementDialog();
+  if (event.target.closest('[data-open-agreement-page]')) return openMineSubpage('agreement');
   const messageDelete = event.target.closest('[data-delete-notification]');
   if (messageDelete) { state.notifications = state.notifications.filter((item) => item.id !== messageDelete.dataset.deleteNotification); saveNotifications(); render(); return; }
   if (event.target.closest('[data-mark-notifications-read]')) { state.notifications.forEach((item) => { item.read = true; }); saveNotifications(); render(); return; }
@@ -16013,7 +16091,7 @@ document.addEventListener('keydown', (event) => {
 
 $('#themeBtn').addEventListener('click', cycleTheme);
 $('#languageBtn').addEventListener('click', cycleLanguage);
-$('#settingsBtn').addEventListener('click', () => { if (state.settingsPageOpen) { state.settingsPageOpen = false; render(); } renderSettings(); });
+$('#settingsBtn').addEventListener('click', () => { if (state.settingsPageOpen) { state.settingsPageOpen = false; state.minePage = ''; render(); } renderSettings(); });
 $('#notifyBtn').addEventListener('click', () => {
   state.notificationOpen = !state.notificationOpen;
   if (state.notificationOpen) { state.notifications.forEach((item) => { if (item.at <= Date.now()) item.read = true; }); saveNotifications(); renderNotifications(); }
@@ -16112,7 +16190,32 @@ function handleSettingsChange(event) {
   if (event.target.dataset.topDisplay) { state.topDisplay[event.target.dataset.topDisplay] = event.target.checked; saveTopDisplay(); renderHeaderControls(); renderSettings(); }
 }
 $('#settingsDialog').addEventListener('change', handleSettingsChange);
-$('#workspace').addEventListener('change', (event) => { if (state.settingsPageOpen) handleSettingsChange(event); });
+$('#workspace').addEventListener('change', (event) => {
+  if (state.settingsPageOpen) { handleSettingsChange(event); return; }
+  if (state.minePage === 'pet') {
+    if (event.target.id === 'petVisibility') { state.mascotVisible = event.target.value !== 'hide'; saveMascotVisibility(); syncMascotVisibility(); render(); }
+    if (event.target.id === 'petDisplayMode') { state.mascotDisplayMode = event.target.value === 'full' ? 'full' : 'half'; saveMascotDisplayMode(); syncMascotDisplayMode(true); render(); }
+    return;
+  }
+  if (state.minePage !== 'account') return;
+  if (event.target.id === 'githubAgreement') {
+    state.githubAgreementAccepted = event.target.checked;
+    localStorage.setItem(STORAGE.githubAgreement, String(state.githubAgreementAccepted));
+    render();
+    return;
+  }
+  const option = event.target.closest('[data-github-sync-option]');
+  if (option) {
+    state.githubSyncSelection = normalizeGithubSyncSelection({ ...state.githubSyncSelection, [option.dataset.githubSyncOption]: option.checked });
+    saveGithubSyncSelection();
+    if (option.dataset.githubSyncOption === 'reading') queueReaderCloudSync(200);
+    window.OneBoxCloudSync?.selectionChanged?.();
+    queueGithubAutoSync(500, false);
+    return;
+  }
+  const autoSyncToggle = event.target.closest('[data-github-auto-sync]');
+  if (autoSyncToggle) window.OneBoxGithubAutoSync?.setEnabled(autoSyncToggle.checked);
+});
 $('#settingsDialog').addEventListener('input', () => {});
 $('#petDialog').addEventListener('click', (event) => {
   if (event.target === $('#petDialog') || event.target.closest('[data-close-pet]')) return closePetDialog();
@@ -16235,7 +16338,7 @@ window.addEventListener('online', () => { $('#connectionStatus').textContent = t
 window.addEventListener('offline', () => { $('#connectionStatus').textContent = t('offline'); toast(state.language === 'en' ? 'Offline mode' : '已切换到离线模式'); });
 window.addEventListener('hashchange', () => {
   const route = location.hash.slice(1);
-  if (route === 'ticket-wallet') { state.section = 'mine'; state.settingsPageOpen = false; state.ticketWalletOpen = true; window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages(); }
+  if (route === 'ticket-wallet') { state.section = 'mine'; state.minePage = 'wallet'; state.settingsPageOpen = false; state.ticketWalletOpen = true; window.scrollTo(0, 0); renderNav(); renderBottomNav(); render(); window.scrollTo(0, 0); scheduleTicketWalletFilterFocus(false); void hydrateTicketWalletImages(); }
   else if (['home', 'navigation', 'messages', 'mine'].includes(route)) selectSection(route);
   else selectTool(route);
 });
@@ -16295,7 +16398,7 @@ persistentRecovery.then((restored) => {
     if (account?.token) {
       Object.assign(state.github, { ...account, token: account.token, refreshToken: account.refreshToken || '', tokenExpiresAt: Number(account.tokenExpiresAt) || 0, refreshTokenExpiresAt: Number(account.refreshTokenExpiresAt) || 0, user: account.user || null, gistId: account.gistId || '' });
       renderNav(); render();
-      if (state.githubDialogOpen) renderGithubDialog();
+      if (githubPageIsVisible()) renderGithubDialog();
       void hydrateGithubUser();
     }
   }

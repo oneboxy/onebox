@@ -288,19 +288,18 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
 .settings-page-card .setting-toggle input:checked { border-color: var(--primary); background: var(--primary); }
 .settings-page-card .setting-toggle input:checked::after { transform: translateX(12px); background: var(--primary-contrast, #fff); }
 
-/* Wallet and Track keep their floating-page behavior, but use the same flat
-   content width, title rule, and quiet controls as Mine > Settings. */
-body:has(.ticket-wallet-page) .ticket-wallet-page {
-  width: min(680px, 100%) !important;
-  max-width: 680px !important;
-  margin: 0 auto !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+/* The wallet page uses the same in-workspace second-level layout as Settings. */
+#workspace[data-tool="mine"] .ticket-wallet-page {
+  width: min(680px, 100%);
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 0 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-page-head {
+#workspace[data-tool="mine"] .ticket-wallet-page-head {
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas: 'breadcrumb actions' 'filters filters';
   gap: 8px 10px;
@@ -309,9 +308,9 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-head {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
-body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb { gap: 11px; }
-body:has(.ticket-wallet-page) .ticket-wallet-page-title { color: var(--ink); font-size: 15px; font-weight: 600; }
-body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb .ticket-wallet-back {
+#workspace[data-tool="mine"] .ticket-wallet-breadcrumb { gap: 11px; }
+#workspace[data-tool="mine"] .ticket-wallet-page-title { color: var(--ink); font-size: 15px; font-weight: 600; }
+#workspace[data-tool="mine"] .ticket-wallet-breadcrumb .ticket-wallet-back {
   display: grid;
   width: 30px;
   min-width: 30px;
@@ -324,7 +323,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-breadcrumb .ticket-wallet-back {
   background: transparent;
   color: var(--muted);
 }
-body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
+#workspace[data-tool="mine"] .ticket-wallet-filter-row {
   grid-area: filters;
   margin: 0;
   padding: 0;
@@ -333,8 +332,8 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-row {
   background: transparent;
   box-shadow: none;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll { border: 0; padding: 0; mask-image: none; -webkit-mask-image: none; }
-body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
+#workspace[data-tool="mine"] .ticket-wallet-filter-scroll { border: 0; padding: 0; mask-image: none; -webkit-mask-image: none; }
+#workspace[data-tool="mine"] .ticket-wallet-filter-scroll .ticket-wallet-category-bar {
   min-width: max-content;
   gap: 14px;
   padding: 0;
@@ -343,7 +342,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-catego
   background: transparent;
   box-shadow: none;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category {
+#workspace[data-tool="mine"] .ticket-wallet-filter-scroll .ticket-wallet-category {
   position: relative;
   min-width: auto;
   min-height: 34px;
@@ -353,13 +352,13 @@ body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-catego
   background: transparent;
   box-shadow: none;
 }
-body:has(.ticket-wallet-page) .ticket-wallet-filter-scroll .ticket-wallet-category.active {
+#workspace[data-tool="mine"] .ticket-wallet-filter-scroll .ticket-wallet-category.active {
   background: transparent;
   box-shadow: inset 0 -2px var(--primary);
   color: var(--primary);
 }
-body:has(.ticket-wallet-page) .ticket-wallet-head-actions { gap: 10px; }
-body:has(.ticket-wallet-page) .ticket-wallet-page-swipe-stage { min-width: 0; }
+#workspace[data-tool="mine"] .ticket-wallet-head-actions { gap: 10px; }
+#workspace[data-tool="mine"] .ticket-wallet-page-swipe-stage { min-width: 0; }
 
 #workspace[data-tool="track"] > .section-page {
   width: min(680px, 100%) !important;
@@ -387,54 +386,6 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-swipe-stage { min-width: 0; }
   background: transparent;
 }
 
-/* These two Mine entries open the same modal surface as Settings. Their page
-   content lives in a scrollable dialog; the surrounding app stays in place. */
-body:has(.ticket-wallet-page) .ticket-wallet-page,
-#workspace[data-tool="track"] .track-module {
-  position: fixed !important;
-  z-index: 80 !important;
-  inset: 0 !important;
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  width: auto !important;
-  max-width: none !important;
-  height: 100vh;
-  height: 100dvh;
-  margin: 0 !important;
-  padding: calc(58px + env(safe-area-inset-top) + 12px) 12px 24px !important;
-  overflow-x: hidden;
-  overflow-y: auto;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: color-mix(in srgb, var(--bg) 76%, transparent) !important;
-  box-shadow: none !important;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
-}
-body:has(.ticket-wallet-page) .ticket-wallet-dialog-card,
-#workspace[data-tool="track"] .track-dialog-card {
-  width: min(680px, 100%);
-  max-height: calc(100vh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  margin: 0 auto;
-  padding: 0;
-  overflow: auto;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--ink);
-  box-shadow: none;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-body:has(.ticket-wallet-page) .ticket-wallet-page-head,
-#workspace[data-tool="track"] .track-page-head {
-  position: sticky;
-  top: 0;
-  z-index: 12;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-}
-#workspace[data-tool="track"] .track-module { padding: 0 !important; }
 #workspace[data-tool="track"] .track-stats { gap: 0; padding: 12px 10px 0; }
 #workspace[data-tool="track"] .track-stats > div { padding: 10px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
 #workspace[data-tool="track"] .track-stats > div + div { border-left: 1px solid var(--line); }
@@ -443,7 +394,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-head,
 #workspace[data-tool="track"] .track-history-page h1 { font-size: 15px; }
 #workspace[data-tool="track"] .track-detail-summary { border-radius: 0; box-shadow: none; }
 #workspace[data-tool="track"] .track-detail-summary,
-#workspace[data-tool="track"] .track-history-item { border-color: var(--line); }
+#workspace[data-tool="track"] .track-route { border-color: var(--line); }
 
 @media (max-width: 760px) {
   #workspace { padding: 14px !important; }
@@ -468,23 +419,6 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-head,
   .settings-page-card .settings-preference-control { gap: 6px; }
   .settings-page-card .settings-preference-control select { width: 100%; min-width: 0; }
   #workspace[data-tool="track"] .track-map { height: min(54vh, 540px); min-height: 300px; }
-  body:has(.ticket-wallet-page) .ticket-wallet-page,
-  #workspace[data-tool="track"] .track-module {
-    padding: calc(58px + env(safe-area-inset-top) + 8px) 10px 18px !important;
-  }
-  body:has(.ticket-wallet-page) .ticket-wallet-dialog-card,
-  #workspace[data-tool="track"] .track-dialog-card {
-    width: 100%;
-    max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    padding: 0;
-    border-radius: 0;
-  }
-  body:has(.ticket-wallet-page) .ticket-wallet-page-head,
-  #workspace[data-tool="track"] .track-page-head {
-    top: 0;
-    margin: 0;
-    padding: 8px 10px;
-  }
   #workspace[data-tool="reader"] .reader-library-view { padding-top: 0 !important; }
 }
 
@@ -494,67 +428,87 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   padding: 0 !important;
 }
 
-/* Pet, account, and agreement are also opened from Mine. Match their outer
-   surfaces to Settings while keeping each view's existing dialog behavior. */
-#petDialog,
-#githubDialog,
-#agreementDialog {
-  align-items: flex-start;
-  background: color-mix(in srgb, var(--bg) 76%, transparent);
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
-}
-#petDialog .pet-dialog-card,
-#githubDialog .github-dialog-card,
-#agreementDialog .agreement-dialog-card {
-  width: min(680px, 100%);
-  max-width: 680px;
-  max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  margin: 0 auto;
-  overflow: auto;
+
+/* Mine children are true second-level pages inside the workspace. */
+#workspace[data-tool="mine"] .ticket-wallet-page,
+#workspace[data-tool="mine"] .track-module {
+  position: relative !important;
+  inset: auto !important;
+  display: block !important;
+  width: min(680px, 100%) !important;
+  max-width: 680px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 0 24px !important;
+  overflow: visible !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
-#petDialog .pet-dialog-head,
-#githubDialog .github-dialog-head,
-#agreementDialog .dialog-head {
-  top: 0;
-  margin: 0;
-  padding: 8px 10px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+#workspace[data-tool="mine"] .ticket-wallet-content,
+#workspace[data-tool="mine"] .track-dialog-card {
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink);
 }
-#petDialog .pet-dialog-head h2,
-#githubDialog .github-dialog-head h2,
-#agreementDialog .dialog-head h2 {
-  margin: 0;
+#workspace[data-tool="mine"] .ticket-wallet-page-head,
+#workspace[data-tool="mine"] .track-page-head {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  z-index: 1;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  border-top: 1px solid var(--line) !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: transparent !important;
+}
+#workspace[data-tool="mine"] .ticket-wallet-page-head {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'breadcrumb actions' 'filters filters';
+  gap: 8px 10px;
+}
+#workspace[data-tool="mine"] .ticket-wallet-page-title,
+#workspace[data-tool="mine"] .track-address {
+  color: var(--ink);
   font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0;
 }
-#petDialog .pet-dialog-body { padding: 0 10px 16px; }
-#githubDialog .github-dialog-body { gap: 12px; padding: 12px 10px; }
-#githubDialog .github-actions { padding: 0 10px 14px; }
-#agreementDialog .agreement-body { padding: 12px 10px; }
-#agreementDialog .agreement-updated { margin-inline: 10px; }
-#petDialog .icon-btn,
-#githubDialog .icon-btn,
-#agreementDialog .icon-btn {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+#workspace[data-tool="mine"] .ticket-wallet-back,
+#workspace[data-tool="mine"] .track-page-nav .track-back {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--muted);
 }
-
+#workspace[data-tool="mine"] .track-map-panel { margin-top: 12px; }
+#workspace[data-tool="mine"] .track-stats { gap: 0; padding: 12px 10px 0; }
+#workspace[data-tool="mine"] .track-stats > div { padding: 10px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+#workspace[data-tool="mine"] .track-stats > div + div { border-left: 1px solid var(--line); }
+#workspace[data-tool="mine"] .track-record-controls { padding: 10px 10px 0; }
+#workspace[data-tool="mine"] .track-history-page { padding: 12px 10px 18px; }
+#workspace[data-tool="mine"] .track-history-page h1 { font-size: 15px; }
+#workspace[data-tool="mine"] .mine-pet-page .pet-dialog-body { padding: 0 10px 16px; }
+#workspace[data-tool="mine"] .mine-account-page .github-dialog-body { gap: 12px; padding: 12px 10px; }
+#workspace[data-tool="mine"] .mine-account-page .github-actions { padding: 0 10px 14px; }
+#workspace[data-tool="mine"] .mine-agreement-page .agreement-body { padding: 12px 10px; }
+#workspace[data-tool="mine"] .mine-agreement-page .agreement-updated { margin-inline: 10px; }
 @media (max-width: 760px) {
-  #petDialog .pet-dialog-card,
-  #githubDialog .github-dialog-card,
-  #agreementDialog .agreement-dialog-card {
-    width: 100%;
-    max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  }
-  #petDialog .pet-dialog-body { grid-template-columns: minmax(0, 1fr); }
+  #workspace[data-tool="mine"] .ticket-wallet-page,
+  #workspace[data-tool="mine"] .track-module { padding-bottom: 20px !important; }
+  #workspace[data-tool="mine"] .track-map { height: min(54vh, 540px); min-height: 300px; }
+  #workspace[data-tool="mine"] .mine-pet-page .pet-dialog-body { grid-template-columns: minmax(0, 1fr); }
 }
