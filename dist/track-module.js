@@ -32,6 +32,10 @@ function moduleText(){
     <section class="track-map-panel" aria-label="${text('路线地图','Route map')}">
       <div class="track-map" data-track-map>
         <div class="track-map-placeholder">${text('地图加载中…','Loading map…')}</div>
+        <div class="track-map-compass" role="img" aria-label="${text('北方位','North')}" title="${text('北方位','North')}" aria-hidden="false">
+          <span class="track-map-compass-n">N</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="track-compass-north" d="m12 3 4.1 9-4.1-2-4.1 2L12 3Z"/><path class="track-compass-south" d="m12 21-4.1-9 4.1 2 4.1-2L12 21Z"/></svg>
+        </div>
         <div class="track-map-zoom-actions" aria-label="${text('地图缩放','Map zoom')}">
           <button type="button" data-track-zoom="1" aria-label="${text('放大地图','Zoom in')}" title="${text('放大地图','Zoom in')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>

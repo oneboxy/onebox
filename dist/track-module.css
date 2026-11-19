@@ -114,6 +114,34 @@
   color: var(--track-muted);
   text-align: center;
 }
+.track-map-compass {
+  position: absolute;
+  z-index: 800;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--track-line) 88%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--track-panel) 90%, transparent);
+  color: var(--track-muted);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--track-ink) 12%, transparent);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+.track-map-compass-n {
+  position: absolute;
+  top: 3px;
+  color: var(--track-muted);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+}
+.track-map-compass svg { width: 19px; height: 19px; margin-top: 5px; overflow: visible; }
+.track-compass-north { fill: var(--primary, #4568dd); }
+.track-compass-south { fill: color-mix(in srgb, var(--track-muted) 78%, transparent); }
 .track-map-zoom-actions {
   position: absolute;
   z-index: 800;
