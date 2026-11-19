@@ -493,3 +493,68 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   border-radius: 0 !important;
   padding: 0 !important;
 }
+
+/* Pet, account, and agreement are also opened from Mine. Match their outer
+   surfaces to Settings while keeping each view's existing dialog behavior. */
+#petDialog,
+#githubDialog,
+#agreementDialog {
+  align-items: flex-start;
+  background: color-mix(in srgb, var(--bg) 76%, transparent);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+#petDialog .pet-dialog-card,
+#githubDialog .github-dialog-card,
+#agreementDialog .agreement-dialog-card {
+  width: min(680px, 100%);
+  max-width: 680px;
+  max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin: 0 auto;
+  overflow: auto;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#petDialog .pet-dialog-head,
+#githubDialog .github-dialog-head,
+#agreementDialog .dialog-head {
+  top: 0;
+  margin: 0;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+}
+#petDialog .pet-dialog-head h2,
+#githubDialog .github-dialog-head h2,
+#agreementDialog .dialog-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+#petDialog .pet-dialog-body { padding: 0 10px 16px; }
+#githubDialog .github-dialog-body { gap: 12px; padding: 12px 10px; }
+#githubDialog .github-actions { padding: 0 10px 14px; }
+#agreementDialog .agreement-body { padding: 12px 10px; }
+#agreementDialog .agreement-updated { margin-inline: 10px; }
+#petDialog .icon-btn,
+#githubDialog .icon-btn,
+#agreementDialog .icon-btn {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 760px) {
+  #petDialog .pet-dialog-card,
+  #githubDialog .github-dialog-card,
+  #agreementDialog .agreement-dialog-card {
+    width: 100%;
+    max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+  #petDialog .pet-dialog-body { grid-template-columns: minmax(0, 1fr); }
+}
