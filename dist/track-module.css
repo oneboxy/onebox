@@ -40,7 +40,7 @@
   min-height: 34px;
   padding: 0;
   border: 1px solid var(--track-line);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--track-panel);
   color: var(--track-muted);
   cursor: pointer;
@@ -76,7 +76,7 @@
   min-height: 34px;
   padding: 5px 10px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 8px;
   background: transparent;
   color: var(--track-muted);
   font: inherit;
@@ -90,7 +90,7 @@
   min-width: 0;
   overflow: hidden;
   border: 0;
-  border-radius: 16px;
+  border-radius: 8px;
   background: transparent;
 }
 .track-map {
@@ -100,8 +100,8 @@
   min-height: 300px;
   overflow: hidden;
   background: var(--track-panel2);
-  border-radius: 16px;
-  box-shadow: 0 3px 14px color-mix(in srgb, var(--track-ink) 8%, transparent);
+  border-radius: 8px;
+  box-shadow: none;
 }
 .track-map-placeholder {
   position: absolute;
@@ -120,15 +120,14 @@
   top: 12px;
   left: 12px;
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--track-line) 88%, transparent);
   border-radius: 50%;
   background: color-mix(in srgb, var(--track-panel) 90%, transparent);
   color: var(--track-muted);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--track-ink) 12%, transparent);
-  backdrop-filter: blur(8px);
+  box-shadow: none;
   pointer-events: none;
 }
 .track-map-compass-n {
@@ -160,7 +159,7 @@
   height: 36px;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--track-line) 84%, transparent);
-  border-radius: 12px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--track-panel) 92%, transparent);
   color: var(--track-ink);
   cursor: pointer;
@@ -172,13 +171,13 @@
   z-index: 800;
   right: 10px;
   bottom: 10px;
-  width: 42px;
-  height: 42px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--primary, #4568dd);
-  color: var(--primary-contrast, #fff);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--track-ink) 20%, transparent);
+  width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--track-line) 84%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--track-panel) 92%, transparent);
+  color: var(--primary, #4568dd);
+  box-shadow: none;
 }
 .track-map-zoom-actions button:hover,
 .track-map-zoom-actions button:active,
@@ -205,7 +204,7 @@
 .track-map .leaflet-control-attribution {
   float: left;
   padding: 2px 5px;
-  border-radius: 8px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--track-panel) 78%, transparent);
   color: var(--track-muted);
   font-size: 9px;
@@ -235,7 +234,7 @@
   min-width: 0;
   padding: 14px 12px;
   border: 1px solid var(--track-line);
-  border-radius: 14px;
+  border-radius: 8px;
   background: var(--track-panel);
 }
 .track-route-open {
@@ -257,7 +256,7 @@
   min-height: 30px;
   padding: 4px 8px;
   border: 1px solid var(--track-line);
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--track-panel);
   color: var(--track-ink);
   font: inherit;
@@ -266,7 +265,7 @@
 }
 .track-delete { color: var(--danger, #d14d5b); }
 .track-empty { padding: 28px 8px; color: var(--track-muted); text-align: center; }
-.track-detail-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 12px; padding: 14px; border: 1px solid var(--track-line); border-radius: 14px; background: var(--track-panel); }
+.track-detail-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 12px; padding: 14px; border: 1px solid var(--track-line); border-radius: 8px; background: var(--track-panel); }
 .track-detail-summary strong { color: var(--track-ink); font-size: 14px; }
 .track-detail-summary span { flex: 1 1 200px; color: var(--track-muted); font-size: 12px; }
 .track-module [hidden] { display: none !important; }
@@ -280,7 +279,7 @@
   min-width: 0;
   padding: 10px 11px;
   border: 1px solid var(--track-line);
-  border-radius: 14px;
+  border-radius: 8px;
   background: var(--track-panel2);
 }
 .track-stats span { display: block; margin-bottom: 4px; color: var(--track-muted); font-size: 11px; }
@@ -294,7 +293,7 @@
   min-height: 42px;
   padding: 9px 16px;
   border: 1px solid var(--track-line);
-  border-radius: 14px;
+  border-radius: 8px;
   background: var(--track-panel);
   color: var(--track-ink);
   font: inherit;
@@ -325,7 +324,7 @@
   margin: 8px 12px 12px;
   padding: 8px 10px;
   border: 1px solid var(--track-line);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--track-panel);
   color: var(--track-ink);
   font-size: 12px;
@@ -333,11 +332,11 @@
 @media (max-width: 760px) {
   .track-module { width: 100%; max-width: none; margin: 0; padding: 0 12px; }
   .track-page-head { min-height: 38px; margin-bottom: 10px; padding: 0 2px 8px; }
-  .track-map-panel { border-radius: 16px; }
-  .track-map { height: min(560px, calc(100svh - 260px)); min-height: 360px; max-height: 560px; }
+  .track-map-panel { border-radius: 8px; }
+  .track-map { height: min(560px, calc(100svh - 260px)); min-height: 360px; max-height: 560px; border-radius: 8px; }
   .track-map-zoom-actions { right: 8px; gap: 3px; }
-  .track-map-zoom-actions button { width: 32px; height: 32px; border-radius: 11px; }
-  .track-map-locate { right: 10px; bottom: 10px; width: 42px; height: 42px; }
+  .track-map-zoom-actions button { width: 32px; height: 32px; border-radius: 7px; }
+  .track-map-locate { right: 8px; bottom: 8px; width: 36px; height: 36px; }
   .track-map-zoom-actions svg { width: 15px; height: 15px; }
   .track-map-locate svg { width: 19px; height: 19px; }
   .track-stats { gap: 6px; padding: 8px 8px 0; }
