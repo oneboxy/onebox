@@ -69,26 +69,6 @@
   box-shadow: none;
 }
 
-/* Let homepage stories end naturally inside the viewport instead of
-   painting a full-width strip that looks clipped at both screen edges. */
-#workspace[data-tool="home"] .feed-list {
-  gap: 8px;
-  padding: 8px 8px 12px;
-}
-
-#workspace[data-tool="home"] .feed-item,
-#workspace[data-tool="home"] .feed-item:first-child {
-  margin: 0;
-  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--panel-2) 72%, var(--panel));
-}
-
-#workspace[data-tool="home"] .feed-item:hover,
-#workspace[data-tool="home"] .feed-item:focus-visible {
-  background: var(--panel-2);
-}
-
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
   border: 1px solid var(--line) !important;
   border-radius: 12px !important;
