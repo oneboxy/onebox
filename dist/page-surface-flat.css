@@ -1,0 +1,41 @@
+/* Keep every top-level OneBox view on a flat, borderless page surface. */
+#workspace,
+#workspace[data-tool="home"],
+#workspace[data-tool="navigation"],
+#workspace[data-tool="messages"],
+#workspace[data-tool="mine"] {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#workspace .home-section,
+#workspace .message-panel,
+#workspace .mine-list,
+#workspace[data-tool="reader"] .reader-library-panel {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#workspace[data-tool="home"] .feed-panel,
+#workspace .home-tool-card,
+#workspace .mine-row,
+#workspace[data-tool="navigation"] .navigation-card {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#workspace[data-tool="reader"] .reader-reading-shell .reader-content {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.ticket-wallet-page {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
