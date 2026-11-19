@@ -20,6 +20,7 @@ function syncMiniWindow(){let node=document.querySelector('[data-track-mini-wind
 function moduleText(){
   const history=s.view==='history',detail=s.view==='detail';
   return `<section class="track-module" data-track-root>
+    <div class="track-dialog-card" role="dialog" aria-modal="true">
     <header class="track-page-head">
       <nav class="track-page-nav" aria-label="${text('页面导航','Page navigation')}">
         <button type="button" class="ticket-wallet-back track-back" data-track-back aria-label="${text('返回上一页','Go back')}" title="${text('返回上一页','Go back')}">
@@ -61,6 +62,7 @@ function moduleText(){
       </div>`}
       <div class="track-toast" data-track-toast role="status" hidden></div>
     </section>`}
+    </div>
   </section>`;
 }
 function render(){setTimeout(initPage,0);return moduleText()}

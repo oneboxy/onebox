@@ -312,6 +312,56 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-swipe-stage { min-width: 0; }
 #workspace[data-tool="track"] .track-address { color: var(--ink); font-size: 17px; font-weight: 650; }
 #workspace[data-tool="track"] .track-map { height: clamp(340px, 54vh, 560px); min-height: 300px; }
 
+/* These two Mine entries open the same modal surface as Settings. Their page
+   content lives in a scrollable dialog; the surrounding app stays in place. */
+body:has(.ticket-wallet-page) .ticket-wallet-page,
+#workspace[data-tool="track"] .track-module {
+  position: fixed !important;
+  z-index: 80 !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  width: auto !important;
+  max-width: none !important;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 !important;
+  padding: calc(58px + env(safe-area-inset-top) + 12px) 12px 24px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: rgba(12, 16, 28, .58) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+body:has(.ticket-wallet-page) .ticket-wallet-dialog-card,
+#workspace[data-tool="track"] .track-dialog-card {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 110px - env(safe-area-inset-top));
+  margin: 0 auto;
+  padding: 18px;
+  overflow: auto;
+  border: 0;
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 14px 42px color-mix(in srgb, var(--ink) 16%, transparent);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body:has(.ticket-wallet-page) .ticket-wallet-page-head,
+#workspace[data-tool="track"] .track-page-head {
+  position: sticky;
+  top: -18px;
+  z-index: 12;
+  background: var(--panel);
+}
+#workspace[data-tool="track"] .track-module { padding: 0 !important; }
+#workspace[data-tool="track"] .track-page-head { margin: -18px -18px 14px; }
+
 @media (max-width: 760px) {
   #workspace { padding: 14px !important; }
   body:has(.ticket-wallet-page) .ticket-wallet-page {
@@ -347,6 +397,23 @@ body:has(.ticket-wallet-page) .ticket-wallet-page-swipe-stage { min-width: 0; }
   }
   #workspace[data-tool="track"] .track-page-head { margin: -14px -14px 12px; padding: 12px 14px 10px; }
   #workspace[data-tool="track"] .track-map { height: min(54vh, 540px); min-height: 300px; }
+  body:has(.ticket-wallet-page) .ticket-wallet-page,
+  #workspace[data-tool="track"] .track-module {
+    padding: calc(58px + env(safe-area-inset-top) + 8px) 10px 18px !important;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-dialog-card,
+  #workspace[data-tool="track"] .track-dialog-card {
+    width: 100%;
+    max-height: calc(100dvh - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 14px;
+    border-radius: 12px;
+  }
+  body:has(.ticket-wallet-page) .ticket-wallet-page-head,
+  #workspace[data-tool="track"] .track-page-head {
+    top: -14px;
+    margin: -14px -14px 12px;
+    padding: 12px 14px 10px;
+  }
   #workspace[data-tool="reader"] .reader-library-view { padding-top: 0 !important; }
 }
 
