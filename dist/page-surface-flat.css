@@ -76,6 +76,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
 
 @media (max-width: 760px) {
   #workspace { padding: 14px !important; }
+  #workspace[data-tool="mine"] .mine-list { padding: 10px; }
   #workspace[data-tool="reader"] .reader-library-view { padding-top: 0 !important; }
 }
 
