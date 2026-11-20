@@ -690,19 +690,6 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   border-radius: 0;
   background: transparent;
 }
-.reader-book-grid-cards .reader-book-meta,
-.reader-book-grid-cards .reader-book-progress { display: none; }
-.reader-book-grid-cards .reader-book-cover {
-  border-radius: 2px;
-  box-shadow: 0 2px 7px rgba(20, 24, 32, .12);
-}
-.reader-book-grid-cards .reader-book-cover-image { border-radius: inherit; }
-.reader-book-grid-cards .reader-book-copy { margin-top: 6px; }
-.reader-book-grid-cards .reader-book-copy strong {
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.4;
-}
 @media (max-width: 600px) {
   .reader-library-view > .reader-library-head { gap: 6px; padding-bottom: 8px; }
   .reader-library-title-row h2 { font-size: 18px; }
@@ -712,5 +699,4 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-inline-stats .reader-stats-summary strong { font-size: 12px; }
   .reader-inline-stats .reader-stats-heatmap { gap: 2px; }
   .reader-page-actions { gap: 4px; }
-  .reader-book-grid:not(.reader-book-list) { gap: 20px 12px; }
 }

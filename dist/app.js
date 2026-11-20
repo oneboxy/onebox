@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.893';
+const APP_VERSION = '2.18.892';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -517,15 +517,7 @@ const storedDevTools = parseStored(STORAGE.devTools, {}) || {};
 const storedTranslationHistoryOpen = parseStored(STORAGE.translationHistoryOpen, false) === true;
 const storedLibrary = parseStored(STORAGE.library, []);
 const storedReaderPreferences = parseStored(STORAGE.readerPreferences, {}) || {};
-let storedReaderLayout = localStorage.getItem(STORAGE.readerLayout) || 'grid';
-const readerLayoutGridMigrationKey = 'onebox.reader-layout-grid-migration-v1';
-if (localStorage.getItem(readerLayoutGridMigrationKey) !== '1') {
-  if (storedReaderLayout === 'list') {
-    storedReaderLayout = 'grid';
-    localStorage.setItem(STORAGE.readerLayout, 'grid');
-  }
-  localStorage.setItem(readerLayoutGridMigrationKey, '1');
-}
+const storedReaderLayout = localStorage.getItem(STORAGE.readerLayout) || 'grid';
 const storedHomeFeeds = parseStored(STORAGE.homeFeeds, {}) || {};
 const storedHomeFeedRead = parseStored(STORAGE.homeFeedRead, {}) || {};
 const storedHomeFeedActivity = parseStored(STORAGE.homeFeedActivity, {}) || {};
