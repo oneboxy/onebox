@@ -341,6 +341,15 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   border-radius: inherit;
   outline: 0 !important;
   box-shadow: none !important;
+  object-fit: contain !important;
+}
+@media (max-width: 600px) {
+  #workspace[data-tool="navigation"] .navigation-card-main > .navigation-site-icon {
+    width: 44px !important;
+    height: 44px !important;
+    flex-basis: 44px !important;
+    border-radius: 11px !important;
+  }
 }
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
   border: 1px solid var(--line) !important;
