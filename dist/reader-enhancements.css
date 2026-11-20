@@ -627,33 +627,40 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 }
 
 /* Keep the reader page open and show reading progress above the bookshelf. */
-#workspace[data-tool="reader"] .reader-library-panel {
-  border: 0;
-  box-shadow: none;
+#workspace[data-tool="reader"] .reader-library-panel { border: 0; box-shadow: none; }
+.reader-page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0 0 10px;
 }
+.reader-library-content { width: 100%; }
+.reader-library-content .reader-library-head {
+  padding: 10px 0 5px;
+  border: 0;
+}
+.reader-library-content .reader-book-grid { padding-top: 5px; }
 .reader-inline-stats {
   margin: 0 0 18px;
   padding: 0 0 12px;
 }
-.reader-inline-stats > h3 {
-  margin: 0 0 8px;
-  font-size: 14px;
-}
 .reader-inline-stats .reader-stats-summary {
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 140px));
+  gap: 8px;
 }
 .reader-inline-stats .reader-stats-summary article {
-  gap: 5px;
-  padding: 9px 11px;
+  gap: 3px;
+  padding: 6px 8px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 7px;
   background: var(--panel-2, #f4f5f8);
 }
 .reader-inline-stats .reader-stats-summary small {
-  font-size: 11px;
+  font-size: 10px;
 }
 .reader-inline-stats .reader-stats-summary strong {
-  font-size: 16px;
+  font-size: 14px;
 }
 .reader-inline-stats-history {
   margin-top: 10px;
@@ -675,8 +682,9 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 }
 @media (max-width: 600px) {
   .reader-inline-stats { margin-bottom: 14px; }
-  .reader-inline-stats .reader-stats-summary { gap: 6px; }
-  .reader-inline-stats .reader-stats-summary article { padding: 8px; }
-  .reader-inline-stats .reader-stats-summary strong { font-size: 14px; }
+  .reader-inline-stats .reader-stats-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .reader-inline-stats .reader-stats-summary article { padding: 6px; }
+  .reader-inline-stats .reader-stats-summary strong { font-size: 12px; }
   .reader-inline-stats .reader-stats-heatmap { gap: 2px; }
+  .reader-page-actions { gap: 4px; margin-bottom: 8px; }
 }
