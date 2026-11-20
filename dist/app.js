@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.899';
+const APP_VERSION = '2.18.900';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7955,9 +7955,6 @@ function updateReaderBookCover(book) {
   const currentCover = cover?.querySelector('.reader-book-cover-image, .reader-cover-fallback');
   if (currentCover) currentCover.outerHTML = readerBookCoverMarkup(book);
 }
-function readerAddCardMarkup() {
-  return '<div class="reader-empty-card reader-add-card"><button class="reader-add-local" data-open-reader-file><span class="reader-empty-book"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 8.5h18.5l6 6v24H10z"/><path d="M28.5 8.5v7h6M16 24h13M16 30h9M16 36h6"/><path d="M37 24v10M32 29h10"/></svg></span><strong>' + t('addBook') + '</strong><small class="reader-add-supported-formats">' + (state.language === 'en' ? 'MD, TXT, PDF, EPUB, FB2, MOBI, AZW3' : '支持 MD、TXT、PDF、EPUB、FB2、MOBI、AZW3') + '</small></button><button type="button" class="reader-add-source" data-reader-opds><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c3.5-1.5 6.2-.8 8 1.2 1.8-2 4.5-2.7 8-1.2v13c-3.5-1.5-6.2-.8-8 1.2-1.8-2-4.5-2.7-8-1.2zM12 7v13"/></svg><span>' + (state.language === 'en' ? 'Book sources' : '书源') + '</span></button></div>';
-}
 function reader() {
   const activeBook = readerBookById(state.readerBookId);
   if (state.readerMode === 'reading' && activeBook) return readerReadingView(activeBook);
@@ -7973,7 +7970,7 @@ function reader() {
     return '<article class="book-card reader-book-card" data-reader-book-card data-reader-book-index="' + books.indexOf(book) + '" data-id="' + escapeHtml(book.id) + '"><button class="book-open reader-book-open" data-open-reader="' + escapeHtml(book.id) + '" aria-label="' + escapeHtml(book.name) + '"><span class="book-cover reader-book-cover ' + book.type + '">' + readerBookCoverMarkup(book) + '<svg class="reader-book-cover-progress" viewBox="0 0 100 134" preserveAspectRatio="none" style="--reader-progress:' + progressPercent + '" aria-hidden="true"><path class="reader-book-cover-progress-fill" pathLength="100" d="' + coverProgressPath + '"/></svg><span class="reader-book-cover-format">' + escapeHtml(book.type.toUpperCase()) + '</span><span class="reader-book-cover-size">' + escapeHtml(sizeLabel) + '</span><span class="reader-book-cover-percent">' + progressPercent + '%</span></span>' + bookNameMarkup + '</button><button class="book-delete reader-book-delete" data-delete-book="' + escapeHtml(book.id) + '" aria-label="' + t('deleteBook') + '" title="' + t('deleteBook') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M8 10v7M12 10v7M16 10v7M7 7l1 14h8l1-14"/></svg></button></article>';
   }).join('');
   const layoutClass = state.readerLayout === 'list' ? 'reader-book-list' : 'reader-book-grid-cards';
-  const libraryBody = '<div class="reader-book-grid ' + layoutClass + (!books.length ? ' reader-book-grid-empty' : '') + '">' + (books.length ? cards : '') + readerAddCardMarkup() + '</div>';
+  const libraryBody = '<div class="reader-book-grid ' + layoutClass + (!books.length ? ' reader-book-grid-empty' : '') + '">' + (books.length ? cards : '<p class="reader-library-empty">' + t('noBooks') + '</p>') + '</div>';
   const readerStats = window.OneBoxReaderExtras?.statsMarkup?.() || '';
   return '<div class="reader-library-view">' + readerStats + '<section class="reader-library-content">' + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,.fb2,.mobi,.azw3,text/markdown,text/plain,application/pdf,application/epub+zip,application/x-mobipocket-ebook,application/vnd.amazon.ebook"></div>';
 }
