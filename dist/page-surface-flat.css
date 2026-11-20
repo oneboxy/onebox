@@ -549,6 +549,7 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
+  flex-wrap: nowrap;
   gap: 10px;
 }
 #workspace[data-tool="mine"] .settings-page-card .settings-preference-row:has(select) .settings-preference-control::after {
@@ -562,9 +563,10 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   transform: rotate(-45deg);
 }
 #workspace[data-tool="mine"] .settings-page-card .settings-preference-control select {
-  width: 100%;
+  width: auto;
   max-width: none;
   min-width: 0;
+  flex: 1 1 0;
   height: 36px;
   padding: 6px 0;
   border: 0 !important;
