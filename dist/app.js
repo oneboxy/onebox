@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.855';
+const APP_VERSION = '2.18.856';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1407,7 +1407,7 @@ const state = {
   readerBookId: null, readerUrl: '', readerAssetUrls: [], readerContent: '', readerHint: '', readerToc: [], readerDialog: '', readerChromeHidden: false, readerImmersive: false, readerMode: 'library', readerReadingMode: 'scroll', readerPage: 0, readerSelectedText: '', readerSelection: null, readerAnnotationDraft: null, readerSelectionInput: 'mouse', readerLayout: storedReaderLayout === 'list' ? 'list' : 'grid', annotationBookId: null,
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
   homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, activityFilter: 'read', hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
-  navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationDialog: null, navigationFolderDraft: null, navigationSettingsOpen: false,
+  navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationDialog: null, navigationFolderDraft: null,
   ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletCardLayout: storedTicketWalletCardLayout, ticketWalletTypeFilter: normalizeTicketWalletFilter(storedTicketWalletTypeFilter), ticketWalletSelectedId: '', ticketWalletDisplayOrder: Array.isArray(storedTicketWalletDisplayOrder) ? storedTicketWalletDisplayOrder.filter((id) => typeof id === 'string') : [], ticketWalletEditorOpen: false, ticketWalletEditorStage: 'choose', ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
   homeFeedRead: storedHomeFeedRead && typeof storedHomeFeedRead === 'object' ? storedHomeFeedRead : {},
@@ -3707,27 +3707,11 @@ function clearNavigationActionCards(except = null) {
     if (card !== except) card.classList.remove('navigation-actions-visible');
   });
 }
-function navigationSettingsMarkup() {
-  if (!state.navigationSettingsOpen) return '';
-  const current = state.openMode === 'new-tab' ? 'new-tab' : 'current';
-  const option = (value, label, icon) => '<button type="button" class="navigation-settings-option ' + (current === value ? 'is-selected' : '') + '" data-navigation-open-mode="' + value + '" aria-pressed="' + String(current === value) + '"><span class="navigation-settings-option-icon">' + icon + '</span><span>' + escapeHtml(label) + '</span><span class="navigation-settings-check" aria-hidden="true">' + (current === value ? '✓' : '') + '</span></button>';
-  return '<div class="navigation-settings-popover" role="dialog" aria-label="' + escapeHtml(t('navigationSettings')) + '"><div class="navigation-settings-label">' + escapeHtml(t('navigationOpenModeHint')) + '</div><div class="navigation-settings-options">' + option('current', t('navigationOpenModeCurrent'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>') + option('new-tab', t('navigationOpenModeNewTab'), '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h13v13M20 4 10 14"/><path d="M17 20H4V7"/></svg>') + '</div></div>';
-}
-function syncNavigationSettingsPopover(button = $('#workspace[data-tool="navigation"] [data-open-navigation-settings]')) {
-  if (!button) return;
-  button.setAttribute('aria-expanded', String(state.navigationSettingsOpen));
-  const tools = button.closest('.navigation-page-tools');
-  if (!tools) return;
-  tools.querySelector('.navigation-settings-popover')?.remove();
-  if (state.navigationSettingsOpen) button.insertAdjacentHTML('afterend', navigationSettingsMarkup());
-}
 function renderNavigation() {
   const items = state.navigation.items || [];
   const emptyBody = '<button class="navigation-card navigation-empty-add-card" type="button" data-open-navigation-add aria-label="' + escapeHtml(t('navigationAdd')) + '"><span class="navigation-add-glyph">＋</span><strong>' + escapeHtml(t('navigationAdd')) + '</strong><small>' + escapeHtml(t('navigationEmpty')) + '</small></button>';
   const body = items.length ? items.map((item, index) => navigationItemMarkup(item, index)).join('') + '<button class="navigation-card navigation-add-card" type="button" data-open-navigation-add aria-label="' + escapeHtml(t('navigationAdd')) + '"><span class="navigation-add-glyph">＋</span><strong>' + escapeHtml(t('navigationAdd')) + '</strong></button>' : emptyBody;
-  const settingsButtonMarkup = '<button class="icon-btn header-icon navigation-settings-button" type="button" data-open-navigation-settings aria-expanded="' + String(state.navigationSettingsOpen) + '" aria-label="' + escapeHtml(t('navigationSettings')) + '"><svg class="header-line-icon settings-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h10M18 17h2"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="17" r="2"/></svg></button>';
-  const toolbarCopy = '<div class="navigation-toolbar-copy"><strong class="navigation-toolbar-title">' + escapeHtml(t('navigationSettings')) + '</strong><span class="navigation-toolbar-caption">' + escapeHtml(t('navigationToolbarHint')) + '</span></div>';
-  return '<div class="section-page navigation-page"><div class="navigation-page-toolbar">' + toolbarCopy + '<div class="navigation-page-tools">' + settingsButtonMarkup + navigationSettingsMarkup() + '</div></div><div class="navigation-grid">' + body + '</div></div>';
+  return '<div class="section-page navigation-page"><div class="navigation-grid">' + body + '</div></div>';
 }
 function renderNavigationAddDialog(folderId = '', site = null) {
   const dialog = $('#navigationDialog'); if (!dialog) return;
@@ -15396,27 +15380,11 @@ workspace.addEventListener('click', async (event) => {
     }
     return runDeveloperAction(devAction.dataset.devAction, event);
   }
-  if (event.target.closest('[data-open-navigation-settings]')) {
-    state.navigationSettingsOpen = !state.navigationSettingsOpen;
-    clearNavigationActionCards();
-    return syncNavigationSettingsPopover(event.target.closest('[data-open-navigation-settings]'));
-  }
-  const navigationOpenMode = event.target.closest('[data-navigation-open-mode]');
-  if (navigationOpenMode) {
-    state.openMode = navigationOpenMode.dataset.navigationOpenMode === 'new-tab' ? 'new-tab' : 'current';
-    saveStored(STORAGE.openMode, state.openMode);
-    state.navigationSettingsOpen = false;
-    // The opening mode is part of each card's anchor markup. Re-render the
-    // navigation surface so target="_blank" is applied immediately instead
-    // of only taking effect after a later route change.
-    return render();
-  }
   if (event.target.closest('[data-open-navigation-add]')) return openNavigationAddDialog();
   const navigationOpenAction = event.target.closest('[data-navigation-open-action]');
   if (navigationOpenAction) {
     event.preventDefault(); event.stopPropagation();
     const card = navigationOpenAction.closest('[data-navigation-item]');
-    state.navigationSettingsOpen = false;
     if (card?.dataset.navigationType === 'folder') return openNavigationFolderDialog(card.dataset.navigationId);
     const link = card?.querySelector('[data-navigation-open-site]');
     if (link) return openNavigationSite(link);
@@ -15425,7 +15393,6 @@ workspace.addEventListener('click', async (event) => {
   const navigationPrimary = event.target.closest('[data-navigation-open-site], [data-navigation-open-folder]');
   if (navigationPrimary) {
     if (navigationPrimary.matches('[data-navigation-open-site]') && navigationPrimary.target === '_blank') {
-      state.navigationSettingsOpen = false;
       // Let the real anchor perform the new-tab navigation. Safari treats
       // this native user-gesture path more reliably than a delegated
       // preventDefault() followed by window.open().
@@ -15450,13 +15417,11 @@ workspace.addEventListener('click', async (event) => {
   if (navigationSiteLink) {
     if (navigationSiteLink.target === '_blank') return;
     event.preventDefault(); event.stopPropagation();
-    state.navigationSettingsOpen = false;
     return openNavigationSite(navigationSiteLink);
   }
   const navigationFolder = event.target.closest('[data-navigation-open-folder]');
   if (navigationFolder) {
     event.preventDefault(); event.stopPropagation();
-    state.navigationSettingsOpen = false;
     return openNavigationFolderDialog(navigationFolder.dataset.navigationOpenFolder);
   }
   if (event.target.closest('[data-reader-layout-toggle]')) {
@@ -15716,8 +15681,7 @@ document.addEventListener('keydown', (event) => {
 });
 document.addEventListener('click', (event) => {
   const navigationPage = state.section === 'navigation' || (state.section === 'tools' && state.tool === 'navigation');
-  if (!navigationPage || event.target.closest('#workspace[data-tool="navigation"] [data-navigation-item], #workspace[data-tool="navigation"] [data-open-navigation-add], [data-open-navigation-settings], .navigation-settings-popover, #navigationDialog')) return;
-  if (state.navigationSettingsOpen) { state.navigationSettingsOpen = false; syncNavigationSettingsPopover(); }
+  if (!navigationPage || event.target.closest('#workspace[data-tool="navigation"] [data-navigation-item], #workspace[data-tool="navigation"] [data-open-navigation-add], #navigationDialog')) return;
   clearNavigationActionCards();
 });
 workspace.addEventListener('dblclick', (event) => {
