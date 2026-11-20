@@ -280,7 +280,7 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 }
 #navigationDialog .navigation-icon-refresh { background: transparent; }
 #navigationDialog .navigation-save-button { box-shadow: none; }
-#navigationDialog .navigation-icon-preview {
+#navigationDialog .navigation-refresh-preview {
   position: relative;
   display: grid;
   width: 24px;

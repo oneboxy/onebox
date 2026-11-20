@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.883';
+const APP_VERSION = '2.18.884';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3660,7 +3660,7 @@ function navigationIconPreviewImageMarkup(value, refreshIndex = 0) {
     } catch {}
   }
   const fallbackAttribute = sources.length ? ' data-fallback-sources="' + escapeHtml(sources.join('|')) + '"' : '';
-  return '<span class="navigation-icon-preview"><img class="navigation-direct-icon" src="' + escapeHtml(icon) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer" data-navigation-url="' + escapeHtml(url) + '"' + fallbackAttribute + ' onload="handleNavigationIconLoad(this)" onerror="handleNavigationPreviewIconError(this)"><svg class="navigation-icon-refresh-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L13 11h7V4z"/></svg></span>';
+  return '<span class="navigation-refresh-preview"><img class="navigation-direct-icon" src="' + escapeHtml(icon) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer" data-navigation-url="' + escapeHtml(url) + '"' + fallbackAttribute + ' onload="handleNavigationIconLoad(this)" onerror="handleNavigationPreviewIconError(this)"><svg class="navigation-icon-refresh-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L13 11h7V4z"/></svg></span>';
 }
 function finishNavigationIconRefresh(element) {
   const button = element?.matches?.('[data-navigation-refresh-icon]') ? element : element?.closest?.('[data-navigation-refresh-icon]');
