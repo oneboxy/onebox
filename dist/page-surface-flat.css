@@ -118,6 +118,8 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   border-bottom: 1px solid var(--line);
 }
 #workspace[data-tool="home"] .feed-item:first-child { border-top: 0 !important; }
+#workspace[data-tool="home"] .feed-item.has-history-divider { border-bottom: 0 !important; }
+#workspace[data-tool="home"] .feed-new-divider { margin: 0; }
 #workspace[data-tool="home"] .feed-item:hover,
 #workspace[data-tool="home"] .feed-item:focus-visible { background: transparent !important; }
 

@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.848';
+const APP_VERSION = '2.18.849';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2502,14 +2502,14 @@ function feedReactionActionsMarkup(id) {
   const reaction = state.homeFeedActivity[id]?.reaction || '';
   return '<span class="feed-item-reactions" role="group" aria-label="' + escapeHtml(t('feedArticleFeedback')) + '"><button class="feed-reaction-button ' + (reaction === 'like' ? 'is-active is-like' : '') + '" type="button" data-feed-reaction="like" aria-label="' + escapeHtml(t('feedLike')) + '" title="' + escapeHtml(t('feedLike')) + '" aria-pressed="' + (reaction === 'like') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v10H4V10h3Zm3 10h7.2a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 18.6 9H14l.65-3.1A2.4 2.4 0 0 0 12.3 3L8 10v10Z"/></svg></button><button class="feed-reaction-button ' + (reaction === 'dislike' ? 'is-active is-dislike' : '') + '" type="button" data-feed-reaction="dislike" aria-label="' + escapeHtml(t('feedDislike')) + '" title="' + escapeHtml(t('feedDislike')) + '" aria-pressed="' + (reaction === 'dislike') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 14V4h3v10h-3Zm-3-10H6.8a2 2 0 0 0-1.96 1.6l-1.4 7A2 2 0 0 0 5.4 15H10l-.65 3.1A2.4 2.4 0 0 0 11.7 21l4.3-7V4Z"/></svg></button></span>';
 }
-function renderFeedItem(item) {
+function renderFeedItem(item, extraClass = '') {
   const source = feedSource(item);
   const rawThumbnail = usableFeedImage(item.thumbnail, source);
   const thumbnail = feedImageUrl(rawThumbnail) || rawThumbnail;
   const image = rawThumbnail ? '<span class="feed-item-media"><img class="feed-item-image" src="' + escapeHtml(thumbnail) + '" data-fallback="' + escapeHtml(rawThumbnail) + '" alt="" loading="lazy" onerror="if(this.dataset.fallback&&this.getAttribute(\'src\')!==this.dataset.fallback){this.src=this.dataset.fallback;return;}var media=this.closest(\'.feed-item-media\');if(media)media.remove();var side=this.closest(\'.feed-item-side\');if(side&&!side.children.length)side.remove();"></span>' : '';
   const meta = '<div class="feed-item-meta"><span class="feed-source-tag ' + source.className + '"><b><img src="' + escapeHtml(source.icon) + '" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display=\'inline\'"><span class="feed-source-fallback">' + escapeHtml(source.badge) + '</span></b>' + escapeHtml(source.name) + '</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time>' + feedReactionActionsMarkup(item.id) + '</div>';
   const read = Boolean(state.homeFeedRead[item.id]);
-  return '<article class="feed-item ' + (thumbnail ? 'has-media ' : '') + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" tabindex="0" role="link"><div class="feed-item-body"><h2>' + escapeHtml(item.title) + '</h2>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + meta + '</div>' + (image ? '<div class="feed-item-side">' + image + '</div>' : '') + '</article>';
+  return '<article class="feed-item ' + (extraClass ? escapeHtml(extraClass) + ' ' : '') + (thumbnail ? 'has-media ' : '') + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" tabindex="0" role="link"><div class="feed-item-body"><h2>' + escapeHtml(item.title) + '</h2>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + meta + '</div>' + (image ? '<div class="feed-item-side">' + image + '</div>' : '') + '</article>';
 }
 function renderJiemianFlash(item) {
   if (!item) return '';
@@ -3591,7 +3591,9 @@ function renderHome() {
     const previousIsNew = index > 0 && newIds.has(visibleItems[index - 1].id);
     const separator = !isFootprint && !separatorShown && previousIsNew && !isNew ? '<div class="feed-new-divider" role="separator"><span>' + (state.language === 'en' ? 'Previous items' : '之前内容') + '</span></div>' : '';
     if (separator) separatorShown = true;
-    return separator + renderFeedItem(item);
+    const nextItem = visibleItems[index + 1];
+    const followsNewItems = !isFootprint && isNew && nextItem && !newIds.has(nextItem.id);
+    return separator + renderFeedItem(item, followsNewItems ? 'has-history-divider' : '');
   }).join('');
   const emptyActivityKey = state.homeFeed.activityFilter === 'like' ? 'feedFootprintEmptyLike' : state.homeFeed.activityFilter === 'dislike' ? 'feedFootprintEmptyDislike' : 'feedFootprintEmptyRead';
   const feedBody = state.homeFeed.loading && !hasItems && !isFootprint ? '<div class="feed-loading"><span></span><span></span><span></span></div>' : hasItems ? '<div class="feed-list">' + feedList + '</div>' : '<p class="empty feed-empty">' + (isFootprint ? t(emptyActivityKey) : t('feedEmpty')) + '</p>';
