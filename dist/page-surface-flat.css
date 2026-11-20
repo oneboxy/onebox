@@ -280,11 +280,39 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 }
 #navigationDialog .navigation-icon-refresh { background: transparent; }
 #navigationDialog .navigation-save-button { box-shadow: none; }
+#navigationDialog .navigation-icon-preview {
+  position: relative;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+}
 #navigationDialog .navigation-direct-icon {
   display: block;
   width: 24px;
   height: 24px;
   object-fit: contain;
+}
+#navigationDialog .navigation-icon-refresh-mark {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 13px;
+  height: 13px;
+  padding: 1px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--primary);
+  fill: currentColor;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+#navigationDialog .navigation-icon-refresh.is-refreshing .navigation-icon-refresh-mark {
+  animation: navigation-icon-refresh-spin 0.7s linear infinite;
+}
+@keyframes navigation-icon-refresh-spin {
+  to { transform: rotate(360deg); }
 }
 #navigationDialog .navigation-save-button svg {
   width: 18px;

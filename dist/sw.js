@@ -1,15 +1,15 @@
 // Mobile editor toolbar assets use the current compact controls.
-const CACHE = 'onebox-v920';
+const CACHE = 'onebox-v921';
 const APP_SHELL = [
   './',
   'index.html',
   'ticket-wallet-layout.js?v=2.18.768',
   'dev-json-editor.js?v=2.18.761',
   'style.css?v=2.18.809',
-  'app.js?v=2.18.882',
+  'app.js?v=2.18.883',
   'track-module.js?v=1.0.23',
   'track-module.css?v=1.0.20',
-  'page-surface-flat.css?v=1.0.65',
+  'page-surface-flat.css?v=1.0.66',
   'converter-mobile-fix.js?v=2.18.810',
   'converter-select-popup.js?v=2.18.885',
   'converter-result-fit.js?v=2.18.895',
@@ -76,7 +76,7 @@ const APP_SHELL = [
   'icons/bilibili.svg',
   'icons/bilibili.svg?v=2.18.311',
   'icons/spotify.svg?v=2.18.761',
-  'icons/qq-mail.svg?v=2.18.882',
+  'icons/qq-mail.svg?v=2.18.883',
   'icons/cafe-brand-luckin.png',
   'icons/cafe-brand-starbucks.png',
   'icons/cafe-brand-cotti.png',

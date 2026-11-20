@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.882';
+const APP_VERSION = '2.18.883';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3660,10 +3660,18 @@ function navigationIconPreviewImageMarkup(value, refreshIndex = 0) {
     } catch {}
   }
   const fallbackAttribute = sources.length ? ' data-fallback-sources="' + escapeHtml(sources.join('|')) + '"' : '';
-  return '<img class="navigation-direct-icon" src="' + escapeHtml(icon) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer" data-navigation-url="' + escapeHtml(url) + '"' + fallbackAttribute + ' onload="handleNavigationIconLoad(this)" onerror="handleNavigationPreviewIconError(this)">';
+  return '<span class="navigation-icon-preview"><img class="navigation-direct-icon" src="' + escapeHtml(icon) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer" data-navigation-url="' + escapeHtml(url) + '"' + fallbackAttribute + ' onload="handleNavigationIconLoad(this)" onerror="handleNavigationPreviewIconError(this)"><svg class="navigation-icon-refresh-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L13 11h7V4z"/></svg></span>';
+}
+function finishNavigationIconRefresh(element) {
+  const button = element?.matches?.('[data-navigation-refresh-icon]') ? element : element?.closest?.('[data-navigation-refresh-icon]');
+  if (!button) return;
+  button.classList.remove('is-refreshing');
+  clearTimeout(button._navigationRefreshTimer);
+  button._navigationRefreshTimer = 0;
 }
 function handleNavigationPreviewIconError(image) {
   if (advanceNavigationIcon(image)) return;
+  finishNavigationIconRefresh(image);
   if (image) image.hidden = true;
 }
 function advanceNavigationIcon(image, allowLowResolution = false) {
@@ -3693,6 +3701,7 @@ function rememberNavigationIcon(image, source = '') {
 }
 function handleNavigationIconLoad(image) {
   if (!image) return;
+  finishNavigationIconRefresh(image);
   const width = Number(image.naturalWidth || 0);
   if (width >= 64) {
     rememberNavigationIcon(image);
@@ -16179,6 +16188,9 @@ $('#navigationDialog').addEventListener('click', (event) => {
     if (!url) return;
     const refreshIndex = Number(refreshIconButton.dataset.refreshIndex || 0) + 1;
     refreshIconButton.dataset.refreshIndex = String(refreshIndex);
+    refreshIconButton.classList.add('is-refreshing');
+    clearTimeout(refreshIconButton._navigationRefreshTimer);
+    refreshIconButton._navigationRefreshTimer = setTimeout(() => finishNavigationIconRefresh(refreshIconButton), 6500);
     refreshIconButton.innerHTML = navigationIconPreviewImageMarkup(url, refreshIndex);
     return;
   }
