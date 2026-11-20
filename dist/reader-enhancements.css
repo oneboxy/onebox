@@ -702,23 +702,33 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   gap: 8px;
 }
 .reader-inline-stats .reader-stats-summary article {
-  gap: 3px;
-  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px 8px;
   border: 0;
   border-radius: 7px;
   background: var(--panel-2, #f4f5f8);
 }
 .reader-inline-stats .reader-stats-summary small {
   font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 .reader-inline-stats .reader-stats-summary strong {
-  font-size: 14px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: right;
+  white-space: nowrap;
 }
 .reader-inline-stats-history {
   margin: 0 0 8px;
 }
 .reader-inline-stats-history > small {
-  color: var(--muted, #737b8c);
+  color: var(--ink, #252a35);
   font-size: 14px;
   font-weight: 600;
 }
@@ -744,8 +754,9 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-library-title-row h2 { font-size: 18px; }
   .reader-inline-stats { margin-bottom: 6px; }
   .reader-inline-stats .reader-stats-summary { gap: 6px; }
-  .reader-inline-stats .reader-stats-summary article { padding: 6px; }
-  .reader-inline-stats .reader-stats-summary strong { font-size: 12px; }
+  .reader-inline-stats .reader-stats-summary article { gap: 4px; padding: 4px 6px; }
+  .reader-inline-stats .reader-stats-summary small { font-size: 9px; }
+  .reader-inline-stats .reader-stats-summary strong { font-size: 11px; }
   .reader-inline-stats .reader-stats-heatmap { gap: 2px; }
   .reader-page-actions { gap: 4px; }
 }
