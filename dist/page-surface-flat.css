@@ -301,6 +301,27 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   box-shadow: none;
   outline: none;
 }
+
+/* Keep navigation drag feedback neutral instead of adding a colored glow. */
+#workspace[data-tool="navigation"] .navigation-card.navigation-long-pressed,
+#workspace[data-tool="navigation"] .navigation-card.navigation-drop-target,
+#workspace[data-tool="navigation"] .navigation-card.navigation-combine-ready {
+  border-color: var(--line) !important;
+  outline: 1px dashed var(--line) !important;
+  outline-offset: 3px;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#workspace[data-tool="navigation"] .navigation-card.navigation-combine-ready { transform: scale(1.02); }
+.navigation-drag-placeholder {
+  border-color: var(--line) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.navigation-drag-ghost {
+  border-color: var(--line) !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--ink) 10%, transparent) !important;
+}
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
   border: 1px solid var(--line) !important;
   border-radius: 12px !important;
