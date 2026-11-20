@@ -172,17 +172,17 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   background: var(--panel);
   box-shadow: 0 14px 40px color-mix(in srgb, var(--ink) 16%, transparent);
 }
-#navigationDialog .navigation-site-dialog-card { width: min(360px, 100%); }
+#navigationDialog .navigation-site-dialog-card { width: min(340px, 100%); }
 #navigationDialog .navigation-dialog-card > .dialog-head {
   position: static;
   align-items: center;
-  min-height: 29px;
+  min-height: 42px;
   margin: -10px -12px 4px;
-  padding: 1px 12px;
+  padding: 2px 12px;
   border-bottom: 1px solid var(--line);
   background: transparent;
 }
-#navigationDialog .navigation-dialog-card > .dialog-head h2 { font-size: 14px; font-weight: 700; }
+#navigationDialog .navigation-dialog-card > .dialog-head h2 { margin: 0; font-size: 14px; font-weight: 700; line-height: 1.2; }
 #navigationDialog .navigation-dialog-card > .dialog-head .icon-btn { width: 26px; min-width: 26px; height: 26px; padding: 0; border-radius: 7px; font-size: 12px; }
 #navigationDialog .navigation-form {
   display: grid;
@@ -190,7 +190,7 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 }
 #navigationDialog .navigation-form-row {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  grid-template-columns: 36px minmax(0, 1fr);
   align-items: center;
   gap: 5px;
   width: 100%;
@@ -203,17 +203,21 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   width: 100%;
   min-width: 0;
   min-height: 36px;
-  padding: 7px 9px;
+  padding: 7px 38px 7px 9px;
   border-radius: 7px;
-  background: var(--bg);
+  background: transparent;
   font-size: 13px;
 }
 #navigationDialog .navigation-form input::placeholder { font-size: 12px; }
+#navigationDialog .navigation-input-wrap { position: relative; min-width: 0; width: 100%; }
 #navigationDialog .navigation-icon-refresh,
 #navigationDialog .navigation-save-button {
+  position: absolute;
+  top: 3px;
+  right: 3px;
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   place-items: center;
   padding: 0;
   border: 0;
@@ -228,14 +232,15 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   background: transparent;
   color: var(--primary);
 }
-#navigationDialog .navigation-icon-refresh[hidden] { display: none; }
+#navigationDialog .navigation-icon-refresh[hidden],
+#navigationDialog .navigation-save-button[hidden] { display: none; }
 #navigationDialog .navigation-icon-refresh:hover,
 #navigationDialog .navigation-save-button:hover {
   background: color-mix(in srgb, var(--primary) 9%, transparent);
   color: var(--primary);
   transform: none;
 }
-#navigationDialog .navigation-icon-refresh { background: var(--surface-raised, var(--bg)); }
+#navigationDialog .navigation-icon-refresh { background: transparent; }
 #navigationDialog .navigation-save-button { box-shadow: none; }
 #navigationDialog .navigation-direct-icon {
   display: block;

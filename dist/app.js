@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.862';
+const APP_VERSION = '2.18.863';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3753,7 +3753,12 @@ function renderNavigationAddDialog(folderId = '', site = null) {
   const subtitle = folder && !editing ? '<p class="navigation-dialog-subtitle">' + escapeHtml(folder.name) + '</p>' : '';
   const action = editing ? t('navigationEditSave') : t('navigationSave');
   const placeholder = state.language === 'en' ? 'Enter' : '请输入';
-  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + addressLabel + '</label><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus><button class="navigation-icon-refresh" type="button" data-navigation-refresh-icon aria-label="' + escapeHtml(state.language === 'en' ? 'Refresh website icon' : '重新获取网站图标') + '" title="' + escapeHtml(state.language === 'en' ? 'Refresh website icon' : '重新获取网站图标') + '" ' + (navigationSafeUrl(url) ? '' : 'hidden') + '>' + navigationIconPreviewImageMarkup(url) + '</button></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + nameLabel + '</label><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '"><button class="navigation-save-button" type="submit" aria-label="' + escapeHtml(action) + '" title="' + escapeHtml(action) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg></button></div></form></div>';
+  const safeAddress = Boolean(navigationSafeUrl(url));
+  const canSave = safeAddress && Boolean(String(name).trim());
+  const iconLabel = state.language === 'en' ? 'Refresh website icon' : '重新获取网站图标';
+  const refreshButton = '<button class="navigation-icon-refresh" type="button" data-navigation-refresh-icon aria-label="' + escapeHtml(iconLabel) + '" title="' + escapeHtml(iconLabel) + '" ' + (safeAddress ? '' : 'hidden') + '>' + navigationIconPreviewImageMarkup(url) + '</button>';
+  const saveButton = '<button class="navigation-save-button" type="submit" aria-label="' + escapeHtml(action) + '" title="' + escapeHtml(action) + '" ' + (canSave ? '' : 'hidden') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg></button>';
+  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + addressLabel + '</label><div class="navigation-input-wrap"><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus>' + refreshButton + '</div></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + nameLabel + '</label><div class="navigation-input-wrap"><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '">' + saveButton + '</div></div></form></div>';
   dialog.hidden = false;
 }
 function renderNavigationFolderDialog(folderId = '') {
@@ -16136,12 +16141,19 @@ $('#navigationDialog').addEventListener('click', (event) => {
   if (event.target.closest('[data-navigation-delete-folder]')) return deleteNavigationFolder(state.navigationDialog?.folderId || '');
 });
 $('#navigationDialog').addEventListener('input', (event) => {
-  if (event.target.id !== 'navigationUrl') return;
-  const refreshIconButton = $('[data-navigation-refresh-icon]', $('#navigationDialog')); if (!refreshIconButton) return;
-  const url = navigationSafeUrl(event.target.value);
-  refreshIconButton.hidden = !url;
-  refreshIconButton.dataset.refreshIndex = '0';
-  refreshIconButton.innerHTML = url ? navigationIconPreviewImageMarkup(url) : '';
+  if (!['navigationUrl', 'navigationName'].includes(event.target.id)) return;
+  const dialog = $('#navigationDialog');
+  const urlInput = $('#navigationUrl', dialog);
+  const nameInput = $('#navigationName', dialog);
+  const url = navigationSafeUrl(urlInput?.value);
+  const refreshIconButton = $('[data-navigation-refresh-icon]', dialog);
+  if (event.target.id === 'navigationUrl' && refreshIconButton) {
+    refreshIconButton.hidden = !url;
+    refreshIconButton.dataset.refreshIndex = '0';
+    refreshIconButton.innerHTML = url ? navigationIconPreviewImageMarkup(url) : '';
+  }
+  const saveButton = $('#navigationSiteForm .navigation-save-button', dialog);
+  if (saveButton) saveButton.hidden = !(url && String(nameInput?.value || '').trim());
 });
 $('#navigationDialog').addEventListener('submit', (event) => {
   event.preventDefault();
