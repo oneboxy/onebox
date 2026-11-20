@@ -670,14 +670,16 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 .reader-book-cover-percent {
   position: absolute;
   z-index: 3;
-  padding: 3px 4px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, .62);
-  color: #fff;
+  padding: 3px 5px;
+  border: 1px solid rgba(76, 91, 115, .12);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .84);
+  color: #475467;
   font-size: 8px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  box-shadow: 0 1px 3px rgba(20, 30, 50, .08);
+  backdrop-filter: blur(4px);
   pointer-events: none;
 }
 .reader-book-cover-format { top: 5px; left: 5px; }
