@@ -537,3 +537,48 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   #workspace[data-tool="mine"] .track-map { height: min(54vh, 540px); min-height: 300px; }
   #workspace[data-tool="mine"] .mine-pet-page .pet-dialog-body { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Settings follow a flat, full-row pattern: label on the left, value and a
+   single quiet chevron on the right, matching the surrounding dividers. */
+#workspace[data-tool="mine"] .settings-page-card .settings-preference-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+#workspace[data-tool="mine"] .settings-page-card .settings-preference-row:has(select) .settings-preference-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  gap: 10px;
+}
+#workspace[data-tool="mine"] .settings-page-card .settings-preference-row:has(select) .settings-preference-control::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  margin-right: 3px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(-45deg);
+}
+#workspace[data-tool="mine"] .settings-page-card .settings-preference-control select {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: 36px;
+  padding: 6px 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted);
+  text-align: right;
+}
+#workspace[data-tool="mine"] .settings-page-card .settings-preference-control select:focus,
+#workspace[data-tool="mine"] .settings-page-card .settings-preference-control select:focus-visible {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
