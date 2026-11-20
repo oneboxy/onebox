@@ -609,3 +609,21 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='m4 8 4-4 4 4M4 12l4 4 4-4' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='m4 8 4-4 4 4M4 12l4 4 4-4' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
+
+/* Messages and Mine should start directly below the app header. Remove only
+   the outer top/bottom strokes; keep the separators between Mine rows. */
+main:has(#workspace[data-tool="messages"]),
+main:has(#workspace[data-tool="mine"]) {
+  padding-top: var(--app-header-height) !important;
+}
+#workspace[data-tool="messages"] .section-page,
+#workspace[data-tool="mine"] .section-page {
+  padding-top: 0 !important;
+}
+#workspace[data-tool="messages"] .message-panel {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+#workspace[data-tool="mine"] .mine-row:first-child { border-top: 0 !important; }
+#workspace[data-tool="mine"] .mine-row:last-child { border-bottom: 0 !important; }
