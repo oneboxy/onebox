@@ -123,6 +123,37 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 #workspace[data-tool="home"] .feed-item:hover,
 #workspace[data-tool="home"] .feed-item:focus-visible { background: transparent !important; }
 
+/* Feed reactions stay icon-only: outline at rest, filled after selection. */
+.feed-reaction-button {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.feed-reaction-button:hover,
+.feed-reaction-button:focus-visible,
+.feed-reaction-button.is-active {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.feed-reaction-button svg {
+  fill: none !important;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.feed-reaction-button.is-active svg {
+  fill: currentColor !important;
+  stroke: none;
+}
+.feed-reaction-button[data-feed-reaction="like"]:hover,
+.feed-reaction-button.is-like { color: var(--primary); }
+.feed-reaction-button[data-feed-reaction="dislike"]:hover,
+.feed-reaction-button.is-dislike { color: var(--danger); }
+
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
   border: 1px solid var(--line) !important;
   border-radius: 12px !important;
