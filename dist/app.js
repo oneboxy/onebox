@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.894';
+const APP_VERSION = '2.18.895';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -6585,10 +6585,8 @@ async function hydrateReaderBookCover(book) {
       await oneBoxDbPut('book-covers', book.id, cover);
     }
     book.hasCover = Boolean(cover);
-    if (book.hasCover !== hadCover) {
-      saveLibrary();
-      if (state.tool === 'reader' && state.readerMode === 'library') render();
-    }
+    if (book.hasCover !== hadCover) saveLibrary();
+    if (cover) updateReaderBookCover(book);
   } finally {
     book._coverHydrating = false;
     Object.defineProperty(book, '_coverHydrated', { value: true, configurable: true, enumerable: false });
@@ -7949,6 +7947,12 @@ function readerFormatCoverMarkup(type) {
 function readerBookCoverMarkup(book) {
   if (book._coverData && /^data:image\//i.test(book._coverData)) return '<img class="reader-book-cover-image" src="' + escapeHtml(book._coverData) + '" alt="" loading="lazy">';
   return readerFormatCoverMarkup(book.type);
+}
+function updateReaderBookCover(book) {
+  if (state.tool !== 'reader' || state.readerMode !== 'library') return;
+  const card = $$('.reader-book-card').find((item) => item.dataset.id === String(book?.id || ''));
+  const cover = card?.querySelector('.reader-book-cover');
+  if (cover) cover.innerHTML = readerBookCoverMarkup(book);
 }
 function readerAddCardMarkup() {
   return '<button class="reader-empty-card reader-add-card" data-open-reader-file><span class="reader-empty-book"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 8.5h18.5l6 6v24H10z"/><path d="M28.5 8.5v7h6M16 24h13M16 30h9M16 36h6"/><path d="M37 24v10M32 29h10"/></svg></span><strong>' + t('addBook') + '</strong></button>';
