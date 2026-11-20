@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.853';
+const APP_VERSION = '2.18.854';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2511,12 +2511,6 @@ function renderFeedItem(item, extraClass = '') {
   const read = Boolean(state.homeFeedRead[item.id]);
   return '<article class="feed-item ' + (extraClass ? escapeHtml(extraClass) + ' ' : '') + (thumbnail ? 'has-media ' : '') + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" tabindex="0" role="link"><div class="feed-item-body"><h2>' + escapeHtml(item.title) + '</h2>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + meta + '</div>' + (image ? '<div class="feed-item-side">' + image + '</div>' : '') + '</article>';
 }
-function renderJiemianFlash(item) {
-  if (!item) return '';
-  const description = item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '';
-  const read = Boolean(state.homeFeedRead[item.id]);
-  return '<article class="jiemian-flash-card ' + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" data-feed-open-new-tab="true" tabindex="0" role="link"><div class="jiemian-flash-head"><span class="jiemian-flash-label"><span class="jiemian-flash-dot" aria-hidden="true"></span>界面快讯</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time></div><h2>' + escapeHtml(item.title) + '</h2>' + description + '<div class="jiemian-flash-footer"><span class="jiemian-flash-action">新页签查看快讯 <span aria-hidden="true">→</span></span>' + feedReactionActionsMarkup(item.id) + '</div></article>';
-}
 function isMobileSurface() {
   return Boolean(navigator.standalone || window.matchMedia?.('(display-mode: standalone)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia?.('(max-width: 760px)').matches);
 }
@@ -3577,10 +3571,7 @@ function renderHome() {
     const newOrder = Number(newIds.has(b.id)) - Number(newIds.has(a.id));
     return newOrder || ((feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0));
   });
-  const featuredJiemianFlash = !isFootprint && state.homeFeed.active === 'jiemian'
-    ? [...allItems].sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0))[0] || null
-    : null;
-  const listItems = featuredJiemianFlash ? items.filter((item) => item.id !== featuredJiemianFlash.id) : items;
+  const listItems = items;
   const renderLimit = isFootprint || homeFeedExpanded.has(state.homeFeed.active) ? RSS_MAX_ITEMS_PER_SOURCE : HOME_FEED_RENDER_LIMIT;
   const visibleItems = listItems.slice(0, renderLimit);
   const hasMoreItems = !isFootprint && listItems.length > visibleItems.length;
@@ -3600,7 +3591,7 @@ function renderHome() {
   const refreshState = state.homeFeed.loading ? '<div class="feed-refresh-state" role="status" aria-label="' + escapeHtml(t('feedLoading')) + '"><span></span></div>' : '';
   const newContentAction = !state.homeFeed.loading && !homeFeedSourceRequesting() && newCount ? '<div class="feed-new-content-action-wrap"><button class="feed-new-content-action" type="button" data-feed-only-new>' + escapeHtml(homeFeedNewActionLabel(newCount)) + '</button></div>' : '';
   const loadMoreAction = hasMoreItems ? '<div class="feed-load-more-wrap"><button class="feed-load-more" type="button" data-feed-load-more>' + escapeHtml(t('feedLoadMore')) + '</button></div>' : '';
-  return '<div class="home-page feed-home">' + (featuredJiemianFlash ? renderJiemianFlash(featuredJiemianFlash) : '') + '<section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
+  return '<div class="home-page feed-home"><section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
 }
 function navigationIconMarkup(site, extraClass = '') {
   const generatedSources = navigationIconSources(site?.url);
