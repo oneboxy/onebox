@@ -256,7 +256,7 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 #navigationDialog .navigation-save-button {
   border-radius: 7px;
   background: transparent;
-  color: var(--primary);
+  color: var(--ink);
 }
 #navigationDialog .navigation-input-clear {
   width: 26px;
@@ -274,8 +274,8 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 #navigationDialog .navigation-input-clear[hidden] { display: none; }
 #navigationDialog .navigation-icon-refresh:hover,
 #navigationDialog .navigation-save-button:hover {
-  background: color-mix(in srgb, var(--primary) 9%, transparent);
-  color: var(--primary);
+  background: transparent;
+  color: var(--ink);
   transform: none;
 }
 #navigationDialog .navigation-icon-refresh { background: transparent; }
@@ -300,11 +300,15 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   width: 13px;
   height: 13px;
   padding: 1px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 50%;
   background: var(--panel);
-  color: var(--primary);
-  fill: currentColor;
+  color: var(--ink);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   box-sizing: border-box;
   pointer-events: none;
 }
@@ -319,7 +323,7 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   height: 18px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.8;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
