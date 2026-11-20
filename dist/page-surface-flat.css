@@ -172,6 +172,7 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   background: var(--panel);
   box-shadow: 0 14px 40px color-mix(in srgb, var(--ink) 16%, transparent);
 }
+#navigationDialog .navigation-site-dialog-card { width: min(360px, 100%); }
 #navigationDialog .navigation-dialog-card > .dialog-head {
   position: static;
   align-items: center;
