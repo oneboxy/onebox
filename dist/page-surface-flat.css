@@ -251,18 +251,20 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
 .settings-page-head h1 { margin: 0; font-size: 15px; font-weight: 650; }
 .settings-page-back {
   display: grid;
-  flex: 0 0 30px;
-  width: 30px;
+  flex: 0 0 26px;
+  width: 26px;
   height: 30px;
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
 }
-.settings-page-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.settings-page-back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.settings-page-back:hover { color: var(--ink); background: color-mix(in srgb, var(--panel-2) 68%, transparent); }
+.settings-page-back:active { color: var(--primary); }
 .settings-page-card .settings-preferences { width: 100%; max-width: none; margin: 0; }
 .settings-page-card .settings-preference-row { display: grid; grid-template-columns: minmax(112px, 1fr) minmax(0, 1.2fr); gap: 12px; min-height: 56px; padding: 10px; border-bottom: 1px solid var(--line); }
 .settings-page-card .settings-preference-row h3 { min-width: 0; margin: 0; font-size: 14px; }
