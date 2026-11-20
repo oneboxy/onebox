@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.887';
+const APP_VERSION = '2.18.889';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7967,7 +7967,8 @@ function reader() {
   const layoutIcon = state.readerLayout === 'list' ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/><path d="M5 6h.01M5 12h.01M5 18h.01"/></svg><span>宫格</span>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span>列表</span>';
   const cloudStatus = window.OneBoxReaderCloudSync?.status?.() || { state: 'idle', message: '' };
   const readerExtraActions = window.OneBoxReaderExtras?.actionsMarkup?.() || '';
-  return '<div class="reader-library-view"><section class="reader-library-panel"><div class="reader-library-head"><div class="reader-library-title-copy"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><small class="reader-cloud-sync-status" id="readerCloudSyncStatus" data-state="' + escapeHtml(cloudStatus.state || 'idle') + '">' + escapeHtml(readerCloudStatusLabel(cloudStatus)) + '</small></div><div class="reader-library-actions">' + readerExtraActions + '<button class="reader-layout-toggle" data-reader-layout-toggle aria-label="切换书架布局">' + layoutIcon + '</button></div></div>' + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,.fb2,.mobi,.azw3,text/markdown,text/plain,application/pdf,application/epub+zip,application/x-mobipocket-ebook,application/vnd.amazon.ebook"></div>';
+  const readerStats = window.OneBoxReaderExtras?.statsMarkup?.() || '';
+  return '<div class="reader-library-view">' + readerStats + '<section class="reader-library-panel"><div class="reader-library-head"><div class="reader-library-title-copy"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><small class="reader-cloud-sync-status" id="readerCloudSyncStatus" data-state="' + escapeHtml(cloudStatus.state || 'idle') + '">' + escapeHtml(readerCloudStatusLabel(cloudStatus)) + '</small></div><div class="reader-library-actions">' + readerExtraActions + '<button class="reader-layout-toggle" data-reader-layout-toggle aria-label="切换书架布局">' + layoutIcon + '</button></div></div>' + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,.fb2,.mobi,.azw3,text/markdown,text/plain,application/pdf,application/epub+zip,application/x-mobipocket-ebook,application/vnd.amazon.ebook"></div>';
 }
 
 // Calendar data --------------------------------------------------------------

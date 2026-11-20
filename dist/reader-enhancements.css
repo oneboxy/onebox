@@ -625,3 +625,58 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 .reader-book-list .reader-add-card svg * {
   stroke: currentColor !important;
 }
+
+/* Keep the reader page open and show reading progress above the bookshelf. */
+#workspace[data-tool="reader"] .reader-library-panel {
+  border: 0;
+  box-shadow: none;
+}
+.reader-inline-stats {
+  margin: 0 0 18px;
+  padding: 0 0 12px;
+}
+.reader-inline-stats > h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.reader-inline-stats .reader-stats-summary {
+  gap: 12px;
+}
+.reader-inline-stats .reader-stats-summary article {
+  gap: 5px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--panel-2, #f4f5f8);
+}
+.reader-inline-stats .reader-stats-summary small {
+  font-size: 11px;
+}
+.reader-inline-stats .reader-stats-summary strong {
+  font-size: 16px;
+}
+.reader-inline-stats-history {
+  margin-top: 10px;
+}
+.reader-inline-stats-history > small {
+  color: var(--muted, #737b8c);
+  font-size: 11px;
+}
+.reader-inline-stats .reader-stats-heatmap {
+  grid-template-columns: repeat(52, minmax(4px, 1fr));
+  grid-template-rows: repeat(7, auto);
+  gap: 3px;
+  width: min(100%, 560px);
+  margin-top: 5px;
+}
+.reader-inline-stats .reader-stats-heatmap i {
+  min-width: 0;
+  border-radius: 2px;
+}
+@media (max-width: 600px) {
+  .reader-inline-stats { margin-bottom: 14px; }
+  .reader-inline-stats .reader-stats-summary { gap: 6px; }
+  .reader-inline-stats .reader-stats-summary article { padding: 8px; }
+  .reader-inline-stats .reader-stats-summary strong { font-size: 14px; }
+  .reader-inline-stats .reader-stats-heatmap { gap: 2px; }
+}
