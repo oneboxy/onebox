@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.875';
+const APP_VERSION = '2.18.876';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3686,7 +3686,7 @@ function handleNavigationIconError(image) {
 function navigationItemMarkup(item, index = 0, folderId = '') {
   const folderAttribute = folderId ? ' data-navigation-folder-id="' + escapeHtml(folderId) + '"' : '';
   const indexAttribute = ' data-navigation-index="' + index + '"';
-  const deleteButton = '<button class="navigation-delete-action" type="button" data-navigation-delete="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(t('navigationRemove') + ' ' + item.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button>';
+  const deleteButton = '<button class="navigation-delete-action" type="button" data-navigation-delete="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(t('navigationRemove') + ' ' + item.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5M14 11v5"/></svg></button>';
   const editButton = item.type === 'site' ? '<button class="navigation-edit-action" type="button" data-navigation-edit="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(t('navigationEdit') + ' ' + item.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16.5-.7 3.2 3.2-.7L18.8 7.7a2.2 2.2 0 0 0-3.1-3.1L5 16.5Z"/><path d="m14.5 6.5 3 3"/></svg></button>' : '';
   const openButton = '<button class="navigation-open-action" type="button" data-navigation-open-action aria-label="' + escapeHtml(t('navigationOpen') + ' ' + item.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></button>';
   const actionButtons = '<span class="navigation-card-actions" role="group" aria-label="' + escapeHtml(t('navigationTitle')) + '"><span class="navigation-primary-actions">' + openButton + '</span><span class="navigation-secondary-actions">' + editButton + deleteButton + '</span></span>';
@@ -13568,7 +13568,14 @@ function finishNavigationDrag(event = null) {
   if (wasLongPressed) navigationSuppressClickUntil = Date.now() + 550;
   if (!wasActive) {
     restoreNavigationDrag(drag);
-    if (wasLongPressed) openNavigationActionsDialog(targetId, drag.target.dataset.navigationFolderId || '');
+    if (wasLongPressed) {
+      if (drag.scope === 'root' && drag.target.dataset.navigationType === 'site') {
+        clearNavigationActionCards(drag.target);
+        drag.target.classList.add('navigation-actions-visible');
+      } else {
+        openNavigationActionsDialog(targetId, drag.target.dataset.navigationFolderId || '');
+      }
+    }
     return wasLongPressed;
   }
   if (drag.scope === 'folder') {
@@ -14755,7 +14762,10 @@ workspace.addEventListener('pointerdown', (event) => {
   const navigationVisible = state.section === 'navigation' || (state.section === 'tools' && state.tool === 'navigation');
   if (!navigationVisible) return;
   const card = event.target.closest('[data-navigation-item]');
-  if (card && !event.target.closest('[data-navigation-open-action], [data-navigation-delete], [data-navigation-edit]')) startNavigationLongPress(card, event);
+  if (card && !event.target.closest('[data-navigation-open-action], [data-navigation-delete], [data-navigation-edit]')) {
+    clearNavigationActionCards(card);
+    startNavigationLongPress(card, event);
+  }
 });
 $('#navigationDialog').addEventListener('pointerdown', (event) => {
   const card = event.target.closest('.navigation-folder-sites [data-navigation-item]');
