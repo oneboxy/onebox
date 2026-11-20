@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.900';
+const APP_VERSION = '2.18.901';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7965,7 +7965,7 @@ function reader() {
     const progressPercent = Math.max(0, Math.min(100, Math.round(progress * 100)));
     const sizeBytes = Math.max(0, Number(book.size) || 0);
     const sizeLabel = sizeBytes >= 1024 * 1024 ? (sizeBytes / (1024 * 1024)).toFixed(1).replace(/\.0$/, '') + ' MB' : Math.max(1, Math.round(sizeBytes / 1024)) + ' KB';
-    const coverProgressPath = 'M50 1.5H94.5a4 4 0 0 1 4 4V128.5a4 4 0 0 1-4 4H5.5a4 4 0 0 1-4-4V5.5a4 4 0 0 1 4-4H50';
+    const coverProgressPath = 'M5.5 1.5H94.5a4 4 0 0 1 4 4V128.5a4 4 0 0 1-4 4H5.5a4 4 0 0 1-4-4V5.5a4 4 0 0 1 4-4';
     const bookNameMarkup = state.readerLayout === 'list' ? '<span class="book-copy reader-book-copy"><strong>' + escapeHtml(book.name) + '</strong>' + (book.syncFileMissing ? '<small class="reader-book-source-missing">' + t('readerMissingSource') + '</small>' : '') + '</span>' : '';
     return '<article class="book-card reader-book-card" data-reader-book-card data-reader-book-index="' + books.indexOf(book) + '" data-id="' + escapeHtml(book.id) + '"><button class="book-open reader-book-open" data-open-reader="' + escapeHtml(book.id) + '" aria-label="' + escapeHtml(book.name) + '"><span class="book-cover reader-book-cover ' + book.type + '">' + readerBookCoverMarkup(book) + '<svg class="reader-book-cover-progress" viewBox="0 0 100 134" preserveAspectRatio="none" style="--reader-progress:' + progressPercent + '" aria-hidden="true"><path class="reader-book-cover-progress-fill" pathLength="100" d="' + coverProgressPath + '"/></svg><span class="reader-book-cover-format">' + escapeHtml(book.type.toUpperCase()) + '</span><span class="reader-book-cover-size">' + escapeHtml(sizeLabel) + '</span><span class="reader-book-cover-percent">' + progressPercent + '%</span></span>' + bookNameMarkup + '</button><button class="book-delete reader-book-delete" data-delete-book="' + escapeHtml(book.id) + '" aria-label="' + t('deleteBook') + '" title="' + t('deleteBook') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M8 10v7M12 10v7M16 10v7M7 7l1 14h8l1-14"/></svg></button></article>';
   }).join('');
