@@ -660,10 +660,6 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
-.reader-book-cover-progress-track {
-  stroke: color-mix(in srgb, var(--ink) 28%, transparent);
-  stroke-width: 1.5;
-}
 .reader-book-cover-progress-fill {
   stroke: var(--primary);
   stroke-width: 2.2;
