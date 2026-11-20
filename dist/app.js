@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.858';
+const APP_VERSION = '2.18.859';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3607,8 +3607,33 @@ function navigationIconMarkup(site, extraClass = '') {
   const siteUrlAttribute = navigationSafeUrl(site?.url) ? ' data-navigation-url="' + escapeHtml(site.url) + '"' : '';
   return '<span class="navigation-site-icon ' + extraClass + '"><img src="' + escapeHtml(icon) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer"' + siteUrlAttribute + fallbackAttribute + ' onload="handleNavigationIconLoad(this)" onerror="handleNavigationIconError(this)"><span class="navigation-icon-fallback" hidden aria-hidden="true"><span class="navigation-fallback-glyph"><i></i><i></i><i></i><i></i></span></span></span>';
 }
-function navigationIconPreviewPlaceholder() {
-  return '<span class="navigation-preview-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>';
+function navigationIconPreviewImageMarkup(value, refreshIndex = 0) {
+  const url = navigationSafeUrl(value);
+  if (!url) return '';
+  let sources = navigationIconSources(url);
+  const cachedIcon = navigationCachedIcon(url);
+  if (refreshIndex > 0) {
+    if (cachedIcon) sources = sources.filter((source) => source !== cachedIcon);
+    if (sources.length) {
+      const offset = (refreshIndex - 1) % sources.length;
+      sources = [...sources.slice(offset), ...sources.slice(0, offset)];
+    }
+  }
+  let icon = sources.shift() || '';
+  if (!icon) return '';
+  if (refreshIndex > 0) {
+    try {
+      const refreshed = new URL(icon);
+      refreshed.searchParams.set('onebox_refresh', String(Date.now()));
+      icon = refreshed.href;
+    } catch {}
+  }
+  const fallbackAttribute = sources.length ? ' data-fallback-sources="' + escapeHtml(sources.join('|')) + '"' : '';
+  return '<img class="navigation-direct-icon" src="' + escapeHtml(icon) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer" data-navigation-url="' + escapeHtml(url) + '"' + fallbackAttribute + ' onload="handleNavigationIconLoad(this)" onerror="handleNavigationPreviewIconError(this)">';
+}
+function handleNavigationPreviewIconError(image) {
+  if (advanceNavigationIcon(image)) return;
+  if (image) image.hidden = true;
 }
 function advanceNavigationIcon(image, allowLowResolution = false) {
   if (!image?.dataset?.fallbackSources) return false;
@@ -3723,11 +3748,12 @@ function renderNavigationAddDialog(folderId = '', site = null) {
   const title = editing ? t('navigationEdit') : folder ? t('navigationAddToFolder') : (state.language === 'en' ? 'Add' : '添加');
   const url = site?.url || '';
   const name = site?.name || '';
-  const preview = url ? navigationIconMarkup({ name, url, icon: site?.icon || navigationIconUrl(url) }, 'navigation-preview-icon') : navigationIconPreviewPlaceholder();
+  const addressLabel = state.language === 'en' ? 'Address' : '地址';
+  const nameLabel = state.language === 'en' ? 'Name' : '名称';
   const subtitle = folder && !editing ? '<p class="navigation-dialog-subtitle">' + escapeHtml(folder.name) + '</p>' : '';
   const action = editing ? t('navigationEditSave') : t('navigationSave');
   const placeholder = state.language === 'en' ? 'Enter' : '请输入';
-  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + escapeHtml(t('navigationUrl')) + '</label><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + escapeHtml(t('navigationName')) + '</label><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '"><span class="navigation-icon-preview" data-navigation-icon-preview>' + preview + '</span></div><button class="primary full-width" type="submit">' + escapeHtml(action) + '</button></form></div>';
+  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + addressLabel + '</label><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus><button class="navigation-icon-refresh" type="button" data-navigation-refresh-icon aria-label="' + escapeHtml(state.language === 'en' ? 'Refresh website icon' : '重新获取网站图标') + '" title="' + escapeHtml(state.language === 'en' ? 'Refresh website icon' : '重新获取网站图标') + '" ' + (navigationSafeUrl(url) ? '' : 'hidden') + '>' + navigationIconPreviewImageMarkup(url) + '</button></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + nameLabel + '</label><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '"><button class="navigation-save-button" type="submit" aria-label="' + escapeHtml(action) + '" title="' + escapeHtml(action) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg></button></div></form></div>';
   dialog.hidden = false;
 }
 function renderNavigationFolderDialog(folderId = '') {
@@ -16073,6 +16099,15 @@ $('#navigationDialog').addEventListener('contextmenu', (event) => {
 });
 $('#navigationDialog').addEventListener('click', (event) => {
   if (event.target === $('#navigationDialog') || event.target.closest('[data-close-navigation-dialog]')) return closeNavigationDialog();
+  const refreshIconButton = event.target.closest('[data-navigation-refresh-icon]');
+  if (refreshIconButton) {
+    const url = navigationSafeUrl($('#navigationUrl', $('#navigationDialog'))?.value);
+    if (!url) return;
+    const refreshIndex = Number(refreshIconButton.dataset.refreshIndex || 0) + 1;
+    refreshIconButton.dataset.refreshIndex = String(refreshIndex);
+    refreshIconButton.innerHTML = navigationIconPreviewImageMarkup(url, refreshIndex);
+    return;
+  }
   if (Date.now() < navigationSuppressClickUntil && event.target.closest('.navigation-folder-sites [data-navigation-item]')) { event.preventDefault(); return; }
   const action = event.target.closest('[data-navigation-action]');
   if (action) {
@@ -16102,8 +16137,11 @@ $('#navigationDialog').addEventListener('click', (event) => {
 });
 $('#navigationDialog').addEventListener('input', (event) => {
   if (event.target.id !== 'navigationUrl') return;
-  const preview = $('[data-navigation-icon-preview]', $('#navigationDialog')); if (!preview) return;
-  const url = navigationSafeUrl(event.target.value); preview.innerHTML = url ? navigationIconMarkup({ name: navigationNameFromUrl(url), url, icon: navigationIconUrl(url) }, 'navigation-preview-icon') : navigationIconPreviewPlaceholder();
+  const refreshIconButton = $('[data-navigation-refresh-icon]', $('#navigationDialog')); if (!refreshIconButton) return;
+  const url = navigationSafeUrl(event.target.value);
+  refreshIconButton.hidden = !url;
+  refreshIconButton.dataset.refreshIndex = '0';
+  refreshIconButton.innerHTML = url ? navigationIconPreviewImageMarkup(url) : '';
 });
 $('#navigationDialog').addEventListener('submit', (event) => {
   event.preventDefault();
