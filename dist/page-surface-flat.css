@@ -166,7 +166,7 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   width: min(440px, 100%);
   max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   margin: auto;
-  padding: 14px;
+  padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel);
@@ -175,27 +175,29 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 #navigationDialog .navigation-dialog-card > .dialog-head {
   position: static;
   align-items: center;
-  min-height: 36px;
-  margin: -14px -14px 6px;
-  padding: 5px 14px;
+  min-height: 29px;
+  margin: -10px -12px 4px;
+  padding: 1px 12px;
   border-bottom: 1px solid var(--line);
   background: transparent;
 }
-#navigationDialog .navigation-dialog-card > .dialog-head h2 { font-size: 16px; font-weight: 700; }
-#navigationDialog .navigation-dialog-card > .dialog-head .icon-btn { border-radius: 8px; }
+#navigationDialog .navigation-dialog-card > .dialog-head h2 { font-size: 14px; font-weight: 700; }
+#navigationDialog .navigation-dialog-card > .dialog-head .icon-btn { width: 26px; min-width: 26px; height: 26px; padding: 0; border-radius: 7px; font-size: 12px; }
 #navigationDialog .navigation-form {
   display: grid;
-  gap: 7px;
+  gap: 5px;
 }
 #navigationDialog .navigation-form-row {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 34px;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
+  width: 100%;
+  max-width: 320px;
   min-width: 0;
   margin: 0;
 }
-#navigationDialog .navigation-form-row label { font-size: 11px; white-space: nowrap; }
+#navigationDialog .navigation-form-row label { color: var(--ink); font-size: 14px; font-weight: 650; white-space: nowrap; }
 #navigationDialog .navigation-form input {
   width: 100%;
   min-width: 0;
@@ -209,24 +211,31 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
 #navigationDialog .navigation-icon-refresh,
 #navigationDialog .navigation-save-button {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 7px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
   box-shadow: none;
 }
+#navigationDialog .navigation-save-button {
+  border-radius: 8px;
+  background: var(--primary);
+  color: var(--primary-contrast, #fff);
+}
 #navigationDialog .navigation-icon-refresh[hidden] { display: none; }
 #navigationDialog .navigation-icon-refresh:hover,
 #navigationDialog .navigation-save-button:hover {
-  background: transparent;
-  color: var(--primary);
+  background: var(--primary-hover, var(--primary));
+  color: var(--primary-contrast, #fff);
   transform: none;
 }
+#navigationDialog .navigation-icon-refresh { background: var(--surface-raised, var(--bg)); }
+#navigationDialog .navigation-save-button { box-shadow: 0 2px 6px color-mix(in srgb, var(--primary) 24%, transparent); }
 #navigationDialog .navigation-direct-icon {
   display: block;
   width: 24px;
