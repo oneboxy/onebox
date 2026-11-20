@@ -256,16 +256,16 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
   height: 30px;
   place-items: center;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: var(--panel);
-  color: var(--muted);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
   cursor: pointer;
-  transition: border-color .18s ease, color .18s ease, background .18s ease;
+  transition: color .18s ease;
 }
-.settings-page-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.settings-page-back:hover { border-color: color-mix(in srgb, var(--primary) 42%, var(--line)); color: var(--primary); }
-.settings-page-back:active { background: color-mix(in srgb, var(--primary) 8%, var(--panel)); }
+.settings-page-back svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.settings-page-back:hover { color: var(--primary); }
+.settings-page-back:active { color: var(--primary); }
 .settings-page-card .settings-preferences { width: 100%; max-width: none; margin: 0; }
 .settings-page-card .settings-preference-row { display: grid; grid-template-columns: minmax(112px, 1fr) minmax(0, 1.2fr); gap: 12px; min-height: 56px; padding: 10px; border-bottom: 1px solid var(--line); }
 .settings-page-card .settings-preference-row h3 { min-width: 0; margin: 0; font-size: 14px; }
@@ -522,15 +522,14 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   height: 30px !important;
   min-height: 30px !important;
   flex-basis: 30px !important;
-  border: 1px solid var(--line) !important;
-  border-radius: 50% !important;
-  background: var(--panel) !important;
-  color: var(--muted);
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--ink);
   box-shadow: none !important;
 }
 #workspace[data-tool="mine"] .ticket-wallet-back:hover,
 #workspace[data-tool="mine"] .track-page-nav .track-back:hover {
-  border-color: color-mix(in srgb, var(--primary) 42%, var(--line)) !important;
   color: var(--primary);
 }
 #workspace[data-tool="mine"] .track-map-panel { margin-top: 12px; }
