@@ -272,13 +272,21 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   object-fit: contain;
 }
 #navigationDialog .navigation-input-clear svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
+  stroke: none;
+}
+#navigationDialog .navigation-input-clear circle {
+  fill: currentColor;
+}
+#navigationDialog .navigation-input-clear path {
+  fill: none;
+  stroke: var(--panel);
+  stroke-width: 2;
   stroke-linecap: round;
 }
+#navigationDialog .navigation-input-clear:hover { background: transparent; color: var(--muted); }
 #navigationDialog .navigation-save-button svg {
   width: 21px;
   height: 21px;

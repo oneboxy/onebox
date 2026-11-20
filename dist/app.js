@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.866';
+const APP_VERSION = '2.18.867';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3756,7 +3756,7 @@ function renderNavigationAddDialog(folderId = '', site = null) {
   const safeAddress = Boolean(navigationSafeUrl(url));
   const canSave = safeAddress && Boolean(String(name).trim());
   const iconLabel = state.language === 'en' ? 'Refresh website icon' : '重新获取网站图标';
-  const clearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+  const clearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></svg>';
   const addressClearButton = '<button class="navigation-input-clear" type="button" data-navigation-clear="navigationUrl" aria-label="' + escapeHtml(state.language === 'en' ? 'Clear address' : '清除地址') + '" ' + (String(url).trim() ? '' : 'hidden') + '>' + clearIcon + '</button>';
   const nameClearButton = '<button class="navigation-input-clear" type="button" data-navigation-clear="navigationName" aria-label="' + escapeHtml(state.language === 'en' ? 'Clear name' : '清除名称') + '" ' + (String(name).trim() ? '' : 'hidden') + '>' + clearIcon + '</button>';
   const refreshButton = '<button class="navigation-icon-refresh" type="button" data-navigation-refresh-icon aria-label="' + escapeHtml(iconLabel) + '" title="' + escapeHtml(iconLabel) + '" ' + (safeAddress ? '' : 'hidden') + '>' + navigationIconPreviewImageMarkup(url) + '</button>';
