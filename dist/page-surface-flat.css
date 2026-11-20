@@ -280,6 +280,19 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
   outline: none;
   box-shadow: none;
 }
+@media (max-width: 760px) {
+  #workspace[data-tool="mine"] .settings-page-card .settings-preference-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  #workspace[data-tool="mine"] .settings-page-card .settings-preference-row:has(select) .settings-preference-control {
+    justify-content: flex-start;
+  }
+  #workspace[data-tool="mine"] .settings-page-card .settings-preference-control select {
+    width: min(100%, 220px);
+    max-width: 220px;
+    background-color: transparent;
+  }
+}
 .settings-page-card .setting-toggle { display: inline-flex; align-items: center; flex: 0 0 auto; gap: 6px; font-size: 11px; }
 .settings-page-card .setting-toggle input {
   appearance: none;
