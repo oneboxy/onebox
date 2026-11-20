@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.864';
+const APP_VERSION = '2.18.865';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3756,9 +3756,12 @@ function renderNavigationAddDialog(folderId = '', site = null) {
   const safeAddress = Boolean(navigationSafeUrl(url));
   const canSave = safeAddress && Boolean(String(name).trim());
   const iconLabel = state.language === 'en' ? 'Refresh website icon' : '重新获取网站图标';
+  const clearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+  const addressClearButton = '<button class="navigation-input-clear" type="button" data-navigation-clear="navigationUrl" aria-label="' + escapeHtml(state.language === 'en' ? 'Clear address' : '清除地址') + '" ' + (String(url).trim() ? '' : 'hidden') + '>' + clearIcon + '</button>';
+  const nameClearButton = '<button class="navigation-input-clear" type="button" data-navigation-clear="navigationName" aria-label="' + escapeHtml(state.language === 'en' ? 'Clear name' : '清除名称') + '" ' + (String(name).trim() ? '' : 'hidden') + '>' + clearIcon + '</button>';
   const refreshButton = '<button class="navigation-icon-refresh" type="button" data-navigation-refresh-icon aria-label="' + escapeHtml(iconLabel) + '" title="' + escapeHtml(iconLabel) + '" ' + (safeAddress ? '' : 'hidden') + '>' + navigationIconPreviewImageMarkup(url) + '</button>';
   const saveButton = '<button class="navigation-save-button" type="submit" aria-label="' + escapeHtml(action) + '" title="' + escapeHtml(action) + '" ' + (canSave ? '' : 'hidden') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg></button>';
-  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + addressLabel + '</label><div class="navigation-input-wrap"><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus>' + refreshButton + '</div></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + nameLabel + '</label><div class="navigation-input-wrap"><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '">' + saveButton + '</div></div></form></div>';
+  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + addressLabel + '</label><div class="navigation-input-wrap"><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus><div class="navigation-input-actions">' + addressClearButton + refreshButton + '</div></div></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + nameLabel + '</label><div class="navigation-input-wrap"><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '"><div class="navigation-input-actions">' + nameClearButton + saveButton + '</div></div></div></form></div>';
   dialog.hidden = false;
 }
 function renderNavigationFolderDialog(folderId = '') {
@@ -16104,6 +16107,16 @@ $('#navigationDialog').addEventListener('contextmenu', (event) => {
 });
 $('#navigationDialog').addEventListener('click', (event) => {
   if (event.target === $('#navigationDialog') || event.target.closest('[data-close-navigation-dialog]')) return closeNavigationDialog();
+  const clearButton = event.target.closest('[data-navigation-clear]');
+  if (clearButton) {
+    const input = clearButton.dataset.navigationClear === 'navigationUrl' ? $('#navigationUrl', $('#navigationDialog')) : $('#navigationName', $('#navigationDialog'));
+    if (input) {
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+    }
+    return;
+  }
   const refreshIconButton = event.target.closest('[data-navigation-refresh-icon]');
   if (refreshIconButton) {
     const url = navigationSafeUrl($('#navigationUrl', $('#navigationDialog'))?.value);
@@ -16146,6 +16159,8 @@ $('#navigationDialog').addEventListener('input', (event) => {
   const urlInput = $('#navigationUrl', dialog);
   const nameInput = $('#navigationName', dialog);
   const url = navigationSafeUrl(urlInput?.value);
+  const clearButton = $('[data-navigation-clear="' + event.target.id + '"]', dialog);
+  if (clearButton) clearButton.hidden = !String(event.target.value || '').trim();
   const refreshIconButton = $('[data-navigation-refresh-icon]', dialog);
   if (event.target.id === 'navigationUrl' && refreshIconButton) {
     refreshIconButton.hidden = !url;
