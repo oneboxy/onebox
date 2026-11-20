@@ -342,8 +342,6 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   outline: 0 !important;
   box-shadow: none !important;
   object-fit: contain !important;
-  transform: scale(1.1);
-  transform-origin: center;
 }
 @media (max-width: 600px) {
   #workspace[data-tool="navigation"] .navigation-card-main > .navigation-site-icon {
