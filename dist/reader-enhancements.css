@@ -715,18 +715,19 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   font-size: 14px;
 }
 .reader-inline-stats-history {
-  margin-top: 7px;
+  margin: 0 0 8px;
 }
 .reader-inline-stats-history > small {
   color: var(--muted, #737b8c);
-  font-size: 11px;
+  font-size: 14px;
+  font-weight: 600;
 }
 .reader-inline-stats .reader-stats-heatmap {
   grid-template-columns: repeat(52, minmax(4px, 1fr));
   grid-template-rows: repeat(7, auto);
   gap: 3px;
   width: min(100%, 520px);
-  margin-top: 5px;
+  margin-top: 7px;
 }
 .reader-inline-stats .reader-stats-heatmap i {
   min-width: 0;
