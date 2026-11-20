@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.879';
+const APP_VERSION = '2.18.880';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -735,12 +735,33 @@ function navigationIconMatchesSite(icon, siteUrl) {
       return iconUrl.searchParams.get('domain') === targetUrl.hostname;
     }
     if (iconUrl.hostname === 'icons.duckduckgo.com' && iconUrl.pathname.startsWith('/ip3/')) return iconUrl.pathname.slice(4).replace(/\.ico$/i, '') === targetUrl.hostname;
-    if (iconUrl.hostname === 'icon.horse' && iconUrl.pathname.startsWith('/icon/')) return iconUrl.pathname.slice(6) === targetUrl.hostname;
+    if (iconUrl.hostname === 'icon.horse' && iconUrl.pathname.startsWith('/icon/')) return iconUrl.pathname.slice(6).split('/')[0] === targetUrl.hostname;
   } catch { return false; }
   return true;
 }
 function navigationIconForSite(icon, siteUrl) {
   return navigationIconMatchesSite(icon, siteUrl) ? navigationSafeUrl(icon) : '';
+}
+function navigationAutoFillIconUrl(value) {
+  const url = navigationSafeUrl(value);
+  if (!url) return '';
+  try {
+    const hostname = new URL(url).hostname;
+    return 'https://icon.horse/icon/' + encodeURIComponent(hostname) + '/256?trim=1&pad=0&fallback=404';
+  } catch { return ''; }
+}
+function navigationIsAutoFillIcon(icon, siteUrl) {
+  const source = navigationSafeUrl(icon);
+  const target = navigationSafeUrl(siteUrl);
+  if (!source || !target) return false;
+  try {
+    const iconUrl = new URL(source);
+    const targetUrl = new URL(target);
+    return iconUrl.hostname === 'icon.horse' && iconUrl.pathname.startsWith('/icon/') &&
+      iconUrl.pathname.slice(6).split('/')[0] === targetUrl.hostname &&
+      iconUrl.searchParams.get('trim') === '1' && iconUrl.searchParams.get('pad') === '0' &&
+      !iconUrl.searchParams.has('weight');
+  } catch { return false; }
 }
 function navigationIconSources(value) {
   const url = navigationSafeUrl(value);
@@ -768,6 +789,7 @@ function navigationIconSources(value) {
       new URL('icons/icon.svg', base).href,
     ]);
     return [...new Set([
+      navigationAutoFillIconUrl(url),
       navigationCachedIcon(url),
       ...direct,
       'https://www.google.com/s2/favicons?domain_url=' + encodeURIComponent(parsed.origin) + '&sz=256',
@@ -3606,7 +3628,7 @@ function navigationIconMarkup(site, extraClass = '') {
   const preferGenerated = navigationUsesSpotifyBrandIcon(site?.url) || navigationUsesDesktopBrandIcon(site?.url) || navigationUsesOneBoxBrandIcon(site?.url);
   const sources = preferGenerated
     ? [...new Set([...generatedSources, preferredIcon].filter(Boolean))]
-    : [...new Set([preferredIcon, ...generatedSources].filter(Boolean))];
+    : [...new Set([...(navigationIsAutoFillIcon(preferredIcon, site?.url) ? [] : [navigationAutoFillIconUrl(site?.url)]), preferredIcon, ...generatedSources].filter(Boolean))];
   const icon = sources.shift() || '';
   const fallbackAttribute = sources.length ? ' data-fallback-sources="' + escapeHtml(sources.join('|')) + '"' : '';
   const siteUrlAttribute = navigationSafeUrl(site?.url) ? ' data-navigation-url="' + escapeHtml(site.url) + '"' : '';
