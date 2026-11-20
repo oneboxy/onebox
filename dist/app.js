@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.854';
+const APP_VERSION = '2.18.855';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3580,7 +3580,7 @@ function renderHome() {
   const feedList = visibleItems.map((item, index) => {
     const isNew = !isFootprint && newIds.has(item.id);
     const previousIsNew = index > 0 && newIds.has(visibleItems[index - 1].id);
-    const separator = !isFootprint && !separatorShown && previousIsNew && !isNew ? '<div class="feed-new-divider" role="separator"><span>' + (state.language === 'en' ? 'Previous items' : '之前内容') + '</span></div>' : '';
+    const separator = !isFootprint && !separatorShown && previousIsNew && !isNew ? '<div class="feed-new-divider" role="separator"><span>' + (state.language === 'en' ? 'Previous items' : '历史信息') + '</span></div>' : '';
     if (separator) separatorShown = true;
     const nextItem = visibleItems[index + 1];
     const followsNewItems = !isFootprint && isNew && nextItem && !newIds.has(nextItem.id);
