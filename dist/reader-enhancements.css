@@ -646,24 +646,54 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 .reader-library-content .reader-book-grid { padding-top: 5px; }
 .reader-book-cover-progress {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   z-index: 2;
   display: block;
-  height: 3px;
-  overflow: hidden;
-  background: rgba(15, 18, 26, .38);
-}
-.reader-book-cover-progress i {
-  display: block;
+  width: 100%;
   height: 100%;
-  border-radius: 0 2px 2px 0;
-  background: var(--primary);
-  box-shadow: 0 0 5px color-mix(in srgb, var(--primary) 45%, transparent);
+  overflow: visible;
+  pointer-events: none;
 }
-.reader-book-progress { justify-content: flex-end; margin-top: 3px; }
-.reader-book-progress em { font-variant-numeric: tabular-nums; }
+.reader-book-cover-progress path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.reader-book-cover-progress-track {
+  stroke: color-mix(in srgb, var(--ink) 28%, transparent);
+  stroke-width: 1.5;
+}
+.reader-book-cover-progress-fill {
+  stroke: var(--primary);
+  stroke-width: 2.2;
+  stroke-dasharray: var(--reader-progress) 100;
+}
+.reader-book-cover-format,
+.reader-book-cover-size,
+.reader-book-cover-percent {
+  position: absolute;
+  z-index: 3;
+  padding: 3px 4px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, .62);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  pointer-events: none;
+}
+.reader-book-cover-format { top: 5px; left: 5px; }
+.reader-book-cover-size { bottom: 5px; left: 5px; }
+.reader-book-cover-percent { right: 5px; bottom: 5px; }
+.reader-book-grid-cards .reader-book-copy { display: none; }
+.reader-book-list .reader-book-cover-format,
+.reader-book-list .reader-book-cover-size,
+.reader-book-list .reader-book-cover-percent {
+  padding: 2px 2px;
+  font-size: 5px;
+}
 .reader-inline-stats {
   margin: 0 0 8px;
   padding: 0;
