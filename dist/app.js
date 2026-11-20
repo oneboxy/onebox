@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.881';
+const APP_VERSION = '2.18.882';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3632,7 +3632,7 @@ function navigationIconMarkup(site, extraClass = '') {
   const preferGenerated = navigationUsesQQMailBrandIcon(site?.url) || navigationUsesSpotifyBrandIcon(site?.url) || navigationUsesDesktopBrandIcon(site?.url) || navigationUsesOneBoxBrandIcon(site?.url);
   const sources = preferGenerated
     ? [...new Set([...generatedSources, preferredIcon].filter(Boolean))]
-    : [...new Set([...(navigationIsAutoFillIcon(preferredIcon, site?.url) ? [] : [navigationAutoFillIconUrl(site?.url)]), preferredIcon, ...generatedSources].filter(Boolean))];
+    : [...new Set([preferredIcon, ...(navigationIsAutoFillIcon(preferredIcon, site?.url) ? [] : [navigationAutoFillIconUrl(site?.url)]), ...generatedSources].filter(Boolean))];
   const icon = sources.shift() || '';
   const fallbackAttribute = sources.length ? ' data-fallback-sources="' + escapeHtml(sources.join('|')) + '"' : '';
   const siteUrlAttribute = navigationSafeUrl(site?.url) ? ' data-navigation-url="' + escapeHtml(site.url) + '"' : '';
