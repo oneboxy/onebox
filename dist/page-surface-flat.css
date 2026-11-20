@@ -629,6 +629,7 @@ main:has(#workspace[data-tool="mine"]) {
 }
 #workspace[data-tool="mine"] .mine-row:first-child { border-top: 0 !important; }
 #workspace[data-tool="mine"] .mine-row:last-child { border-bottom: 0 !important; }
+#workspace[data-tool="mine"] .mine-row[data-open-agreement-page] { border-bottom: 1px solid var(--line) !important; }
 
 /* Mine child pages share a compact title rail without the extra strokes. */
 #workspace[data-tool="mine"] .settings-page-head,
@@ -636,6 +637,9 @@ main:has(#workspace[data-tool="mine"]) {
 #workspace[data-tool="mine"] .track-page-head {
   border-top: 0 !important;
   border-bottom: 0 !important;
+}
+#workspace[data-tool="mine"] .mine-settings-page:not(.mine-subpage) .settings-page-head {
+  border-bottom: 1px solid var(--line) !important;
 }
 @media (min-width: 761px) {
   #workspace[data-tool="mine"] .settings-page-head,
