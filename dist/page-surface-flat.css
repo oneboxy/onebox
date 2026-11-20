@@ -632,14 +632,18 @@ main:has(#workspace[data-tool="mine"]) {
 #workspace[data-tool="mine"] .settings-page-head,
 #workspace[data-tool="mine"] .ticket-wallet-page-head,
 #workspace[data-tool="mine"] .track-page-head {
-  min-height: 42px !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  padding: 4px 10px !important;
   border-top: 0 !important;
   border-bottom: 0 !important;
 }
 @media (min-width: 761px) {
+  #workspace[data-tool="mine"] .settings-page-head,
+  #workspace[data-tool="mine"] .ticket-wallet-page-head,
+  #workspace[data-tool="mine"] .track-page-head {
+    min-height: 42px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 4px 10px !important;
+  }
   #workspace[data-tool="mine"] .mine-settings-page,
   #workspace[data-tool="mine"] .ticket-wallet-page,
   #workspace[data-tool="mine"] .track-module {
