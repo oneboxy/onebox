@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.890';
+const APP_VERSION = '2.18.892';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -7969,8 +7969,8 @@ function reader() {
   const readerExtraActions = window.OneBoxReaderExtras?.actionsMarkup?.() || '';
   const readerStats = window.OneBoxReaderExtras?.statsMarkup?.() || '';
   const layoutButton = '<button class="reader-layout-toggle" data-reader-layout-toggle aria-label="切换书架布局">' + layoutIcon + '</button>';
-  const libraryHeader = '<div class="reader-library-head"><div class="reader-library-title-copy"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><small class="reader-cloud-sync-status" id="readerCloudSyncStatus" data-state="' + escapeHtml(cloudStatus.state || 'idle') + '">' + escapeHtml(readerCloudStatusLabel(cloudStatus)) + '</small></div></div>';
-  return '<div class="reader-library-view"><div class="reader-library-actions reader-page-actions">' + readerExtraActions + layoutButton + '</div>' + readerStats + '<section class="reader-library-content">' + libraryHeader + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,.fb2,.mobi,.azw3,text/markdown,text/plain,application/pdf,application/epub+zip,application/x-mobipocket-ebook,application/vnd.amazon.ebook"></div>';
+  const libraryHeader = '<div class="reader-library-head"><div class="reader-library-title-copy"><div class="reader-library-title-row"><h2>' + t('bookshelf') + ' <span class="reader-book-count">(' + books.length + ')</span></h2><small>' + t('readerHint') + '</small></div><small class="reader-cloud-sync-status" id="readerCloudSyncStatus" data-state="' + escapeHtml(cloudStatus.state || 'idle') + '">' + escapeHtml(readerCloudStatusLabel(cloudStatus)) + '</small></div><div class="reader-library-actions reader-page-actions">' + readerExtraActions + layoutButton + '</div></div>';
+  return '<div class="reader-library-view">' + libraryHeader + readerStats + '<section class="reader-library-content">' + libraryBody + '</section><input id="readerFileInput" type="file" hidden multiple accept=".md,.markdown,.txt,.pdf,.epub,.fb2,.mobi,.azw3,text/markdown,text/plain,application/pdf,application/epub+zip,application/x-mobipocket-ebook,application/vnd.amazon.ebook"></div>';
 }
 
 // Calendar data --------------------------------------------------------------

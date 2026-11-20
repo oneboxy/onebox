@@ -632,21 +632,25 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
-  margin: 0 0 10px;
+  flex-wrap: nowrap;
+  gap: 5px;
+  margin: 0;
 }
 .reader-library-content { width: 100%; }
-.reader-library-content .reader-library-head {
-  padding: 10px 0 5px;
+.reader-library-view > .reader-library-head {
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 10px;
   border: 0;
 }
 .reader-library-content .reader-book-grid { padding-top: 5px; }
 .reader-inline-stats {
-  margin: 0 0 18px;
-  padding: 0 0 12px;
+  margin: 0 0 8px;
+  padding: 0;
 }
 .reader-inline-stats .reader-stats-summary {
-  grid-template-columns: repeat(3, minmax(0, 140px));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 390px;
   gap: 8px;
 }
 .reader-inline-stats .reader-stats-summary article {
@@ -663,7 +667,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   font-size: 14px;
 }
 .reader-inline-stats-history {
-  margin-top: 10px;
+  margin-top: 7px;
 }
 .reader-inline-stats-history > small {
   color: var(--muted, #737b8c);
@@ -673,18 +677,26 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   grid-template-columns: repeat(52, minmax(4px, 1fr));
   grid-template-rows: repeat(7, auto);
   gap: 3px;
-  width: min(100%, 560px);
+  width: min(100%, 520px);
   margin-top: 5px;
 }
 .reader-inline-stats .reader-stats-heatmap i {
   min-width: 0;
   border-radius: 2px;
 }
+#workspace[data-tool="reader"] .reader-book-list .reader-book-card {
+  padding: 5px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
 @media (max-width: 600px) {
-  .reader-inline-stats { margin-bottom: 14px; }
-  .reader-inline-stats .reader-stats-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .reader-library-view > .reader-library-head { gap: 6px; padding-bottom: 8px; }
+  .reader-library-title-row h2 { font-size: 18px; }
+  .reader-inline-stats { margin-bottom: 6px; }
+  .reader-inline-stats .reader-stats-summary { gap: 6px; }
   .reader-inline-stats .reader-stats-summary article { padding: 6px; }
   .reader-inline-stats .reader-stats-summary strong { font-size: 12px; }
   .reader-inline-stats .reader-stats-heatmap { gap: 2px; }
-  .reader-page-actions { gap: 4px; margin-bottom: 8px; }
+  .reader-page-actions { gap: 4px; }
 }
