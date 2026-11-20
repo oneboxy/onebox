@@ -323,12 +323,12 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   box-shadow: 0 10px 24px color-mix(in srgb, var(--ink) 10%, transparent) !important;
 }
 
-/* Use one clean, consistent frame for every navigation site icon. */
+/* Give every navigation icon a fine, theme-aware outline. */
 #workspace[data-tool="navigation"] .navigation-card-main > .navigation-site-icon {
   width: 56px !important;
   height: 56px !important;
   flex-basis: 56px !important;
-  border: 0 !important;
+  border: 1px solid var(--line) !important;
   border-radius: 14px !important;
   outline: 0 !important;
   background: transparent !important;
