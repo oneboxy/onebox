@@ -263,7 +263,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-page {
   cursor: pointer;
   transition: color .18s ease;
 }
-.settings-page-back svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.settings-page-back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .settings-page-back:hover { color: var(--primary); }
 .settings-page-back:active { color: var(--primary); }
 .settings-page-card .settings-preferences { width: 100%; max-width: none; margin: 0; }
