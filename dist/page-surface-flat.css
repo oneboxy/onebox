@@ -584,3 +584,15 @@ body.dev-tools-fullscreen #workspace[data-tool="dev"] {
   outline: none !important;
   box-shadow: none !important;
 }
+
+/* Match the compact up/down selector indicator shown in the reference. */
+#workspace[data-tool="mine"] .settings-page-card .settings-preference-row:has(select) .settings-preference-control::after {
+  width: 12px;
+  height: 16px;
+  flex-basis: 12px;
+  border: 0;
+  transform: none;
+  background: var(--muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='m4 8 4-4 4 4M4 12l4 4 4-4' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='m4 8 4-4 4 4M4 12l4 4 4-4' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
