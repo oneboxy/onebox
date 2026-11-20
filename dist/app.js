@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.857';
+const APP_VERSION = '2.18.858';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3607,6 +3607,9 @@ function navigationIconMarkup(site, extraClass = '') {
   const siteUrlAttribute = navigationSafeUrl(site?.url) ? ' data-navigation-url="' + escapeHtml(site.url) + '"' : '';
   return '<span class="navigation-site-icon ' + extraClass + '"><img src="' + escapeHtml(icon) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer"' + siteUrlAttribute + fallbackAttribute + ' onload="handleNavigationIconLoad(this)" onerror="handleNavigationIconError(this)"><span class="navigation-icon-fallback" hidden aria-hidden="true"><span class="navigation-fallback-glyph"><i></i><i></i><i></i><i></i></span></span></span>';
 }
+function navigationIconPreviewPlaceholder() {
+  return '<span class="navigation-preview-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>';
+}
 function advanceNavigationIcon(image, allowLowResolution = false) {
   if (!image?.dataset?.fallbackSources) return false;
   if (allowLowResolution && Number(image.naturalWidth || 0) >= 64) return false;
@@ -3717,13 +3720,14 @@ function renderNavigationAddDialog(folderId = '', site = null) {
   const dialog = $('#navigationDialog'); if (!dialog) return;
   const folder = folderId ? navigationFindFolder(folderId) : null;
   const editing = Boolean(site);
-  const title = editing ? t('navigationEdit') : folder ? t('navigationAddToFolder') : t('navigationAdd');
+  const title = editing ? t('navigationEdit') : folder ? t('navigationAddToFolder') : (state.language === 'en' ? 'Add' : '添加');
   const url = site?.url || '';
   const name = site?.name || '';
-  const preview = url ? navigationIconMarkup({ name, url, icon: site?.icon || navigationIconUrl(url) }, 'navigation-preview-icon') + '<span>' + escapeHtml(t('navigationIconHint')) + '</span>' : '<span class="navigation-preview-placeholder">' + escapeHtml(t('navigationIconHint')) + '</span>';
+  const preview = url ? navigationIconMarkup({ name, url, icon: site?.icon || navigationIconUrl(url) }, 'navigation-preview-icon') : navigationIconPreviewPlaceholder();
   const subtitle = folder && !editing ? '<p class="navigation-dialog-subtitle">' + escapeHtml(folder.name) + '</p>' : '';
   const action = editing ? t('navigationEditSave') : t('navigationSave');
-  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-url-field"><label for="navigationUrl">' + escapeHtml(t('navigationUrl')) + '</label><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + escapeHtml(t('navigationUrlPlaceholder')) + '" autofocus></div><div class="field"><label for="navigationName">' + escapeHtml(t('navigationName')) + '</label><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + escapeHtml(t('navigationNamePlaceholder')) + '"></div><div class="navigation-icon-preview" data-navigation-icon-preview>' + preview + '</div><button class="primary full-width" type="submit">' + escapeHtml(action) + '</button></form></div>';
+  const placeholder = state.language === 'en' ? 'Enter' : '请输入';
+  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">×</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + escapeHtml(t('navigationUrl')) + '</label><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + escapeHtml(t('navigationName')) + '</label><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '"><span class="navigation-icon-preview" data-navigation-icon-preview>' + preview + '</span></div><button class="primary full-width" type="submit">' + escapeHtml(action) + '</button></form></div>';
   dialog.hidden = false;
 }
 function renderNavigationFolderDialog(folderId = '') {
@@ -16099,7 +16103,7 @@ $('#navigationDialog').addEventListener('click', (event) => {
 $('#navigationDialog').addEventListener('input', (event) => {
   if (event.target.id !== 'navigationUrl') return;
   const preview = $('[data-navigation-icon-preview]', $('#navigationDialog')); if (!preview) return;
-  const url = navigationSafeUrl(event.target.value); preview.innerHTML = url ? navigationIconMarkup({ name: navigationNameFromUrl(url), url, icon: navigationIconUrl(url) }, 'navigation-preview-icon') + '<span>' + escapeHtml(t('navigationIconHint')) + '</span>' : '<span class="navigation-preview-placeholder">' + escapeHtml(t('navigationIconHint')) + '</span>';
+  const url = navigationSafeUrl(event.target.value); preview.innerHTML = url ? navigationIconMarkup({ name: navigationNameFromUrl(url), url, icon: navigationIconUrl(url) }, 'navigation-preview-icon') : navigationIconPreviewPlaceholder();
 });
 $('#navigationDialog').addEventListener('submit', (event) => {
   event.preventDefault();
