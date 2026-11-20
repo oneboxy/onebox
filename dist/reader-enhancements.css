@@ -644,6 +644,26 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   border: 0;
 }
 .reader-library-content .reader-book-grid { padding-top: 5px; }
+.reader-book-cover-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(15, 18, 26, .38);
+}
+.reader-book-cover-progress i {
+  display: block;
+  height: 100%;
+  border-radius: 0 2px 2px 0;
+  background: var(--primary);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.reader-book-progress { justify-content: flex-end; margin-top: 3px; }
+.reader-book-progress em { font-variant-numeric: tabular-nums; }
 .reader-inline-stats {
   margin: 0 0 8px;
   padding: 0;
