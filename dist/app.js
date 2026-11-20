@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.880';
+const APP_VERSION = '2.18.881';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -668,6 +668,9 @@ function navigationNameFromUrl(value) {
 function navigationUsesDesktopBrandIcon(value) {
   try { return /(^|\.)bilibili\.com$/i.test(new URL(value).hostname); } catch { return false; }
 }
+function navigationUsesQQMailBrandIcon(value) {
+  try { return /^(?:mail\.qq\.com|qqmail\.com)$/i.test(new URL(value).hostname); } catch { return false; }
+}
 // Use the bundled mark so Spotify's icon stays consistent across mobile and desktop favicon services.
 function navigationUsesSpotifyBrandIcon(value) {
   try { return /(^|\.)(?:spotify\.com|spotify\.link|spoti\.fi)$/i.test(new URL(value).hostname); } catch { return false; }
@@ -769,6 +772,7 @@ function navigationIconSources(value) {
   try {
     const parsed = new URL(url);
     const hostname = parsed.hostname;
+    if (navigationUsesQQMailBrandIcon(url)) return [navigationAppAssetUrl('icons/qq-mail.svg?v=' + APP_VERSION)];
     if (navigationUsesSpotifyBrandIcon(url)) return [navigationAppAssetUrl('icons/spotify.svg?v=' + APP_VERSION)];
     if (navigationUsesDesktopBrandIcon(url)) return [navigationAppAssetUrl('icons/bilibili.svg'), 'https://static.hdslb.com/images/favicon.ico', 'https://www.bilibili.com/favicon.ico'];
     if (navigationUsesOneBoxBrandIcon(url)) return [navigationAppAssetUrl('icons/onebox-brand-v317-192.png?v=2.18.334'), navigationAppAssetUrl('icons/onebox-brand-v317-512.png?v=2.18.334')];
@@ -3625,7 +3629,7 @@ function navigationIconMarkup(site, extraClass = '') {
   // A service URL can be the only reliable source for a site. It is still a
   // valid cached result and must be preferred on the next render/reload.
   const preferredIcon = navigationIconForSite(site?.icon, site?.url);
-  const preferGenerated = navigationUsesSpotifyBrandIcon(site?.url) || navigationUsesDesktopBrandIcon(site?.url) || navigationUsesOneBoxBrandIcon(site?.url);
+  const preferGenerated = navigationUsesQQMailBrandIcon(site?.url) || navigationUsesSpotifyBrandIcon(site?.url) || navigationUsesDesktopBrandIcon(site?.url) || navigationUsesOneBoxBrandIcon(site?.url);
   const sources = preferGenerated
     ? [...new Set([...generatedSources, preferredIcon].filter(Boolean))]
     : [...new Set([...(navigationIsAutoFillIcon(preferredIcon, site?.url) ? [] : [navigationAutoFillIconUrl(site?.url)]), preferredIcon, ...generatedSources].filter(Boolean))];
@@ -3842,18 +3846,19 @@ function openNavigationActionsDialog(siteId, folderId = '') {
   renderNavigationDialog();
 }
 function closeNavigationDialog() { state.navigationDialog = null; state.navigationFolderDraft = null; navigationSuppressClickUntil = 0; const dialog = $('#navigationDialog'); if (dialog) dialog.hidden = true; }
-function addNavigationSite(urlValue, nameValue, folderId = '') {
+function addNavigationSite(urlValue, nameValue, folderId = '', iconValue = '') {
   const url = navigationSafeUrl(urlValue);
   if (!url) return toast(t('navigationInvalidUrl'), 'error');
   if (navigationEverySite().some((site) => site.url === url)) return toast(t('navigationAlreadyExists'), 'error');
-  const site = { id: 'site-' + uid(), type: 'site', name: String(nameValue || '').trim() || navigationNameFromUrl(url), url, icon: navigationIconUrl(url), createdAt: Date.now() };
+  const icon = navigationIconForSite(iconValue, url) || navigationIconUrl(url);
+  const site = { id: 'site-' + uid(), type: 'site', name: String(nameValue || '').trim() || navigationNameFromUrl(url), url, icon, createdAt: Date.now() };
   if (folderId) {
     const folder = navigationFindFolder(folderId); if (!folder) return toast(t('navigationInvalidUrl'), 'error');
     folder.children.push(site);
   } else state.navigation.items.push(site);
   saveNavigation(); closeNavigationDialog(); render(); toast(t('navigationAdded'));
 }
-function editNavigationSite(siteId, folderId, urlValue, nameValue) {
+function editNavigationSite(siteId, folderId, urlValue, nameValue, iconValue = '') {
   const site = navigationFindSite(siteId, folderId);
   const url = navigationSafeUrl(urlValue);
   if (!site || !url) return toast(t('navigationInvalidUrl'), 'error');
@@ -3861,8 +3866,17 @@ function editNavigationSite(siteId, folderId, urlValue, nameValue) {
   const previousUrl = site.url;
   site.url = url;
   site.name = String(nameValue || '').trim() || navigationNameFromUrl(url);
-  site.icon = previousUrl === url ? (navigationSafeUrl(site.icon) || navigationIconUrl(url)) : navigationIconUrl(url);
+  site.icon = navigationIconForSite(iconValue, url) || (previousUrl === url ? (navigationSafeUrl(site.icon) || navigationIconUrl(url)) : navigationIconUrl(url));
   saveNavigation(); closeNavigationDialog(); render(); toast(t('navigationEditSave'));
+}
+function submitNavigationSiteForm(form) {
+  if (!form || !form.reportValidity()) return false;
+  const urlValue = $('#navigationUrl', form)?.value;
+  const nameValue = $('#navigationName', form)?.value;
+  const iconValue = $('[data-navigation-refresh-icon] img', form)?.getAttribute('src') || '';
+  const folderId = form.dataset.navigationFolderId || '';
+  if (form.dataset.navigationMode === 'edit') return editNavigationSite(form.dataset.navigationSiteId, folderId, urlValue, nameValue, iconValue);
+  return addNavigationSite(urlValue, nameValue, folderId, iconValue);
 }
 function deleteNavigationSite(siteId, folderId = '') {
   if (folderId) {
@@ -16144,6 +16158,11 @@ $('#navigationDialog').addEventListener('contextmenu', (event) => {
 });
 $('#navigationDialog').addEventListener('click', (event) => {
   if (event.target === $('#navigationDialog') || event.target.closest('[data-close-navigation-dialog]')) return closeNavigationDialog();
+  const saveButton = event.target.closest('.navigation-save-button');
+  if (saveButton) {
+    event.preventDefault();
+    return submitNavigationSiteForm(saveButton.form);
+  }
   const clearButton = event.target.closest('[data-navigation-clear]');
   if (clearButton) {
     const input = clearButton.dataset.navigationClear === 'navigationUrl' ? $('#navigationUrl', $('#navigationDialog')) : $('#navigationName', $('#navigationDialog'));
@@ -16209,11 +16228,7 @@ $('#navigationDialog').addEventListener('input', (event) => {
 });
 $('#navigationDialog').addEventListener('submit', (event) => {
   event.preventDefault();
-  if (event.target.id === 'navigationSiteForm') {
-    const folderId = event.target.dataset.navigationFolderId || '';
-    if (event.target.dataset.navigationMode === 'edit') return editNavigationSite(event.target.dataset.navigationSiteId, folderId, $('#navigationUrl', event.target)?.value, $('#navigationName', event.target)?.value);
-    return addNavigationSite($('#navigationUrl', event.target)?.value, $('#navigationName', event.target)?.value, folderId);
-  }
+  if (event.target.id === 'navigationSiteForm') return submitNavigationSiteForm(event.target);
   if (event.target.id === 'navigationFolderForm') {
     const folder = navigationFindFolder(state.navigationDialog?.folderId || ''); if (!folder) return closeNavigationDialog();
     folder.name = $('#navigationFolderName', event.target)?.value.trim() || folder.name; saveNavigation(); closeNavigationDialog(); render(); return;
