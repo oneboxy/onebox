@@ -1458,8 +1458,8 @@ main:has(#workspace[data-tool="home"]), main:has(#workspace[data-tool="messages"
 .feed-item-media .feed-item-image { display: block; width: 100%; height: 100%; border: 0; }
 .feed-refresh-state { display: flex; align-items: center; justify-content: center; min-height: 28px; padding: 5px 14px; color: var(--primary); }
 .feed-refresh-state span { width: 10px; height: 10px; border: 2px solid color-mix(in srgb, var(--primary) 28%, transparent); border-top-color: var(--primary); border-radius: 50%; animation: feed-spin .75s linear infinite; }
-.feed-new-content-action-wrap { display: flex; justify-content: center; padding: 8px 12px 2px; }
-.feed-new-content-action { border: 0; border-radius: 0; padding: 7px 0; background: transparent; color: var(--primary); font-size: 12px; font-weight: 800; cursor: pointer; }
+.feed-new-content-action-wrap { display: flex; justify-content: center; padding: 2px 12px 0; }
+.feed-new-content-action { border: 0; border-radius: 0; padding: 4px 0; background: transparent; color: var(--primary); font-size: 12px; font-weight: 800; cursor: pointer; }
 .feed-new-content-action:hover, .feed-new-content-action:focus-visible { background: transparent; text-decoration: underline; text-underline-offset: 3px; }
 .feed-load-more-wrap { display: flex; justify-content: center; padding: 8px 12px 12px; border-top: 1px solid var(--line); }
 .feed-load-more { border: 0; border-radius: 0; padding: 7px 0; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
