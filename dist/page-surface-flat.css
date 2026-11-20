@@ -248,6 +248,11 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   background: transparent;
   color: var(--primary);
 }
+#navigationDialog .navigation-input-clear {
+  width: 26px;
+  flex-basis: 26px;
+  color: var(--muted);
+}
 #navigationDialog .navigation-icon-refresh[hidden],
 #navigationDialog .navigation-save-button[hidden],
 #navigationDialog .navigation-input-clear[hidden] { display: none; }
@@ -267,8 +272,8 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   object-fit: contain;
 }
 #navigationDialog .navigation-input-clear svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
