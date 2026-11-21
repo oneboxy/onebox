@@ -600,6 +600,14 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 .reader-library-content .reader-book-grid { padding-top: 5px; }
 .reader-book-cover { border-radius: 7px; }
 .reader-book-list .reader-book-cover { border-radius: 6px; }
+.reader-book-cover::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, transparent 70%, rgba(12, 16, 24, .28) 100%);
+  content: '';
+  pointer-events: none;
+}
 .reader-book-cover-progress {
   position: absolute;
   inset: 0;
@@ -627,22 +635,22 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   position: absolute;
   z-index: 3;
   padding: 3px 5px;
-  border: 1px solid rgba(76, 91, 115, .12);
-  border-radius: 5px;
-  background: rgba(255, 255, 255, .84);
-  color: #475467;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 6px;
+  background: rgba(18, 22, 30, .58);
+  color: #fff;
   font-size: 8px;
   font-weight: 600;
   line-height: 1;
-  box-shadow: 0 1px 3px rgba(20, 30, 50, .08);
-  backdrop-filter: blur(4px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
+  backdrop-filter: blur(5px);
   pointer-events: none;
 }
 .reader-book-cover-percent { top: 3px; left: 3px; }
 .reader-book-cover-meta { bottom: 3px; left: 3px; display: flex; align-items: center; gap: 3px; }
 .reader-book-cover-meta .reader-book-cover-format,
 .reader-book-cover-meta .reader-book-cover-size { position: static; padding: 0; border: 0; border-radius: 0; background: transparent; color: inherit; font: inherit; line-height: inherit; box-shadow: none; }
-.reader-book-cover-meta i { color: #8b95a5; font-size: 7px; font-style: normal; }
+.reader-book-cover-meta i { color: rgba(255, 255, 255, .65); font-size: 7px; font-style: normal; }
 .reader-book-grid-cards .reader-book-copy { display: none !important; }
 .reader-book-list .reader-book-cover-percent,
 .reader-book-list .reader-book-cover-meta {
@@ -892,10 +900,6 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   outline: 1px solid color-mix(in srgb, var(--muted, #667085) 45%, transparent);
   outline-offset: 2px;
 }
-.reader-inline-stats .reader-stats-heatmap i[role="button"] { cursor: pointer; }
-.reader-inline-stats .reader-stats-heatmap i[role="button"]:hover { outline: 1px solid var(--primary); outline-offset: 1px; }
-.reader-inline-stats .reader-stats-heatmap i[role="button"]:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
-
 .reader-stat-popover {
   position: fixed;
   z-index: 2100;
@@ -909,10 +913,23 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   background: var(--panel, #fff);
   color: var(--ink, #252a35);
   box-shadow: 0 8px 24px rgba(20, 28, 44, .14);
-  pointer-events: none;
+  pointer-events: auto;
 }
 .reader-stat-popover small { overflow: hidden; color: var(--muted, #737b8c); font-size: 11px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .reader-stat-popover strong { color: var(--ink, #252a35); font-size: 14px; font-weight: 500; line-height: 1.3; }
+.reader-stat-popover-chart {
+  width: min(560px, calc(100vw - 24px));
+  max-width: min(560px, calc(100vw - 24px));
+  min-width: 0;
+  padding: 12px;
+}
+.reader-stat-popover-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.reader-stat-popover-heading > div { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.reader-stat-popover-heading button { display: grid; flex: 0 0 24px; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted, #737b8c); font-size: 18px; line-height: 1; cursor: pointer; }
+.reader-stat-popover-heading button:hover { background: transparent; color: var(--muted, #737b8c); transform: none; }
+.reader-stat-popover-chart .reader-inline-stats-history { width: 100%; margin: 10px 0 0; overflow-x: hidden; }
+.reader-stat-popover-chart .reader-stats-heatmap { grid-template-columns: repeat(52, minmax(0, 1fr)); grid-template-rows: repeat(7, auto); grid-auto-flow: column; gap: 3px; width: 100%; min-width: 0; justify-content: stretch; margin: 0; }
+.reader-stat-popover-chart .reader-stats-heatmap i { width: 100%; min-width: 0; aspect-ratio: 1; border-radius: 2px; }
 
 .reader-opds-dialog {
   width: min(680px, 100%);
@@ -1004,6 +1021,9 @@ html[data-theme-mode="dark-gray"] .reader-opds-dialog .reader-opds-pagination bu
 @media (max-width: 600px) {
   #toolNav .tool-tabs .tab[data-tool="reader"] { font-size: 11px; }
   .reader-stat-popover { min-width: 116px; padding: 9px 11px; }
+  .reader-stat-popover-chart { padding: 10px; }
+  .reader-stat-popover-chart .reader-inline-stats-history { margin-top: 8px; }
+  .reader-stat-popover-chart .reader-stats-heatmap { gap: 2px; }
   .reader-opds-dialog { border-radius: 13px; }
   .reader-opds-dialog .reader-extra-body { gap: 10px; padding: 13px; }
   .reader-opds-dialog .reader-opds-entry { grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }

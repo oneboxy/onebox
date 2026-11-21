@@ -14,7 +14,7 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function saveStats(force=false){if(!force&&Date.now()-lastPersist<55000)return;lastPersist=Date.now();stats.updatedAt=Date.now();localStorage.setItem(STATS_KEY,JSON.stringify(CORE.normalizeStats(stats)));window.dispatchEvent(new CustomEvent('onebox:reader-stats-updated'))}
 function getBookName(id){try{return(JSON.parse(localStorage.getItem('onebox.library')||'[]').find(x=>x.id===id)||{}).name||tx('已删除的书籍','Removed book')}catch{return tx('书籍','Book')}}
 function duration(sec){const s=Math.max(0,Math.floor(sec||0));if(s<60)return s+' '+tx('秒','sec');const m=Math.floor(s/60);if(m<60)return m+' '+tx('分钟','min');const h=Math.floor(m/60);return h+' '+tx('小时','hr')+' '+m%60+' '+tx('分钟','min')}
-function statsHeatmapMarkup(aggregate=CORE.aggregateStats(stats)){const weeks=52,days=CORE.recentWeekDays(new Date(),weeks),squares=days.map(day=>{const value=aggregate.days[day]||0,level=value===0?0:value<300?1:value<1200?2:value<3600?3:4;return '<i role="button" tabindex="0" aria-label="'+esc(day+' · '+duration(value))+'" title="'+esc(day+' · '+duration(value))+'" data-reader-heatmap-day="'+day+'" data-seconds="'+value+'" data-level="'+level+'"></i>'}).join('');return '<div class="reader-stats-heatmap" style="--reader-weeks:'+weeks+'">'+squares+'</div>'}
+function statsHeatmapMarkup(aggregate=CORE.aggregateStats(stats)){const weeks=52,days=CORE.recentWeekDays(new Date(),weeks),squares=days.map(day=>{const value=aggregate.days[day]||0,level=value===0?0:value<300?1:value<1200?2:value<3600?3:4;return '<i data-level="'+level+'"></i>'}).join('');return '<div class="reader-stats-heatmap" style="--reader-weeks:'+weeks+'">'+squares+'</div>'}
 function dayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function start(bookId){stop();currentBook=String(bookId||'');lastTick=Date.now();lastActivity=lastTick}
 function stop(){tick(true);currentBook='';lastTick=0}
@@ -32,14 +32,15 @@ function statsMarkup(){
   const importIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/></svg>';
   const sourceIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c3.5-1.5 6.2-.8 8 1.2 1.8-2 4.5-2.7 8-1.2v13c-3.5-1.5-6.2-.8-8 1.2-1.8-2-4.5-2.7-8-1.2zM12 7v13"/></svg>';
   const metric=(title,value)=>'<button type="button" class="reader-stat-card" data-reader-stat-card data-stat-title="'+esc(title)+'" data-stat-value="'+esc(value)+'"><small>'+esc(title)+'</small><strong>'+esc(value)+'</strong></button>';
-  return '<section class="reader-inline-stats" aria-label="'+tx('阅读统计','Reading statistics')+'"><div class="reader-inline-stats-heading"><div class="reader-inline-stats-heading-copy"><strong>'+tx('阅读统计','Reading statistics')+'</strong></div><div class="reader-inline-stats-actions"><button type="button" class="reader-inline-action" data-open-reader-file aria-label="'+tx('导入文件','Import file')+'" title="'+tx('导入文件','Import file')+'">'+importIcon+'</button><button type="button" class="reader-inline-action" data-reader-opds aria-label="'+tx('书源','Sources')+'" title="'+tx('书源','Sources')+'">'+sourceIcon+'</button><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="'+tx('切换布局','Switch layout')+'" title="'+tx('切换布局','Switch layout')+'">'+layoutIcon+'</button></div></div><div class="reader-stats-summary">'+metric(tx('阅读数量','Books read'),shelfCount+'')+metric(tx('天数','Days'),activeDays+'')+metric(tx('累计','Total'),duration(total))+metric(tx('今日阅读','Today'),duration(aggregate.days[today]||0))+'</div><div class="reader-inline-stats-history">'+statsHeatmapMarkup(aggregate)+'</div></section>';
+  return '<section class="reader-inline-stats" aria-label="'+tx('阅读统计','Reading statistics')+'"><div class="reader-inline-stats-heading"><div class="reader-inline-stats-heading-copy"><strong>'+tx('阅读统计','Reading statistics')+'</strong></div><div class="reader-inline-stats-actions"><button type="button" class="reader-inline-action" data-open-reader-file aria-label="'+tx('导入文件','Import file')+'" title="'+tx('导入文件','Import file')+'">'+importIcon+'</button><button type="button" class="reader-inline-action" data-reader-opds aria-label="'+tx('书源','Sources')+'" title="'+tx('书源','Sources')+'">'+sourceIcon+'</button><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="'+tx('切换布局','Switch layout')+'" title="'+tx('切换布局','Switch layout')+'">'+layoutIcon+'</button></div></div><div class="reader-stats-summary">'+metric(tx('阅读数量','Books read'),shelfCount+'')+metric(tx('天数','Days'),activeDays+'')+metric(tx('累计','Total'),duration(total))+metric(tx('今日阅读','Today'),duration(aggregate.days[today]||0))+'</div></section>';
 }
 window.addEventListener('onebox:reader-stats-updated',()=>{const current=document.querySelector('.reader-inline-stats');if(current)current.outerHTML=statsMarkup()});
 
 function closeStatPopover(){document.querySelector('[data-reader-stat-popover]')?.remove()}
-function showStatPopover(anchor,title,value){
-  closeStatPopover();const pop=document.createElement('div');pop.className='reader-stat-popover';pop.dataset.readerStatPopover='';pop.setAttribute('role','status');pop.setAttribute('aria-live','polite');
-  pop.innerHTML='<small></small><strong></strong>';pop.querySelector('small').textContent=title;pop.querySelector('strong').textContent=value;document.body.append(pop);
+function showHeatmapPopover(anchor,title,value){
+  closeStatPopover();stats=CORE.normalizeStats(read(STATS_KEY,stats));const pop=document.createElement('div');pop.className='reader-stat-popover reader-stat-popover-chart';pop.dataset.readerStatPopover='';pop.setAttribute('role','dialog');pop.setAttribute('aria-label',tx('阅读统计','Reading statistics'));
+  pop.innerHTML='<div class="reader-stat-popover-heading"><div><small></small><strong></strong></div><button type="button" data-dismiss-reader-stat-popover aria-label="'+tx('关闭','Close')+'" title="'+tx('关闭','Close')+'">×</button></div><div class="reader-inline-stats-history">'+statsHeatmapMarkup(CORE.aggregateStats(stats))+'</div>';
+  pop.querySelector('small').textContent=title;pop.querySelector('strong').textContent=value;document.body.append(pop);
   const rect=anchor.getBoundingClientRect(),box=pop.getBoundingClientRect(),gap=8,pad=12;
   const left=Math.max(pad,Math.min(window.innerWidth-box.width-pad,rect.left+(rect.width-box.width)/2));
   const top=rect.bottom+box.height+gap<=window.innerHeight-pad?rect.bottom+gap:Math.max(pad,rect.top-box.height-gap);
@@ -47,12 +48,11 @@ function showStatPopover(anchor,title,value){
 }
 document.addEventListener('click',event=>{
   const card=event.target.closest('[data-reader-stat-card]');
-  if(card){showStatPopover(card,card.dataset.statTitle,card.dataset.statValue);return}
-  const dot=event.target.closest('[data-reader-heatmap-day]');
-  if(dot){showStatPopover(dot,dot.dataset.readerHeatmapDay,duration(dot.dataset.seconds));return}
+  if(card){showHeatmapPopover(card,card.dataset.statTitle,card.dataset.statValue);return}
+  if(event.target.closest('[data-dismiss-reader-stat-popover]')){closeStatPopover();return}
   if(!event.target.closest('[data-reader-stat-popover]'))closeStatPopover();
 });
-document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeStatPopover();return}const dot=event.target.closest('[data-reader-heatmap-day]');if(dot&&(event.key==='Enter'||event.key===' ')){event.preventDefault();showStatPopover(dot,dot.dataset.readerHeatmapDay,duration(dot.dataset.seconds))}});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeStatPopover()});
 window.addEventListener('resize',closeStatPopover);
 window.addEventListener('scroll',closeStatPopover,true);
 
