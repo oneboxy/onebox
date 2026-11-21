@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.906';
+const APP_VERSION = '2.18.907';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3807,7 +3807,7 @@ function renderNavigationAddDialog(folderId = '', site = null) {
 function renderNavigationFolderDialog(folderId = '') {
   const dialog = $('#navigationDialog'); const folder = navigationFindFolder(folderId); if (!dialog || !folder) return;
   const children = folder.children.length ? folder.children.map((site) => '<div class="navigation-folder-site-row" data-navigation-folder-id="' + escapeHtml(folder.id) + '">' + navigationIconMarkup(site, 'navigation-folder-row-icon') + '<strong>' + escapeHtml(site.name) + '</strong><button class="navigation-folder-remove" type="button" data-navigation-delete="' + escapeHtml(site.id) + '" aria-label="' + escapeHtml(t('navigationRemove') + ' ' + site.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5M14 11v5"/></svg></button></div>').join('') : '<p class="empty compact navigation-folder-empty">' + escapeHtml(t('navigationFolderEmpty')) + '</p>';
-  const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg>';
+  const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
   const addIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>';
   const ungroupIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8V6.5A1.5 1.5 0 0 1 5 5h4l2 2h7.5A1.5 1.5 0 0 1 20 8.5V10M3.5 10.5h9.8a1.7 1.7 0 0 1 1.6 2.2l-.8 2.6a1.7 1.7 0 0 1-1.6 1.2H5a1.5 1.5 0 0 1-1.5-1.5v-4.5Z"/><path d="M16 14h5m-2.5-2.5L21 14l-2.5 2.5"/></svg>';
   const clearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>';
@@ -3819,7 +3819,7 @@ function renderNavigationCreateFolderDialog() {
   const dialog = $('#navigationDialog'); const draft = state.navigationFolderDraft; if (!dialog || !draft) return;
   const first = navigationFindRootItem(draft.firstId); const second = navigationFindRootItem(draft.secondId); if (!first || !second || first.type !== 'site' || second.type !== 'site') return closeNavigationDialog();
   const clearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>';
-  const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg>';
+  const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
   const nameLabel = state.language === 'en' ? 'Name' : '名称';
   dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card navigation-create-folder-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(t('navigationCreateFolder')) + '</h2></div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">' + clearIcon + '</button></div><form id="navigationCreateFolderForm" class="navigation-form navigation-folder-form"><div class="field navigation-form-row navigation-folder-name-field"><label for="navigationFolderName">' + escapeHtml(nameLabel) + '</label><div class="navigation-input-wrap"><input id="navigationFolderName" name="name" maxlength="30" placeholder="' + escapeHtml(t('navigationFolderPlaceholder')) + '" autofocus><div class="navigation-input-actions"><button class="navigation-save-button navigation-folder-save-button" type="submit" aria-label="' + escapeHtml(t('navigationCreateFolder')) + '" title="' + escapeHtml(t('navigationCreateFolder')) + '">' + saveIcon + '</button></div></div></div><div class="navigation-folder-draft"><span>' + navigationIconMarkup(first) + '<strong>' + escapeHtml(first.name) + '</strong></span><i aria-hidden="true">+</i><span>' + navigationIconMarkup(second) + '<strong>' + escapeHtml(second.name) + '</strong></span></div></form></div>';
   dialog.hidden = false;
