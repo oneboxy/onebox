@@ -2248,3 +2248,96 @@ main:has(#workspace[data-tool="mine"]) {
 @media (max-width: 600px) {
   #homeSourceDialog .dialog-head h2 { font-size: 15px; }
 }
+
+/* Calm calendar controls and reduce the grid's boxy appearance. */
+#workspace[data-tool="calendar"] .calendar-top { margin-bottom: 14px; }
+#workspace[data-tool="calendar"] .calendar-month { gap: 8px; }
+#workspace[data-tool="calendar"] .calendar-nav-btn,
+#workspace[data-tool="calendar"] .calendar-today {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 10px;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+  transform: none !important;
+}
+#workspace[data-tool="calendar"] .calendar-nav-btn:hover,
+#workspace[data-tool="calendar"] .calendar-nav-btn:focus-visible,
+#workspace[data-tool="calendar"] .calendar-today:hover,
+#workspace[data-tool="calendar"] .calendar-today:focus-visible {
+  background: var(--panel-2) !important;
+  color: var(--ink);
+}
+#workspace[data-tool="calendar"] .calendar-nav-btn svg { width: 18px; height: 18px; }
+#workspace[data-tool="calendar"] .calendar-today svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#workspace[data-tool="calendar"] .calendar-legend {
+  gap: 12px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 10px;
+}
+#workspace[data-tool="calendar"] .calendar-legend .dot { width: 6px; height: 6px; }
+#workspace[data-tool="calendar"] .calendar-grid { gap: 5px 6px; }
+#workspace[data-tool="calendar"] .day {
+  min-height: 70px;
+  padding: 7px 3px;
+  border-radius: 11px;
+  background: transparent;
+  transition: background-color .14s ease, border-color .14s ease;
+}
+#workspace[data-tool="calendar"] .day:hover { background: var(--panel-2); }
+#workspace[data-tool="calendar"] .day.today span { color: var(--primary); }
+#workspace[data-tool="calendar"] .day.selected {
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--line));
+  background: color-mix(in srgb, var(--primary) 9%, var(--panel));
+  box-shadow: none;
+}
+#workspace[data-tool="calendar"] .day.muted { opacity: .3; }
+#workspace[data-tool="calendar"] .agenda-panel > .subhead { align-items: center; }
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event {
+  min-height: 36px;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-contrast, #fff);
+  font-size: 12px;
+  font-weight: 650;
+  box-shadow: none;
+}
+#workspace[data-tool="calendar"] .calendar-add-event span { font-size: 12px; line-height: 1; }
+#workspace[data-tool="calendar"] .calendar-add-event svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event:hover,
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event:focus-visible {
+  background: color-mix(in srgb, var(--primary) 88%, #000);
+  color: var(--primary-contrast, #fff);
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .calendar-top { grid-template-columns: 36px minmax(0, 1fr) 36px; gap: 5px; }
+  #workspace[data-tool="calendar"] .calendar-month { gap: 6px; }
+  #workspace[data-tool="calendar"] .day { min-height: 62px; padding: 5px 2px; }
+}
