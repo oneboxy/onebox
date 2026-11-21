@@ -1991,3 +1991,43 @@ main:has(#workspace[data-tool="mine"]) {
   max-height: 22px !important;
   object-fit: contain !important;
 }
+
+/* Match the add tile's icon box exactly to the neighboring navigation icons. */
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card .navigation-site-icon,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-folder-card .navigation-folder-preview,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card .navigation-add-glyph,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card .navigation-add-glyph {
+  box-sizing: border-box !important;
+  width: 56px !important;
+  height: 56px !important;
+  flex-basis: 56px !important;
+  border-radius: 14px !important;
+}
+#navigationDialog .navigation-folder-sites .navigation-site-icon,
+#navigationDialog .navigation-create-folder-sites .navigation-site-icon,
+#navigationDialog .navigation-folder-add-card .navigation-add-glyph {
+  box-sizing: border-box !important;
+  width: 48px !important;
+  height: 48px !important;
+  flex-basis: 48px !important;
+  border-radius: 13px !important;
+}
+@media (max-width: 600px) {
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card .navigation-site-icon,
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-folder-card .navigation-folder-preview,
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card .navigation-add-glyph,
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card .navigation-add-glyph {
+    width: 44px !important;
+    height: 44px !important;
+    flex-basis: 44px !important;
+    border-radius: 11px !important;
+  }
+  #navigationDialog .navigation-folder-sites .navigation-site-icon,
+  #navigationDialog .navigation-create-folder-sites .navigation-site-icon,
+  #navigationDialog .navigation-folder-add-card .navigation-add-glyph {
+    width: 40px !important;
+    height: 40px !important;
+    flex-basis: 40px !important;
+    border-radius: 11px !important;
+  }
+}
