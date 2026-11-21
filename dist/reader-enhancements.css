@@ -837,6 +837,21 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   min-width: 0;
   border-radius: 2px;
 }
+@media (min-width: 601px) {
+  #workspace[data-tool="reader"] .reader-library-content {
+    width: min(100%, 520px);
+    margin-inline: auto;
+  }
+  #workspace[data-tool="reader"] .reader-library-content .reader-book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+    gap: 22px 14px;
+    width: 100%;
+    padding-top: 14px;
+  }
+  #workspace[data-tool="reader"] .reader-library-content .reader-book-grid.reader-book-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 #workspace[data-tool="reader"] .reader-book-list .reader-book-card {
   padding: 5px 0;
   border: 0;
