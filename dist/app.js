@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.932';
+const APP_VERSION = '2.18.933';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1719,7 +1719,17 @@ function scrollToolTabs(direction) {
     : [...tabItems].reverse().find((tab) => tab.offsetLeft <= desired + 1) || tabItems[0];
   // Stop exactly at the rail's real ends; do not add tail padding that leaves
   // a blank after the final tab. Intermediate stops line up on tab boundaries.
-  const target = desired >= maxScroll - 1 ? maxScroll : Math.min(maxScroll, boundary.offsetLeft);
+  let target = desired >= maxScroll - 1 ? maxScroll : Math.min(maxScroll, boundary.offsetLeft);
+  // Keep the selected tab fully inside the visible rail, regardless of which
+  // direction the arrow is moving. The right-side arrow occupies its own
+  // gutter, so the tab viewport itself is the visibility boundary here.
+  const activeTab = tabs.querySelector('.tab.active');
+  if (activeTab && activeTab.offsetWidth <= tabs.clientWidth) {
+    const padding = 8;
+    const activeMin = Math.max(0, activeTab.offsetLeft + activeTab.offsetWidth - tabs.clientWidth + padding);
+    const activeMax = Math.min(maxScroll, activeTab.offsetLeft - padding);
+    if (activeMin <= activeMax) target = Math.max(activeMin, Math.min(activeMax, target));
+  }
   tabs.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
 }
 function mainSectionEntries() {
