@@ -2164,7 +2164,9 @@ main:has(#workspace[data-tool="mine"]) {
 #workspace[data-tool="home"] .feed-item .feed-item-meta {
   grid-column: 1 / -1;
   width: 100%;
+  margin-top: 0;
 }
+#workspace[data-tool="home"] .feed-item { row-gap: 0; }
 
 /* Pin the source direction icon to the end of the underline and strengthen
    the add-source glyph slightly while preserving its existing size. */
