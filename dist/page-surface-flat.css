@@ -2115,6 +2115,14 @@ main:has(#workspace[data-tool="mine"]) {
   #toolNav::after { left: 14px; right: 14px; }
 }
 
+/* Keep the active Navigation tab accent shorter than the tab itself. */
+#toolNav .tab[data-tool="navigation"].active::after {
+  left: 50%;
+  right: auto;
+  width: 64%;
+  transform: translateX(-50%);
+}
+
 /* Match the global toast close affordance to the same Lucide x mark. */
 #toast .toast-close svg { display: block !important; width: 12px; height: 12px; }
 #toast .toast-close::before,

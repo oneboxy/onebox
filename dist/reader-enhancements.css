@@ -811,6 +811,15 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
 }
 .reader-library-empty { margin: 22px 0; color: var(--muted, #737b8c); font-size: 12px; text-align: center; }
 
+/* A portaled shelf bar must leave with the reader during page-swipe previews. */
+body.page-swipe-reader-leaving > .reader-inline-stats { visibility: hidden !important; pointer-events: none !important; }
+#workspace[data-tool="reader"] .reader-inline-stats { margin-bottom: 5px; }
+#workspace[data-tool="reader"] .reader-library-content .reader-book-grid { padding-top: 1px; }
+@media (max-width: 600px) {
+  #workspace[data-tool="reader"] .reader-inline-stats { margin-bottom: 4px; }
+  #workspace[data-tool="reader"] .reader-library-content .reader-book-grid { padding-top: 0; }
+}
+
 /* Desktop chrome places the tool tabs on the app-header row, so the floating
    shelf bar should sit immediately below that shared rail. */
 @media (min-width: 761px) {

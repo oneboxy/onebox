@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.933';
+const APP_VERSION = '2.18.934';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -14183,7 +14183,7 @@ function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
   if (state.section === 'mine' && state.ticketWalletOpen && (state.ticketWalletSelectedId || ticketWalletMapReturnContext)) return null;
-  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], .navigation-page, input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher, .ticket-wallet-template-options.is-airlines')) return null;
+  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher, .ticket-wallet-template-options.is-airlines')) return null;
   if (event.target.closest('[data-swipe-row]')) return null;
   const items = pageSwipeItems();
   const index = pageSwipeIndex(items);
@@ -14235,6 +14235,7 @@ function clearPageSwipeTrack() {
   }
   workspace.classList.remove('page-swipe-dragging', 'page-swipe-settling');
   workspace.style.transform = '';
+  document.body.classList.remove('page-swipe-reader-leaving');
   clearPageSwipeNav();
   pageSwipeTrackState = null;
 }
@@ -14247,6 +14248,11 @@ function preparePageSwipeTrack(gesture, direction) {
   const target = gesture.items[nextIndex];
   if (pageSwipeTrackState?.target?.id === target.id && pageSwipeTrackState.direction === direction) return pageSwipeTrackState;
   clearPageSwipeTrack();
+  if (state.section === 'tools' && state.tool === 'reader' && target.id !== 'reader') {
+    // The reader stats bar is portaled outside the swipe stage. Hide it for
+    // the transition so it cannot sit over the incoming tool's tab rail.
+    document.body.classList.add('page-swipe-reader-leaving');
+  }
   const rendered = pageSwipeMarkup(target);
   if (target.kind === 'ticket-filter') {
     const stage = workspace.querySelector('[data-ticket-wallet-swipe-stage]');
@@ -14330,6 +14336,13 @@ function settlePageSwipe(target, direction) {
 function updatePageSwipe(event) {
   const gesture = pageSwipeGesture;
   if (!gesture || (gesture.pointerId != null && event.pointerId !== gesture.pointerId)) return;
+  // Navigation cards keep their long-press reorder gesture; once it arms,
+  // let the card drag own the pointer instead of changing pages.
+  if (state.section === 'tools' && state.tool === 'navigation' && (navigationDrag?.longPressed || navigationDrag?.active)) {
+    gesture.cancelled = true;
+    resetPageSwipeTransform();
+    return;
+  }
   gesture.dx = event.clientX - gesture.startX;
   gesture.dy = event.clientY - gesture.startY;
   if (Math.abs(gesture.dy) > Math.abs(gesture.dx) + 10 && Math.abs(gesture.dy) > 8) {
