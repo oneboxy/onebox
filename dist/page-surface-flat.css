@@ -2386,20 +2386,50 @@ main:has(#workspace[data-tool="mine"]) {
   transition: border-color .14s ease, color .14s ease;
 }
 #calendarPickerDialog .calendar-picker-option.selected {
-  border-color: color-mix(in srgb, var(--primary) 58%, var(--line));
+  border-color: var(--line);
   background: transparent !important;
-  color: var(--primary);
-  font-weight: 600;
+  color: var(--ink);
+  font-weight: 550;
 }
 #calendarPickerDialog .calendar-picker-option:hover,
 #calendarPickerDialog .calendar-picker-option:focus-visible {
-  border-color: var(--line);
+  border-color: transparent;
   background: transparent !important;
   outline: none;
 }
 #calendarPickerDialog .calendar-picker-option.selected:hover,
 #calendarPickerDialog .calendar-picker-option.selected:focus-visible {
-  border-color: color-mix(in srgb, var(--primary) 58%, var(--line));
+  border-color: var(--line);
+}
+#calendarPickerDialog .calendar-picker-date-tab.active {
+  border-color: var(--line);
+  background: transparent !important;
+  color: var(--ink);
+}
+#calendarPickerDialog .calendar-picker-date-tab:hover,
+#calendarPickerDialog .calendar-picker-date-tab:focus-visible,
+#calendarPickerDialog .calendar-picker-date-tab:active {
+  border-color: transparent;
+  background: transparent !important;
+  color: var(--ink);
+  outline: none;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#calendarPickerDialog .calendar-picker-date-tab.active:hover,
+#calendarPickerDialog .calendar-picker-date-tab.active:focus-visible,
+#calendarPickerDialog .calendar-picker-date-tab.active:active {
+  border-color: var(--line);
+}
+#calendarPickerDialog .calendar-picker-period-btn:hover,
+#calendarPickerDialog .calendar-picker-period-btn:focus-visible,
+#calendarPickerDialog .calendar-picker-period-btn:active {
+  border-color: transparent;
+  background: transparent !important;
+  color: var(--muted);
+  outline: none;
+  box-shadow: none !important;
+  transform: none !important;
 }
 @media (max-width: 760px) {
   #calendarPickerDialog .calendar-picker-dialog-card { padding: 15px; border-radius: 16px; }
