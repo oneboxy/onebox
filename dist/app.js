@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.922';
+const APP_VERSION = '2.18.924';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3725,7 +3725,8 @@ function navigationSelectedIconMarkup(value, selectedIcon = '') {
   const selected = navigationIconForSite(selectedIcon, url) || navigationIconUrl(url);
   const alternatives = navigationIconSources(url).filter((source) => source !== selected);
   const fallback = alternatives.length ? ' data-fallback-sources="' + escapeHtml(alternatives.join('|')) + '"' : '';
-  return '<span class="navigation-selected-icon-wrap"><img class="navigation-selected-icon" data-navigation-selected-icon data-icon-url="' + escapeHtml(selected) + '" src="' + escapeHtml(selected) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer"' + fallback + (selected ? '' : ' hidden') + ' onerror="handleNavigationIconError(this)"></span>';
+  const imageSource = selected ? ' src="' + escapeHtml(selected) + '"' : '';
+  return '<span class="navigation-selected-icon-wrap"' + (selected ? '' : ' hidden') + '><img class="navigation-selected-icon" data-navigation-selected-icon data-icon-url="' + escapeHtml(selected) + '"' + imageSource + (selected ? '' : ' hidden') + ' alt="" loading="eager" decoding="async" referrerpolicy="no-referrer"' + fallback + ' onerror="handleNavigationIconError(this)"></span>';
 }
 function finishNavigationIconRefresh(element) {
   const button = element?.matches?.('[data-navigation-refresh-icon]') ? element : element?.closest?.('[data-navigation-refresh-icon]');
@@ -16425,6 +16426,8 @@ $('#navigationDialog').addEventListener('input', (event) => {
       if (fallbackIcons.length) selectedIcon.dataset.fallbackSources = fallbackIcons.join('|');
       else delete selectedIcon.dataset.fallbackSources;
       selectedIcon.hidden = !defaultIcon;
+      const selectedIconWrap = selectedIcon.closest('.navigation-selected-icon-wrap');
+      if (selectedIconWrap) selectedIconWrap.hidden = !defaultIcon;
     }
     if (candidateRow) candidateRow.hidden = !url;
     if (refreshCandidates) {

@@ -1814,6 +1814,71 @@ main:has(#workspace[data-tool="mine"]) {
   max-height: 20px !important;
   object-fit: contain !important;
 }
+
+/* Keep the folder editor toggle horizontal and visually quiet. */
+#navigationDialog .navigation-folder-dialog-card > .dialog-head {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+#navigationDialog .navigation-folder-dialog-card > .dialog-head > div {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+#navigationDialog .navigation-folder-dialog-card .navigation-name-toggle {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  margin: 0 2px 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+}
+#navigationDialog .navigation-folder-dialog-card .navigation-name-toggle strong {
+  display: inline !important;
+  color: var(--ink) !important;
+  font-size: inherit !important;
+  font-weight: 750 !important;
+  line-height: 1 !important;
+}
+#navigationDialog .navigation-folder-dialog-card .navigation-name-toggle:hover,
+#navigationDialog .navigation-folder-dialog-card .navigation-name-toggle:active,
+#navigationDialog .navigation-folder-dialog-card .navigation-name-toggle:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+  outline: none !important;
+  transform: none !important;
+}
+
+/* Long-press actions replace site names in the folder editor, like on the homepage. */
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-long-pressed .navigation-card-main strong,
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-actions-visible .navigation-card-main strong {
+  display: none !important;
+}
+
+/* An empty URL has no icon yet; keep its preview slot fully hidden. */
+#navigationDialog .navigation-selected-icon-wrap[hidden],
+#navigationDialog .navigation-selected-icon[hidden] {
+  display: none !important;
+}
 #navigationDialog .navigation-input-actions .navigation-selected-icon-wrap {
   flex: 0 0 24px !important;
   width: 24px !important;
