@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.912';
+const APP_VERSION = '2.18.913';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3862,7 +3862,21 @@ function openNavigationActionsDialog(siteId, folderId = '') {
   state.navigationDialog = { kind: 'actions', siteId, folderId };
   renderNavigationDialog();
 }
-function closeNavigationDialog() { state.navigationDialog = null; state.navigationFolderDraft = null; navigationSuppressClickUntil = 0; const dialog = $('#navigationDialog'); if (dialog) dialog.hidden = true; }
+function closeNavigationDialog() {
+  const current = state.navigationDialog;
+  const returnFolderId = current && ['add', 'edit'].includes(current.kind) ? current.folderId : '';
+  if (returnFolderId && navigationFindFolder(returnFolderId)) {
+    state.navigationFolderDraft = null;
+    state.navigationDialog = { kind: 'folder', folderId: returnFolderId };
+    navigationSuppressClickUntil = 0;
+    renderNavigationDialog();
+    return;
+  }
+  state.navigationDialog = null;
+  state.navigationFolderDraft = null;
+  navigationSuppressClickUntil = 0;
+  const dialog = $('#navigationDialog'); if (dialog) dialog.hidden = true;
+}
 function returnToNavigationFolder(folderId) {
   if (folderId && navigationFindFolder(folderId)) {
     state.navigationFolderDraft = null;

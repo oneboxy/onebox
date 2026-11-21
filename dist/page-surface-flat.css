@@ -1299,6 +1299,11 @@ main:has(#workspace[data-tool="mine"]) {
 #navigationDialog .navigation-folder-name-actions .navigation-folder-dissolve-button:hover {
   color: var(--danger) !important;
 }
+#navigationDialog .navigation-folder-name-actions .navigation-folder-dissolve-button,
+#navigationDialog .navigation-folder-name-actions .navigation-folder-dissolve-button svg {
+  color: #ef4444 !important;
+  stroke: #ef4444 !important;
+}
 #navigationDialog .navigation-folder-name-actions .navigation-folder-control svg {
   width: 18px;
   height: 18px;
