@@ -1376,3 +1376,29 @@ main:has(#workspace[data-tool="mine"]) {
   #navigationDialog .navigation-folder-add-card .navigation-add-glyph { border-radius: 12px; }
   #navigationDialog .navigation-folder-add-card strong { font-size: 11px; }
 }
+
+/* Keep both add-site tiles visually steady while they are pressed or focused. */
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card:active,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card:focus,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card:focus-visible,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card:active,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card:focus,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card:focus-visible,
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card,
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card:hover,
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card:active,
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card:focus,
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card:focus-visible {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+}
