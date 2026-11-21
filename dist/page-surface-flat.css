@@ -2404,3 +2404,36 @@ main:has(#workspace[data-tool="mine"]) {
 @media (max-width: 760px) {
   #calendarPickerDialog .calendar-picker-dialog-card { padding: 15px; border-radius: 16px; }
 }
+
+/* Keep the legend alongside the date controls and tighten calendar rows. */
+#workspace[data-tool="calendar"] .calendar-top { margin-bottom: 8px; }
+#workspace[data-tool="calendar"] .calendar-month { gap: 5px; }
+#workspace[data-tool="calendar"] .calendar-month-pickers { flex: 0 0 auto; }
+#workspace[data-tool="calendar"] .calendar-today { flex: 0 0 30px; width: 30px; height: 32px; }
+#workspace[data-tool="calendar"] .calendar-today svg { width: 17px; height: 17px; }
+#workspace[data-tool="calendar"] .calendar-legend {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 8px;
+  margin: 0;
+  white-space: nowrap;
+  font-size: 9px;
+  line-height: 1;
+}
+#workspace[data-tool="calendar"] .calendar-legend span { gap: 3px; white-space: nowrap; }
+#workspace[data-tool="calendar"] .calendar-legend .dot { flex: 0 0 5px; width: 5px; height: 5px; }
+#workspace[data-tool="calendar"] .calendar-grid { row-gap: 2px; }
+#workspace[data-tool="calendar"] .dow { padding-block: 4px; }
+#workspace[data-tool="calendar"] .day { min-height: 64px; padding-block: 4px; }
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .calendar-month { gap: 4px; }
+  #workspace[data-tool="calendar"] .calendar-today { flex-basis: 28px; width: 28px; height: 30px; }
+  #workspace[data-tool="calendar"] .calendar-legend { gap: 5px; font-size: 8px; }
+  #workspace[data-tool="calendar"] .calendar-legend span { gap: 2px; }
+  #workspace[data-tool="calendar"] .calendar-legend .dot { flex-basis: 4px; width: 4px; height: 4px; }
+  #workspace[data-tool="calendar"] .calendar-grid { row-gap: 1px; }
+  #workspace[data-tool="calendar"] .dow { padding-block: 3px; }
+  #workspace[data-tool="calendar"] .day { min-height: 58px; padding-block: 3px; }
+}
