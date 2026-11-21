@@ -6866,9 +6866,9 @@ html[data-theme-mode="dark-gray"] .key {
     padding-bottom: 10px;
   }
   html.ios-safari-browser.reader-focus #workspace[data-tool="reader"] .reader-reference-body {
-    flex: 0 0 auto !important;
+    flex: 1 0 auto !important;
     height: auto !important;
-    min-height: var(--onebox-visual-height, 100dvh) !important;
+    min-height: 0 !important;
     overflow: visible !important;
   }
   html.ios-safari-browser.reader-focus #workspace[data-tool="reader"] .reader-reference-viewer {
@@ -8149,9 +8149,9 @@ html.standalone-pwa:not(.reader-focus):has(#workspace[data-tool="home"]) main:ha
   }
 
   html.ios-safari-browser.reader-focus.reader-safari-surface #workspace[data-tool="reader"] .reader-reference-body {
-    flex: 0 0 auto !important;
+    flex: 1 0 auto !important;
     height: auto !important;
-    min-height: 100svh !important;
+    min-height: 0 !important;
     max-height: none !important;
     overflow: visible !important;
     background: var(--onebox-reader-surface-bg, var(--reader-bg)) !important;
