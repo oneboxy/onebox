@@ -1481,7 +1481,7 @@ main:has(#workspace[data-tool="home"]), main:has(#workspace[data-tool="messages"
   position: relative;
   width: 34px;
   height: 20px;
-  flex: 0 0 34px;
+  flex: 0 0 28px;
   margin: 0;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -2561,7 +2561,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-stack-section > .ticket-wallet-add-
   right: 10px;
   z-index: 12;
   display: grid;
-  width: 34px;
+  width: 28px;
   height: 34px;
   place-items: center;
   padding: 0;
@@ -7264,7 +7264,7 @@ html[data-theme-mode="dark-gray"] .key {
 @media (max-width: 600px) {
   #homeSourceNav .feed-source-panel { padding-right: 0; }
   #homeSourceNav .feed-source-scroll-button[data-feed-source-scroll="next"] { right: 32px; }
-  #homeSourceNav .feed-source-manage { flex-basis: 32px; width: 32px; }
+  #homeSourceNav .feed-source-manage { flex-basis: 28px; width: 28px; }
   #homeSourceDialog {
     align-items: flex-end;
     padding: 12px 10px calc(10px + env(safe-area-inset-bottom));

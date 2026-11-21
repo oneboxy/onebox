@@ -2125,9 +2125,9 @@ main:has(#workspace[data-tool="mine"]) {
 #homeSourceNav .feed-source-panel .feed-source-manage {
   position: relative;
   z-index: 2;
-  flex: 0 0 34px;
-  width: 34px;
-  margin: 0 4px 0 0;
+  flex: 0 0 28px;
+  width: 28px;
+  margin: 0 2px 0 0;
   border: 0 !important;
   background: transparent;
 }
@@ -2154,7 +2154,7 @@ main:has(#workspace[data-tool="mine"]) {
 #homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"]::after { content: none !important; display: none !important; }
 #homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"]:hover { color: var(--ink); }
 @media (max-width: 600px) {
-  #homeSourceNav .feed-source-panel .feed-source-manage { flex-basis: 32px; width: 32px; }
+  #homeSourceNav .feed-source-panel .feed-source-manage { flex-basis: 28px; width: 28px; }
 }
 
 /* Match the global toast close affordance to the same Lucide x mark. */
