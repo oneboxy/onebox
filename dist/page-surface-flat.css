@@ -2055,8 +2055,8 @@ main:has(#workspace[data-tool="mine"]) {
   height: 18px !important;
 }
 
-/* Put tab scrolling arrows in a separate trailing gutter. The tab strip keeps
-   its left anchor, and the arrows never cover a tab or take a flex position. */
+/* Keep one direction toggle in a compact right gutter; the rail has no filler
+   after its last tab, so scrolling ends with the actual tab content. */
 #toolNav .tool-tab-panel {
   position: relative;
   display: block !important;
@@ -2069,16 +2069,8 @@ main:has(#workspace[data-tool="mine"]) {
   padding-left: 0;
   padding-right: 0;
 }
-#toolNav .tool-tabs::after {
-  content: '';
-  flex: 0 0 var(--tool-tab-tail-space, 0px);
-}
-#toolNav .tool-tab-panel.has-tool-overflow-left:not(.has-tool-overflow-right) .tool-tabs,
-#toolNav .tool-tab-panel.has-tool-overflow-right:not(.has-tool-overflow-left) .tool-tabs {
+#toolNav .tool-tab-panel.has-tool-overflow .tool-tabs {
   width: calc(100% - 32px);
-}
-#toolNav .tool-tab-panel.has-tool-overflow-left.has-tool-overflow-right .tool-tabs {
-  width: calc(100% - 52px);
 }
 #toolNav .tool-tab-panel .feed-source-scroll-button {
   position: absolute;
@@ -2093,8 +2085,7 @@ main:has(#workspace[data-tool="mine"]) {
   border: 0;
   background: transparent !important;
 }
-#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="previous"] { right: 30px; }
-#toolNav .tool-tab-panel.has-tool-overflow-left:not(.has-tool-overflow-right) .feed-source-scroll-button[data-tool-scroll="previous"] { right: 10px; }
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="toggle"] { right: 10px; }
 #toolNav .tool-tab-panel .feed-source-scroll-button svg { width: 16px; height: 16px; }
 @media (max-width: 760px) {
   #toolNav {

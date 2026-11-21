@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.931';
+const APP_VERSION = '2.18.932';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1657,7 +1657,7 @@ function renderNav() {
     const active = id === 'navigation' ? state.section === 'tools' && state.tool === 'navigation' : state.section === 'tools' && state.tool === id;
     return '<button class="tab ' + (active ? 'active' : '') + '" draggable="true" data-tool="' + id + '" data-tool-index="' + index + '" aria-current="' + (active ? 'page' : 'false') + '"><span aria-hidden="true">' + item.icon + '</span>' + toolName(id) + '</button>';
   }).join('');
-  nav.innerHTML = '<div class="tool-tab-panel"><button class="feed-source-scroll-button" data-tool-scroll="previous" type="button" hidden aria-label="' + escapeHtml(t('feedTabPrevious')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5.25 8.25 12 15 18.75"/></svg></button><div class="tool-tabs" data-tab-rail="tools" role="tablist" aria-label="' + escapeHtml(t('tools')) + '">' + tabsMarkup + '</div><button class="feed-source-scroll-button" data-tool-scroll="next" type="button" hidden aria-label="' + escapeHtml(t('feedTabNext')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg></button></div>';
+  nav.innerHTML = '<div class="tool-tab-panel"><div class="tool-tabs" data-tab-rail="tools" role="tablist" aria-label="' + escapeHtml(t('tools')) + '">' + tabsMarkup + '</div><button class="feed-source-scroll-button" data-tool-scroll="toggle" data-scroll-direction="right" type="button" hidden aria-label="' + escapeHtml(t('feedTabNext')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg></button></div>';
   const nextTabs = nav.querySelector('.tool-tabs');
   if (nextTabs) {
     nextTabs.scrollLeft = Math.min(previousScrollLeft, Math.max(0, nextTabs.scrollWidth - nextTabs.clientWidth));
@@ -1683,33 +1683,28 @@ function focusActiveToolTab(smooth = false) {
 function updateToolTabOverflowControls() {
   const panel = nav.querySelector('.tool-tab-panel');
   const tabs = nav.querySelector('.tool-tabs');
-  const previous = nav.querySelector('[data-tool-scroll="previous"]');
-  const next = nav.querySelector('[data-tool-scroll="next"]');
-  if (!panel || !tabs || !previous || !next) return;
+  const control = nav.querySelector('[data-tool-scroll="toggle"]');
+  if (!panel || !tabs || !control) return;
   const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
   const hasOverflow = maxScroll > 1;
-  const hasPrevious = tabs.scrollLeft > 1;
-  const hasNext = tabs.scrollLeft < maxScroll - 1;
+  const firstTab = tabs.querySelector('.tab');
+  const threshold = Math.max(1, Math.min((firstTab?.offsetWidth || 0) * .5, tabs.clientWidth * .12));
+  const scrollLeft = Math.max(0, Math.min(maxScroll, tabs.scrollLeft));
+  const hasScrolledRight = hasOverflow && scrollLeft > threshold;
+  const layoutChanged = panel.classList.contains('has-tool-overflow') !== hasOverflow || control.hidden === hasOverflow;
   panel.classList.toggle('has-tool-overflow', hasOverflow);
-  panel.classList.toggle('has-tool-overflow-left', hasPrevious);
-  panel.classList.toggle('has-tool-overflow-right', hasNext);
-  const controlsChanged = previous.hidden === hasPrevious || next.hidden === hasNext;
-  previous.hidden = !hasPrevious;
-  next.hidden = !hasNext;
-  // Leave enough scrollable tail space to align the final tab at the left edge.
-  const lastTab = tabs.querySelector('.tab:last-child');
-  if (lastTab) {
-    const currentTail = Number(tabs.dataset.toolTabTail || 0);
-    const rawScrollWidth = Math.max(tabs.clientWidth, tabs.scrollWidth - currentTail);
-    const tail = hasOverflow ? Math.max(0, Math.round(tabs.clientWidth + lastTab.offsetLeft - rawScrollWidth)) : 0;
-    if (tail !== currentTail) {
-      tabs.dataset.toolTabTail = String(tail);
-      tabs.style.setProperty('--tool-tab-tail-space', tail + 'px');
-      requestAnimationFrame(updateToolTabOverflowControls);
-    }
+  panel.classList.toggle('is-scrolled-right', hasScrolledRight);
+  control.hidden = !hasOverflow;
+  const direction = hasScrolledRight ? 'left' : 'right';
+  if (control.dataset.scrollDirection !== direction) {
+    control.dataset.scrollDirection = direction;
+    control.setAttribute('aria-label', t(direction === 'left' ? 'feedTabPrevious' : 'feedTabNext'));
+    control.innerHTML = direction === 'left'
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5.25 8.25 12 15 18.75"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg>';
   }
-  // Arrow visibility changes the reserved gutter; recalculate after layout.
-  if (controlsChanged) requestAnimationFrame(updateToolTabOverflowControls);
+  // The single arrow gutter changes the tab viewport width only on overflow.
+  if (layoutChanged) requestAnimationFrame(updateToolTabOverflowControls);
 }
 function scrollToolTabs(direction) {
   const tabs = nav.querySelector('.tool-tabs');
@@ -1719,10 +1714,13 @@ function scrollToolTabs(direction) {
   const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
   const distance = Math.max(120, Math.round(tabs.clientWidth * .72));
   const desired = Math.max(0, Math.min(maxScroll, tabs.scrollLeft + direction * distance));
-  const target = direction > 0
+  const boundary = direction > 0
     ? tabItems.find((tab) => tab.offsetLeft >= desired - 1) || tabItems[tabItems.length - 1]
     : [...tabItems].reverse().find((tab) => tab.offsetLeft <= desired + 1) || tabItems[0];
-  tabs.scrollTo({ left: target.offsetLeft, behavior: 'smooth' });
+  // Stop exactly at the rail's real ends; do not add tail padding that leaves
+  // a blank after the final tab. Intermediate stops line up on tab boundaries.
+  const target = desired >= maxScroll - 1 ? maxScroll : Math.min(maxScroll, boundary.offsetLeft);
+  tabs.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
 }
 function mainSectionEntries() {
   return Object.values(SECTION_DEFS).filter((item) => (item.key !== 'navigation' || state.navigationLocation === 'main') && cloudModuleEnabled(item.key === 'mine' ? 'settings' : item.key));
@@ -14942,7 +14940,7 @@ nav.addEventListener('click', (event) => {
   const scrollButton = event.target.closest('[data-tool-scroll]');
   if (scrollButton) {
     event.preventDefault();
-    scrollToolTabs(scrollButton.dataset.toolScroll === 'previous' ? -1 : 1);
+    scrollToolTabs(scrollButton.dataset.scrollDirection === 'left' ? -1 : 1);
     return;
   }
   const tab = event.target.closest('[data-tool]'); if (!tab) return;
