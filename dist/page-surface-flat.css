@@ -1670,3 +1670,85 @@ main:has(#workspace[data-tool="mine"]) {
     max-width: 279px;
   }
 }
+
+/* Make Add tiles use the same icon size and icon-to-label spacing as their grid peers. */
+#workspace[data-tool="navigation"] .navigation-add-card,
+#workspace[data-tool="navigation"] .navigation-empty-add-card {
+  gap: 6px !important;
+}
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  grid-template-rows: none !important;
+  align-content: unset !important;
+  justify-items: unset !important;
+}
+#navigationDialog .navigation-folder-add-card .navigation-add-glyph {
+  display: grid !important;
+  flex: 0 0 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  margin: 0 !important;
+}
+#navigationDialog .navigation-folder-add-card strong {
+  flex: 0 0 14px;
+  grid-row: auto;
+  width: 100%;
+  height: 14px;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 14px !important;
+}
+#navigationDialog .navigation-folder-dialog-card.navigation-names-hidden .navigation-folder-sites > .navigation-folder-add-card {
+  grid-template-rows: none !important;
+}
+#navigationDialog .navigation-name-toggle {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#navigationDialog .navigation-name-toggle:hover,
+#navigationDialog .navigation-name-toggle:active,
+#navigationDialog .navigation-name-toggle:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+@media (max-width: 600px) {
+  #navigationDialog .navigation-folder-sites > .navigation-folder-add-card { gap: 3px !important; }
+  #navigationDialog .navigation-folder-add-card .navigation-add-glyph {
+    flex-basis: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+  #navigationDialog .navigation-folder-add-card strong {
+    flex-basis: 12px;
+    height: 12px;
+    line-height: 12px !important;
+  }
+}
+#workspace[data-tool="navigation"] .navigation-add-card .navigation-add-glyph,
+#workspace[data-tool="navigation"] .navigation-empty-add-card .navigation-add-glyph {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+}
+#navigationDialog .navigation-name-toggle { appearance: none; }
+@media (max-width: 600px) {
+  #workspace[data-tool="navigation"] .navigation-add-card .navigation-add-glyph,
+  #workspace[data-tool="navigation"] .navigation-empty-add-card .navigation-add-glyph {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+  }
+}
