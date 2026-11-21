@@ -688,10 +688,10 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  min-height: 32px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
   padding: 0;
   border: 0;
   border-radius: 8px;
@@ -736,12 +736,12 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   stroke-width: 1.7;
 }
 .reader-inline-stats-row .reader-layout-toggle {
-  flex: 0 0 32px;
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  min-height: 32px;
-  padding: 0;
+  flex: 0 0 30px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 4px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -795,10 +795,10 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-inline-stats { margin-bottom: 6px; padding-top: 10px; }
   .reader-inline-stats-row { width: 100%; justify-content: flex-end; gap: 8px; }
   .reader-inline-stats-actions { gap: 3px; }
-  .reader-inline-action, .reader-stat-popover-action { width: 30px; min-width: 30px; height: 30px; min-height: 30px; }
-  .reader-inline-action svg, .reader-stat-popover-action svg { width: 18px; height: 18px; }
-  .reader-inline-stats-row .reader-layout-toggle { width: 30px; min-width: 30px; flex-basis: 30px; height: 30px; min-height: 30px; padding: 0; }
-  .reader-inline-stats-row .reader-layout-toggle svg { width: 18px; height: 18px; }
+  .reader-inline-action { width: 24px; min-width: 24px; height: 30px; min-height: 30px; }
+  .reader-inline-action svg { width: 16px; height: 16px; }
+  .reader-inline-stats-row .reader-layout-toggle { width: 24px; min-width: 24px; flex-basis: 24px; height: 30px; min-height: 30px; padding: 2px; }
+  .reader-inline-stats-row .reader-layout-toggle svg { width: 16px; height: 16px; }
   .reader-inline-stats .reader-stats-heatmap {
     grid-template-columns: repeat(var(--reader-weeks, 52), 6px);
     grid-template-rows: repeat(7, 6px);
@@ -844,11 +844,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   min-width: 0;
   padding: 12px;
 }
-.reader-stat-popover-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.reader-stat-popover-actions { display: flex; align-items: center; gap: 4px; }
-.reader-stat-popover-action { display: inline-flex; flex: 0 0 32px; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--muted, #667085); cursor: pointer; }
-.reader-stat-popover-action svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.reader-stat-popover-action:hover, .reader-stat-popover-action:focus:not(:focus-visible) { background: transparent; color: var(--muted, #667085); transform: none; }
+.reader-stat-popover-heading { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
 .reader-stat-popover-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .reader-stat-popover-summary > div { display: grid; align-content: center; gap: 3px; min-width: 0; padding: 7px 8px; border: 1px solid var(--line, #e1e6f0); border-radius: 8px; background: var(--panel-2, #f4f5f8); }
 .reader-stat-popover-summary small { font-size: 10px; }
