@@ -843,16 +843,16 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-library-view > .reader-library-head { gap: 6px; padding-bottom: 8px; }
   .reader-library-title-row h2 { font-size: 18px; }
   .reader-inline-stats { margin-bottom: 6px; }
-  .reader-inline-stats-row { width: 100%; gap: 4px; }
-  .reader-inline-stats-actions { gap: 1px; }
-  .reader-inline-action { width: 24px; min-width: 24px; height: 28px; min-height: 28px; }
+  .reader-inline-stats-row { width: fit-content; gap: 8px; }
+  .reader-inline-stats-actions { gap: 3px; }
+  .reader-inline-action { width: 24px; min-width: 24px; height: 30px; min-height: 30px; }
   .reader-inline-action svg { width: 16px; height: 16px; }
-  .reader-inline-stats-row .reader-layout-toggle { width: 24px; min-width: 24px; flex-basis: 24px; height: 28px; min-height: 28px; padding: 2px; }
+  .reader-inline-stats-row .reader-layout-toggle { width: 24px; min-width: 24px; flex-basis: 24px; height: 30px; min-height: 30px; padding: 2px; }
   .reader-inline-stats-row .reader-layout-toggle svg { width: 16px; height: 16px; }
-  .reader-inline-stats .reader-stats-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); flex: 1 1 auto; width: auto; max-width: none; gap: 3px; }
-  .reader-inline-stats .reader-stats-summary .reader-stat-card { min-height: 34px; gap: 3px; padding: 4px; }
+  .reader-inline-stats .reader-stats-summary { grid-template-columns: repeat(4, minmax(60px, max-content)); flex: 0 1 auto; width: max-content; max-width: 100%; gap: 2px; }
+  .reader-inline-stats .reader-stats-summary .reader-stat-card { min-height: 36px; gap: 3px; padding: 4px; border-radius: 7px; }
   .reader-inline-stats .reader-stats-summary .reader-stat-card small,
-  .reader-inline-stats .reader-stats-summary .reader-stat-card strong { font-size: 9px; }
+  .reader-inline-stats .reader-stats-summary .reader-stat-card strong { font-size: 10px; }
   .reader-inline-stats .reader-stats-heatmap {
     grid-template-columns: repeat(var(--reader-weeks, 52), 6px);
     grid-template-rows: repeat(7, 6px);
@@ -1016,4 +1016,10 @@ html[data-theme-mode="dark-gray"] .reader-opds-dialog .reader-opds-pagination bu
   .reader-opds-dialog .reader-opds-entry { grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }
   .reader-opds-dialog .reader-opds-entry > [data-opds-open],
   .reader-opds-dialog .reader-opds-entry > [data-opds-download] { grid-column: 2; }
+}
+
+@media (max-width: 380px) {
+  .reader-inline-stats-row { width: 100%; flex-wrap: wrap; justify-content: flex-end; }
+  .reader-inline-stats .reader-stats-summary { flex: 1 1 100%; width: 100%; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .reader-inline-stats-actions { margin-left: auto; }
 }
