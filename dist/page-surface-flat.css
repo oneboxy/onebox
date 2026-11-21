@@ -2095,7 +2095,7 @@ main:has(#workspace[data-tool="mine"]) {
 #toolNav::after {
   content: '';
   position: absolute;
-  left: 14px;
+  left: 0;
   right: 14px;
   bottom: 0;
   height: 1px;
@@ -2112,7 +2112,7 @@ main:has(#workspace[data-tool="mine"]) {
     transform: none;
   }
   #toolNav .tool-tabs { padding-left: 4px; }
-  #toolNav::after { left: 14px; right: 14px; }
+  #toolNav::after { left: 0; right: 14px; }
 }
 
 /* The homepage source rail uses one right-side direction toggle like the tool
@@ -2152,17 +2152,6 @@ main:has(#workspace[data-tool="mine"]) {
 #homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"]:hover { color: var(--ink); }
 @media (max-width: 600px) {
   #homeSourceNav .feed-source-panel .feed-source-manage { flex-basis: 32px; width: 32px; }
-}
-
-/* Keep the active Navigation tab accent shorter than the tab itself. */
-#toolNav .tab[data-tool="navigation"].active::after {
-  left: 6px;
-  right: 10px;
-  width: auto;
-  transform: none;
-}
-@media (max-width: 760px) {
-  #toolNav .tab[data-tool="navigation"].active::after { left: 10px; }
 }
 
 /* Match the global toast close affordance to the same Lucide x mark. */
