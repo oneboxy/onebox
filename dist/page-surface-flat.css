@@ -2410,7 +2410,7 @@ main:has(#workspace[data-tool="mine"]) {
 #workspace[data-tool="calendar"] .calendar-month { gap: 5px; }
 #workspace[data-tool="calendar"] .calendar-month-pickers { flex: 0 0 auto; }
 #workspace[data-tool="calendar"] .calendar-today { flex: 0 0 30px; width: 30px; height: 32px; }
-#workspace[data-tool="calendar"] .calendar-today svg { width: 17px; height: 17px; }
+#workspace[data-tool="calendar"] .calendar-today svg { width: 19px; height: 19px; }
 #workspace[data-tool="calendar"] .calendar-legend {
   display: flex;
   flex: 0 1 auto;
