@@ -679,7 +679,8 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: min(100%, 900px);
+  width: fit-content;
+  max-width: 100%;
   margin: 0 auto;
 }
 .reader-inline-action {
@@ -747,10 +748,10 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 }
 .reader-inline-stats .reader-stats-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  flex: 1 1 auto;
-  width: auto;
-  max-width: none;
+  grid-template-columns: repeat(4, 126px);
+  flex: 0 1 auto;
+  width: max-content;
+  max-width: 100%;
   min-width: 0;
   margin: 0;
   gap: 5px;
@@ -842,13 +843,13 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-library-view > .reader-library-head { gap: 6px; padding-bottom: 8px; }
   .reader-library-title-row h2 { font-size: 18px; }
   .reader-inline-stats { margin-bottom: 6px; }
-  .reader-inline-stats-row { gap: 4px; }
+  .reader-inline-stats-row { width: 100%; gap: 4px; }
   .reader-inline-stats-actions { gap: 1px; }
   .reader-inline-action { width: 24px; min-width: 24px; height: 28px; min-height: 28px; }
   .reader-inline-action svg { width: 16px; height: 16px; }
   .reader-inline-stats-row .reader-layout-toggle { width: 24px; min-width: 24px; flex-basis: 24px; height: 28px; min-height: 28px; padding: 2px; }
   .reader-inline-stats-row .reader-layout-toggle svg { width: 16px; height: 16px; }
-  .reader-inline-stats .reader-stats-summary { gap: 3px; }
+  .reader-inline-stats .reader-stats-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); flex: 1 1 auto; width: auto; max-width: none; gap: 3px; }
   .reader-inline-stats .reader-stats-summary .reader-stat-card { min-height: 34px; gap: 3px; padding: 4px; }
   .reader-inline-stats .reader-stats-summary .reader-stat-card small,
   .reader-inline-stats .reader-stats-summary .reader-stat-card strong { font-size: 9px; }
