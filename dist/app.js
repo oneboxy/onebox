@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.916';
+const APP_VERSION = '2.18.917';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3785,7 +3785,7 @@ function renderNavigation() {
   const items = state.navigation.items || [];
   const emptyBody = '<button class="navigation-card navigation-empty-add-card" type="button" data-open-navigation-add aria-label="' + escapeHtml(t('navigationAdd')) + '"><span class="navigation-add-glyph">＋</span><strong>' + escapeHtml(t('navigationAdd')) + '</strong><small>' + escapeHtml(t('navigationEmpty')) + '</small></button>';
   const body = items.length ? items.map((item, index) => navigationItemMarkup(item, index)).join('') + '<button class="navigation-card navigation-add-card" type="button" data-open-navigation-add aria-label="' + escapeHtml(t('navigationAdd')) + '"><span class="navigation-add-glyph">＋</span></button>' : emptyBody;
-  return '<div class="section-page navigation-page"><div class="navigation-grid">' + body + '</div></div>';
+  return '<div class="section-page navigation-page' + (state.navigationShowNames ? '' : ' navigation-names-hidden') + '"><div class="navigation-page-toolbar"><button class="navigation-name-toggle" type="button" data-navigation-toggle-names aria-label="' + escapeHtml(state.language === 'en' ? (state.navigationShowNames ? 'Hide site names' : 'Show site names') : (state.navigationShowNames ? '隐藏网站名称' : '显示网站名称')) + '" title="' + escapeHtml(state.language === 'en' ? (state.navigationShowNames ? 'Hide site names' : 'Show site names') : (state.navigationShowNames ? '隐藏网站名称' : '显示网站名称')) + '" aria-pressed="' + String(state.navigationShowNames) + '">Aa</button></div><div class="navigation-grid">' + body + '</div></div>';
 }
 function renderNavigationAddDialog(folderId = '', site = null) {
   const dialog = $('#navigationDialog'); if (!dialog) return;
@@ -3810,11 +3810,6 @@ function renderNavigationAddDialog(folderId = '', site = null) {
   dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(title) + '</h2>' + subtitle + '</div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">' + clearIcon + '</button></div><form id="navigationSiteForm" class="navigation-form" data-navigation-mode="' + (editing ? 'edit' : 'add') + '" data-navigation-site-id="' + escapeHtml(site?.id || '') + '" data-navigation-folder-id="' + escapeHtml(folderId || '') + '"><div class="field navigation-form-row navigation-url-field"><label for="navigationUrl">' + addressLabel + '</label><div class="navigation-input-wrap"><input id="navigationUrl" name="url" type="url" required inputmode="url" autocomplete="url" value="' + escapeHtml(url) + '" placeholder="' + placeholder + '" autofocus><div class="navigation-input-actions">' + refreshButton + addressClearButton + '</div></div></div><div class="field navigation-form-row navigation-name-row"><label for="navigationName">' + nameLabel + '</label><div class="navigation-input-wrap"><input id="navigationName" name="name" maxlength="40" value="' + escapeHtml(name) + '" placeholder="' + placeholder + '"><div class="navigation-input-actions">' + saveButton + nameClearButton + '</div></div></div></form></div>';
   dialog.hidden = false;
 }
-function navigationFolderNameToggleMarkup() {
-  const showing = state.navigationShowNames !== false;
-  const label = state.language === 'en' ? (showing ? 'Hide site names' : 'Show site names') : (showing ? '隐藏网站名称' : '显示网站名称');
-  return '<button class="navigation-folder-name-toggle" type="button" data-navigation-toggle-names aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '" aria-pressed="' + String(showing) + '">Aa</button>';
-}
 function renderNavigationFolderDialog(folderId = '') {
   const dialog = $('#navigationDialog'); const folder = navigationFindFolder(folderId); if (!dialog || !folder) return;
   const addSiteLabel = t('navigationAdd');
@@ -3823,7 +3818,7 @@ function renderNavigationFolderDialog(folderId = '') {
   const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
   const ungroupIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8V6.5A1.5 1.5 0 0 1 5 5h4l2 2h7.5A1.5 1.5 0 0 1 20 8.5V10M3.5 10.5h9.8a1.7 1.7 0 0 1 1.6 2.2l-.8 2.6a1.7 1.7 0 0 1-1.6 1.2H5a1.5 1.5 0 0 1-1.5-1.5v-4.5Z"/><path d="M16 14h5m-2.5-2.5L21 14l-2.5 2.5"/></svg>';
   const clearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>';
-  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card navigation-folder-dialog-card' + (state.navigationShowNames ? '' : ' navigation-names-hidden') + '" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(t('navigationFolderEdit')) + '</h2></div>' + navigationFolderNameToggleMarkup() + '<button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">' + clearIcon + '</button></div><form id="navigationFolderForm" class="navigation-form navigation-folder-form"><div class="field navigation-folder-name-field"><div class="navigation-folder-name-wrap"><div class="navigation-folder-input-wrap"><input id="navigationFolderName" class="navigation-folder-name-input" name="name" type="text" maxlength="30" value="' + escapeHtml(folder.name) + '" aria-label="' + escapeHtml(t('navigationFolderName')) + '" required><button class="navigation-folder-control navigation-save-button navigation-folder-save-button" type="submit" aria-label="' + escapeHtml(t('navigationSaveShort')) + '" title="' + escapeHtml(t('navigationSaveShort')) + '">' + saveIcon + '</button></div><div class="navigation-folder-name-actions"><button class="navigation-folder-control navigation-folder-dissolve-button" type="button" data-navigation-delete-folder aria-label="' + escapeHtml(t('navigationFolderDelete')) + '" title="' + escapeHtml(t('navigationFolderDelete')) + '">' + ungroupIcon + '</button></div></div></div><div class="navigation-folder-sites">' + children + '</div></form></div>';
+  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card navigation-folder-dialog-card' + (state.navigationShowNames ? '' : ' navigation-names-hidden') + '" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(t('navigationFolderEdit')) + '</h2></div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">' + clearIcon + '</button></div><form id="navigationFolderForm" class="navigation-form navigation-folder-form"><div class="field navigation-folder-name-field"><div class="navigation-folder-name-wrap"><div class="navigation-folder-input-wrap"><input id="navigationFolderName" class="navigation-folder-name-input" name="name" type="text" maxlength="30" value="' + escapeHtml(folder.name) + '" aria-label="' + escapeHtml(t('navigationFolderName')) + '" required><button class="navigation-folder-control navigation-save-button navigation-folder-save-button" type="submit" aria-label="' + escapeHtml(t('navigationSaveShort')) + '" title="' + escapeHtml(t('navigationSaveShort')) + '">' + saveIcon + '</button></div><div class="navigation-folder-name-actions"><button class="navigation-folder-control navigation-folder-dissolve-button" type="button" data-navigation-delete-folder aria-label="' + escapeHtml(t('navigationFolderDelete')) + '" title="' + escapeHtml(t('navigationFolderDelete')) + '">' + ungroupIcon + '</button></div></div></div><div class="navigation-folder-sites">' + children + '</div></form></div>';
   dialog.hidden = false;
 }
 function renderNavigationCreateFolderDialog() {
@@ -3831,7 +3826,7 @@ function renderNavigationCreateFolderDialog() {
   const first = navigationFindRootItem(draft.firstId); const second = navigationFindRootItem(draft.secondId); if (!first || !second || first.type !== 'site' || second.type !== 'site') return closeNavigationDialog();
   const clearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>';
   const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
-  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card navigation-folder-dialog-card navigation-create-folder-card' + (state.navigationShowNames ? '' : ' navigation-names-hidden') + '" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(t('navigationCreateFolder')) + '</h2></div>' + navigationFolderNameToggleMarkup() + '<button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">' + clearIcon + '</button></div><form id="navigationCreateFolderForm" class="navigation-form navigation-folder-form"><div class="field navigation-folder-name-field"><div class="navigation-folder-name-wrap"><div class="navigation-folder-input-wrap"><input id="navigationFolderName" class="navigation-folder-name-input" name="name" maxlength="30" placeholder="' + escapeHtml(t('navigationFolderPlaceholder')) + '" aria-label="' + escapeHtml(t('navigationFolderName')) + '" autofocus><button class="navigation-folder-control navigation-save-button navigation-folder-save-button" type="submit" aria-label="' + escapeHtml(t('navigationCreateFolder')) + '" title="' + escapeHtml(t('navigationCreateFolder')) + '">' + saveIcon + '</button></div></div></div><div class="navigation-folder-sites navigation-create-folder-sites"><span class="navigation-folder-preview-item">' + navigationIconMarkup(first) + '<strong>' + escapeHtml(first.name) + '</strong></span><span class="navigation-folder-preview-item">' + navigationIconMarkup(second) + '<strong>' + escapeHtml(second.name) + '</strong></span></div></form></div>';
+  dialog.innerHTML = '<div class="dialog-card navigation-dialog-card navigation-site-dialog-card navigation-folder-dialog-card navigation-create-folder-card' + (state.navigationShowNames ? '' : ' navigation-names-hidden') + '" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(t('navigationCreateFolder')) + '</h2></div><button class="icon-btn small" type="button" data-close-navigation-dialog aria-label="' + t('close') + '">' + clearIcon + '</button></div><form id="navigationCreateFolderForm" class="navigation-form navigation-folder-form"><div class="field navigation-folder-name-field"><div class="navigation-folder-name-wrap"><div class="navigation-folder-input-wrap"><input id="navigationFolderName" class="navigation-folder-name-input" name="name" maxlength="30" placeholder="' + escapeHtml(t('navigationFolderPlaceholder')) + '" aria-label="' + escapeHtml(t('navigationFolderName')) + '" autofocus><button class="navigation-folder-control navigation-save-button navigation-folder-save-button" type="submit" aria-label="' + escapeHtml(t('navigationCreateFolder')) + '" title="' + escapeHtml(t('navigationCreateFolder')) + '">' + saveIcon + '</button></div></div></div><div class="navigation-folder-sites navigation-create-folder-sites"><span class="navigation-folder-preview-item">' + navigationIconMarkup(first) + '<strong>' + escapeHtml(first.name) + '</strong></span><span class="navigation-folder-preview-item">' + navigationIconMarkup(second) + '<strong>' + escapeHtml(second.name) + '</strong></span></div></form></div>';
   dialog.hidden = false;
 }
 function renderNavigationDialog() {
@@ -15206,6 +15201,18 @@ workspace.addEventListener('click', async (event) => {
     return;
   }
   const navigationPage = state.section === 'navigation' || (state.section === 'tools' && state.tool === 'navigation');
+  const navigationNamesToggle = event.target.closest('[data-navigation-toggle-names]');
+  if (navigationNamesToggle && navigationPage) {
+    state.navigationShowNames = !state.navigationShowNames;
+    localStorage.setItem('onebox.navigation.showNames', String(state.navigationShowNames));
+    const namesLabel = state.language === 'en' ? (state.navigationShowNames ? 'Hide site names' : 'Show site names') : (state.navigationShowNames ? '隐藏网站名称' : '显示网站名称');
+    $('#workspace .navigation-page')?.classList.toggle('navigation-names-hidden', !state.navigationShowNames);
+    $('#navigationDialog .navigation-folder-dialog-card')?.classList.toggle('navigation-names-hidden', !state.navigationShowNames);
+    navigationNamesToggle.setAttribute('aria-pressed', String(state.navigationShowNames));
+    navigationNamesToggle.setAttribute('aria-label', namesLabel);
+    navigationNamesToggle.title = namesLabel;
+    return;
+  }
   if (navigationPage && !event.target.closest('[data-navigation-item]')) clearNavigationActionCards();
   if (Date.now() < navigationSuppressClickUntil && event.target.closest('[data-navigation-item]') && !event.target.closest('[data-navigation-delete], [data-navigation-edit]')) { event.preventDefault(); return; }
   if (Date.now() < readerBookSuppressClickUntil && event.target.closest('[data-reader-book-card]')) { event.preventDefault(); return; }
@@ -16215,17 +16222,6 @@ $('#navigationDialog').addEventListener('contextmenu', (event) => {
 $('#navigationDialog').addEventListener('click', (event) => {
   if (event.target === $('#navigationDialog') || event.target.closest('[data-close-navigation-dialog]')) return closeNavigationDialog();
   if (!event.target.closest('.navigation-folder-sites [data-navigation-item]')) clearNavigationFolderActionCards();
-  const namesToggle = event.target.closest('[data-navigation-toggle-names]');
-  if (namesToggle) {
-    state.navigationShowNames = !state.navigationShowNames;
-    localStorage.setItem('onebox.navigation.showNames', String(state.navigationShowNames));
-    $('.navigation-folder-dialog-card', $('#navigationDialog'))?.classList.toggle('navigation-names-hidden', !state.navigationShowNames);
-    const label = state.language === 'en' ? (state.navigationShowNames ? 'Hide site names' : 'Show site names') : (state.navigationShowNames ? '隐藏网站名称' : '显示网站名称');
-    namesToggle.setAttribute('aria-pressed', String(state.navigationShowNames));
-    namesToggle.setAttribute('aria-label', label);
-    namesToggle.title = label;
-    return;
-  }
   const saveButton = event.target.closest('.navigation-save-button');
   if (saveButton) {
     event.preventDefault();
