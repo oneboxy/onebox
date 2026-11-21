@@ -39,26 +39,36 @@ function statsMarkup(){
   return '<section class="reader-inline-stats'+(statsExpanded?' is-expanded':'')+'" aria-label="'+tx('阅读统计','Reading statistics')+'"><div class="reader-inline-stats-head">'+compact+'<div class="reader-inline-stats-actions"><button type="button" class="reader-inline-action" data-open-reader-file aria-label="'+tx('导入文件','Import file')+'" title="'+tx('导入文件','Import file')+'">'+importIcon+'</button><button type="button" class="reader-inline-action" data-reader-opds aria-label="'+tx('书源','Sources')+'" title="'+tx('书源','Sources')+'">'+sourceIcon+'</button><button type="button" class="reader-inline-action reader-layout-toggle" data-reader-layout-toggle aria-label="'+tx('切换布局','Switch layout')+'" title="'+tx('切换布局','Switch layout')+'">'+layoutIcon+'</button><button type="button" class="reader-inline-action reader-stats-expand-toggle" data-reader-stats-toggle aria-expanded="'+statsExpanded+'" aria-label="'+tx(statsExpanded?'收起统计':'展开统计',statsExpanded?'Collapse statistics':'Expand statistics')+'" title="'+tx(statsExpanded?'收起统计':'展开统计',statsExpanded?'Collapse statistics':'Expand statistics')+'">'+expandIcon+'</button></div></div>'+expanded+'</section>';
 }
 function syncReaderStatsFloat(){
-  const card=document.querySelector('#workspace[data-tool="reader"] .reader-inline-stats');
-  const spacer=card?.nextElementSibling?.classList.contains('reader-inline-stats-spacer')?card.nextElementSibling:null;
+  const workspace=document.querySelector('#workspace');
+  const inlineCard=workspace?.dataset.tool==='reader'?workspace.querySelector('.reader-inline-stats'):null;
+  const portalCard=document.querySelector('body > .reader-inline-stats');
+  let card=inlineCard||portalCard;
+  let spacer=document.querySelector('#reader-inline-stats-spacer');
+  if(!workspace||workspace.dataset.tool!=='reader'){
+    portalCard?.remove();spacer?.remove();return;
+  }
+  if(inlineCard&&portalCard&&portalCard!==inlineCard){portalCard.remove();spacer?.remove();spacer=null}
   if(!card){spacer?.remove();return}
   const header=document.querySelector('.app-header')?.getBoundingClientRect();
   const nav=document.querySelector('#toolNav');
   const navRect=nav&&!nav.hidden?nav.getBoundingClientRect():null;
   const top=Math.max(header?.bottom||0,navRect?.bottom||0)+6;
   const rect=card.getBoundingClientRect();
-  const parentRect=card.parentElement.getBoundingClientRect();
+  const parentRect=inlineCard?inlineCard.parentElement.getBoundingClientRect():{left:rect.left,width:rect.width};
   const width=Math.min(parentRect.width,900);
   const left=parentRect.left+(parentRect.width-width)/2;
-  let placeholder=spacer;
-  if(!placeholder){placeholder=document.createElement('div');placeholder.className='reader-inline-stats-spacer';card.after(placeholder)}
-  placeholder.style.height=rect.height+'px';
-  placeholder.classList.add('is-active');
+  if(inlineCard){
+    if(!spacer){spacer=document.createElement('div');spacer.id='reader-inline-stats-spacer';spacer.className='reader-inline-stats-spacer';inlineCard.after(spacer)}
+    document.body.append(card);
+  }
+  if(spacer){spacer.style.height=rect.height+'px';spacer.classList.add('is-active')}
   card.style.setProperty('--reader-stats-float-top',top+'px');
   card.style.setProperty('--reader-stats-float-left',left+'px');
   card.style.setProperty('--reader-stats-float-width',width+'px');
   card.classList.add('is-floating');
 }
+const readerStatsPortalObserver=new MutationObserver(()=>requestAnimationFrame(syncReaderStatsFloat));
+readerStatsPortalObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-tool']});
 document.addEventListener('scroll',syncReaderStatsFloat,{passive:true,capture:true});
 window.addEventListener('scroll',syncReaderStatsFloat,{passive:true});
 window.addEventListener('resize',syncReaderStatsFloat,{passive:true});
