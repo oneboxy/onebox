@@ -645,6 +645,7 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
   width: var(--reader-stats-float-width) !important;
   z-index: 60 !important;
   margin: 0 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
 }
 .reader-inline-stats-spacer.is-active { display: block; flex: 0 0 auto; }
 .reader-inline-stats-head {
