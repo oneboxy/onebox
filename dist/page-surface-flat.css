@@ -2463,7 +2463,7 @@ main:has(#workspace[data-tool="mine"]) {
 #calendarPickerDialog .calendar-picker-apply:hover,
 #calendarPickerDialog .calendar-picker-apply:focus-visible { background: transparent; outline: none; }
 
-/* Keep the selected calendar day quiet: emphasize its numeral only. */
+/* Keep the selected day border local to its numeral; leave the cell plain. */
 #workspace[data-tool="calendar"] .day.selected,
 #workspace[data-tool="calendar"] .day.selected:hover {
   border-color: transparent !important;
@@ -2471,26 +2471,28 @@ main:has(#workspace[data-tool="mine"]) {
   box-shadow: none !important;
 }
 #workspace[data-tool="calendar"] .day.selected > span {
-  position: relative;
   display: grid;
-  width: 24px;
-  height: 24px;
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
   padding: 0 !important;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  background: transparent !important;
   place-items: center;
   color: var(--primary);
   font-weight: 800;
   line-height: 1;
 }
-#workspace[data-tool="calendar"] .day.selected > span::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  width: 10px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--primary);
-  transform: translateX(-50%);
+#workspace[data-tool="calendar"] .calendar-today:hover,
+#workspace[data-tool="calendar"] .calendar-today:focus-visible,
+#workspace[data-tool="calendar"] .calendar-today:active {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--ink);
+  outline: none;
+  box-shadow: none !important;
+  transform: none !important;
 }
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] .calendar-today svg { width: 16px; height: 16px; }
