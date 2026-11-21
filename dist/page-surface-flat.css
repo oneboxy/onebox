@@ -1094,7 +1094,7 @@ main:has(#workspace[data-tool="mine"]) {
 }
 #navigationDialog .navigation-folder-dialog-card .navigation-folder-sites {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   align-items: start !important;
   justify-content: stretch !important;
   gap: 10px 8px;
@@ -1114,6 +1114,45 @@ main:has(#workspace[data-tool="mine"]) {
   background: transparent;
   box-shadow: none;
   overflow: visible;
+}
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card {
+  display: flex !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 82px !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 10px;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+}
+#navigationDialog .navigation-folder-sites > .navigation-folder-add-card:hover {
+  color: var(--primary);
+}
+#navigationDialog .navigation-folder-add-card .navigation-add-glyph {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px dashed currentColor;
+  border-radius: 15px;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1;
+}
+#navigationDialog .navigation-folder-add-card strong {
+  display: block !important;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 #navigationDialog .navigation-folder-sites .navigation-card-main {
   display: grid;
@@ -1314,7 +1353,7 @@ main:has(#workspace[data-tool="mine"]) {
   stroke-linejoin: round;
 }
 #navigationDialog .navigation-create-folder-sites {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 #navigationDialog .navigation-create-folder-sites > .navigation-folder-preview-item {
   display: grid;
@@ -1326,4 +1365,14 @@ main:has(#workspace[data-tool="mine"]) {
   width: 52px;
   height: 52px;
   border-radius: 10px;
+}
+@media (max-width: 600px) {
+  #navigationDialog .navigation-folder-sites .navigation-site-icon,
+  #navigationDialog .navigation-create-folder-sites .navigation-site-icon,
+  #navigationDialog .navigation-folder-add-card .navigation-add-glyph {
+    width: 44px;
+    height: 44px;
+  }
+  #navigationDialog .navigation-folder-add-card .navigation-add-glyph { border-radius: 12px; }
+  #navigationDialog .navigation-folder-add-card strong { font-size: 11px; }
 }
