@@ -2463,26 +2463,17 @@ main:has(#workspace[data-tool="mine"]) {
 #calendarPickerDialog .calendar-picker-apply:hover,
 #calendarPickerDialog .calendar-picker-apply:focus-visible { background: transparent; outline: none; }
 
-/* Keep the selected day border local to its numeral; leave the cell plain. */
+/* Select the full date cell, including its lunar/solar-term label, with a
+   theme-aware neutral outline and no fill. */
 #workspace[data-tool="calendar"] .day.selected,
 #workspace[data-tool="calendar"] .day.selected:hover {
-  border-color: transparent !important;
+  border-color: var(--line) !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 #workspace[data-tool="calendar"] .day.selected > span {
-  display: grid;
-  box-sizing: border-box;
-  width: 26px;
-  height: 26px;
-  padding: 0 !important;
-  border: 1px solid var(--primary);
-  border-radius: 6px;
-  background: transparent !important;
-  place-items: center;
-  color: var(--primary);
+  color: var(--ink);
   font-weight: 800;
-  line-height: 1;
 }
 #workspace[data-tool="calendar"] .calendar-today:hover,
 #workspace[data-tool="calendar"] .calendar-today:focus-visible,
@@ -2510,7 +2501,7 @@ main:has(#workspace[data-tool="mine"]) {
   flex-wrap: nowrap;
   min-width: 0;
   gap: 8px;
-  margin: 0;
+  margin: 0 0 0 12px;
   white-space: nowrap;
   font-size: 9px;
   line-height: 1;
@@ -2525,7 +2516,7 @@ main:has(#workspace[data-tool="mine"]) {
   #workspace[data-tool="calendar"] .calendar-month { gap: 4px; }
   #workspace[data-tool="calendar"] .calendar-today { flex-basis: 28px; width: 28px; height: 30px; }
   #workspace[data-tool="calendar"] .calendar-today svg { width: 16px; height: 16px; }
-  #workspace[data-tool="calendar"] .calendar-legend { gap: 5px; font-size: 8px; }
+  #workspace[data-tool="calendar"] .calendar-legend { gap: 5px; margin-left: 8px; font-size: 8px; }
   #workspace[data-tool="calendar"] .calendar-legend span { gap: 2px; }
   #workspace[data-tool="calendar"] .calendar-legend .dot { flex-basis: 4px; width: 4px; height: 4px; }
   #workspace[data-tool="calendar"] .calendar-grid { row-gap: 1px; }
