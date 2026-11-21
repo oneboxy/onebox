@@ -2159,18 +2159,11 @@ main:has(#workspace[data-tool="mine"]) {
 #toast .toast-close::before,
 #toast .toast-close::after { content: none !important; display: none !important; }
 
-/* Align feed reactions with the thumbnail's outer edge without changing the
-   article grid or the metadata row's vertical position. */
-#workspace[data-tool="home"] .feed-item.has-media {
-  --feed-reaction-side-width: 132px;
-  --feed-reaction-side-gap: 16px;
-}
-#workspace[data-tool="home"] .feed-item.has-media .feed-item-meta { position: relative; }
-#workspace[data-tool="home"] .feed-item.has-media .feed-item-reactions {
-  position: absolute;
-  top: 50%;
-  right: calc(-1 * (var(--feed-reaction-side-width) + var(--feed-reaction-side-gap)));
-  transform: translateY(-50%);
+/* Keep source, date and reactions in one full-width footer row. The grid places
+   it after both text and media, so short descriptions cannot overlap images. */
+#workspace[data-tool="home"] .feed-item .feed-item-meta {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 /* Pin the source direction icon to the end of the underline and strengthen
@@ -2180,16 +2173,6 @@ main:has(#workspace[data-tool="mine"]) {
   transform: translateX(4px);
 }
 #homeSourceNav .feed-source-panel .feed-source-manage svg { stroke-width: 2.3; }
-
-@media (max-width: 760px) {
-  #workspace[data-tool="home"] .feed-item.has-media {
-    --feed-reaction-side-width: 78px;
-    --feed-reaction-side-gap: 10px;
-  }
-}
-@media (max-width: 600px) {
-  #workspace[data-tool="home"] .feed-item.has-media { --feed-reaction-side-width: 84px; }
-}
 
 /* The source picker stays a four-column card grid at phone widths. */
 #homeSourceDialog .home-source-options {
@@ -2224,13 +2207,8 @@ main:has(#workspace[data-tool="mine"]) {
 /* Make the layers-plus strokes clearly visible at the existing icon size. */
 #homeSourceNav .feed-source-panel .feed-source-manage svg { stroke-width: 2.8; }
 
-/* Feed thumbnails use one crop shape at every breakpoint. Keep the reaction
-   controls above the media layer so short metadata rows remain clickable. */
+/* Feed thumbnails use one crop shape at every breakpoint. */
 #workspace[data-tool="home"] .feed-item.has-media .feed-item-media {
   height: auto;
   aspect-ratio: 4 / 3;
-}
-#workspace[data-tool="home"] .feed-item.has-media .feed-item-reactions {
-  z-index: 2;
-  pointer-events: auto;
 }
