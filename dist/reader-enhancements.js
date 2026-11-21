@@ -57,7 +57,7 @@ function syncReaderStatsFloat(){
     document.body.append(card);
   }
   if(spacer){
-    const flowMargins=parseFloat(spacer.dataset.readerFlowMargins)||0;
+    const flowMargins=window.matchMedia('(min-width: 761px)').matches?0:(parseFloat(spacer.dataset.readerFlowMargins)||0);
     spacer.style.height=(rect.height+flowMargins)+'px';spacer.classList.add('is-active')
   }
   card.classList.add('is-floating');

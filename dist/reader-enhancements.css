@@ -646,7 +646,7 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
   transform: translateX(-50%) !important;
   z-index: 60 !important;
   margin: 0 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
+  box-shadow: none !important;
 }
 .reader-inline-stats-spacer.is-active { display: block; flex: 0 0 auto; }
 .reader-inline-stats-head {
@@ -782,6 +782,9 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
   #workspace[data-tool="reader"] .reader-library-content .reader-book-grid.reader-book-list {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+@media (min-width: 761px) {
+  #workspace[data-tool="reader"] .reader-library-content .reader-book-grid { padding-top: 6px; }
 }
 #workspace[data-tool="reader"] .reader-book-list .reader-book-card {
   padding: 5px 0;
