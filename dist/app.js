@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.927';
+const APP_VERSION = '2.18.929';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1691,8 +1691,12 @@ function updateToolTabOverflowControls() {
   panel.classList.toggle('has-tool-overflow', hasOverflow);
   panel.classList.toggle('has-tool-overflow-left', hasPrevious);
   panel.classList.toggle('has-tool-overflow-right', hasNext);
+  const controlsChanged = previous.hidden === hasPrevious || next.hidden === hasNext;
   previous.hidden = !hasPrevious;
   next.hidden = !hasNext;
+  // The visible arrows sit beside the tabs and take up real layout space.
+  // Recheck after that space has been applied so the scroll limits stay exact.
+  if (controlsChanged) requestAnimationFrame(updateToolTabOverflowControls);
 }
 function scrollToolTabs(direction) {
   const tabs = nav.querySelector('.tool-tabs');
@@ -3668,22 +3672,17 @@ function navigationIconCandidateSources(value) {
   if (!url) return [];
   try {
     const parsed = new URL(url);
-    const bases = navigationAssetBases(url);
-    const direct = bases.flatMap((base) => [
-      new URL('apple-touch-icon.png', base).href,
-      new URL('apple-touch-icon-precomposed.png', base).href,
-      new URL('favicon.png', base).href,
-      new URL('favicon.ico', base).href,
-      new URL('favicon-96x96.png', base).href,
-      new URL('icons/icon.svg', base).href
-    ]);
+    const direct = ['apple-touch-icon.png', 'favicon.ico', 'favicon.png'].map((path) => new URL(path, parsed.origin + '/').href);
     const providers = [
       'https://www.google.com/s2/favicons?domain_url=' + encodeURIComponent(parsed.origin) + '&sz=256',
       'https://icons.duckduckgo.com/ip3/' + parsed.hostname + '.ico',
-      'https://icon.horse/icon/' + parsed.hostname
+      'https://ico.faviconkit.net/favicon/' + encodeURIComponent(parsed.hostname) + '?sz=128',
+      'https://favicon.gg/api/favicon/' + encodeURIComponent(parsed.hostname) + '?size=256&fallback=404',
+      'https://icon.horse/icon/' + parsed.hostname + '/256?fallback=404'
     ];
     const discovered = navigationIconSources(url);
-    return [...new Set([navigationCachedIcon(url), discovered[0], direct[0], direct[2], direct[3], direct[5], ...providers, ...discovered.slice(1), ...direct].filter(Boolean))].slice(0, 10);
+    const brandIcon = navigationUsesQQMailBrandIcon(url) || navigationUsesSpotifyBrandIcon(url) || navigationUsesDesktopBrandIcon(url) || navigationUsesOneBoxBrandIcon(url) ? discovered[0] : '';
+    return [...new Set([navigationCachedIcon(url), brandIcon, ...direct, ...providers].filter(Boolean))].slice(0, 10);
   } catch { return []; }
 }
 function navigationIconCandidateImageUrl(value, refreshIndex = 0) {
@@ -3704,12 +3703,66 @@ function navigationIconCandidatesMarkup(value, refreshIndex = 0, selectedIcon = 
     return '<button class="navigation-icon-candidate' + (source === selectedIcon ? ' is-selected' : '') + '" type="button" data-navigation-icon-choice data-icon-url="' + escapeHtml(source) + '" aria-label="' + escapeHtml(label) + '"><img src="' + escapeHtml(iconUrl) + '" alt="" loading="eager" decoding="async" referrerpolicy="no-referrer" onload="handleNavigationIconCandidateLoad(this)" onerror="handleNavigationIconCandidateError(this)"></button>';
   }).join('');
 }
-function handleNavigationIconCandidateLoad(image) {
+async function navigationIconCandidateVisualHash(image) {
+  if (!image || typeof fetch !== 'function' || typeof createImageBitmap !== 'function') return '';
+  try {
+    const response = await fetch(image.currentSrc || image.src, { mode: 'cors', credentials: 'omit', cache: 'force-cache', signal: AbortSignal.timeout(2500) });
+    if (!response.ok) return '';
+    const bitmap = await createImageBitmap(await response.blob());
+    const canvas = document.createElement('canvas');
+    canvas.width = 9;
+    canvas.height = 8;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) { bitmap.close?.(); return ''; }
+    context.clearRect(0, 0, 9, 8);
+    context.drawImage(bitmap, 0, 0, 9, 8);
+    bitmap.close?.();
+    const pixels = context.getImageData(0, 0, 9, 8).data;
+    const luminance = [];
+    for (let i = 0; i < pixels.length; i += 4) {
+      const alpha = pixels[i + 3] / 255;
+      luminance.push((pixels[i] * .299 + pixels[i + 1] * .587 + pixels[i + 2] * .114) * alpha + 255 * (1 - alpha));
+    }
+    let hash = '';
+    for (let y = 0; y < 8; y += 1) {
+      for (let x = 0; x < 8; x += 1) hash += luminance[y * 9 + x] >= luminance[y * 9 + x + 1] ? '1' : '0';
+    }
+    return hash;
+  } catch { return ''; }
+}
+function collapseNavigationIconCandidates(form) {
+  if (!form) return;
+  const images = $$('[data-navigation-icon-choice] img[data-visual-hash]', form);
+  const selected = form.dataset.selectedIcon || '';
+  for (let i = 0; i < images.length; i += 1) {
+    for (let j = i + 1; j < images.length; j += 1) {
+      const first = images[i];
+      const second = images[j];
+      if (!first?.isConnected || !second?.isConnected) continue;
+      const firstHash = first.dataset.visualHash;
+      const secondHash = second.dataset.visualHash;
+      if (!firstHash || !secondHash || firstHash.length !== secondHash.length) continue;
+      let distance = 0;
+      for (let bit = 0; bit < firstHash.length; bit += 1) if (firstHash[bit] !== secondHash[bit] && ++distance > 2) break;
+      if (distance > 2) continue;
+      const firstButton = first.closest('[data-navigation-icon-choice]');
+      const secondButton = second.closest('[data-navigation-icon-choice]');
+      if (firstButton?.dataset.iconUrl === selected) secondButton?.remove();
+      else if (secondButton?.dataset.iconUrl === selected) firstButton?.remove();
+      else secondButton?.remove();
+    }
+  }
+}
+async function handleNavigationIconCandidateLoad(image) {
   const form = image?.closest?.('#navigationSiteForm');
   if (form && Number(form.dataset.navigationCandidatesPending || 0) > 0) {
     form.dataset.navigationCandidatesPending = String(Number(form.dataset.navigationCandidatesPending) - 1);
     if (Number(form.dataset.navigationCandidatesPending) === 0) $('[data-navigation-refresh-icons]', form)?.classList.remove('is-refreshing');
   }
+  const visualHash = await navigationIconCandidateVisualHash(image);
+  if (!visualHash || !image?.isConnected) return;
+  image.dataset.visualHash = visualHash;
+  collapseNavigationIconCandidates(form);
 }
 function handleNavigationIconCandidateError(image) {
   const button = image?.closest?.('[data-navigation-icon-choice]');

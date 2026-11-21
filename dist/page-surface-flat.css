@@ -383,6 +383,7 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
     border-radius: 11px !important;
   }
 }
+
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
   border: 1px solid var(--line) !important;
   border-radius: 12px !important;
@@ -2031,3 +2032,52 @@ main:has(#workspace[data-tool="mine"]) {
     border-radius: 11px !important;
   }
 }
+
+/* Keep the dialog's refresh and save controls compact beside the inputs. */
+#navigationDialog .navigation-site-dialog-card .navigation-icon-refresh {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  flex-basis: 24px !important;
+}
+#navigationDialog .navigation-site-dialog-card .navigation-icon-refresh svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+#navigationDialog .navigation-form:not(.navigation-folder-form) .navigation-save-button {
+  width: 26px !important;
+  height: 26px !important;
+  flex-basis: 26px !important;
+}
+#navigationDialog .navigation-form:not(.navigation-folder-form) .navigation-save-button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Keep tab scrolling controls together at the rail's right edge. This avoids
+   leaving a control-sized hole before the first tab or covering the last tab. */
+#toolNav .tool-tab-panel {
+  display: flex !important;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+#toolNav .tool-tabs {
+  order: 0;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+#toolNav .tool-tab-panel .feed-source-scroll-button {
+  position: relative;
+  inset: auto;
+  order: 1;
+  flex: 0 0 28px;
+  width: 28px;
+  min-width: 28px;
+  height: 100%;
+  background: transparent !important;
+}
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="next"] { order: 2; }
+#toolNav .tool-tab-panel .feed-source-scroll-button svg { width: 18px; height: 18px; }
