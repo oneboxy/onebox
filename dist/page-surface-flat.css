@@ -2244,3 +2244,8 @@ main:has(#workspace[data-tool="mine"]) {
 @media (max-width: 600px) {
   #homeSourceDialog .dialog-head h2 { font-size: 15px; }
 }
+
+/* Keep the add-source action out of the default tab width. Interaction can
+   reveal it briefly when selecting, scrolling, reordering or focusing tabs. */
+#homeSourceNav .feed-source-panel .feed-source-manage { display: none; }
+#homeSourceNav .feed-source-panel.is-manage-visible .feed-source-manage { display: grid; }
