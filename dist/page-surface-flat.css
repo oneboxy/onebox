@@ -2067,25 +2067,35 @@ main:has(#workspace[data-tool="mine"]) {
   width: 100%;
   min-width: 0;
   padding-left: 0;
+  padding-right: 0;
 }
-#toolNav .tool-tab-panel.has-tool-overflow .tool-tabs {
-  width: calc(100% - 48px);
+#toolNav .tool-tabs::after {
+  content: '';
+  flex: 0 0 var(--tool-tab-tail-space, 0px);
+}
+#toolNav .tool-tab-panel.has-tool-overflow-left:not(.has-tool-overflow-right) .tool-tabs,
+#toolNav .tool-tab-panel.has-tool-overflow-right:not(.has-tool-overflow-left) .tool-tabs {
+  width: calc(100% - 32px);
+}
+#toolNav .tool-tab-panel.has-tool-overflow-left.has-tool-overflow-right .tool-tabs {
+  width: calc(100% - 52px);
 }
 #toolNav .tool-tab-panel .feed-source-scroll-button {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 10px;
   bottom: 0;
   z-index: 3;
-  width: 24px;
-  min-width: 24px;
+  width: 20px;
+  min-width: 20px;
   height: 100%;
   padding: 0;
   border: 0;
   background: transparent !important;
 }
-#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="previous"] { right: 24px; }
-#toolNav .tool-tab-panel .feed-source-scroll-button svg { width: 17px; height: 17px; }
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="previous"] { right: 30px; }
+#toolNav .tool-tab-panel.has-tool-overflow-left:not(.has-tool-overflow-right) .feed-source-scroll-button[data-tool-scroll="previous"] { right: 10px; }
+#toolNav .tool-tab-panel .feed-source-scroll-button svg { width: 16px; height: 16px; }
 @media (max-width: 760px) {
   #toolNav {
     left: 0;
@@ -2097,3 +2107,8 @@ main:has(#workspace[data-tool="mine"]) {
   }
   #toolNav .tool-tabs { padding-left: 4px; }
 }
+
+/* Match the global toast close affordance to the same Lucide x mark. */
+#toast .toast-close svg { display: block !important; width: 12px; height: 12px; }
+#toast .toast-close::before,
+#toast .toast-close::after { content: none !important; display: none !important; }

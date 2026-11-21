@@ -81,7 +81,7 @@
     return '<div class="dev-file-compare-file-card' + (item.loading ? ' is-loading' : '') + '">' +
       '<div class="dev-file-compare-file-icon" aria-hidden="true">' + escape(item.file.name.split('.').pop().slice(0, 4).toUpperCase()) + '</div>' +
       '<div class="dev-file-compare-file-meta"><strong title="' + escape(item.file.name) + '">' + escape(item.file.name) + '</strong><span>' + typeLabel(item.kind) + ' · ' + formatSize(item.file.size) + '</span></div>' +
-      (item.loading ? '<span class="dev-file-compare-spinner" role="status" aria-label="' + words('正在解析', 'Parsing') + '"></span>' : '<button type="button" class="dev-file-compare-remove" data-fc-action="remove-' + side + '" aria-label="' + words('移除文件', 'Remove file') + '">×</button>') +
+      (item.loading ? '<span class="dev-file-compare-spinner" role="status" aria-label="' + words('正在解析', 'Parsing') + '"></span>' : '<button type="button" class="dev-file-compare-remove" data-fc-action="remove-' + side + '" aria-label="' + words('移除文件', 'Remove file') + '"><svg class="lucide lucide-x" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>') +
       (item.error ? '<p class="dev-file-compare-file-error">' + escape(item.error) + '</p>' : '') + '</div>';
   }
 
