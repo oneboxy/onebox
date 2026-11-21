@@ -774,7 +774,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 .reader-inline-stats-summary strong { overflow: hidden; color: var(--ink, #252a35); font-size: 12px; font-weight: 400; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .reader-inline-stats-history {
   width: 100%;
-  margin: 8px 0 0;
+  margin: 12px 0 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -826,7 +826,8 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-inline-action { flex-basis: 30px; width: 30px; min-width: 30px; height: 30px; min-height: 30px; }
   .reader-inline-action svg, .reader-inline-stats .reader-layout-toggle svg { width: 17px; height: 17px; }
   .reader-inline-stats-summary { gap: 5px; margin-top: 8px; }
-  .reader-inline-stats-summary > div { padding: 6px; }
+  .reader-inline-stats-summary > div { padding: 7px; }
+  .reader-inline-stats-history { margin-top: 10px; }
   .reader-inline-stats-summary small, .reader-inline-stats-summary strong { font-size: 10px; }
   .reader-inline-stats .reader-stats-heatmap { gap: 2px; }
 }
