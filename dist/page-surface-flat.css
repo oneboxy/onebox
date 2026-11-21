@@ -2427,6 +2427,7 @@ main:has(#workspace[data-tool="mine"]) {
 #workspace[data-tool="calendar"] .calendar-grid { row-gap: 2px; }
 #workspace[data-tool="calendar"] .dow { padding-block: 4px; }
 #workspace[data-tool="calendar"] .day { min-height: 64px; padding-block: 4px; }
+#workspace[data-tool="calendar"] .calendar-today { color: var(--ink); opacity: 1; }
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] .calendar-month { gap: 4px; }
   #workspace[data-tool="calendar"] .calendar-today { flex-basis: 28px; width: 28px; height: 30px; }
