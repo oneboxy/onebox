@@ -2223,3 +2223,14 @@ main:has(#workspace[data-tool="mine"]) {
 
 /* Make the layers-plus strokes clearly visible at the existing icon size. */
 #homeSourceNav .feed-source-panel .feed-source-manage svg { stroke-width: 2.8; }
+
+/* Feed thumbnails use one crop shape at every breakpoint. Keep the reaction
+   controls above the media layer so short metadata rows remain clickable. */
+#workspace[data-tool="home"] .feed-item.has-media .feed-item-media {
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+#workspace[data-tool="home"] .feed-item.has-media .feed-item-reactions {
+  z-index: 2;
+  pointer-events: auto;
+}
