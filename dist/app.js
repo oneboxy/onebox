@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.945';
+const APP_VERSION = '2.18.946';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -137,8 +137,6 @@ const homeSourceNav = document.createElement('nav');
 homeSourceNav.id = 'homeSourceNav';
 homeSourceNav.setAttribute('aria-label', '首页来源切换');
 const homeSourceNavPlaceholder = document.createComment('home source navigation position');
-let homeSourceManageVisibleUntil = 0;
-let homeSourceManageRevealTimer = 0;
 pageSwipeStage.parentNode.insertBefore(homeSourceNavPlaceholder, pageSwipeStage);
 pageSwipeStage.parentNode.insertBefore(homeSourceNav, pageSwipeStage);
 function syncDesktopPageTabs() {
@@ -1864,12 +1862,11 @@ function saveHomeFeedVisibility() { saveStored(STORAGE.homeFeedVisibility, state
 function swapHomeFeedSources(from, to) {
   if (from === to || from == null || to == null) return;
   [state.homeFeed.order[from], state.homeFeed.order[to]] = [state.homeFeed.order[to], state.homeFeed.order[from]];
-  saveHomeFeedOrder(); revealHomeSourceManageTemporarily(); render();
+  saveHomeFeedOrder(); render();
   toast(state.language === 'en' ? 'Feed order saved' : '订阅源顺序已保存');
 }
 function selectHomeFeedSource(sourceId) {
   if (!homeTabIds().includes(sourceId)) return;
-  revealHomeSourceManageTemporarily();
   state.homeFeed.active = sourceId;
   saveActiveHomeFeedPreference();
   if (sourceId === 'footprint') {
@@ -1956,21 +1953,9 @@ function updateHomeFeedOverflowControls() {
   }
   if (layoutChanged) requestAnimationFrame(updateHomeFeedOverflowControls);
 }
-function revealHomeSourceManageTemporarily() {
-  homeSourceManageVisibleUntil = Date.now() + 4000;
-  homeSourceNav.querySelector('.feed-source-panel')?.classList.add('is-manage-visible');
-  window.clearTimeout(homeSourceManageRevealTimer);
-  homeSourceManageRevealTimer = window.setTimeout(() => {
-    homeSourceManageVisibleUntil = 0;
-    homeSourceNav.querySelector('.feed-source-panel')?.classList.remove('is-manage-visible');
-    requestAnimationFrame(updateHomeFeedOverflowControls);
-  }, 4000);
-  requestAnimationFrame(updateHomeFeedOverflowControls);
-}
 function scrollHomeFeedTabs(direction) {
   const tabs = homeSourceNav.querySelector('.feed-source-tabs');
   if (!tabs) return;
-  revealHomeSourceManageTemporarily();
   const tabItems = $$('.feed-source-tab', tabs);
   if (!tabItems.length) return;
   const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
@@ -3656,7 +3641,6 @@ function renderHomeSourceNav() {
   homeSourceNav.innerHTML = state.section === 'home' ? '<div class="feed-source-panel"><button class="feed-source-manage" type="button" data-open-home-source-picker aria-label="' + escapeHtml(t('homeSourceManage')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a1.99 1.99 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.831z"/><path d="M16 17h6"/><path d="M19 14v6"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 .825.178"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l2.116-.962"/></svg></button><div class="feed-source-tabs" role="tablist" aria-label="RSS 来源">' + homeSourceTabsMarkup() + '</div><button class="feed-source-scroll-button" data-feed-source-scroll="toggle" data-scroll-direction="right" type="button" hidden aria-label="' + escapeHtml(t('feedTabNext')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg></button></div>' : '';
   const nextTabs = homeSourceNav.querySelector('.feed-source-tabs');
   if (nextTabs) {
-    homeSourceNav.querySelector('.feed-source-panel')?.classList.toggle('is-manage-visible', Date.now() < homeSourceManageVisibleUntil);
     nextTabs.scrollLeft = Math.min(previousScrollLeft, Math.max(0, nextTabs.scrollWidth - nextTabs.clientWidth));
     nextTabs.addEventListener('scroll', updateHomeFeedOverflowControls, { passive: true });
     requestAnimationFrame(updateHomeFeedOverflowControls);
@@ -15019,18 +15003,11 @@ nav.addEventListener('dragstart', (event) => { const tab = event.target.closest(
 nav.addEventListener('dragover', (event) => { if (event.target.closest('[data-tool]')) event.preventDefault(); });
   nav.addEventListener('drop', (event) => { event.preventDefault(); const tab = event.target.closest('[data-tool]'); if (tab) swapToolOrder(Number(event.dataTransfer.getData('text/plain')), Number(tab.dataset.toolIndex)); });
 
-homeSourceNav.addEventListener('pointerenter', (event) => {
-  if (event.pointerType === 'mouse') revealHomeSourceManageTemporarily();
-});
-homeSourceNav.addEventListener('focusin', revealHomeSourceManageTemporarily);
 homeSourceNav.addEventListener('pointerdown', (event) => {
   const source = event.target.closest('[data-feed-source]');
   if (source?.dataset.feedSourceIndex != null) startLongPress(source, 'feed', Number(source.dataset.feedSourceIndex), event);
 });
-homeSourceNav.addEventListener('pointerup', (event) => {
-  endLongPress();
-  if (event.pointerType !== 'mouse') window.setTimeout(revealHomeSourceManageTemporarily, 0);
-});
+homeSourceNav.addEventListener('pointerup', endLongPress);
 homeSourceNav.addEventListener('pointercancel', endLongPress);
 homeSourceNav.addEventListener('click', (event) => {
   if (event.target.closest('[data-open-home-source-picker]')) {

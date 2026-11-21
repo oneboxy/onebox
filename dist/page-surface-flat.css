@@ -2145,10 +2145,13 @@ main:has(#workspace[data-tool="mine"]) {
   width: 24px;
   min-width: 24px;
   height: 100%;
-  background: transparent;
+  background: transparent !important;
   color: var(--muted);
   opacity: .92;
+  box-shadow: none !important;
 }
+#homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"]::before,
+#homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"]::after { content: none !important; display: none !important; }
 #homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"]:hover { color: var(--ink); }
 @media (max-width: 600px) {
   #homeSourceNav .feed-source-panel .feed-source-manage { flex-basis: 32px; width: 32px; }
@@ -2209,6 +2212,7 @@ main:has(#workspace[data-tool="mine"]) {
 }
 
 /* Make the layers-plus strokes clearly visible at the existing icon size. */
+#homeSourceNav .feed-source-panel .feed-source-manage { color: var(--ink); opacity: 1; }
 #homeSourceNav .feed-source-panel .feed-source-manage svg { stroke-width: 2.8; }
 
 /* Feed thumbnails use one crop shape at every breakpoint. */
@@ -2244,8 +2248,3 @@ main:has(#workspace[data-tool="mine"]) {
 @media (max-width: 600px) {
   #homeSourceDialog .dialog-head h2 { font-size: 15px; }
 }
-
-/* Keep the add-source action out of the default tab width. Interaction can
-   reveal it briefly when selecting, scrolling, reordering or focusing tabs. */
-#homeSourceNav .feed-source-panel .feed-source-manage { display: none; }
-#homeSourceNav .feed-source-panel.is-manage-visible .feed-source-manage { display: grid; }
