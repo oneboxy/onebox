@@ -1402,3 +1402,10 @@ main:has(#workspace[data-tool="mine"]) {
   filter: none !important;
   transition: none !important;
 }
+
+/* Tighten the vertical rhythm between launcher rows. */
+#workspace[data-tool="navigation"] .navigation-grid { row-gap: 10px !important; }
+#navigationDialog .navigation-folder-dialog-card .navigation-folder-sites { row-gap: 6px !important; }
+@media (max-width: 600px) {
+  #workspace[data-tool="navigation"] .navigation-grid { row-gap: 8px !important; }
+}
