@@ -1053,109 +1053,154 @@ main:has(#workspace[data-tool="mine"]) {
 #navigationDialog .navigation-create-folder-card .navigation-folder-name-field {
   margin: 0;
 }
-#navigationDialog .navigation-folder-dialog-card .navigation-folder-sites {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch !important;
+#navigationDialog .navigation-folder-dialog-card .navigation-folder-name-field input {
+  padding-right: 98px;
+}
+#navigationDialog .navigation-folder-inline-actions {
   gap: 0;
-  width: 100%;
-  max-height: min(38vh, 260px);
-  overflow: auto;
-  margin: 8px 0 2px;
-  padding: 0;
 }
-#navigationDialog .navigation-folder-site-row {
+#navigationDialog .navigation-folder-inline-actions .navigation-folder-add-button,
+#navigationDialog .navigation-folder-inline-actions .navigation-folder-dissolve-button {
+  color: var(--muted);
+}
+#navigationDialog .navigation-folder-inline-actions .navigation-folder-dissolve-button:hover {
+  color: var(--danger);
+}
+#navigationDialog .navigation-folder-inline-actions .navigation-folder-add-button,
+#navigationDialog .navigation-folder-inline-actions .navigation-folder-dissolve-button,
+#navigationDialog .navigation-folder-inline-actions .navigation-save-button {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 28px;
-  align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
-}
-#navigationDialog .navigation-folder-site-row:last-child { border-bottom: 0; }
-#navigationDialog .navigation-folder-site-row .navigation-site-icon,
-#navigationDialog .navigation-folder-site-row .navigation-folder-row-icon {
-  width: 26px;
-  height: 26px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-}
-#navigationDialog .navigation-folder-site-row strong {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 400;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#navigationDialog .navigation-folder-remove {
-  display: grid;
-  width: 26px;
-  height: 26px;
+  width: 29px;
+  min-width: 29px;
+  height: 30px;
+  flex: 0 0 29px;
   place-items: center;
   padding: 0;
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--muted);
+  box-shadow: none;
   cursor: pointer;
 }
-#navigationDialog .navigation-folder-remove:hover { color: var(--danger); background: transparent; }
-#navigationDialog .navigation-folder-remove svg {
-  width: 15px;
-  height: 15px;
+#navigationDialog .navigation-folder-inline-actions .navigation-folder-add-button svg,
+#navigationDialog .navigation-folder-inline-actions .navigation-folder-dissolve-button svg {
+  width: 17px;
+  height: 17px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+#navigationDialog .navigation-folder-dialog-card .navigation-folder-sites {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: start !important;
+  justify-content: stretch !important;
+  gap: 10px 8px;
+  width: 100%;
+  max-height: min(48vh, 360px);
+  overflow: auto;
+  margin: 10px 0 0;
+  padding: 0;
+}
+#navigationDialog .navigation-folder-sites > .navigation-site-card {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 82px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main {
+  display: grid;
+  width: 100%;
+  height: 82px;
+  min-height: 82px;
+  place-items: center;
+  padding: 3px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-main strong { display: none !important; }
+#navigationDialog .navigation-folder-sites .navigation-site-icon {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: transparent;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-actions {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+#navigationDialog .navigation-folder-sites .navigation-primary-actions { display: none !important; }
+#navigationDialog .navigation-folder-sites .navigation-secondary-actions {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  transform: translateX(-50%) !important;
+}
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-long-pressed .navigation-card-actions,
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-actions-visible .navigation-card-actions {
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-long-pressed .navigation-secondary-actions,
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-actions-visible .navigation-secondary-actions { pointer-events: auto !important; }
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-long-pressed .navigation-site-icon,
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-actions-visible .navigation-site-icon { transform: translateY(-10px); }
+#navigationDialog .navigation-folder-sites .navigation-card-actions button {
+  position: static !important;
+  display: grid !important;
+  width: 25px !important;
+  height: 25px !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  pointer-events: auto !important;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-actions .navigation-delete-action,
+#navigationDialog .navigation-folder-sites .navigation-card-actions .navigation-delete-action:hover,
+#navigationDialog .navigation-folder-sites .navigation-card-actions .navigation-delete-action:focus-visible {
+  order: 1;
+  color: #ef4444 !important;
+}
+#navigationDialog .navigation-folder-sites .navigation-card-actions .navigation-edit-action { order: 2; }
+#navigationDialog .navigation-folder-sites .navigation-card-actions svg {
+  width: 14px !important;
+  height: 14px !important;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#navigationDialog .navigation-folder-sites .navigation-delete-action svg { stroke: #ef4444 !important; }
+#navigationDialog .navigation-folder-sites .navigation-site-card.navigation-actions-visible { background: color-mix(in srgb, var(--ink) 5%, var(--panel)); }
 #navigationDialog .navigation-folder-empty {
   margin: 6px 0;
   color: var(--muted);
   font-size: 12px;
   text-align: center;
-}
-#navigationDialog .navigation-folder-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
-}
-#navigationDialog .navigation-folder-actions button {
-  display: inline-flex;
-  width: auto !important;
-  min-width: 0 !important;
-  flex: 0 0 auto !important;
-  min-height: 30px;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 4px 2px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 400;
-  box-shadow: none;
-  cursor: pointer;
-}
-#navigationDialog .navigation-folder-actions button:hover { background: transparent; color: var(--ink); transform: none; }
-#navigationDialog .navigation-folder-actions .navigation-folder-dissolve-button:hover { color: var(--danger); }
-#navigationDialog .navigation-folder-actions button svg {
-  width: 15px;
-  height: 15px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 #navigationDialog .navigation-folder-draft {
   justify-content: flex-start;
@@ -1188,6 +1233,6 @@ main:has(#workspace[data-tool="mine"]) {
 @media (max-width: 600px) {
   #navigationDialog .navigation-folder-dialog-card,
   #navigationDialog .navigation-create-folder-card { padding: 10px 12px; }
-  #navigationDialog .navigation-folder-dialog-card .navigation-folder-sites { max-height: min(34vh, 220px); }
+  #navigationDialog .navigation-folder-dialog-card .navigation-folder-sites { max-height: min(48vh, 360px); }
   #navigationDialog .navigation-folder-draft { gap: 8px; }
 }
