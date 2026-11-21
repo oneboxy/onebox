@@ -37,11 +37,47 @@ function statsMarkup(){
   const expanded='<div class="reader-inline-stats-expanded" aria-hidden="'+(!statsExpanded)+'"><div class="reader-inline-stats-summary">'+metric(tx('书架','Books'),shelfCount+tx('本',''))+metric(tx('天数','Days'),activeDays+'')+metric(tx('时长','Time'),duration(aggregate.total))+metric(tx('今日','Today'),duration(aggregate.days[today]||0))+'</div><div class="reader-inline-stats-history">'+statsHeatmapMarkup(aggregate)+'</div></div>';
   return '<section class="reader-inline-stats'+(statsExpanded?' is-expanded':'')+'" aria-label="'+tx('阅读统计','Reading statistics')+'"><div class="reader-inline-stats-head">'+compact+'<div class="reader-inline-stats-actions"><button type="button" class="reader-inline-action" data-open-reader-file aria-label="'+tx('导入文件','Import file')+'" title="'+tx('导入文件','Import file')+'">'+importIcon+'</button><button type="button" class="reader-inline-action" data-reader-opds aria-label="'+tx('书源','Sources')+'" title="'+tx('书源','Sources')+'">'+sourceIcon+'</button><button type="button" class="reader-inline-action reader-layout-toggle" data-reader-layout-toggle aria-label="'+tx('切换布局','Switch layout')+'" title="'+tx('切换布局','Switch layout')+'">'+layoutIcon+'</button><button type="button" class="reader-inline-action reader-stats-expand-toggle" data-reader-stats-toggle aria-expanded="'+statsExpanded+'" aria-label="'+tx(statsExpanded?'收起统计':'展开统计',statsExpanded?'Collapse statistics':'Expand statistics')+'" title="'+tx(statsExpanded?'收起统计':'展开统计',statsExpanded?'Collapse statistics':'Expand statistics')+'">'+expandIcon+'</button></div></div>'+expanded+'</section>';
 }
-window.addEventListener('onebox:reader-stats-updated',()=>{const current=document.querySelector('.reader-inline-stats');if(current)current.outerHTML=statsMarkup()});
+function syncReaderStatsFloat(){
+  const card=document.querySelector('#workspace[data-tool="reader"] .reader-inline-stats');
+  const spacer=card?.nextElementSibling?.classList.contains('reader-inline-stats-spacer')?card.nextElementSibling:null;
+  if(!card){spacer?.remove();return}
+  const header=document.querySelector('.app-header')?.getBoundingClientRect();
+  const nav=document.querySelector('#toolNav');
+  const navRect=nav&&!nav.hidden?nav.getBoundingClientRect():null;
+  const top=Math.max(header?.bottom||0,navRect?.bottom||0)+6;
+  const floating=card.classList.contains('is-floating');
+  const naturalTop=floating&&spacer?spacer.getBoundingClientRect().top-(Number.parseFloat(spacer.style.height)||0):card.getBoundingClientRect().top;
+  const main=document.querySelector('main');
+  const hasScrolled=(window.scrollY||document.documentElement.scrollTop||document.body.scrollTop||0)>0||(main?.scrollTop||0)>0;
+  if(naturalTop<=top&&hasScrolled){
+    const rect=card.getBoundingClientRect();
+    const parentRect=card.parentElement.getBoundingClientRect();
+    const width=Math.min(parentRect.width,900);
+    const left=parentRect.left+(parentRect.width-width)/2;
+    let placeholder=spacer;
+    if(!placeholder){placeholder=document.createElement('div');placeholder.className='reader-inline-stats-spacer';card.after(placeholder)}
+    placeholder.style.height=rect.height+'px';
+    placeholder.classList.add('is-active');
+    card.style.setProperty('--reader-stats-float-top',top+'px');
+    card.style.setProperty('--reader-stats-float-left',left+'px');
+    card.style.setProperty('--reader-stats-float-width',width+'px');
+    card.classList.add('is-floating');
+  }else if(floating){
+    card.classList.remove('is-floating');
+    card.style.removeProperty('--reader-stats-float-top');
+    card.style.removeProperty('--reader-stats-float-left');
+    card.style.removeProperty('--reader-stats-float-width');
+    spacer?.remove();
+  }
+}
+document.addEventListener('scroll',syncReaderStatsFloat,{passive:true,capture:true});
+window.addEventListener('scroll',syncReaderStatsFloat,{passive:true});
+window.addEventListener('resize',syncReaderStatsFloat,{passive:true});
+window.addEventListener('onebox:reader-stats-updated',()=>{const current=document.querySelector('.reader-inline-stats');if(current){current.outerHTML=statsMarkup();requestAnimationFrame(syncReaderStatsFloat)}});
 document.addEventListener('click',event=>{
   const toggle=event.target.closest('[data-reader-stats-toggle]');
   if(!toggle)return;
-  statsExpanded=!statsExpanded;const current=document.querySelector('.reader-inline-stats');if(current)current.outerHTML=statsMarkup();
+  statsExpanded=!statsExpanded;const current=document.querySelector('.reader-inline-stats');if(current){current.outerHTML=statsMarkup();requestAnimationFrame(syncReaderStatsFloat)}
 });
 
 function modalShell(title,body,dialogClass=''){closeModal();const node=document.createElement('div');node.className='reader-extra-overlay';node.dataset.readerExtraOverlay='';node.innerHTML='<section class="reader-extra-dialog '+dialogClass+'" role="dialog" aria-modal="true" aria-label="'+esc(title)+'"><header><strong>'+esc(title)+'</strong><button type="button" data-extra-close aria-label="'+tx('关闭','Close')+'">×</button></header><div class="reader-extra-body">'+body+'</div></section>';document.body.append(node);return node}
