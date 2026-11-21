@@ -629,6 +629,9 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
 .reader-book-list .reader-book-cover-meta { gap: 1px; }
 .reader-book-list .reader-book-cover-meta i { font-size: 4px; }
 .reader-inline-stats {
+  position: sticky;
+  top: calc(var(--app-header-height, 56px) + 49px);
+  z-index: 30;
   width: min(100%, 900px);
   margin: 14px auto 12px;
   padding: 8px 10px;
@@ -637,6 +640,7 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
   background: var(--panel, #fff);
   color: var(--ink, #252a35);
 }
+html.standalone-pwa .reader-inline-stats { top: 48px; }
 .reader-inline-stats-head {
   display: flex;
   align-items: center;

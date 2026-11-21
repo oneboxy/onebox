@@ -4449,7 +4449,7 @@ html.reader-focus .shell { width: 100%; padding: 0; }
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     overflow-y: visible !important;
   }
   #workspace[data-tool="reader"] .reader-library-view { min-height: 0 !important; }
