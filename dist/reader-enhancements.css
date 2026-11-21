@@ -624,6 +624,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 .reader-book-cover-meta i { color: rgba(30, 36, 48, .48); font-size: 7px; font-style: normal; }
 .reader-book-cover-progress { display: none; }
 .reader-book-grid-cards .reader-book-copy { display: none !important; }
+html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image { filter: brightness(.84); }
 .reader-book-list .reader-book-cover-info { right: 3px; bottom: 3px; left: 3px; gap: 2px; font-size: 4.5px; }
 .reader-book-list .reader-book-cover-meta { gap: 1px; }
 .reader-book-list .reader-book-cover-meta i { font-size: 4px; }
