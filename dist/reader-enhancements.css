@@ -748,7 +748,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 }
 .reader-inline-stats .reader-stats-summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   flex: 0 1 auto;
   width: max-content;
   max-width: 100%;
@@ -849,7 +849,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-inline-action svg { width: 16px; height: 16px; }
   .reader-inline-stats-row .reader-layout-toggle { width: 24px; min-width: 24px; flex-basis: 24px; height: 30px; min-height: 30px; padding: 2px; }
   .reader-inline-stats-row .reader-layout-toggle svg { width: 16px; height: 16px; }
-  .reader-inline-stats .reader-stats-summary { grid-template-columns: repeat(4, 1fr); flex: 0 1 auto; width: max-content; max-width: 100%; gap: 6px; }
+  .reader-inline-stats .reader-stats-summary { grid-template-columns: repeat(3, 1fr); flex: 0 1 auto; width: max-content; max-width: 100%; gap: 6px; }
   .reader-inline-stats .reader-stats-summary .reader-stat-card { min-height: 36px; gap: 3px; padding: 4px; border-radius: 7px; }
   .reader-inline-stats .reader-stats-summary .reader-stat-card small,
   .reader-inline-stats .reader-stats-summary .reader-stat-card strong { font-size: 10px; }
@@ -911,6 +911,8 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   padding: 12px;
 }
 .reader-stat-popover-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.reader-stat-popover-duration { display: flex; align-items: baseline; gap: 8px; padding: 3px 0 1px; }
+.reader-stat-popover-duration[hidden] { display: none; }
 .reader-stat-popover-heading > div { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .reader-stat-popover-heading button { display: grid; flex: 0 0 24px; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted, #737b8c); font-size: 18px; line-height: 1; cursor: pointer; }
 .reader-stat-popover-heading button:hover { background: transparent; color: var(--muted, #737b8c); transform: none; }
