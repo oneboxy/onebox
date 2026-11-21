@@ -2341,3 +2341,66 @@ main:has(#workspace[data-tool="mine"]) {
   #workspace[data-tool="calendar"] .calendar-month { gap: 6px; }
   #workspace[data-tool="calendar"] .day { min-height: 62px; padding: 5px 2px; }
 }
+
+/* Minimal year/month picker: outlined selection and an unboxed close action. */
+#calendarPickerDialog { background: rgba(12, 16, 28, .34); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+#calendarPickerDialog .calendar-picker-dialog-card {
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .16);
+}
+#calendarPickerDialog .calendar-picker-dialog-head { align-items: center; margin-bottom: 12px; }
+#calendarPickerDialog .icon-btn.small[data-close-calendar-picker] {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 8px;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+  transform: none !important;
+}
+#calendarPickerDialog .icon-btn.small[data-close-calendar-picker]:hover,
+#calendarPickerDialog .icon-btn.small[data-close-calendar-picker]:focus-visible {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--ink);
+  outline: none;
+  box-shadow: none !important;
+}
+#calendarPickerDialog .icon-btn.small[data-close-calendar-picker]:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  outline-offset: -3px;
+}
+#calendarPickerDialog .calendar-picker-options { gap: 6px; }
+#calendarPickerDialog .calendar-picker-options.month-options { gap: 6px; }
+#calendarPickerDialog .calendar-picker-option {
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent !important;
+  color: var(--ink);
+  transition: border-color .14s ease, color .14s ease;
+}
+#calendarPickerDialog .calendar-picker-option.selected {
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--line));
+  background: transparent !important;
+  color: var(--primary);
+  font-weight: 600;
+}
+#calendarPickerDialog .calendar-picker-option:hover,
+#calendarPickerDialog .calendar-picker-option:focus-visible {
+  border-color: var(--line);
+  background: transparent !important;
+  outline: none;
+}
+#calendarPickerDialog .calendar-picker-option.selected:hover,
+#calendarPickerDialog .calendar-picker-option.selected:focus-visible {
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--line));
+}
+@media (max-width: 760px) {
+  #calendarPickerDialog .calendar-picker-dialog-card { padding: 15px; border-radius: 16px; }
+}
