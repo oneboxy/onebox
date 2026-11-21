@@ -619,16 +619,15 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   justify-content: space-between;
   gap: 4px;
   min-width: 0;
-  padding: 4px 5px 7px;
-  border: 1px solid rgba(255, 255, 255, .78);
-  border-radius: 7px;
-  background: rgba(255, 255, 255, .88);
-  color: #303745;
-  font-size: 8px;
+  padding: 3px 4px 6px;
+  border: 1px solid rgba(35, 45, 65, .08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .74);
+  color: #424b5a;
+  font-size: 7px;
   font-weight: 500;
   line-height: 1;
-  box-shadow: 0 1px 3px rgba(20, 28, 44, .12);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
   pointer-events: none;
 }
 .reader-book-cover-meta { display: flex; align-items: center; gap: 3px; min-width: 0; white-space: nowrap; }
@@ -636,7 +635,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
 .reader-book-cover-meta .reader-book-cover-size { overflow: hidden; text-overflow: ellipsis; }
 .reader-book-cover-percent { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
 .reader-book-cover-meta i { color: #8a92a0; font-size: 7px; font-style: normal; }
-.reader-book-cover-progress { position: absolute; right: 5px; bottom: 3px; left: 5px; height: 2px; overflow: hidden; border-radius: 2px; background: rgba(35, 45, 65, .12); }
+.reader-book-cover-progress { position: absolute; right: 5px; bottom: 3px; left: 5px; height: 1px; overflow: hidden; border-radius: 2px; background: rgba(35, 45, 65, .1); }
 .reader-book-cover-progress i { display: block; height: 100%; border-radius: inherit; background: var(--primary, #465cff); }
 .reader-book-grid-cards .reader-book-copy { display: none !important; }
 .reader-book-list .reader-book-cover-info { right: 2px; bottom: 2px; left: 2px; gap: 2px; padding: 2px 2px 5px; border-radius: 4px; font-size: 4.5px; }
