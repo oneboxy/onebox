@@ -52,9 +52,14 @@ function syncReaderStatsFloat(){
   const rect=card.getBoundingClientRect();
   if(inlineCard){
     if(!spacer){spacer=document.createElement('div');spacer.id='reader-inline-stats-spacer';spacer.className='reader-inline-stats-spacer';inlineCard.after(spacer)}
+    const flowStyle=getComputedStyle(inlineCard);
+    spacer.dataset.readerFlowMargins=(parseFloat(flowStyle.marginTop)||0)+(parseFloat(flowStyle.marginBottom)||0);
     document.body.append(card);
   }
-  if(spacer){spacer.style.height=rect.height+'px';spacer.classList.add('is-active')}
+  if(spacer){
+    const flowMargins=parseFloat(spacer.dataset.readerFlowMargins)||0;
+    spacer.style.height=(rect.height+flowMargins)+'px';spacer.classList.add('is-active')
+  }
   card.classList.add('is-floating');
 }
 const readerStatsPortalObserver=new MutationObserver(()=>requestAnimationFrame(syncReaderStatsFloat));

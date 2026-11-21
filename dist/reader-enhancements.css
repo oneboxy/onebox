@@ -808,6 +808,14 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
 }
 .reader-library-empty { margin: 22px 0; color: var(--muted, #737b8c); font-size: 12px; text-align: center; }
 
+/* Desktop chrome places the tool tabs on the app-header row, so the floating
+   shelf bar should sit immediately below that shared rail. */
+@media (min-width: 761px) {
+  .reader-inline-stats.is-floating {
+    top: calc(var(--app-header-height, 56px) + 8px) !important;
+  }
+}
+
 /* Keep the tool label and inline actions quiet when clicked. */
 #toolNav .tool-tabs .tab[data-tool="reader"] { font-size: 13px; }
 .reader-inline-action:hover,
