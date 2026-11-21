@@ -2216,3 +2216,31 @@ main:has(#workspace[data-tool="mine"]) {
   height: auto;
   aspect-ratio: 4 / 3;
 }
+
+/* Keep the source picker minimal: a smaller title and a plain close glyph. */
+#homeSourceDialog .dialog-head h2 { font-size: 16px; }
+#homeSourceDialog .home-source-dialog-close {
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+}
+#homeSourceDialog .home-source-dialog-close:hover {
+  transform: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--ink);
+  box-shadow: none !important;
+}
+#homeSourceDialog .home-source-dialog-close:focus-visible {
+  transform: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  outline: 2px solid color-mix(in srgb, var(--ink) 38%, transparent);
+  outline-offset: -3px;
+  box-shadow: none !important;
+}
+@media (max-width: 600px) {
+  #homeSourceDialog .dialog-head h2 { font-size: 15px; }
+}
