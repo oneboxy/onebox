@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.934';
+const APP_VERSION = '2.18.935';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -16092,6 +16092,24 @@ workspace.addEventListener('input', (event) => {
       state.weatherSearchRequest += 1; state.weatherSearchLoading = false; state.weatherSearchError = ''; state.weatherSearchResults = [];
       updateWeatherSearchResults();
     }
+  }
+});
+// The compact reader stats bar is portaled to <body> while it floats, so its
+// actions no longer bubble through workspace's delegated click handler.
+document.addEventListener('click', (event) => {
+  const statsCard = event.target.closest('.reader-inline-stats');
+  if (!statsCard || statsCard.parentElement !== document.body || state.section !== 'tools' || state.tool !== 'reader') return;
+  if (Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
+  if (event.target.closest('[data-open-reader-file]')) {
+    event.preventDefault();
+    $('#readerFileInput')?.click();
+    return;
+  }
+  if (event.target.closest('[data-reader-layout-toggle]')) {
+    event.preventDefault();
+    state.readerLayout = state.readerLayout === 'list' ? 'grid' : 'list';
+    saveReaderLayout();
+    render();
   }
 });
 workspace.addEventListener('scroll', (event) => {
