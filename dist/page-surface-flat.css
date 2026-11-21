@@ -1755,3 +1755,15 @@ main:has(#workspace[data-tool="mine"]) {
 
 #navigationDialog .navigation-name-toggle { font-weight: 400 !important; }
 #navigationDialog .navigation-name-toggle strong { font-weight: 750; }
+
+/* Tighten the vertical rhythm of homepage launcher rows. */
+#workspace[data-tool="navigation"] .navigation-grid { row-gap: 2px !important; }
+@media (max-width: 600px) {
+  #workspace[data-tool="navigation"] .navigation-grid { row-gap: 0 !important; }
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-card,
+  #workspace[data-tool="navigation"] .navigation-grid .navigation-card-main,
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-add-card,
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-empty-add-card {
+    min-height: 82px !important;
+  }
+}
