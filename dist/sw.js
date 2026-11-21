@@ -1,5 +1,5 @@
 // Mobile editor toolbar assets use the current compact controls.
-const CACHE = 'onebox-v965';
+const CACHE = 'onebox-v966';
 const APP_SHELL = [
   './',
   'index.html',
@@ -16,7 +16,7 @@ const APP_SHELL = [
   'converter-row-drag.js?v=2.18.893',
   'reader-enhancements-core.js?v=2.18.783',
   'reader-enhancements.js?v=2.18.807',
-  'reader-enhancements.css?v=2.18.933',
+  'reader-enhancements.css?v=2.18.934',
   'dev-editor-controls.css?v=2.18.904',
   'dev-pane-inline-actions.js?v=2.18.905',
   'vendor/reader-formats/mobi.mjs?v=2.18.780',
