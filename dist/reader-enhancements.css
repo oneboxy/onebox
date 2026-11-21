@@ -679,7 +679,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: fit-content;
+  width: min(100%, 900px);
   max-width: 100%;
   margin: 0 auto;
 }
@@ -843,7 +843,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   .reader-library-view > .reader-library-head { gap: 6px; padding-bottom: 8px; }
   .reader-library-title-row h2 { font-size: 18px; }
   .reader-inline-stats { margin-bottom: 6px; }
-  .reader-inline-stats-row { width: fit-content; gap: 8px; }
+  .reader-inline-stats-row { width: 100%; justify-content: flex-start; gap: 8px; }
   .reader-inline-stats-actions { gap: 3px; }
   .reader-inline-action { width: 24px; min-width: 24px; height: 30px; min-height: 30px; }
   .reader-inline-action svg { width: 16px; height: 16px; }
