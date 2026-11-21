@@ -2158,3 +2158,35 @@ main:has(#workspace[data-tool="mine"]) {
 #toast .toast-close svg { display: block !important; width: 12px; height: 12px; }
 #toast .toast-close::before,
 #toast .toast-close::after { content: none !important; display: none !important; }
+
+/* Align feed reactions with the thumbnail's outer edge without changing the
+   article grid or the metadata row's vertical position. */
+#workspace[data-tool="home"] .feed-item.has-media {
+  --feed-reaction-side-width: 132px;
+  --feed-reaction-side-gap: 16px;
+}
+#workspace[data-tool="home"] .feed-item.has-media .feed-item-meta { position: relative; }
+#workspace[data-tool="home"] .feed-item.has-media .feed-item-reactions {
+  position: absolute;
+  top: 50%;
+  right: calc(-1 * (var(--feed-reaction-side-width) + var(--feed-reaction-side-gap)));
+  transform: translateY(-50%);
+}
+
+/* Pin the source direction icon to the end of the underline and strengthen
+   the add-source glyph slightly while preserving its existing size. */
+#homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"] {
+  justify-items: end;
+  transform: translateX(4px);
+}
+#homeSourceNav .feed-source-panel .feed-source-manage svg { stroke-width: 2.3; }
+
+@media (max-width: 760px) {
+  #workspace[data-tool="home"] .feed-item.has-media {
+    --feed-reaction-side-width: 78px;
+    --feed-reaction-side-gap: 10px;
+  }
+}
+@media (max-width: 600px) {
+  #workspace[data-tool="home"] .feed-item.has-media { --feed-reaction-side-width: 84px; }
+}
