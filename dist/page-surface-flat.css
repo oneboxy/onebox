@@ -966,18 +966,35 @@ main:has(#workspace[data-tool="mine"]) {
   width: 26px !important;
   height: 26px !important;
   padding: 0 !important;
-  border: 1px solid color-mix(in srgb, var(--line) 86%, transparent) !important;
-  border-radius: 50% !important;
-  background: color-mix(in srgb, var(--panel) 90%, transparent) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   color: var(--ink) !important;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 14%, transparent) !important;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   opacity: 1 !important;
   pointer-events: auto !important;
 }
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-card-actions button:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-card-actions button:focus-visible,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-card-actions button:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-card-actions button:focus-visible {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-delete-action,
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-delete-action { order: 1; }
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-delete-action,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-delete-action,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-delete-action:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-delete-action:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-delete-action:focus-visible,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-delete-action:focus-visible {
+  color: var(--danger) !important;
+}
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-edit-action,
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-edit-action { order: 2; }
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-card-actions svg,
