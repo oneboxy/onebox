@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.914';
+const APP_VERSION = '2.18.915';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3783,7 +3783,7 @@ function clearNavigationFolderActionCards(except = null) {
 function renderNavigation() {
   const items = state.navigation.items || [];
   const emptyBody = '<button class="navigation-card navigation-empty-add-card" type="button" data-open-navigation-add aria-label="' + escapeHtml(t('navigationAdd')) + '"><span class="navigation-add-glyph">＋</span><strong>' + escapeHtml(t('navigationAdd')) + '</strong><small>' + escapeHtml(t('navigationEmpty')) + '</small></button>';
-  const body = items.length ? items.map((item, index) => navigationItemMarkup(item, index)).join('') + '<button class="navigation-card navigation-add-card" type="button" data-open-navigation-add aria-label="' + escapeHtml(t('navigationAdd')) + '"><span class="navigation-add-glyph">＋</span><strong>' + escapeHtml(t('navigationAdd')) + '</strong></button>' : emptyBody;
+  const body = items.length ? items.map((item, index) => navigationItemMarkup(item, index)).join('') + '<button class="navigation-card navigation-add-card" type="button" data-open-navigation-add aria-label="' + escapeHtml(t('navigationAdd')) + '"><span class="navigation-add-glyph">＋</span></button>' : emptyBody;
   return '<div class="section-page navigation-page"><div class="navigation-grid">' + body + '</div></div>';
 }
 function renderNavigationAddDialog(folderId = '', site = null) {
@@ -3812,7 +3812,7 @@ function renderNavigationAddDialog(folderId = '', site = null) {
 function renderNavigationFolderDialog(folderId = '') {
   const dialog = $('#navigationDialog'); const folder = navigationFindFolder(folderId); if (!dialog || !folder) return;
   const addSiteLabel = t('navigationAdd');
-  const addSiteCard = '<button class="navigation-card navigation-add-card navigation-folder-add-card" type="button" data-navigation-add-in-folder aria-label="' + escapeHtml(addSiteLabel) + '"><span class="navigation-add-glyph">＋</span><strong>' + escapeHtml(addSiteLabel) + '</strong></button>';
+  const addSiteCard = '<button class="navigation-card navigation-add-card navigation-folder-add-card" type="button" data-navigation-add-in-folder aria-label="' + escapeHtml(addSiteLabel) + '"><span class="navigation-add-glyph">＋</span></button>';
   const children = folder.children.map((site, index) => navigationItemMarkup(site, index, folder.id)).join('') + addSiteCard;
   const saveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
   const ungroupIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8V6.5A1.5 1.5 0 0 1 5 5h4l2 2h7.5A1.5 1.5 0 0 1 20 8.5V10M3.5 10.5h9.8a1.7 1.7 0 0 1 1.6 2.2l-.8 2.6a1.7 1.7 0 0 1-1.6 1.2H5a1.5 1.5 0 0 1-1.5-1.5v-4.5Z"/><path d="M16 14h5m-2.5-2.5L21 14l-2.5 2.5"/></svg>';
