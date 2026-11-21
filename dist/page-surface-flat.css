@@ -2405,6 +2405,76 @@ main:has(#workspace[data-tool="mine"]) {
   #calendarPickerDialog .calendar-picker-dialog-card { padding: 15px; border-radius: 16px; }
 }
 
+/* The year/month labels and the today icon share one vertical center line. */
+#workspace[data-tool="calendar"] .calendar-month-pickers,
+#workspace[data-tool="calendar"] .calendar-picker { align-items: center; }
+#workspace[data-tool="calendar"] .calendar-picker { line-height: 1; }
+#workspace[data-tool="calendar"] .calendar-picker-value,
+#workspace[data-tool="calendar"] .calendar-picker-unit { display: inline-flex; align-items: center; line-height: 1; }
+#workspace[data-tool="calendar"] .calendar-today svg { width: 22px; height: 22px; }
+
+/* A single minimal picker switches between year and month in place. */
+#calendarPickerDialog .calendar-picker-date-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+#calendarPickerDialog .calendar-picker-date-tab {
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+}
+#calendarPickerDialog .calendar-picker-date-tab.active {
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--line));
+  color: var(--ink);
+}
+#calendarPickerDialog .calendar-picker-date-tab:hover,
+#calendarPickerDialog .calendar-picker-date-tab:focus-visible {
+  background: transparent;
+  outline: none;
+}
+#calendarPickerDialog .calendar-picker-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+#calendarPickerDialog .calendar-picker-apply {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#calendarPickerDialog .calendar-picker-apply:hover,
+#calendarPickerDialog .calendar-picker-apply:focus-visible { background: transparent; outline: none; }
+
+/* Keep the selected calendar day quiet: emphasize its numeral only. */
+#workspace[data-tool="calendar"] .day.selected,
+#workspace[data-tool="calendar"] .day.selected:hover {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#workspace[data-tool="calendar"] .day.selected > span { color: var(--primary); }
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .calendar-today svg { width: 20px; height: 20px; }
+}
+
 /* Keep the legend alongside the date controls and tighten calendar rows. */
 #workspace[data-tool="calendar"] .calendar-top { margin-bottom: 8px; }
 #workspace[data-tool="calendar"] .calendar-month { gap: 5px; }
