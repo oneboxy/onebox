@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.935';
+const APP_VERSION = '2.18.936';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1686,9 +1686,10 @@ function updateToolTabOverflowControls() {
   const control = nav.querySelector('[data-tool-scroll="toggle"]');
   if (!panel || !tabs || !control) return;
   const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
-  const hasOverflow = maxScroll > 1;
+  const reservedGutter = panel.classList.contains('has-tool-overflow') ? 26 : 0;
+  const hasOverflow = tabs.scrollWidth > tabs.clientWidth + reservedGutter + 1;
   const firstTab = tabs.querySelector('.tab');
-  const threshold = Math.max(1, Math.min((firstTab?.offsetWidth || 0) * .5, tabs.clientWidth * .12));
+  const threshold = Math.min(Math.max(1, Math.min((firstTab?.offsetWidth || 0) * .5, tabs.clientWidth * .12)), maxScroll * .5);
   const scrollLeft = Math.max(0, Math.min(maxScroll, tabs.scrollLeft));
   const hasScrolledRight = hasOverflow && scrollLeft > threshold;
   const layoutChanged = panel.classList.contains('has-tool-overflow') !== hasOverflow || control.hidden === hasOverflow;
@@ -1930,23 +1931,48 @@ function focusActiveHomeFeedTab(smooth = false) {
 function updateHomeFeedOverflowControls() {
   const panel = homeSourceNav.querySelector('.feed-source-panel');
   const tabs = homeSourceNav.querySelector('.feed-source-tabs');
-  const previous = homeSourceNav.querySelector('[data-feed-source-scroll="previous"]');
-  const next = homeSourceNav.querySelector('[data-feed-source-scroll="next"]');
-  if (!panel || !tabs || !previous || !next) return;
+  const control = homeSourceNav.querySelector('[data-feed-source-scroll="toggle"]');
+  if (!panel || !tabs || !control) return;
   const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
-  const hasOverflow = maxScroll > 1;
-  const hasPrevious = tabs.scrollLeft > 1;
-  const hasNext = tabs.scrollLeft < maxScroll - 1;
+  const controlWidth = control.getBoundingClientRect().width || Number.parseFloat(getComputedStyle(control).width) || 24;
+  const reservedGutter = control.hidden ? 0 : controlWidth;
+  const hasOverflow = tabs.scrollWidth > tabs.clientWidth + reservedGutter + 1;
+  const threshold = Math.min(Math.max(1, Math.min((tabs.querySelector('.feed-source-tab')?.offsetWidth || 0) * .5, tabs.clientWidth * .12)), maxScroll * .5);
+  const hasScrolledRight = hasOverflow && tabs.scrollLeft > threshold;
+  const layoutChanged = panel.classList.contains('has-feed-overflow') !== hasOverflow || control.hidden === hasOverflow;
   panel.classList.toggle('has-feed-overflow', hasOverflow);
-  panel.classList.toggle('has-feed-overflow-left', hasPrevious);
-  panel.classList.toggle('has-feed-overflow-right', hasNext);
-  previous.hidden = !hasPrevious;
-  next.hidden = !hasNext;
+  panel.classList.toggle('is-scrolled-right', hasScrolledRight);
+  control.hidden = !hasOverflow;
+  const direction = hasScrolledRight ? 'left' : 'right';
+  if (control.dataset.scrollDirection !== direction) {
+    control.dataset.scrollDirection = direction;
+    control.setAttribute('aria-label', t(direction === 'left' ? 'feedTabPrevious' : 'feedTabNext'));
+    control.innerHTML = direction === 'left'
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5.25 8.25 12 15 18.75"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg>';
+  }
+  if (layoutChanged) requestAnimationFrame(updateHomeFeedOverflowControls);
 }
 function scrollHomeFeedTabs(direction) {
   const tabs = homeSourceNav.querySelector('.feed-source-tabs');
   if (!tabs) return;
-  tabs.scrollBy({ left: direction * Math.max(120, Math.round(tabs.clientWidth * .72)), behavior: 'smooth' });
+  const tabItems = $$('.feed-source-tab', tabs);
+  if (!tabItems.length) return;
+  const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
+  const distance = Math.max(120, Math.round(tabs.clientWidth * .72));
+  const desired = Math.max(0, Math.min(maxScroll, tabs.scrollLeft + direction * distance));
+  const boundary = direction > 0
+    ? tabItems.find((tab) => tab.offsetLeft >= desired - 1) || tabItems[tabItems.length - 1]
+    : [...tabItems].reverse().find((tab) => tab.offsetLeft <= desired + 1) || tabItems[0];
+  let target = direction > 0 && desired >= maxScroll - 1 ? maxScroll : direction < 0 && desired <= 1 ? 0 : Math.min(maxScroll, boundary.offsetLeft);
+  const activeTab = tabs.querySelector('.feed-source-tab.active');
+  if (activeTab && activeTab.offsetWidth <= tabs.clientWidth) {
+    const padding = 8;
+    const activeMin = Math.max(0, activeTab.offsetLeft + activeTab.offsetWidth - tabs.clientWidth + padding);
+    const activeMax = Math.min(maxScroll, activeTab.offsetLeft - padding);
+    if (activeMin <= activeMax) target = Math.max(activeMin, Math.min(activeMax, target));
+  }
+  tabs.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
 }
 
 function feedText(value = '') { return String(value).replace(/<[^>]*>/g, ' ').replace(/!\[[^\]]*\]\([^)]*\)/g, ' ').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim(); }
@@ -3612,7 +3638,7 @@ function renderHomeSourceNav() {
   homeSourceNav.hidden = state.section !== 'home';
   const previousTabs = homeSourceNav.querySelector('.feed-source-tabs');
   const previousScrollLeft = previousTabs?.scrollLeft || 0;
-  homeSourceNav.innerHTML = state.section === 'home' ? '<div class="feed-source-panel"><button class="feed-source-scroll-button" data-feed-source-scroll="previous" type="button" hidden aria-label="' + escapeHtml(t('feedTabPrevious')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5.25 8.25 12 15 18.75"/></svg></button><div class="feed-source-tabs" role="tablist" aria-label="RSS 来源">' + homeSourceTabsMarkup() + '</div><button class="feed-source-scroll-button" data-feed-source-scroll="next" type="button" hidden aria-label="' + escapeHtml(t('feedTabNext')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg></button><button class="feed-source-manage" type="button" data-open-home-source-picker aria-label="' + escapeHtml(t('homeSourceManage')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>' : '';
+  homeSourceNav.innerHTML = state.section === 'home' ? '<div class="feed-source-panel"><button class="feed-source-manage" type="button" data-open-home-source-picker aria-label="' + escapeHtml(t('homeSourceManage')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><div class="feed-source-tabs" role="tablist" aria-label="RSS 来源">' + homeSourceTabsMarkup() + '</div><button class="feed-source-scroll-button" data-feed-source-scroll="toggle" data-scroll-direction="right" type="button" hidden aria-label="' + escapeHtml(t('feedTabNext')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg></button></div>' : '';
   const nextTabs = homeSourceNav.querySelector('.feed-source-tabs');
   if (nextTabs) {
     nextTabs.scrollLeft = Math.min(previousScrollLeft, Math.max(0, nextTabs.scrollWidth - nextTabs.clientWidth));
@@ -14989,10 +15015,10 @@ homeSourceNav.addEventListener('click', (event) => {
     openHomeSourceDialog();
     return;
   }
-  const scrollButton = event.target.closest('[data-feed-source-scroll]');
+  const scrollButton = event.target.closest('[data-feed-source-scroll="toggle"]');
   if (scrollButton) {
     event.preventDefault();
-    scrollHomeFeedTabs(scrollButton.dataset.feedSourceScroll === 'previous' ? -1 : 1);
+    scrollHomeFeedTabs(scrollButton.dataset.scrollDirection === 'left' ? -1 : 1);
     return;
   }
   const feedSource = event.target.closest('[data-feed-source]');
