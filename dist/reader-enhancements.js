@@ -49,22 +49,12 @@ function syncReaderStatsFloat(){
   }
   if(inlineCard&&portalCard&&portalCard!==inlineCard){portalCard.remove();spacer?.remove();spacer=null}
   if(!card){spacer?.remove();return}
-  const header=document.querySelector('.app-header')?.getBoundingClientRect();
-  const nav=document.querySelector('#toolNav');
-  const navRect=nav&&!nav.hidden?nav.getBoundingClientRect():null;
-  const top=Math.max(header?.bottom||0,navRect?.bottom||0)+6;
   const rect=card.getBoundingClientRect();
-  const parentRect=inlineCard?inlineCard.parentElement.getBoundingClientRect():{left:rect.left,width:rect.width};
-  const width=Math.min(parentRect.width,900);
-  const left=parentRect.left+(parentRect.width-width)/2;
   if(inlineCard){
     if(!spacer){spacer=document.createElement('div');spacer.id='reader-inline-stats-spacer';spacer.className='reader-inline-stats-spacer';inlineCard.after(spacer)}
     document.body.append(card);
   }
   if(spacer){spacer.style.height=rect.height+'px';spacer.classList.add('is-active')}
-  card.style.setProperty('--reader-stats-float-top',top+'px');
-  card.style.setProperty('--reader-stats-float-left',left+'px');
-  card.style.setProperty('--reader-stats-float-width',width+'px');
   card.classList.add('is-floating');
 }
 const readerStatsPortalObserver=new MutationObserver(()=>requestAnimationFrame(syncReaderStatsFloat));

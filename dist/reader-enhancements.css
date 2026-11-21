@@ -639,10 +639,11 @@ html[data-theme="dark"] #workspace[data-tool="reader"] .reader-book-cover-image 
 }
 .reader-inline-stats.is-floating {
   position: fixed !important;
-  top: var(--reader-stats-float-top) !important;
-  left: var(--reader-stats-float-left) !important;
+  top: calc(var(--app-header-height, 58px) + 42px + 8px) !important;
+  left: 50% !important;
   right: auto !important;
-  width: var(--reader-stats-float-width) !important;
+  width: min(900px, calc(100% - 24px)) !important;
+  transform: translateX(-50%) !important;
   z-index: 60 !important;
   margin: 0 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
