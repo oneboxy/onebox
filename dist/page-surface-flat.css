@@ -1767,3 +1767,67 @@ main:has(#workspace[data-tool="mine"]) {
     min-height: 82px !important;
   }
 }
+
+/* Clamp fetched site icons inside the Add/Edit dialog to a compact single row. */
+#navigationDialog .navigation-icon-candidates-row {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  overflow: hidden !important;
+}
+#navigationDialog .navigation-icon-candidates-row[hidden] { display: none !important; }
+#navigationDialog .navigation-icon-candidates {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  height: 34px !important;
+  max-height: 34px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+#navigationDialog button.navigation-icon-candidate {
+  position: relative !important;
+  display: grid !important;
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  margin: 0 !important;
+  padding: 3px !important;
+  overflow: hidden !important;
+}
+#navigationDialog .navigation-icon-candidate img {
+  display: block !important;
+  flex: none !important;
+  width: 20px !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  object-fit: contain !important;
+}
+#navigationDialog .navigation-input-actions .navigation-selected-icon-wrap {
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  height: 24px !important;
+  max-height: 24px !important;
+  overflow: hidden !important;
+}
+#navigationDialog .navigation-input-actions .navigation-selected-icon {
+  display: block !important;
+  width: 22px !important;
+  max-width: 22px !important;
+  height: 22px !important;
+  max-height: 22px !important;
+  object-fit: contain !important;
+}
