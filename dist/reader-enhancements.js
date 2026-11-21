@@ -25,31 +25,31 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)tick(true);
 window.addEventListener('pagehide',()=>tick(true));
 setInterval(()=>tick(false),15000);
 function statsMarkup(){
-  stats=CORE.normalizeStats(read(STATS_KEY,stats));
-  const aggregate=CORE.aggregateStats(stats),today=dayKey(),total=aggregate.total,activeDays=Object.values(aggregate.days).filter(value=>value>0).length;
-  const shelfCount=(()=>{try{const books=JSON.parse(localStorage.getItem('onebox.library')||'[]');return Array.isArray(books)?books.length:0}catch{return 0}})();
   const isList=localStorage.getItem('onebox.reader-layout')==='list';
   const layoutIcon=isList?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/><path d="M5 6h.01M5 12h.01M5 18h.01"/></svg><span>'+tx('宫格','Grid')+'</span>':'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span>'+tx('列表','List')+'</span>';
+  const statsIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 17V9"/><path d="M18 17V5"/><path d="M3 3v18h18"/><path d="M8 17v-3"/></svg>';
   const importIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/></svg>';
   const sourceIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c3.5-1.5 6.2-.8 8 1.2 1.8-2 4.5-2.7 8-1.2v13c-3.5-1.5-6.2-.8-8 1.2-1.8-2-4.5-2.7-8-1.2zM12 7v13"/></svg>';
-  const metric=(title,value)=>'<button type="button" class="reader-stat-card" data-reader-stat-card data-stat-title="'+esc(title)+'" data-stat-value="'+esc(value)+'"><small>'+esc(title)+'：</small><strong>'+esc(value)+'</strong></button>';
-  return '<section class="reader-inline-stats" aria-label="'+tx('阅读统计','Reading statistics')+'"><div class="reader-inline-stats-row"><div class="reader-stats-summary">'+metric(tx('书架','Books'),shelfCount+'')+metric(tx('天数','Days'),activeDays+'')+metric(tx('今日','Today'),compactDuration(aggregate.days[today]||0))+'</div><div class="reader-inline-stats-actions"><button type="button" class="reader-inline-action" data-open-reader-file aria-label="'+tx('导入文件','Import file')+'" title="'+tx('导入文件','Import file')+'">'+importIcon+'</button><button type="button" class="reader-inline-action" data-reader-opds aria-label="'+tx('书源','Sources')+'" title="'+tx('书源','Sources')+'">'+sourceIcon+'</button><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="'+tx('切换布局','Switch layout')+'" title="'+tx('切换布局','Switch layout')+'">'+layoutIcon+'</button></div></div></section>';
+  return '<section class="reader-inline-stats" aria-label="'+tx('阅读统计','Reading statistics')+'"><div class="reader-inline-stats-row"><div class="reader-inline-stats-actions"><button type="button" class="reader-inline-action" data-reader-open-stats aria-label="'+tx('阅读统计','Reading statistics')+'" title="'+tx('阅读统计','Reading statistics')+'">'+statsIcon+'</button><button type="button" class="reader-inline-action" data-open-reader-file aria-label="'+tx('导入文件','Import file')+'" title="'+tx('导入文件','Import file')+'">'+importIcon+'</button><button type="button" class="reader-inline-action" data-reader-opds aria-label="'+tx('书源','Sources')+'" title="'+tx('书源','Sources')+'">'+sourceIcon+'</button><button class="reader-layout-toggle" data-reader-layout-toggle aria-label="'+tx('切换布局','Switch layout')+'" title="'+tx('切换布局','Switch layout')+'">'+layoutIcon+'</button></div></div></section>';
 }
 window.addEventListener('onebox:reader-stats-updated',()=>{const current=document.querySelector('.reader-inline-stats');if(current)current.outerHTML=statsMarkup()});
 
 function closeStatPopover(){document.querySelector('[data-reader-stat-popover]')?.remove()}
-function showHeatmapPopover(anchor,title,value){
-  closeStatPopover();stats=CORE.normalizeStats(read(STATS_KEY,stats));const pop=document.createElement('div');pop.className='reader-stat-popover reader-stat-popover-chart';pop.dataset.readerStatPopover='';pop.setAttribute('role','dialog');pop.setAttribute('aria-label',tx('阅读统计','Reading statistics'));
-  pop.innerHTML='<div class="reader-stat-popover-heading"><div><small></small><strong></strong></div><button type="button" data-dismiss-reader-stat-popover aria-label="'+tx('关闭','Close')+'" title="'+tx('关闭','Close')+'">×</button></div><div class="reader-stat-popover-duration" hidden><small>'+tx('累计时长','Total reading')+'：</small><strong></strong></div><div class="reader-inline-stats-history">'+statsHeatmapMarkup(CORE.aggregateStats(stats))+'</div>';
-  pop.querySelector('.reader-stat-popover-heading small').textContent=title;pop.querySelector('.reader-stat-popover-heading strong').textContent=value;if(title===tx('天数','Days')){const durationRow=pop.querySelector('.reader-stat-popover-duration');durationRow.hidden=false;durationRow.querySelector('strong').textContent=duration(CORE.aggregateStats(stats).total)}document.body.append(pop);
+function showStatsPopover(anchor){
+  closeStatPopover();stats=CORE.normalizeStats(read(STATS_KEY,stats));const aggregate=CORE.aggregateStats(stats),today=dayKey();
+  const shelfCount=(()=>{try{const books=JSON.parse(localStorage.getItem('onebox.library')||'[]');return Array.isArray(books)?books.length:0}catch{return 0}})();
+  const metrics=[[tx('书架','Books'),shelfCount+''],[tx('天数','Days'),Object.values(aggregate.days).filter(value=>value>0).length+''],[tx('时长','Time'),duration(aggregate.total)],[tx('今日','Today'),duration(aggregate.days[today]||0)]];
+  const summary=metrics.map(([label,value])=>'<div><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join('');
+  const pop=document.createElement('div');pop.className='reader-stat-popover reader-stat-popover-chart';pop.dataset.readerStatPopover='';pop.setAttribute('role','dialog');pop.setAttribute('aria-label',tx('阅读统计','Reading statistics'));
+  pop.innerHTML='<div class="reader-stat-popover-heading"><button type="button" data-dismiss-reader-stat-popover aria-label="'+tx('关闭','Close')+'" title="'+tx('关闭','Close')+'">×</button></div><div class="reader-stat-popover-summary">'+summary+'</div><div class="reader-inline-stats-history">'+statsHeatmapMarkup(aggregate)+'</div>';document.body.append(pop);
   const rect=anchor.getBoundingClientRect(),box=pop.getBoundingClientRect(),gap=8,pad=12;
   const left=Math.max(pad,Math.min(window.innerWidth-box.width-pad,rect.left+(rect.width-box.width)/2));
   const top=rect.bottom+box.height+gap<=window.innerHeight-pad?rect.bottom+gap:Math.max(pad,rect.top-box.height-gap);
   pop.style.left=left+'px';pop.style.top=top+'px';
 }
 document.addEventListener('click',event=>{
-  const card=event.target.closest('[data-reader-stat-card]');
-  if(card){showHeatmapPopover(card,card.dataset.statTitle,card.dataset.statValue);return}
+  const statsButton=event.target.closest('[data-reader-open-stats]');
+  if(statsButton){showStatsPopover(statsButton);return}
   if(event.target.closest('[data-dismiss-reader-stat-popover]')){closeStatPopover();return}
   if(!event.target.closest('[data-reader-stat-popover]'))closeStatPopover();
 });
