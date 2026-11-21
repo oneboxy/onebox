@@ -2141,9 +2141,9 @@ main:has(#workspace[data-tool="mine"]) {
   position: relative;
   inset: auto;
   z-index: 2;
-  flex: 0 0 24px;
-  width: 24px;
-  min-width: 24px;
+  flex: 0 0 34px;
+  width: 34px;
+  min-width: 34px;
   height: 100%;
   background: transparent !important;
   color: var(--muted);
@@ -2174,8 +2174,8 @@ main:has(#workspace[data-tool="mine"]) {
 /* Pin the source direction icon to the end of the underline and strengthen
    the add-source glyph slightly while preserving its existing size. */
 #homeSourceNav .feed-source-panel .feed-source-scroll-button[data-feed-source-scroll="toggle"] {
-  justify-items: end;
-  transform: translateX(4px);
+  justify-items: center;
+  transform: none;
 }
 #homeSourceNav .feed-source-panel .feed-source-manage svg { stroke-width: 2.3; }
 
