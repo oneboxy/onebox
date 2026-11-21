@@ -1880,80 +1880,99 @@ main:has(#workspace[data-tool="mine"]) {
   display: none !important;
 }
 
-/* In the edit-site dialog, keep fetched icons and refresh beside the title. */
-#navigationDialog .navigation-site-dialog-card > .dialog-head .navigation-dialog-title-row {
+/* Place fetched icon choices directly under the URL, with refresh at the far right. */
+#navigationDialog .navigation-site-dialog-card .navigation-form {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+#navigationDialog .navigation-site-dialog-card .navigation-form-row {
+  width: 100% !important;
+  max-width: none !important;
+}
+#navigationDialog .navigation-site-dialog-card .navigation-icon-candidates-row {
+  display: flex !important;
+  flex: none !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  width: calc(100% - 41px) !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  margin: 0 0 2px 41px !important;
+  overflow: hidden !important;
+}
+#navigationDialog .navigation-site-dialog-card .navigation-icon-candidates-row[hidden] {
+  display: none !important;
+}
+#navigationDialog .navigation-site-dialog-card .navigation-icon-candidates {
   display: flex !important;
   flex: 1 1 auto !important;
   flex-flow: row nowrap !important;
   align-items: center !important;
-  gap: 7px !important;
+  gap: 4px !important;
   min-width: 0 !important;
+  height: 28px !important;
+  max-height: 28px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 0 !important;
 }
-#navigationDialog .navigation-site-dialog-card > .dialog-head .navigation-dialog-title-row h2 {
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-}
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates {
-  flex: 1 1 auto !important;
-  width: auto !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  height: 26px !important;
-  min-height: 26px !important;
-  max-height: 26px !important;
-  margin: 0 !important;
-  gap: 3px !important;
-  overflow: hidden !important;
-}
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates .navigation-icon-refresh {
+#navigationDialog .navigation-site-dialog-card .navigation-icon-refresh {
   display: grid !important;
-  flex: 0 0 24px !important;
-  width: 24px !important;
-  height: 24px !important;
+  flex: 0 0 28px !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
   padding: 0 !important;
   border: 0 !important;
-  border-radius: 0 !important;
+  border-radius: 50% !important;
   background: transparent !important;
   color: var(--muted) !important;
   box-shadow: none !important;
 }
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates .navigation-icon-refresh svg {
+#navigationDialog .navigation-site-dialog-card .navigation-icon-refresh svg {
   width: 17px !important;
   height: 17px !important;
+  fill: none !important;
+  stroke: currentColor !important;
   stroke-width: 1.7 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
 }
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates .navigation-icon-refresh:hover,
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates .navigation-icon-refresh:active {
+#navigationDialog .navigation-site-dialog-card .navigation-icon-refresh:hover,
+#navigationDialog .navigation-site-dialog-card .navigation-icon-refresh:active {
   background: transparent !important;
   color: var(--ink) !important;
   box-shadow: none !important;
   transform: none !important;
 }
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates .navigation-icon-candidates {
-  height: 24px !important;
-  max-height: 24px !important;
-  gap: 2px !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-}
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates button.navigation-icon-candidate {
-  flex: 0 0 22px !important;
-  width: 22px !important;
-  min-width: 22px !important;
-  max-width: 22px !important;
-  height: 22px !important;
-  min-height: 22px !important;
-  max-height: 22px !important;
+#navigationDialog .navigation-site-dialog-card button.navigation-icon-candidate {
+  flex: 0 0 26px !important;
+  width: 26px !important;
+  min-width: 26px !important;
+  max-width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
   padding: 2px !important;
-  border-radius: 5px !important;
+  border-radius: 6px !important;
 }
-#navigationDialog .navigation-site-dialog-card .navigation-edit-header-candidates .navigation-icon-candidate img {
-  width: 16px !important;
-  min-width: 16px !important;
-  max-width: 16px !important;
-  height: 16px !important;
-  min-height: 16px !important;
-  max-height: 16px !important;
+#navigationDialog .navigation-site-dialog-card .navigation-icon-candidate img {
+  width: 19px !important;
+  min-width: 19px !important;
+  max-width: 19px !important;
+  height: 19px !important;
+  min-height: 19px !important;
+  max-height: 19px !important;
+  object-fit: contain !important;
+}
+#navigationDialog .navigation-folder-dialog-card.navigation-names-hidden .navigation-folder-sites > .navigation-folder-add-card strong {
+  display: none !important;
 }
 #navigationDialog .navigation-input-actions .navigation-selected-icon-wrap {
   flex: 0 0 24px !important;
