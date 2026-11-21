@@ -21675,3 +21675,83 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
     font-size: 9.5px;
   }
 }
+
+/* Keep long-press site actions compact and neutral: edit over the icon,
+   delete at the tile corner, with both controls sharing the same treatment. */
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed {
+  border-color: var(--line) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 7%, transparent) !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible .navigation-card-actions,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed .navigation-card-actions {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible .navigation-primary-actions,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed .navigation-primary-actions,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible .navigation-secondary-actions,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed .navigation-secondary-actions {
+  display: contents !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-open-action {
+  display: none !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible .navigation-edit-action,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed .navigation-edit-action,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible .navigation-delete-action,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed .navigation-delete-action {
+  position: absolute !important;
+  display: grid !important;
+  place-items: center;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, transparent) !important;
+  border-radius: 50% !important;
+  background: color-mix(in srgb, var(--panel) 90%, transparent) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 14%, transparent) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  pointer-events: auto !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible .navigation-edit-action,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed .navigation-edit-action {
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-actions-visible .navigation-delete-action,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card.navigation-long-pressed .navigation-delete-action {
+  top: 3px !important;
+  right: 3px !important;
+  width: 25px !important;
+  height: 25px !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-edit-action:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-delete-action:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-edit-action:focus-visible,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-delete-action:focus-visible {
+  border-color: var(--line) !important;
+  background: var(--panel) !important;
+  color: var(--ink) !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-edit-action:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-edit-action:focus-visible {
+  transform: translate(-50%, -50%) !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-delete-action:hover,
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions .navigation-delete-action:focus-visible {
+  transform: none !important;
+}
+#workspace[data-tool="navigation"] .navigation-grid > .navigation-card .navigation-card-actions svg {
+  width: 13px !important;
+  height: 13px !important;
+  stroke-width: 1.8 !important;
+}
