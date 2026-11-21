@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.919';
+const APP_VERSION = '2.18.920';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -3881,7 +3881,7 @@ function renderNavigationAddDialog(folderId = '', site = null) {
 function navigationNameToggleMarkup() {
   const showing = state.navigationShowNames !== false;
   const label = state.language === 'en' ? (showing ? 'Hide site names' : 'Show site names') : (showing ? '隐藏网站名称' : '显示网站名称');
-  return '<button class="navigation-name-toggle" type="button" data-navigation-toggle-names aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '" aria-pressed="' + String(showing) + '">Aa</button>';
+  return '<button class="navigation-name-toggle" type="button" data-navigation-toggle-names aria-label="' + escapeHtml(label) + '" title="' + escapeHtml(label) + '" aria-pressed="' + String(showing) + '">' + (showing ? '<strong>A</strong>a' : 'A<strong>a</strong>') + '</button>';
 }
 function renderNavigationFolderDialog(folderId = '') {
   const dialog = $('#navigationDialog'); const folder = navigationFindFolder(folderId); if (!dialog || !folder) return;
@@ -16302,6 +16302,7 @@ $('#navigationDialog').addEventListener('click', (event) => {
     const namesLabel = state.language === 'en' ? (state.navigationShowNames ? 'Hide site names' : 'Show site names') : (state.navigationShowNames ? '隐藏网站名称' : '显示网站名称');
     $('#workspace .navigation-page')?.classList.toggle('navigation-names-hidden', !state.navigationShowNames);
     $('#navigationDialog .navigation-folder-dialog-card')?.classList.toggle('navigation-names-hidden', !state.navigationShowNames);
+    namesToggle.innerHTML = state.navigationShowNames ? '<strong>A</strong>a' : 'A<strong>a</strong>';
     namesToggle.setAttribute('aria-pressed', String(state.navigationShowNames));
     namesToggle.setAttribute('aria-label', namesLabel);
     namesToggle.title = namesLabel;

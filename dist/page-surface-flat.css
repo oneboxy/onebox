@@ -1752,3 +1752,6 @@ main:has(#workspace[data-tool="mine"]) {
     height: 44px;
   }
 }
+
+#navigationDialog .navigation-name-toggle { font-weight: 400 !important; }
+#navigationDialog .navigation-name-toggle strong { font-weight: 750; }
