@@ -917,11 +917,13 @@ main:has(#workspace[data-tool="mine"]) {
   }
 }
 
-/* Long-press site actions sit directly over the icon: edit in the center,
-   delete at its upper-right corner. */
+/* Long-press actions: centered edit and upper-right delete use a neutral,
+   theme-aware style that stays clear over both dark and bright site icons. */
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed,
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible {
   outline: 0 !important;
+  border-color: var(--line) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 7%, transparent) !important;
 }
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-card-actions,
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-card-actions {
@@ -951,14 +953,14 @@ main:has(#workspace[data-tool="mine"]) {
   position: absolute !important;
   display: grid !important;
   place-items: center !important;
-  width: 26px !important;
-  height: 26px !important;
+  width: 28px !important;
+  height: 28px !important;
   padding: 0 !important;
-  border: 1px solid var(--line) !important;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, transparent) !important;
   border-radius: 50% !important;
-  background: color-mix(in srgb, var(--panel) 92%, transparent) !important;
-  color: var(--primary) !important;
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--ink) 18%, transparent) !important;
+  background: color-mix(in srgb, var(--panel) 90%, transparent) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 14%, transparent) !important;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   opacity: 1 !important;
@@ -966,38 +968,34 @@ main:has(#workspace[data-tool="mine"]) {
 }
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-edit-action,
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-edit-action {
-  top: 22px !important;
+  top: 50% !important;
   left: 50% !important;
-  transform: translateX(-50%) !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) !important;
 }
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-delete-action,
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-delete-action {
-  top: -4px !important;
-  left: calc(50% + 17px) !important;
-  color: var(--danger) !important;
+  top: 3px !important;
+  right: 3px !important;
+  left: auto !important;
+  width: 25px !important;
+  height: 25px !important;
 }
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-card-actions svg,
 #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-card-actions svg {
   width: 13px !important;
   height: 13px !important;
+  stroke-width: 1.8 !important;
 }
 @media (max-width: 600px) {
-  #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-edit-action,
-  #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-edit-action {
-    top: 24px !important;
-    width: 24px !important;
-    height: 24px !important;
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-card-actions button,
+  #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-card-actions button {
+    width: 26px !important;
+    height: 26px !important;
   }
   #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-delete-action,
   #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-delete-action {
-    top: 5px !important;
-    left: calc(50% + 11px) !important;
-    width: 22px !important;
-    height: 22px !important;
-  }
-  #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-long-pressed .navigation-card-actions svg,
-  #workspace[data-tool="navigation"] .navigation-grid > .navigation-site-card.navigation-actions-visible .navigation-card-actions svg {
-    width: 12px !important;
-    height: 12px !important;
+    width: 24px !important;
+    height: 24px !important;
   }
 }
