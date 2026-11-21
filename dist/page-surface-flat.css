@@ -2055,29 +2055,45 @@ main:has(#workspace[data-tool="mine"]) {
   height: 18px !important;
 }
 
-/* Keep tab scrolling controls together at the rail's right edge. This avoids
-   leaving a control-sized hole before the first tab or covering the last tab. */
+/* Put tab scrolling arrows in a separate trailing gutter. The tab strip keeps
+   its left anchor, and the arrows never cover a tab or take a flex position. */
 #toolNav .tool-tab-panel {
-  display: flex !important;
-  align-items: stretch;
+  position: relative;
+  display: block !important;
   width: 100%;
   min-width: 0;
 }
 #toolNav .tool-tabs {
-  order: 0;
-  flex: 1 1 auto;
-  width: auto;
+  width: 100%;
   min-width: 0;
+  padding-left: 0;
+}
+#toolNav .tool-tab-panel.has-tool-overflow .tool-tabs {
+  width: calc(100% - 48px);
 }
 #toolNav .tool-tab-panel .feed-source-scroll-button {
-  position: relative;
-  inset: auto;
-  order: 1;
-  flex: 0 0 28px;
-  width: 28px;
-  min-width: 28px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 24px;
+  min-width: 24px;
   height: 100%;
+  padding: 0;
+  border: 0;
   background: transparent !important;
 }
-#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="next"] { order: 2; }
-#toolNav .tool-tab-panel .feed-source-scroll-button svg { width: 18px; height: 18px; }
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="previous"] { right: 24px; }
+#toolNav .tool-tab-panel .feed-source-scroll-button svg { width: 17px; height: 17px; }
+@media (max-width: 760px) {
+  #toolNav {
+    left: 0;
+    width: 100%;
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    transform: none;
+  }
+  #toolNav .tool-tabs { padding-left: 4px; }
+}
