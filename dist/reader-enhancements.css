@@ -657,7 +657,7 @@ html:not([data-theme="light"]) .reader-extra-dialog :focus-visible {
   min-width: 0;
   white-space: nowrap;
 }
-.reader-inline-stats-compact small { color: var(--muted, #737b8c); font-size: 12px; font-weight: 400; }
+.reader-inline-stats-compact small { color: var(--muted, #737b8c); font-size: 12px; font-weight: 600; }
 .reader-inline-stats-compact strong { color: var(--ink, #252a35); font-size: 12px; font-weight: 400; }
 .reader-inline-stats-actions {
   display: flex;
