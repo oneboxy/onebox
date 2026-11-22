@@ -2995,5 +2995,9 @@ main:has(#workspace[data-tool="mine"]) {
 }
 
 @media (max-width: 760px) {
+  #workspace[data-tool="calendar"] {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
   #workspace[data-tool="calendar"] .calendar-layout { row-gap: 12px; }
 }
