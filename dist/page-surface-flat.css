@@ -2986,3 +2986,10 @@ main:has(#workspace[data-tool="mine"]) {
   font-size: 11px;
   white-space: nowrap;
 }
+
+/* Tighten the calendar's vertical rhythm without squeezing its labels. */
+#workspace[data-tool="calendar"] .calendar-grid { row-gap: 0; }
+#workspace[data-tool="calendar"] .day { min-height: 60px; }
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .day { min-height: 50px; }
+}
