@@ -945,3 +945,61 @@ html[data-theme-mode="dark-gray"] .reader-opds-dialog .reader-opds-pagination bu
   .reader-inline-stats-actions { width: 100%; justify-content: flex-end; }
   .reader-inline-stats.is-expanded .reader-inline-stats-actions { width: 100%; }
 }
+
+/* Keep the source picker compact and flat, like the calendar detail dialog. */
+.reader-opds-dialog { height: auto; min-height: 0; box-shadow: 0 12px 36px rgba(0, 0, 0, .16); }
+.reader-opds-dialog > header { padding: 13px 17px 9px; border-bottom: 0; }
+.reader-opds-dialog > header strong { font-size: 15px; font-weight: 600; }
+.reader-opds-dialog > header button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted, #737b8c);
+  -webkit-tap-highlight-color: transparent;
+}
+.reader-opds-dialog > header button svg { width: 18px; height: 18px; }
+.reader-opds-dialog > header button:hover,
+.reader-opds-dialog > header button:active { background: transparent !important; box-shadow: none !important; color: var(--ink, #252a35); }
+.reader-opds-dialog .reader-extra-body { min-height: 0; gap: 9px; padding: 8px 17px 14px; }
+.reader-opds-dialog .reader-opds-toolbar { gap: 6px; }
+.reader-opds-dialog .reader-opds-source-row,
+.reader-opds-dialog .reader-opds-search { align-items: center; gap: 6px; }
+.reader-opds-dialog .reader-opds-source-row input,
+.reader-opds-dialog .reader-opds-source-row select,
+.reader-opds-dialog .reader-opds-search input { height: 36px; border-radius: 8px; }
+.reader-opds-dialog .reader-opds-source-row button,
+.reader-opds-dialog .reader-opds-search button,
+.reader-opds-dialog .reader-opds-entry button,
+.reader-opds-dialog .reader-opds-pagination button {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted, #737b8c) !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.reader-opds-dialog .reader-opds-source-row button:hover,
+.reader-opds-dialog .reader-opds-search button:hover,
+.reader-opds-dialog .reader-opds-entry button:hover,
+.reader-opds-dialog .reader-opds-pagination button:hover,
+.reader-opds-dialog .reader-opds-source-row button:active,
+.reader-opds-dialog .reader-opds-search button:active,
+.reader-opds-dialog .reader-opds-entry button:active,
+.reader-opds-dialog .reader-opds-pagination button:active { background: transparent !important; box-shadow: none !important; color: var(--ink, #252a35) !important; transform: none; }
+.reader-opds-dialog .reader-opds-heading { margin: 1px 0 0; }
+.reader-opds-dialog .reader-opds-list { flex: 0 1 auto; min-height: 0; }
+.reader-opds-dialog .reader-opds-empty { padding: 5px 0 0; }
+.reader-opds-dialog .reader-opds-entry { padding: 9px 0; }
+.reader-opds-dialog .reader-opds-pagination { padding-top: 2px; }
+@media (max-width: 600px) {
+  .reader-opds-dialog > header { padding: 12px 14px 8px; }
+  .reader-opds-dialog .reader-extra-body { gap: 8px; padding: 7px 14px 12px; }
+}
