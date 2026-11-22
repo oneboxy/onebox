@@ -2555,11 +2555,11 @@ main:has(#workspace[data-tool="mine"]) {
 }
 
 /* Give the calendar legend more breathing room beside the date controls. */
-#workspace[data-tool="calendar"] .calendar-month { gap: 11px; }
-#workspace[data-tool="calendar"] .calendar-legend { margin-left: 20px; }
+#workspace[data-tool="calendar"] .calendar-month { gap: 14px; }
+#workspace[data-tool="calendar"] .calendar-legend { margin-left: 26px; }
 @media (max-width: 760px) {
-  #workspace[data-tool="calendar"] .calendar-month { gap: 8px; }
-  #workspace[data-tool="calendar"] .calendar-legend { margin-left: 13px; }
+  #workspace[data-tool="calendar"] .calendar-month { gap: 10px; }
+  #workspace[data-tool="calendar"] .calendar-legend { margin-left: 18px; }
 }
 
 /* International observances keep their semantic color without bold emphasis. */
