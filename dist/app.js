@@ -16,7 +16,6 @@ const ACCOUNT_LOGIN_PROVIDERS = Object.freeze([
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const LUCIDE_X_MARKUP = '<svg class="lucide lucide-x" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-const LUCIDE_SAVE_MARKUP = '<svg class="lucide lucide-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
 const LUCIDE_LOADER_CIRCLE_MARKUP = '<svg class="lucide lucide-loader-circle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
 const TicketWalletLayout = window.OneBoxTicketWalletLayout;
 const DeveloperJsonEditor = window.OneBoxDeveloperJsonEditor;
@@ -385,7 +384,7 @@ const DICT = {
     keyboard: '键盘：数字、+ − × ÷、括号、Enter 等号、Esc 清空',
     today: '今天', off: '休', work: '补班', normalCalendar: '工作日历',
     legalHoliday: '法定休息', makeUpWorkday: '补班', solarTerm: '节气', selectedDay: '选中日期',
-    noAgenda: '这一天还没有安排。', agenda: '日程', addAgenda: '新增日程', newReminder: '新增日程', eventContent: '日程内容', eventPlaceholder: '请输入', selectPlease: '请选择', addEvent: '添加日程', addToDay: '添加日程', eventDate: '日期', eventTime: '时间', eventDateTime: '选择提醒时间', reminderSchedule: '提醒日程', eventRepeat: '重复',
+    noAgenda: '这一天还没有安排。', agenda: '日程', addAgenda: '新增日程', newReminder: '新增', eventContent: '日程内容', eventPlaceholder: '请输入', selectPlease: '请选择', addEvent: '添加日程', addToDay: '添加日程', eventDate: '日期', eventTime: '时间', eventDateTime: '选择提醒时间', reminderSchedule: '提醒日程', eventRepeat: '重复',
     noteOptional: '备注（可选）', weatherSearch: '搜索', currentLocation: '当前位置',
     refresh: '刷新', searchPlace: '搜索城市或区县',
     noWeather: '天气需要联网，搜索一个城市或区县开始。', weatherLoading: '正在获取天气…', weatherLoadFailed: '天气获取失败，点击卡片重试。',
@@ -432,7 +431,7 @@ const DICT = {
     keyboard: 'Keyboard: numbers, + − × ÷, parentheses, Enter and Escape',
     today: 'Today', off: 'Off', work: 'Make-up workday', normalCalendar: 'Work calendar',
     legalHoliday: 'Public holiday', makeUpWorkday: 'Make-up workday', solarTerm: 'Solar term', selectedDay: 'Selected day',
-    noAgenda: 'Nothing planned for this day.', agenda: 'Events', addAgenda: 'New event', newReminder: 'New reminder', eventContent: 'Event details', eventPlaceholder: 'Enter', selectPlease: 'Select', addEvent: 'Add event', addToDay: 'Add event', eventDate: 'Date', eventTime: 'Time', eventDateTime: 'Date and time', reminderSchedule: 'Reminder time', eventRepeat: 'Repeat',
+    noAgenda: 'Nothing planned for this day.', agenda: 'Events', addAgenda: 'New event', newReminder: 'New', eventContent: 'Event details', eventPlaceholder: 'Enter', selectPlease: 'Select', addEvent: 'Add event', addToDay: 'Add event', eventDate: 'Date', eventTime: 'Time', eventDateTime: 'Date and time', reminderSchedule: 'Reminder time', eventRepeat: 'Repeat',
     noteOptional: 'Note (optional)', weatherSearch: 'Search', currentLocation: 'Current location',
     refresh: 'Refresh', searchPlace: 'Search city or district',
     noWeather: 'Search a city or district to get weather.', weatherLoading: 'Loading weather…', weatherLoadFailed: 'Weather failed to load. Click the card to retry.',
@@ -8746,7 +8745,7 @@ function renderEventDialog() {
   const weekdays = eventWeekdayLabels.map((label, index) => '<label class="weekday-option"><input type="checkbox" name="eventWeekday" value="' + index + '" ' + (index < 5 ? 'checked' : '') + '><span>' + (state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] : label) + '</span></label>').join('');
   const dateTime = eventDateTimeMarkup(state.selectedDate, options);
   dialog.setAttribute('aria-label', t('newReminder'));
-  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form"><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" required maxlength="60" placeholder="' + t('eventPlaceholder') + '"></textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field"><div class="event-schedule-action-row">' + dateTime.control + '<button class="event-save-icon-button" type="submit" aria-label="' + (state.language === 'en' ? 'Save' : '保存') + '" title="' + (state.language === 'en' ? 'Save' : '保存') + '">' + LUCIDE_SAVE_MARKUP + '</button></div></div></div>' + dateTime.hidden + '</div><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
+  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form"><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" required maxlength="60" placeholder="' + t('eventPlaceholder') + '"></textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><button class="primary full-width" type="submit">' + (state.language === 'en' ? 'Save' : '保存') + '</button><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
   dialog.hidden = false;
 }
 function closeEventDialog() { const dialog = $('#eventDialog'); if (dialog) dialog.hidden = true; }
