@@ -2596,3 +2596,121 @@ main:has(#workspace[data-tool="mine"]) {
   padding-top: 4px;
   border-top: 0;
 }
+
+/* Icon-only add action: keep the hit area quiet and light only the glyph. */
+#workspace[data-tool="calendar"] .agenda-panel > .subhead { padding-right: 44px; }
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 8px;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+  transform: none !important;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .14s ease;
+}
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event:hover,
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event:focus-visible,
+#workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event:active {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--primary);
+  outline: none;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#workspace[data-tool="calendar"] .calendar-add-event svg {
+  width: 19px;
+  height: 19px;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .agenda-panel > .subhead { padding-right: 40px; }
+  #workspace[data-tool="calendar"] .agenda-panel > .calendar-add-event {
+    top: 13px;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+  }
+}
+
+/* Flatten the reminder form into a short, quiet set of fields. */
+#eventDialog {
+  padding: max(12px, calc(env(safe-area-inset-top) + 12px)) 12px max(12px, env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--bg) 46%, transparent);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+#eventDialog .event-dialog-card {
+  width: min(400px, 100%);
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+#eventDialog .dialog-head {
+  position: static;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+#eventDialog .dialog-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+#eventDialog .event-form {
+  display: grid;
+  gap: 10px;
+  border: 0;
+  padding: 0;
+}
+#eventDialog .event-form .field {
+  gap: 5px;
+  margin: 0;
+}
+#eventDialog .event-form .field > label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+#eventDialog .event-form textarea#eventTitle {
+  height: 76px;
+  min-height: 76px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+#eventDialog .event-datetime-input,
+#eventDialog #eventRepeat {
+  height: 40px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+#eventDialog .event-datetime-control { height: 40px; min-height: 40px; }
+#eventDialog .event-form .full-width {
+  min-height: 40px;
+  margin-top: 0;
+  border-radius: 10px;
+  box-shadow: none;
+}
+@media (max-width: 600px) {
+  #eventDialog .event-dialog-card { padding: 15px; border-radius: 15px; }
+  #eventDialog .event-datetime-input,
+  #eventDialog #eventRepeat { height: 40px; min-height: 40px; }
+}
