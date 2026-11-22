@@ -3345,6 +3345,16 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   width: 84px;
   grid-template-columns: repeat(2, 42px);
   align-items: stretch;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .14s ease, visibility .14s ease;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-row.swiped .event-swipe-actions {
+  z-index: 2;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
 }
 #workspace[data-tool="calendar"] .calendar-event-swipe-action {
   display: grid;
