@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.976';
+const APP_VERSION = '2.18.977';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8760,9 +8760,13 @@ let calendarEventEditingId = '';
 function renderEventDialog(eventId = '') {
   const dialog = $('#eventDialog');
   if (!dialog) return;
-  const entry = eventId ? calendarEventEntries().find(({ event }) => event.id === eventId) : null;
+  const entry = eventId ? calendarEventEntries().find(({ event }) => String(event.id) === String(eventId)) : null;
+  if (eventId && !entry) {
+    toast(state.language === 'en' ? 'This event is no longer available' : '日程不存在或已删除，请刷新后重试', 'error');
+    return;
+  }
   const item = entry?.event || null;
-  calendarEventEditingId = item ? eventId : '';
+  calendarEventEditingId = item ? String(item.id) : '';
   const repeatValue = item?.repeat || 'once';
   const options = ['once', 'daily', 'workdays', 'restdays', 'weekly'].map((value) => '<option value="' + value + '" ' + (repeatValue === value ? 'selected' : '') + '>' + (value === 'once' ? (state.language === 'en' ? 'Once' : '单次') : t(value === 'daily' ? 'everyDay' : value)) + '</option>').join('');
   const eventWeekdayLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
@@ -15428,9 +15432,10 @@ workspace.addEventListener('click', async (event) => {
   const calendarDeleteButton = event.target.closest('[data-calendar-event-row] [data-delete-event]');
   if (calendarDeleteButton) {
     event.preventDefault(); event.stopPropagation();
-    const eventId = calendarDeleteButton.dataset.deleteEvent;
-    const removed = calendarEventEntries().map(({ event: item }) => item).find((item) => item.id === eventId);
-    Object.keys(ensureCalendarEventStore()).forEach((day) => { state.events[day] = (Array.isArray(state.events[day]) ? state.events[day] : []).filter((item) => item && item.id !== eventId); if (!state.events[day].length) delete state.events[day]; });
+    const eventId = calendarDeleteButton.dataset.deleteEvent || calendarDeleteButton.closest('[data-calendar-event-row]')?.dataset.eventId || '';
+    if (!eventId) { toast(state.language === 'en' ? 'Could not identify this event' : '无法识别这条日程', 'error'); return; }
+    const removed = calendarEventEntries().map(({ event: item }) => item).find((item) => String(item.id) === String(eventId));
+    Object.keys(ensureCalendarEventStore()).forEach((day) => { state.events[day] = (Array.isArray(state.events[day]) ? state.events[day] : []).filter((item) => item && String(item.id) !== String(eventId)); if (!state.events[day].length) delete state.events[day]; });
     if (removed?.sourceTicketId) {
       const ticket = state.ticketWallet.find((item) => item.id === removed.sourceTicketId);
       if (ticket) {
@@ -15444,7 +15449,13 @@ workspace.addEventListener('click', async (event) => {
     return;
   }
   const calendarEditButton = event.target.closest('[data-calendar-event-row] [data-edit-event]');
-  if (calendarEditButton) { event.preventDefault(); event.stopPropagation(); return renderEventDialog(calendarEditButton.dataset.editEvent); }
+  if (calendarEditButton) {
+    event.preventDefault(); event.stopPropagation();
+    const eventId = calendarEditButton.dataset.editEvent || calendarEditButton.closest('[data-calendar-event-row]')?.dataset.eventId || '';
+    if (eventId) return renderEventDialog(eventId);
+    toast(state.language === 'en' ? 'Could not identify this event' : '无法识别这条日程', 'error');
+    return;
+  }
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
   if (event.target.closest('[data-mine-page-back]')) { closeMineSubpage(); return; }
   if (state.minePage === 'pet') {
@@ -16304,10 +16315,10 @@ function saveCalendarEventFromDialog() {
   try {
     const store = ensureCalendarEventStore();
     const editing = Boolean(calendarEventEditingId);
-    const original = calendarEventEditingId ? calendarEventEntries().find(({ event }) => event.id === calendarEventEditingId)?.event : null;
+    const original = calendarEventEditingId ? calendarEventEntries().find(({ event }) => String(event.id) === calendarEventEditingId)?.event : null;
     if (calendarEventEditingId) {
       Object.keys(store).forEach((day) => {
-        store[day] = (Array.isArray(store[day]) ? store[day] : []).filter((event) => event && event.id !== calendarEventEditingId);
+        store[day] = (Array.isArray(store[day]) ? store[day] : []).filter((event) => event && String(event.id) !== calendarEventEditingId);
         if (!store[day].length) delete store[day];
       });
     }
