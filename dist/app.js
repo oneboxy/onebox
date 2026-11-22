@@ -8670,7 +8670,7 @@ function renderCalendarPickerDialog(mode = calendarPickerMode, initializeDraft =
   dialog.innerHTML = '<div class="dialog-card calendar-picker-dialog-card" role="dialog" aria-modal="true" aria-labelledby="calendarPickerTitle"><div class="calendar-picker-dialog-head"><h2 id="calendarPickerTitle">' + title + '</h2><button type="button" class="icon-btn small" data-close-calendar-picker aria-label="' + closeLabel + '">' + LUCIDE_X_MARKUP + '</button></div>' + switchMarkup + options + '<div class="calendar-picker-footer"><button type="button" class="calendar-picker-apply" data-calendar-picker-apply>' + applyLabel + '</button></div></div>';
   dialog.hidden = false;
 }
-function renderCalendarFull() {
+function calendar() {
   const year = state.month.getFullYear();
   const month = state.month.getMonth();
   const first = new Date(year, month, 1);
@@ -8683,8 +8683,10 @@ function renderCalendarFull() {
     const date = new Date(year, month, number);
     const key = dateKey(date);
     const outside = date.getMonth() !== month;
-    const meta = calendarMeta(key);
-    const eventCount = eventsForDate(key).length;
+    let meta = { lunar: null, holiday: null, term: '', festival: '' };
+    try { meta = calendarMeta(key) || meta; } catch (error) { console.error('Calendar date metadata failed:', key, error); }
+    let eventCount = 0;
+    try { eventCount = eventsForDate(key).length; } catch (error) { console.error('Calendar date events failed:', key, error); }
     const holidayClass = meta.holiday ? (meta.holiday.isOffDay ? 'holiday' : 'workday') : '';
     const termClass = meta.term ? 'term-day' : '';
     const festivalClass = meta.festival ? 'international-festival' : '';
@@ -8693,12 +8695,15 @@ function renderCalendarFull() {
     const lunarCell = !hasPriorityLabel && meta.lunar ? (meta.lunar.day === 1 ? meta.lunar.monthText + meta.lunar.dayText : meta.lunar.dayText) : '';
     const cellLabel = label || lunarCell;
     const eventBadge = eventCount ? (eventCount > 99 ? '…' : String(eventCount)) : '';
-    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + holidayClass + ' ' + termClass + ' ' + festivalClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(formatDate(key) + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (label ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small>' + (eventCount ? '<i aria-label="' + eventCount + ' 个日程">' + eventBadge + '</i>' : '') + '</button>';
+    let dateLabel = key;
+    try { dateLabel = formatDate(key); } catch { /* retain the ISO date */ }
+    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + holidayClass + ' ' + termClass + ' ' + festivalClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(dateLabel + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (label ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small>' + (eventCount ? '<i aria-label="' + eventCount + ' 个日程">' + eventBadge + '</i>' : '') + '</button>';
   }
-  const selectedEvents = eventsForDate(state.selectedDate).sort((a, b) => {
+  let selectedEvents = [];
+  try { selectedEvents = eventsForDate(state.selectedDate).sort((a, b) => {
     const left = String(a.time || '00:00:00'); const right = String(b.time || '00:00:00');
     return right.localeCompare(left) || Number(b.createdAt || 0) - Number(a.createdAt || 0);
-  });
+  }); } catch (error) { console.error('Selected calendar events failed:', error); }
   const eventList = selectedEvents.length
     ? selectedEvents.map((item) => '<div class="swipe-row event-swipe-row" data-swipe-row><div class="event-item swipe-content"><div><strong>' + escapeHtml(item.title) + '</strong><small>' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div></div><button class="swipe-delete" data-delete-event="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>').join('')
     : '<p class="empty compact">' + t('noAgenda') + '</p>';
@@ -8712,31 +8717,6 @@ function renderCalendarFull() {
     '<div class="calendar-layout"><div class="calendar-card"><div class="calendar-top"><button type="button" class="calendar-nav-btn" data-month="-1" aria-label="' + (isEnglish ? 'Previous month' : '上个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div class="calendar-month"><div class="calendar-month-pickers">' + monthPickers + '</div><div class="calendar-legend"><span><i class="dot off"></i>' + (isEnglish ? 'Rest' : '休息') + '</span><span><i class="dot work"></i>' + (isEnglish ? 'Work' : t('makeUpWorkday')) + '</span><span><i class="dot term"></i>' + (isEnglish ? 'Term' : t('solarTerm')) + '</span></div><button type="button" class="calendar-today" data-today aria-label="' + escapeHtml(t('today')) + '" title="' + escapeHtml(t('today')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><text x="12" y="16" text-anchor="middle" dominant-baseline="central" alignment-baseline="central" fill="currentColor" stroke="none" font-family="system-ui, sans-serif" font-size="11" font-weight="700">今</text></svg></button></div><button type="button" class="calendar-nav-btn" data-month="1" aria-label="' + (isEnglish ? 'Next month' : '下个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>' +
     '<div class="calendar-grid">' + weekdays.map((day) => '<div class="dow">' + day + '</div>').join('') + cells + '</div></div>' +
    '<aside class="agenda-panel"><div class="subhead"><h3>' + t('agenda') + '</h3></div><div class="event-list">' + eventList + '</div><button type="button" class="calendar-add-event" data-open-event-dialog aria-label="' + escapeHtml(t('addEvent')) + '" title="' + escapeHtml(t('addEvent')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg></button></aside></div>';
-}
-function renderCalendarFallback(error) {
-  console.error('Calendar renderer failed; showing minimal calendar.', error);
-  const monthDate = state.month instanceof Date && Number.isFinite(state.month.getTime()) ? state.month : today;
-  const year = monthDate.getFullYear();
-  const month = monthDate.getMonth();
-  const first = new Date(year, month, 1);
-  const start = (first.getDay() + 6) % 7;
-  const days = new Date(year, month + 1, 0).getDate();
-  const count = start + days > 35 ? 42 : 35;
-  const weekdayLabels = state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-  let cells = '';
-  for (let index = 0; index < count; index += 1) {
-    const date = new Date(year, month, index - start + 1);
-    const key = dateKey(date);
-    const outside = date.getMonth() !== month;
-    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + '" data-date="' + key + '" data-outside="' + outside + '"><span>' + date.getDate() + '</span><small class="day-meta"></small></button>';
-  }
-  const label = state.language === 'en' ? new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(first) : year + '年' + (month + 1) + '月';
-  return heading(t('calendar'), t('calendarDesc')) +
-    '<div class="calendar-layout"><div class="calendar-card"><div class="calendar-top"><button type="button" class="calendar-nav-btn" data-month="-1" aria-label="Previous month">‹</button><div class="calendar-month"><div class="calendar-month-pickers"><strong>' + escapeHtml(label) + '</strong></div><button type="button" class="calendar-today" data-today aria-label="' + escapeHtml(t('today')) + '">今</button></div><button type="button" class="calendar-nav-btn" data-month="1" aria-label="Next month">›</button></div><div class="calendar-grid">' + weekdayLabels.map((day) => '<div class="dow">' + day + '</div>').join('') + cells + '</div></div><aside class="agenda-panel"><div class="subhead"><h3>' + t('agenda') + '</h3></div><div class="event-list"><p class="empty compact">' + (state.language === 'en' ? 'Calendar details are temporarily unavailable.' : '日历详情暂时无法加载。') + '</p></div><button type="button" class="calendar-add-event" data-open-event-dialog aria-label="' + escapeHtml(t('addEvent')) + '" title="' + escapeHtml(t('addEvent')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg></button></aside></div>';
-}
-function calendar() {
-  try { return renderCalendarFull(); }
-  catch (error) { return renderCalendarFallback(error); }
 }
 function saveEvents() { saveStored(STORAGE.events, state.events); }
 
