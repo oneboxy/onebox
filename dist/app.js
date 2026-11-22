@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.979';
+const APP_VERSION = '2.18.980';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -10940,6 +10940,10 @@ function isIosSafariBrowser() {
 function isIosSafariReaderSurfaceActive() {
   return isIosSafariBrowser() && state.section === 'tools' && state.tool === 'reader' && state.readerMode === 'reading' && state.readerImmersive;
 }
+function syncCalendarViewportDensity(height = window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight) {
+  const compact = state.section === 'tools' && state.tool === 'calendar' && window.innerWidth <= 760 && height < 820;
+  workspace.classList.toggle('calendar-compact-viewport', compact);
+}
 function syncOneBoxViewportMetrics() {
   const visualViewport = window.visualViewport;
   const height = Math.max(1, Math.round(visualViewport?.height || window.innerHeight || document.documentElement.clientHeight));
@@ -10948,6 +10952,7 @@ function syncOneBoxViewportMetrics() {
   root.style.setProperty('--onebox-visual-height', height + 'px');
   root.style.setProperty('--onebox-visual-top', top + 'px');
   root.classList.toggle('ios-safari-browser', isIosSafariBrowser());
+  syncCalendarViewportDensity(height);
 }
 function refreshOneBoxViewportMetrics() {
   syncOneBoxViewportMetrics();
@@ -13710,6 +13715,7 @@ function render() {
   nav.hidden = state.section !== 'tools' || state.tool === 'track';
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation, track: () => window.OneBoxTrack.render() };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
+  syncCalendarViewportDensity();
   workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.settingsPageOpen ? renderSettingsPage() : state.ticketWalletOpen ? renderTicketWallet() : state.minePage === 'pet' ? renderPetDialog(true) : state.minePage === 'account' ? renderGithubDialog(true) : state.minePage === 'agreement' ? renderAgreementDialog(true) : state.minePage === 'track' ? window.OneBoxTrack.render() : renderMine()) : (renderers[state.tool] || calculator)();
   $('#settingsBtn').hidden = !cloudModuleEnabled('settings');
   injectCloudContent();
