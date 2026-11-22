@@ -8697,7 +8697,7 @@ function calendar() {
     const eventBadge = eventCount ? (eventCount > 99 ? '…' : String(eventCount)) : '';
     let dateLabel = key;
     try { dateLabel = formatDate(key); } catch { /* retain the ISO date */ }
-    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + holidayClass + ' ' + termClass + ' ' + festivalClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(dateLabel + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (label ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small>' + (eventCount ? '<i aria-label="' + eventCount + ' 个日程">' + eventBadge + '</i>' : '') + '</button>';
+    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + (eventCount ? 'has-events ' : '') + holidayClass + ' ' + termClass + ' ' + festivalClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(dateLabel + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (label ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small>' + (eventCount ? '<i aria-label="' + eventCount + ' 个日程">' + eventBadge + '</i>' : '') + '</button>';
   }
   let selectedEvents = [];
   try { selectedEvents = eventsForDate(state.selectedDate).sort((a, b) => {
