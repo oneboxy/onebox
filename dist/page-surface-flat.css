@@ -3235,10 +3235,6 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   }
   #workspace[data-tool="calendar"] .calendar-legend span { gap: 2px; }
   #workspace[data-tool="calendar"] .calendar-legend .dot { width: 4px; height: 4px; flex-basis: 4px; }
-  #workspace[data-tool="calendar"] .agenda-panel .event-list {
-    flex: 0 1 280px;
-    height: 280px;
-  }
 }
 
 /* Compact agenda rows reveal edit/delete controls with a left swipe. */
@@ -3271,10 +3267,10 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 #workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event:focus-visible { background: transparent !important; color: var(--primary); }
 #workspace[data-tool="calendar"] .agenda-panel .event-list {
   display: flex;
-  flex: 0 1 294px;
+  flex: 0 0 210px;
   flex-direction: column;
   justify-content: flex-start;
-  height: 294px;
+  height: 210px;
   max-height: 100%;
   min-height: 0;
   overflow-x: hidden;
@@ -3282,6 +3278,12 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   gap: 0;
   margin: 4px 0 0;
   padding: 0;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .agenda-panel .event-list {
+    flex-basis: 200px;
+    height: 200px;
+  }
 }
 #workspace[data-tool="calendar"] .calendar-event-swipe-row {
   position: relative;
