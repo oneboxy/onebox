@@ -2553,3 +2553,46 @@ main:has(#workspace[data-tool="mine"]) {
   #workspace[data-tool="calendar"] .dow { padding-block: 3px; }
   #workspace[data-tool="calendar"] .day { min-height: 58px; padding-block: 3px; }
 }
+
+/* Give the calendar legend more breathing room beside the date controls. */
+#workspace[data-tool="calendar"] .calendar-month { gap: 11px; }
+#workspace[data-tool="calendar"] .calendar-legend { margin-left: 20px; }
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .calendar-month { gap: 8px; }
+  #workspace[data-tool="calendar"] .calendar-legend { margin-left: 13px; }
+}
+
+/* International observances keep their semantic color without bold emphasis. */
+#workspace[data-tool="calendar"] .day.international-festival .day-meta.priority {
+  font-weight: 400;
+}
+
+/* Reduce the picker chrome while keeping the active choice easy to find. */
+#calendarPickerDialog .calendar-picker-dialog-card {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+}
+#calendarPickerDialog .calendar-picker-dialog-head { margin-bottom: 8px; }
+#calendarPickerDialog .calendar-picker-date-tabs {
+  gap: 14px;
+  margin-bottom: 8px;
+}
+#calendarPickerDialog .calendar-picker-date-tab,
+#calendarPickerDialog .calendar-picker-date-tab.active,
+#calendarPickerDialog .calendar-picker-date-tab.active:hover,
+#calendarPickerDialog .calendar-picker-date-tab.active:focus-visible {
+  border-color: transparent;
+  border-radius: 0;
+  background: transparent !important;
+}
+#calendarPickerDialog .calendar-picker-date-tab.active { font-weight: 650; }
+#calendarPickerDialog .calendar-picker-options { gap: 4px; }
+#calendarPickerDialog .calendar-picker-option.selected {
+  border-color: var(--line);
+  border-radius: 7px;
+  font-weight: 600;
+}
+#calendarPickerDialog .calendar-picker-footer {
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 0;
+}
