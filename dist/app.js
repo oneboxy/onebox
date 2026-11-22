@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.983';
+const APP_VERSION = '2.18.984';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8709,9 +8709,7 @@ function calendar() {
     ? selectedEvents.map((item) => '<div class="swipe-row event-swipe-row calendar-event-swipe-row" data-swipe-row data-calendar-event-row data-event-id="' + escapeHtml(item.id) + '"><div class="event-item swipe-content"><div class="event-copy"><strong>' + escapeHtml(item.title) + '</strong><small class="event-time">' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div></div><div class="event-swipe-actions"><button type="button" class="event-swipe-action event-action-edit" data-edit-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Edit event' : '编辑日程') + '" title="' + (state.language === 'en' ? 'Edit' : '编辑') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16.5-.7 3.2 3.2-.7L18.8 7.7a2.2 2.2 0 0 0-3.1-3.1L5 16.5Z"/><path d="m14.5 6.5 3 3"/></svg></button><button type="button" class="event-swipe-action event-action-delete" data-delete-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Delete event' : '删除日程') + '" title="' + (state.language === 'en' ? 'Delete' : '删除') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5M14 11v5"/></svg></button></div></div>').join('')
     : '<p class="empty compact">' + t('noAgenda') + '</p>';
   const isEnglish = state.language === 'en';
-  const agendaCountBadge = selectedEvents.length
-    ? '<span class="agenda-count-badge" aria-label="' + (isEnglish ? selectedEvents.length + (selectedEvents.length === 1 ? ' event' : ' events') : selectedEvents.length + ' 条日程') + '">' + (selectedEvents.length > 99 ? '…' : selectedEvents.length) + '</span>'
-    : '';
+  const agendaCountText = isEnglish ? ' (' + selectedEvents.length + ')' : '（' + selectedEvents.length + '）';
   const monthNames = Array.from({ length: 12 }, (_, index) => isEnglish ? new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, index, 1)) : String(index + 1));
   const yearPicker = '<button type="button" class="calendar-picker calendar-year-picker" data-calendar-picker="year" aria-label="' + (isEnglish ? 'Choose year' : '选择年份') + '"><span class="calendar-picker-value">' + year + '</span>' + (isEnglish ? '' : '<span class="calendar-picker-unit">年</span>') + '</button>';
   const monthPicker = '<button type="button" class="calendar-picker calendar-month-picker" data-calendar-picker="month" aria-label="' + (isEnglish ? 'Choose month' : '选择月份') + '"><span class="calendar-picker-value">' + escapeHtml(monthNames[month]) + '</span>' + (isEnglish ? '' : '<span class="calendar-picker-unit">月</span>') + '</button>';
@@ -8720,7 +8718,7 @@ function calendar() {
   return heading(t('calendar'), t('calendarDesc')) +
     '<div class="calendar-layout"><div class="calendar-card"><div class="calendar-top"><button type="button" class="calendar-nav-btn" data-month="-1" aria-label="' + (isEnglish ? 'Previous month' : '上个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div class="calendar-month"><div class="calendar-month-pickers">' + monthPickers + '</div><div class="calendar-legend"><span><i class="dot off"></i>' + (isEnglish ? 'Rest' : '休息') + '</span><span><i class="dot work"></i>' + (isEnglish ? 'Work' : t('makeUpWorkday')) + '</span><span><i class="dot term"></i>' + (isEnglish ? 'Term' : t('solarTerm')) + '</span></div><button type="button" class="calendar-today" data-today aria-label="' + escapeHtml(t('today')) + '" title="' + escapeHtml(t('today')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><text x="12" y="16" text-anchor="middle" dominant-baseline="central" alignment-baseline="central" fill="currentColor" stroke="none" font-family="system-ui, sans-serif" font-size="11" font-weight="700">今</text></svg></button></div><button type="button" class="calendar-nav-btn" data-month="1" aria-label="' + (isEnglish ? 'Next month' : '下个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>' +
     '<div class="calendar-grid">' + weekdays.map((day) => '<div class="dow">' + day + '</div>').join('') + cells + '</div></div>' +
-   '<aside class="agenda-panel"><div class="subhead"><h3>' + (isEnglish ? 'Schedule' : '日程安排') + agendaCountBadge + '</h3><button type="button" class="calendar-add-event" data-open-event-dialog aria-label="' + escapeHtml(t('addEvent')) + '" title="' + escapeHtml(t('addEvent')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg></button></div><div class="event-list">' + eventList + '</div></aside></div>';
+   '<aside class="agenda-panel"><div class="subhead"><h3>' + (isEnglish ? 'Schedule' : '日程安排') + '<span class="agenda-count-text">' + agendaCountText + '</span></h3><button type="button" class="calendar-add-event" data-open-event-dialog aria-label="' + escapeHtml(t('addEvent')) + '" title="' + escapeHtml(t('addEvent')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg></button></div><div class="event-list">' + eventList + '</div></aside></div>';
 }
 function saveEvents() { saveStored(STORAGE.events, state.events); }
 function deleteCalendarEventById(eventId) {
@@ -8846,44 +8844,29 @@ function renderLunarDialog(key) {
   const meta = calendarMeta(key);
   const lunar = meta.lunar;
   const isEnglish = state.language === 'en';
-  const labels = isEnglish ? {
-    lunar: 'Lunar', yearPillar: 'Year pillar · zodiac', monthPillar: 'Month pillar', dayPillar: 'Day pillar', constellation: 'Constellation', highlights: 'Date markers', agenda: 'Agenda', offDay: 'Rest day', workday: 'Make-up workday', almanac: 'More calendar details', advice: 'Almanac advice', suitable: 'Good for', avoid: 'Avoid',
-  } : {
-    lunar: '农历', yearPillar: '年柱 · 生肖', monthPillar: '月柱', dayPillar: '日柱', constellation: '星座', highlights: '日期标记', agenda: '日程', offDay: '休息日', workday: '补班日', almanac: '更多历法信息', advice: '黄历宜忌', suitable: '宜', avoid: '忌',
-  };
-  const lunarText = lunar ? lunar.monthText + lunar.dayText : (state.language === 'en' ? 'Lunar calendar unavailable' : '当前浏览器不支持农历格式');
   const almanac = almanacFor(key);
   const constellation = constellationFor(date);
-  const constellationLabel = isEnglish ? constellation.en : constellation.zh;
   const weekday = new Intl.DateTimeFormat(isEnglish ? 'en-US' : 'zh-CN', { weekday: 'long' }).format(date);
   const title = formatDate(key, { year: 'numeric', month: 'long', day: 'numeric' });
-  const yearValue = [almanac.yearPillar && (isEnglish ? almanac.yearPillar : almanac.yearPillar + '年'), almanac.zodiac && (isEnglish ? almanac.zodiac : '属' + almanac.zodiac)].filter(Boolean).join(isEnglish ? ' · ' : '');
-  const overviewFields = [
-    [labels.yearPillar, yearValue || '—'],
-    [labels.monthPillar, almanac.monthPillar ? almanac.monthPillar + (isEnglish ? '' : '月') : '—'],
-    [labels.dayPillar, almanac.dayPillar ? almanac.dayPillar + (isEnglish ? '' : '日') : '—'],
-    [labels.constellation, constellationLabel],
-  ];
-  const highlightNames = [...new Set(almanac.festivals.filter((name) => name !== meta.holiday?.name))];
-  const highlights = [
-    ...highlightNames.map((name) => ({ label: name, kind: 'festival' })),
-    meta.holiday ? { label: meta.holiday.name + ' · ' + (meta.holiday.isOffDay ? labels.offDay : labels.workday), kind: meta.holiday.isOffDay ? 'holiday' : 'workday' } : null,
-    meta.term ? { label: meta.term, kind: 'term' } : null,
-  ].filter(Boolean);
-  const highlightMarkup = highlights.length ? '<div class="lunar-dialog-tags" aria-label="' + labels.highlights + '">' + highlights.map((item) => '<span class="lunar-dialog-tag ' + item.kind + '">' + escapeHtml(item.label) + '</span>').join('') + '</div>' : '';
-  const almanacField = (label, value, wide = false) => '<div class="lunar-dialog-almanac-field' + (wide ? ' wide' : '') + '"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value || '—') + '</strong></div>';
-  const almanacFields = isEnglish ? [
-    ['Year element', almanac.yearElement], ['Season', almanac.season], ['Month element', almanac.monthElement], ['Mansion', almanac.mansion], ['Day element', almanac.dayElement], ['Julian day', almanac.julian], ['Buddhist year', almanac.buddhist], ['Islamic date', almanac.islamic], ['Clash', almanac.clash], ['Sha direction', almanac.sha], ['Six star', almanac.sixStar], ['Twelve duty', almanac.twelveGod], ['Peng Zu taboos', almanac.pengZu, true], ['Fetal deity', almanac.fetalPalace, true],
-  ] : [
-    ['年五行', almanac.yearElement], ['季节', almanac.season], ['月五行', almanac.monthElement], ['星宿', almanac.mansion], ['日五行', almanac.dayElement], ['儒略日', almanac.julian], ['佛历年', almanac.buddhist], ['伊斯兰历', almanac.islamic], ['冲', almanac.clash], ['煞', almanac.sha], ['六曜', almanac.sixStar], ['十二神', almanac.twelveGod], ['彭祖百忌', almanac.pengZu, true], ['胎神占方', almanac.fetalPalace, true],
-  ];
-  const almanacMarkup = '<details class="lunar-dialog-more" open><summary>' + labels.almanac + '</summary><div class="lunar-dialog-almanac-grid">' + almanacFields.map((field) => almanacField(field[0], field[1], field[2])).join('') + '</div></details>';
-  const almanacList = (items) => escapeHtml(items.join(isEnglish ? ' · ' : '、'));
-  const adviceMarkup = '<details class="lunar-dialog-more" open><summary>' + labels.advice + '</summary><section class="lunar-dialog-advice"><div class="lunar-dialog-suit-avoid-grid"><div><span class="lunar-dialog-suitable-label">' + labels.suitable + '</span><p>' + almanacList(almanac.suit) + '</p></div><div><span class="lunar-dialog-avoid-label">' + labels.avoid + '</span><p>' + almanacList(almanac.avoid) + '</p></div></div></section></details>';
-  const selectedEvents = eventsForDate(key);
-  const agendaMarkup = selectedEvents.length ? '<div class="lunar-dialog-agenda"><span>' + labels.agenda + '</span><strong>' + (isEnglish ? selectedEvents.length + (selectedEvents.length === 1 ? ' event' : ' events') : selectedEvents.length + ' 项') + '</strong></div>' : '';
-  const infoGrid = '<section class="lunar-dialog-overview"><div class="lunar-dialog-info-grid">' + overviewFields.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div></section>';
-  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true"><div class="lunar-dialog-head"><div class="lunar-dialog-title-line"><h2>' + escapeHtml(title) + '</h2><div class="lunar-dialog-date-meta"><span class="lunar-dialog-weekday">' + escapeHtml(weekday) + '</span><span class="lunar-dialog-lunar">' + labels.lunar + ' · ' + escapeHtml(lunarText) + '</span>' + highlightMarkup + '</div></div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><div class="lunar-dialog-body">' + infoGrid + adviceMarkup + agendaMarkup + almanacMarkup + '</div></div>';
+  const lunarText = lunar ? lunar.monthText + lunar.dayText : (isEnglish ? 'Unavailable' : '农历信息不可用');
+  const facts = [
+    [isEnglish ? 'Day pillar' : '日柱', almanac.dayPillar ? almanac.dayPillar + (isEnglish ? '' : '日') : ''],
+    [isEnglish ? 'Zodiac' : '生肖', almanac.zodiac ? (isEnglish ? almanac.zodiac : '属' + almanac.zodiac) : ''],
+    [isEnglish ? 'Constellation' : '星座', isEnglish ? constellation.en : constellation.zh],
+  ].filter(([, value]) => Boolean(value));
+  const markers = [...new Set([
+    meta.holiday ? meta.holiday.name + ' · ' + (meta.holiday.isOffDay ? (isEnglish ? 'Rest' : '休息') : (isEnglish ? 'Work' : '补班')) : '',
+    meta.term || '',
+    meta.festival || '',
+    lunar?.festival || '',
+  ].filter(Boolean))];
+  const markerMarkup = markers.length
+    ? '<div class="lunar-dialog-markers">' + markers.map((name) => '<span>' + escapeHtml(name) + '</span>').join('') + '</div>'
+    : '';
+  const factsMarkup = facts.length
+    ? '<div class="lunar-dialog-facts">' + facts.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div>'
+    : '';
+  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true" aria-labelledby="lunarDialogTitle"><div class="lunar-dialog-head"><div><h2 id="lunarDialogTitle">' + escapeHtml(title) + '</h2><p>' + escapeHtml(weekday) + '</p></div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><div class="lunar-dialog-body"><div class="lunar-dialog-lunar"><span>' + (isEnglish ? 'Lunar date' : '农历') + '</span><strong>' + escapeHtml(lunarText) + '</strong></div>' + markerMarkup + factsMarkup + '</div></div>';
   dialog.hidden = false;
   state.lunarDialogDate = key;
 }
