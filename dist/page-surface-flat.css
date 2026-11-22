@@ -2273,7 +2273,7 @@ main:has(#workspace[data-tool="mine"]) {
   background: var(--panel-2) !important;
   color: var(--ink);
 }
-#workspace[data-tool="calendar"] .calendar-nav-btn svg { width: 18px; height: 18px; }
+#workspace[data-tool="calendar"] .calendar-nav-btn svg { width: 21px; height: 21px; }
 #workspace[data-tool="calendar"] .calendar-today svg {
   display: block;
   width: 18px;
@@ -2996,8 +2996,8 @@ main:has(#workspace[data-tool="mine"]) {
 
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] {
-    padding-right: 8px;
-    padding-left: 8px;
+    padding-right: 4px;
+    padding-left: 4px;
   }
   #workspace[data-tool="calendar"] .calendar-layout { row-gap: 12px; }
 }
