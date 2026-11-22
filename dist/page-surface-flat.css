@@ -3022,9 +3022,9 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 }
 #workspace[data-tool="calendar"] {
   box-sizing: border-box;
-  height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 58px - 70px);
+  height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 58px);
   min-height: 0 !important;
-  max-height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 58px - 70px);
+  max-height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 58px);
   display: flex;
   flex-direction: column;
   overflow: hidden !important;
@@ -3139,8 +3139,8 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     padding-bottom: 0 !important;
   }
   html:has(#workspace[data-tool="calendar"]) #workspace[data-tool="calendar"] {
-    height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 54px - 70px);
-    max-height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 54px - 70px);
+    height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 54px);
+    max-height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 54px);
     padding: 8px 0 !important;
   }
   #workspace[data-tool="calendar"] .calendar-layout {
