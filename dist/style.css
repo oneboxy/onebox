@@ -945,7 +945,7 @@ main:has(#workspace[data-tool="home"]), main:has(#workspace[data-tool="messages"
 /* Calendar cells keep every datum centered while the event badge stays clear of the date. */
 #workspace[data-tool="calendar"] .day { justify-content: center; align-items: center; padding-left: 3px; padding-right: 3px; }
 #workspace[data-tool="calendar"] .day > span, #workspace[data-tool="calendar"] .day > small { width: 100%; padding-right: 0; text-align: center; }
-#workspace[data-tool="calendar"] .day i { top: -4px; right: -4px; bottom: auto; z-index: 2; display: grid; width: 15px; min-width: 15px; height: 15px; padding: 0; place-items: center; box-sizing: border-box; border: 1px solid var(--primary); border-radius: 50%; background: var(--panel); color: var(--primary); font-size: 7px; font-weight: 700; line-height: 1; box-shadow: none; }
+#workspace[data-tool="calendar"] .day i { top: -1px; right: -1px; bottom: auto; z-index: 2; display: grid; width: 18px; min-width: 18px; height: 18px; padding: 0; place-items: center; box-sizing: border-box; border: 1px solid var(--ink); border-radius: 50%; background: var(--ink); color: var(--bg); font-size: 8px; font-weight: 700; line-height: 1; box-shadow: none; }
 #workspace[data-tool="calendar"] .day.has-events > span { transform: none; }
 #workspace[data-tool="calendar"] .calendar-double-tap-hint { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; font-weight: 500; }
 .lunar-dialog-card { width: min(390px, 100%); text-align: center; }
@@ -5592,9 +5592,9 @@ main { overflow-x: hidden; }
    otherwise make the count disappear. */
 html[data-color="mono"] #workspace[data-tool="calendar"] .day i {
   border-color: var(--ink);
-  background: var(--panel);
-  color: var(--ink);
-  font-size: 7px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 8px;
   font-weight: 800;
 }
 
