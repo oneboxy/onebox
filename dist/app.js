@@ -8705,7 +8705,7 @@ function calendar() {
     return right.localeCompare(left) || Number(b.createdAt || 0) - Number(a.createdAt || 0);
   }); } catch (error) { console.error('Selected calendar events failed:', error); }
   const eventList = selectedEvents.length
-    ? selectedEvents.map((item) => '<div class="event-item" data-calendar-event-row data-event-id="' + escapeHtml(item.id) + '"><div class="event-copy"><strong>' + escapeHtml(item.title) + '</strong><small class="event-time">' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div><div class="event-actions"><button type="button" class="event-action-edit" data-edit-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Edit event' : '编辑日程') + '" title="' + (state.language === 'en' ? 'Edit' : '编辑') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16.5-.7 3.2 3.2-.7L18.8 7.7a2.2 2.2 0 0 0-3.1-3.1L5 16.5Z"/><path d="m14.5 6.5 3 3"/></svg></button><button type="button" class="event-action-delete" data-delete-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Delete event' : '删除日程') + '" title="' + (state.language === 'en' ? 'Delete' : '删除') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5M14 11v5"/></svg></button></div></div>').join('')
+    ? selectedEvents.map((item) => '<div class="swipe-row event-swipe-row calendar-event-swipe-row" data-swipe-row data-calendar-event-row data-event-id="' + escapeHtml(item.id) + '"><div class="event-item swipe-content"><div class="event-copy"><strong>' + escapeHtml(item.title) + '</strong><small class="event-time">' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div></div><div class="event-swipe-actions"><button type="button" class="event-swipe-action event-action-edit" data-edit-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Edit event' : '编辑日程') + '" title="' + (state.language === 'en' ? 'Edit' : '编辑') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16.5-.7 3.2 3.2-.7L18.8 7.7a2.2 2.2 0 0 0-3.1-3.1L5 16.5Z"/><path d="m14.5 6.5 3 3"/></svg></button><button type="button" class="event-swipe-action event-action-delete" data-delete-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Delete event' : '删除日程') + '" title="' + (state.language === 'en' ? 'Delete' : '删除') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5M14 11v5"/></svg></button></div></div>').join('')
     : '<p class="empty compact">' + t('noAgenda') + '</p>';
   const isEnglish = state.language === 'en';
   const monthNames = Array.from({ length: 12 }, (_, index) => isEnglish ? new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, index, 1)) : String(index + 1));
@@ -8716,7 +8716,7 @@ function calendar() {
   return heading(t('calendar'), t('calendarDesc')) +
     '<div class="calendar-layout"><div class="calendar-card"><div class="calendar-top"><button type="button" class="calendar-nav-btn" data-month="-1" aria-label="' + (isEnglish ? 'Previous month' : '上个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div class="calendar-month"><div class="calendar-month-pickers">' + monthPickers + '</div><div class="calendar-legend"><span><i class="dot off"></i>' + (isEnglish ? 'Rest' : '休息') + '</span><span><i class="dot work"></i>' + (isEnglish ? 'Work' : t('makeUpWorkday')) + '</span><span><i class="dot term"></i>' + (isEnglish ? 'Term' : t('solarTerm')) + '</span></div><button type="button" class="calendar-today" data-today aria-label="' + escapeHtml(t('today')) + '" title="' + escapeHtml(t('today')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><text x="12" y="16" text-anchor="middle" dominant-baseline="central" alignment-baseline="central" fill="currentColor" stroke="none" font-family="system-ui, sans-serif" font-size="11" font-weight="700">今</text></svg></button></div><button type="button" class="calendar-nav-btn" data-month="1" aria-label="' + (isEnglish ? 'Next month' : '下个月') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>' +
     '<div class="calendar-grid">' + weekdays.map((day) => '<div class="dow">' + day + '</div>').join('') + cells + '</div></div>' +
-   '<aside class="agenda-panel"><div class="subhead"><h3>' + t('agenda') + '</h3></div><div class="event-list">' + eventList + '</div><button type="button" class="calendar-add-event" data-open-event-dialog aria-label="' + escapeHtml(t('addEvent')) + '" title="' + escapeHtml(t('addEvent')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg></button></aside></div>';
+   '<aside class="agenda-panel"><div class="subhead"><h3>' + (isEnglish ? 'Schedule' : '日程安排') + '</h3><button type="button" class="calendar-add-event" data-open-event-dialog aria-label="' + escapeHtml(t('addEvent')) + '" title="' + escapeHtml(t('addEvent')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg></button></div><div class="event-list">' + eventList + '</div></aside></div>';
 }
 function saveEvents() { saveStored(STORAGE.events, state.events); }
 
@@ -13695,8 +13695,6 @@ let ticketWalletReorderFrame = 0;
 let ticketWalletReorderPoint = null;
 let swipeGesture = null;
 let swipeSuppressClickUntil = 0;
-let calendarEventLongPress = null;
-let calendarEventSuppressClickUntil = 0;
 let ticketWalletSuppressSyntheticClick = false;
 let ticketWalletSyntheticClickPoint = null;
 let ticketWalletDetailClosingId = '';
@@ -14485,7 +14483,7 @@ function finishHomeFeedPull(event) {
 
 workspace.addEventListener('pointerdown', (event) => {
   const row = event.target.closest('[data-swipe-row]');
-  if (!row || event.target.closest('.swipe-delete')) {
+  if (!row || event.target.closest('.swipe-delete, [data-edit-event], [data-delete-event]')) {
     if (!row) $$('.swipe-row.swiped').forEach((item) => item.classList.remove('swiped'));
     swipeGesture = null;
     return;
@@ -14493,7 +14491,7 @@ workspace.addEventListener('pointerdown', (event) => {
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   const ticketWalletEditTarget = event.target.closest('button, a, [data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]');
   const ticketWalletId = ticketCard && (!ticketWalletEditTarget || state.ticketWalletSelectedId !== ticketCard.dataset.ticketWalletCard) ? ticketCard.dataset.ticketWalletCard : '';
-  swipeGesture = { row, ticketWalletId, startX: event.clientX, startY: event.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
+  swipeGesture = { row, ticketWalletId, calendarEvent: row.hasAttribute('data-calendar-event-row'), startX: event.clientX, startY: event.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
 });
 function ticketWalletDetailReturnMotion(shell, detail, selectedId) {
   const selectedRow = shell?.querySelector('.ticket-wallet-detail-row');
@@ -14697,6 +14695,21 @@ function ticketWalletMatchesSyntheticClick(event) {
   return Boolean(ticketWalletSuppressSyntheticClick && point && Date.now() < point.expiresAt && Number.isFinite(event.clientX) && Number.isFinite(event.clientY) && Math.hypot(event.clientX - point.x, event.clientY - point.y) <= 28);
 }
 function finishTicketWalletHorizontalGesture(gesture) {
+  if (gesture?.calendarEvent) {
+    const isOpen = gesture.row.classList.contains('swiped');
+    if (gesture.dx < -42 && Math.abs(gesture.dx) > Math.abs(gesture.dy) + 10) {
+      $$('.calendar-event-swipe-row.swiped').forEach((row) => { if (row !== gesture.row) row.classList.remove('swiped'); });
+      gesture.row.classList.add('swiped');
+      swipeSuppressClickUntil = Date.now() + 250;
+      return true;
+    }
+    if (gesture.dx > 28 && Math.abs(gesture.dx) > Math.abs(gesture.dy) + 8 && isOpen) {
+      gesture.row.classList.remove('swiped');
+      swipeSuppressClickUntil = Date.now() + 250;
+      return true;
+    }
+    return false;
+  }
   if (!gesture?.ticketWalletId) return false;
   const isPackRow = gesture.row.dataset.ticketWalletPackRow === 'true';
   if (isPackRow) {
@@ -14727,9 +14740,14 @@ function updateTicketWalletTouchGesture(event) {
     queueTicketWalletReorderPosition(touch.clientX, touch.clientY);
     return;
   }
-  if (!gesture?.ticketWalletId || !touch) return;
+  if (!gesture || !touch) return;
   gesture.dx = touch.clientX - gesture.startX;
   gesture.dy = touch.clientY - gesture.startY;
+  if (gesture.calendarEvent) {
+    if (Math.abs(gesture.dy) > Math.abs(gesture.dx) + 10 && Math.abs(gesture.dy) > 8) gesture.cancelled = true;
+    return;
+  }
+  if (!gesture.ticketWalletId) return;
   if (Math.abs(gesture.dy) > Math.abs(gesture.dx) + 10 && Math.abs(gesture.dy) > 8) {
     gesture.ticketVertical = true;
     // Safari may cancel the pointer stream as soon as the page claims the
@@ -14740,13 +14758,14 @@ function updateTicketWalletTouchGesture(event) {
 }
 function finishTicketWalletTouchGesture(event) {
   const gesture = swipeGesture;
-  if (!gesture?.ticketWalletId) return;
+  if (!gesture?.ticketWalletId && !gesture?.calendarEvent) return;
   const touch = event.changedTouches?.[0];
   if (touch) {
     gesture.dx = touch.clientX - gesture.startX;
     gesture.dy = touch.clientY - gesture.startY;
   }
   swipeGesture = null;
+  if (gesture.calendarEvent) { finishTicketWalletHorizontalGesture(gesture); return; }
   if (finishTicketWalletVerticalGesture(gesture)) return;
   if (finishTicketWalletTapGesture(gesture)) return;
   finishTicketWalletHorizontalGesture(gesture);
@@ -14991,13 +15010,19 @@ workspace.addEventListener('contextmenu', (event) => {
   if (event.target.closest('.ticket-wallet-stack > [data-ticket-wallet-pack-row="true"]')) event.preventDefault();
 }, true);
 workspace.addEventListener('touchstart', (event) => {
-  if (swipeGesture || event.target.closest('.swipe-delete')) return;
+  if (swipeGesture || event.target.closest('.swipe-delete, [data-edit-event], [data-delete-event]')) return;
   const row = event.target.closest('[data-swipe-row]');
+  const calendarEventRow = event.target.closest('[data-calendar-event-row]');
   const ticketCard = event.target.closest('[data-ticket-wallet-card]');
   const ticketWalletEditTarget = event.target.closest('button, a, [data-ticket-wallet-edit-field], [data-ticket-wallet-edit], [data-ticket-wallet-original], [data-ticket-wallet-apple], [data-ticket-wallet-delete]');
-  if (!row || !ticketCard || (ticketWalletEditTarget && state.ticketWalletSelectedId === ticketCard.dataset.ticketWalletCard)) return;
+  if (!row) return;
   const touch = event.touches?.[0];
   if (!touch) return;
+  if (calendarEventRow) {
+    swipeGesture = { row: calendarEventRow, calendarEvent: true, startX: touch.clientX, startY: touch.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
+    return;
+  }
+  if (!ticketCard || (ticketWalletEditTarget && state.ticketWalletSelectedId === ticketCard.dataset.ticketWalletCard)) return;
   swipeGesture = { row, ticketWalletId: ticketCard.dataset.ticketWalletCard, startX: touch.clientX, startY: touch.clientY, dx: 0, dy: 0, dragging: false, ticketVertical: false, cancelled: false };
 }, { passive: true });
 workspace.addEventListener('touchmove', updateTicketWalletTouchGesture, { passive: false });
@@ -15401,7 +15426,6 @@ workspace.addEventListener('keydown', (event) => {
 });
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
-  if (Date.now() < calendarEventSuppressClickUntil && event.target.closest('[data-calendar-event-row]') && !event.target.closest('[data-edit-event], [data-delete-event]')) { event.preventDefault(); event.stopPropagation(); return; }
   if (event.target.closest('[data-mine-page-back]')) { closeMineSubpage(); return; }
   if (state.minePage === 'pet') {
     const outfit = event.target.closest('[data-pet-outfit]');
@@ -15457,8 +15481,8 @@ workspace.addEventListener('click', async (event) => {
   if (navigationPage && !event.target.closest('[data-navigation-item]')) clearNavigationActionCards();
   if (Date.now() < navigationSuppressClickUntil && event.target.closest('[data-navigation-item]') && !event.target.closest('[data-navigation-delete], [data-navigation-edit]')) { event.preventDefault(); return; }
   if (Date.now() < readerBookSuppressClickUntil && event.target.closest('[data-reader-book-card]')) { event.preventDefault(); return; }
-  if (Date.now() < swipeSuppressClickUntil && event.target.closest('[data-swipe-row]') && !event.target.closest('.swipe-delete')) return;
-  if (Date.now() < swipeSuppressClickUntil && state.readerMode === 'reading') { event.preventDefault(); event.stopPropagation(); return; }
+  if (Date.now() < swipeSuppressClickUntil && event.target.closest('[data-swipe-row]') && !event.target.closest('.swipe-delete, [data-edit-event], [data-delete-event]')) return;
+  if (Date.now() < swipeSuppressClickUntil && state.tool === 'reader' && state.readerMode === 'reading') { event.preventDefault(); event.stopPropagation(); return; }
   const readerSelectionControl = event.target.closest('[data-reader-selection-action], [data-reader-comment-popover], [data-reader-comment-id]');
   const readerSelectionSafeControl = event.target.closest('[data-reader-settings], [data-reader-toc], [data-reader-comments], [data-reader-fullscreen], [data-close-reader], [data-reader-page-prev], [data-reader-page-next], [data-reader-chapter-prev], [data-reader-chapter-next]');
   if (state.readerMode === 'reading' && readerHasLiveSelection() && !readerSelectionControl && !readerSelectionSafeControl) {
@@ -16312,42 +16336,6 @@ $('#eventDialog').addEventListener('submit', (event) => {
 
 $('#lunarDialog').addEventListener('click', (event) => {
   if (event.target === $('#lunarDialog') || event.target.closest('[data-close-lunar-dialog]')) closeLunarDialog();
-});
-
-workspace.addEventListener('pointerdown', (event) => {
-  const row = event.target.closest('[data-calendar-event-row]');
-  if (!row || event.target.closest('[data-edit-event], [data-delete-event]')) return;
-  $$('.event-item.event-actions-visible', workspace).forEach((item) => item.classList.remove('event-actions-visible'));
-  const press = { row, x: event.clientX, y: event.clientY, pointerId: event.pointerId, timer: 0 };
-  press.timer = window.setTimeout(() => {
-    if (!row.isConnected) return;
-    row.classList.add('event-actions-visible');
-    calendarEventSuppressClickUntil = Date.now() + 750;
-    press.timer = 0;
-  }, 520);
-  calendarEventLongPress = press;
-}, { passive: true });
-document.addEventListener('pointermove', (event) => {
-  const press = calendarEventLongPress;
-  if (!press || (press.pointerId != null && event.pointerId !== press.pointerId)) return;
-  if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10 && press.timer) {
-    clearTimeout(press.timer);
-    press.timer = 0;
-    calendarEventLongPress = null;
-  }
-}, { passive: true });
-const endCalendarEventLongPress = () => {
-  if (calendarEventLongPress?.timer) clearTimeout(calendarEventLongPress.timer);
-  calendarEventLongPress = null;
-};
-document.addEventListener('pointerup', endCalendarEventLongPress, { passive: true });
-document.addEventListener('pointercancel', endCalendarEventLongPress, { passive: true });
-workspace.addEventListener('contextmenu', (event) => {
-  const row = event.target.closest('[data-calendar-event-row]');
-  if (!row) return;
-  event.preventDefault();
-  $$('.event-item.event-actions-visible', workspace).forEach((item) => item.classList.remove('event-actions-visible'));
-  row.classList.add('event-actions-visible');
 });
 
 function applyReaderDialogChoice(choice) {

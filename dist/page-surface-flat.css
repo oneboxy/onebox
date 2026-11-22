@@ -3245,3 +3245,136 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     min-height: 70px;
   }
 }
+
+/* Compact agenda rows reveal edit/delete controls with a left swipe. */
+#workspace[data-tool="calendar"] .agenda-panel > .subhead {
+  min-height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 0 !important;
+  margin-bottom: 0;
+}
+#workspace[data-tool="calendar"] .agenda-panel > .subhead h3 { font-size: 16px; }
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event {
+  position: static !important;
+  display: grid !important;
+  flex: 0 0 32px;
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin-left: auto;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 8px;
+  place-items: center;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+}
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event svg { width: 19px; height: 19px; }
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event:hover,
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event:focus-visible { background: transparent !important; color: var(--primary); }
+#workspace[data-tool="calendar"] .agenda-panel .event-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0;
+  margin: 4px 0 0;
+  padding: 0;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-row {
+  position: relative;
+  flex: 0 0 42px;
+  width: 100%;
+  min-height: 42px;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  touch-action: pan-y;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-row .event-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  height: 41px;
+  min-height: 41px;
+  align-items: center;
+  padding: 4px 2px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--bg) !important;
+  box-shadow: none !important;
+  transform: translateX(0) !important;
+  transition: transform .18s ease;
+  touch-action: pan-y;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-row.swiped .event-item { transform: translateX(-84px) !important; }
+#workspace[data-tool="calendar"] .calendar-event-swipe-row .event-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: baseline;
+  gap: 10px;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-row .event-copy strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-row .event-copy small {
+  flex: 0 0 auto;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-actions {
+  position: absolute;
+  inset: 0 0 1px auto;
+  z-index: 0;
+  display: grid;
+  width: 84px;
+  grid-template-columns: repeat(2, 42px);
+  align-items: stretch;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-action {
+  display: grid;
+  width: 42px;
+  height: 41px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+  transform: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+#workspace[data-tool="calendar"] .calendar-event-swipe-action.event-action-delete { color: var(--danger, #e45858); }
+#workspace[data-tool="calendar"] .calendar-event-swipe-action svg {
+  display: block;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .calendar-event-swipe-row { flex-basis: 40px; min-height: 40px; }
+  #workspace[data-tool="calendar"] .calendar-event-swipe-row .event-item { height: 39px; min-height: 39px; }
+  #workspace[data-tool="calendar"] .calendar-event-swipe-action { height: 39px; }
+}
