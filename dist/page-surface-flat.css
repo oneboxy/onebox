@@ -3114,10 +3114,24 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 #workspace[data-tool="calendar"] .event-actions-visible .event-copy { gap: 6px; }
 
 @media (max-width: 760px) {
-  html:has(#workspace[data-tool="calendar"]),
-  html:has(#workspace[data-tool="calendar"]) body { overflow: hidden !important; }
+  html:has(#workspace[data-tool="calendar"]) {
+    width: 100%;
+    height: 100%;
+    overflow: hidden !important;
+  }
+  html:has(#workspace[data-tool="calendar"]) body {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100%;
+    height: var(--onebox-visual-height, 100dvh);
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
   html:has(#workspace[data-tool="calendar"]) main,
   html.ios-safari-browser:not(.standalone-pwa):not(.reader-focus) main:has(#workspace[data-tool="calendar"]) {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
     height: var(--onebox-visual-height, 100dvh) !important;
     min-height: 0 !important;
     max-height: var(--onebox-visual-height, 100dvh) !important;
@@ -3144,4 +3158,43 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   #workspace[data-tool="calendar"] .calendar-grid { grid-template-rows: 26px repeat(5, minmax(43px, auto)); }
   #workspace[data-tool="calendar"] .calendar-grid:has(> .day:nth-of-type(42)) { grid-template-rows: 26px repeat(6, minmax(43px, auto)); }
   #workspace[data-tool="calendar"] .day { min-height: 43px; }
+}
+
+/* Explicitly neutralize the former swipe-card treatment and keep the two
+   long-press actions as unboxed, visible line icons when revealed. */
+#workspace[data-tool="calendar"] .agenda-panel .event-list > .event-item,
+#workspace[data-tool="calendar"] .agenda-panel .event-list > .event-swipe-row,
+#workspace[data-tool="calendar"] .agenda-panel .event-list > .event-swipe-row > .event-item {
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+#workspace[data-tool="calendar"] .agenda-panel .event-list > .event-item {
+  min-height: 44px;
+  padding: 7px 2px;
+}
+#workspace[data-tool="calendar"] .agenda-panel .event-list > .event-item .event-actions { display: none !important; }
+#workspace[data-tool="calendar"] .agenda-panel .event-list > .event-item.event-actions-visible .event-actions { display: flex !important; }
+#workspace[data-tool="calendar"] .agenda-panel .event-actions .event-action-edit,
+#workspace[data-tool="calendar"] .agenda-panel .event-actions .event-action-delete {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#workspace[data-tool="calendar"] .agenda-panel .event-actions .event-action-edit svg,
+#workspace[data-tool="calendar"] .agenda-panel .event-actions .event-action-delete svg {
+  display: block;
+  width: 18px !important;
+  height: 18px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8;
 }
