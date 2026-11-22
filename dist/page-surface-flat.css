@@ -2906,9 +2906,63 @@ main:has(#workspace[data-tool="mine"]) {
 #eventDialog .icon-btn.small[data-close-event-dialog]:hover,
 #eventDialog .icon-btn.small[data-close-event-dialog]:focus-visible,
 #eventDialog .icon-btn.small[data-close-event-dialog]:active {
+  display: grid;
+  box-sizing: border-box;
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
   border: 0 !important;
+  border-radius: 0 !important;
   background: transparent !important;
+  color: var(--muted);
+  outline: none !important;
   box-shadow: none !important;
   transform: none !important;
 }
+#eventDialog .icon-btn.small[data-close-event-dialog]:hover,
+#eventDialog .icon-btn.small[data-close-event-dialog]:focus-visible,
+#eventDialog .icon-btn.small[data-close-event-dialog]:active { color: var(--ink); }
 #eventDialog .icon-btn.small[data-close-event-dialog] svg { width: 18px; height: 18px; }
+#eventDialog .dialog-head {
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 7px;
+}
+#eventDialog .dialog-head h2 { font-size: 14px; line-height: 1.2; }
+#eventDialog .event-form textarea#eventTitle { height: 80px; min-height: 80px; }
+#eventDialog .event-schedule-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+#eventDialog .event-datetime-control { min-width: 0; }
+#eventDialog .event-save-icon-button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  transform: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .14s ease;
+}
+#eventDialog .event-save-icon-button:hover,
+#eventDialog .event-save-icon-button:focus-visible,
+#eventDialog .event-save-icon-button:active {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  outline: none;
+  box-shadow: none;
+  transform: none;
+}
+#eventDialog .event-save-icon-button svg { width: 19px; height: 19px; }

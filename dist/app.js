@@ -16,6 +16,7 @@ const ACCOUNT_LOGIN_PROVIDERS = Object.freeze([
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const LUCIDE_X_MARKUP = '<svg class="lucide lucide-x" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+const LUCIDE_SAVE_MARKUP = '<svg class="lucide lucide-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
 const LUCIDE_LOADER_CIRCLE_MARKUP = '<svg class="lucide lucide-loader-circle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
 const TicketWalletLayout = window.OneBoxTicketWalletLayout;
 const DeveloperJsonEditor = window.OneBoxDeveloperJsonEditor;
@@ -384,7 +385,7 @@ const DICT = {
     keyboard: '键盘：数字、+ − × ÷、括号、Enter 等号、Esc 清空',
     today: '今天', off: '休', work: '补班', normalCalendar: '工作日历',
     legalHoliday: '法定休息', makeUpWorkday: '补班', solarTerm: '节气', selectedDay: '选中日期',
-    noAgenda: '这一天还没有安排。', agenda: '日程', addAgenda: '新增日程', newReminder: '新增日程', eventContent: '日程内容', eventPlaceholder: '请输入你的日程信息', addEvent: '添加日程', addToDay: '添加日程', eventDate: '日期', eventTime: '时间', eventDateTime: '选择提醒时间', reminderSchedule: '提醒日程', eventRepeat: '重复',
+    noAgenda: '这一天还没有安排。', agenda: '日程', addAgenda: '新增日程', newReminder: '新增日程', eventContent: '日程内容', eventPlaceholder: '请输入', selectPlease: '请选择', addEvent: '添加日程', addToDay: '添加日程', eventDate: '日期', eventTime: '时间', eventDateTime: '选择提醒时间', reminderSchedule: '提醒日程', eventRepeat: '重复',
     noteOptional: '备注（可选）', weatherSearch: '搜索', currentLocation: '当前位置',
     refresh: '刷新', searchPlace: '搜索城市或区县',
     noWeather: '天气需要联网，搜索一个城市或区县开始。', weatherLoading: '正在获取天气…', weatherLoadFailed: '天气获取失败，点击卡片重试。',
@@ -410,7 +411,7 @@ const DICT = {
     appUpdate: '应用更新', checkUpdate: '更新', updateAvailable: '发现有新版本', upToDate: '已是最新版', updating: '检查中', updateApplying: '更新中', updateCheckFailed: '检查失败，可重试', applyUpdate: '更新',
     notificationsPermission: '消息通知', enableNotifications: '允许通知', disableNotifications: '不允许通知', notificationDescription: 'iPhone 需要先将 OneBox 添加到主屏幕并允许消息通知；应用关闭后的后台提醒仍需要 Push 服务端。',
     userAgreement: '用户协议', viewAgreement: '查看协议', agreementTitle: 'OneBox 用户协议', agreementIntro: 'OneBox 是一款本地优先的日常工具应用，主要功能在当前设备上运行。', agreementLocal: '本地数据：未启用同步时，计算历史、日程、天气卡片、翻译历史、通知记录、阅读书架和进度等默认保存在当前设备。', agreementNetwork: '网络服务：首页订阅源、天气和翻译会请求对应的第三方或开源服务；首页文章来自公开订阅源，内容、时效和可用性由来源网站决定。点击文章会打开来源网站，OneBox 不控制第三方页面的登录、广告或隐私规则。', agreementGithub: '云端同步：经你授权后，设置、导航、日程、消息、足迹、书架信息、阅读进度和卡包记录存入 OneBox Cloudflare D1，卡包图片存入 R2；书籍原件和封面保存在你自己的 GitHub 秘密 Gist。管理员可能按其角色权限查看或管理云端个人数据。秘密 Gist 是不公开列出的链接，但不是真正的私有仓库；任何拿到链接的人都可能访问。GitHub 令牌只保存在当前设备，并经 HTTPS 发给 OneBox Worker 验证，不保存在云端数据库。', agreementPermissions: '权限说明：定位仅用于查找当前位置天气；通知仅用于提醒日程和消息；文件选择仅用于导入本地阅读文档。未授权时，相应功能不会正常工作，但不影响其他功能。', agreementDisclaimer: '使用提示：天气、翻译、订阅源和第三方网页可能因网络、服务策略或接口变化而暂时不可用。不要将敏感书籍原件放入秘密 Gist；持有 Gist 链接的人都可能访问。', agreementUpdated: '最后更新',
-    addReminder: '添加提醒', reminderText: '提醒内容', remindAt: '提醒时间', noNotifications: '还没有提醒。', once: '指定时间', everyDay: '每天', workdays: '工作日', restdays: '非工作日', weekly: '每周', weekdays: '重复星期',
+    addReminder: '添加提醒', reminderText: '提醒内容', remindAt: '提醒时间', noNotifications: '还没有提醒。', once: '单次', everyDay: '每天', workdays: '工作日', restdays: '非工作日', weekly: '每周', weekdays: '重复星期',
     markRead: '全部已读', close: '关闭', system: '跟随系统', light: '浅色', dark: '深色', darkGray: '黑灰',
     layout: '布局', classicLayout: '传统', simpleLayout: '简约', navigationLocation: '导航位置', navigationLocationMain: '主导航', navigationLocationTools: '工具 Tab', openMode: '打开方式', openCurrent: '当前页打开', openNewTab: '新标签页打开', language: '语言', theme: '主题', color: '颜色', blackWhite: '黑白配', noblePurple: '贵族紫', skyBlue: '天空蓝', notBananaGreen: '不蕉绿', meituanYellow: '美团黄', topDisplay: '顶部显示', footprint: '足迹', showFootprint: '在首页显示', hideFootprint: '不在首页显示', mascot: '宠物', petDescription: '显示方式、等级、服饰与互动', petSettings: '宠物设置', showMascot: '显示宠物', hideMascot: '隐藏宠物', mascotDisplay: '宠物显示', mascotFullBody: '显示全身', mascotHalfBody: '显示半身', petSocialTitle: '社交宠物', petLevel: 'Lv.{level} · {name}', petPoints: '{points} 积分', petNextLevel: '距离下一级还差 {points} 积分', petMaxLevel: '已达到最高等级', petOwner: '绑定：{owner}', petLocalOwner: '当前设备', petGithubOwner: 'GitHub · {owner}', petEarnHint: '阅读文章、读书和使用工具都能获得积分', petArticlePoints: '阅读文章 +3', petBookPoints: '打开书籍 +5', petToolPoints: '使用工具 +2', petOutfits: '服饰兑换', petOutfitLocked: '达到 Lv.{level} 解锁', petOutfitUse: '穿上', petOutfitWearing: '当前穿着', petUnlocked: '已解锁', petInteractions: '互动解锁', petInteractionLocked: 'Lv.{level} 解锁', petPointsEarned: '获得 {points} 积分', petLevelUp: '宠物升级到 Lv.{level}！', reorderHint: '长按工具标签可以调整顺序',
     languagePending: '日语、韩语语言包已预留，当前版本先提供中文和英文。',
@@ -431,7 +432,7 @@ const DICT = {
     keyboard: 'Keyboard: numbers, + − × ÷, parentheses, Enter and Escape',
     today: 'Today', off: 'Off', work: 'Make-up workday', normalCalendar: 'Work calendar',
     legalHoliday: 'Public holiday', makeUpWorkday: 'Make-up workday', solarTerm: 'Solar term', selectedDay: 'Selected day',
-    noAgenda: 'Nothing planned for this day.', agenda: 'Events', addAgenda: 'New event', newReminder: 'New reminder', eventContent: 'Event details', eventPlaceholder: 'Enter your event details', addEvent: 'Add event', addToDay: 'Add event', eventDate: 'Date', eventTime: 'Time', eventDateTime: 'Date and time', reminderSchedule: 'Reminder time', eventRepeat: 'Repeat',
+    noAgenda: 'Nothing planned for this day.', agenda: 'Events', addAgenda: 'New event', newReminder: 'New reminder', eventContent: 'Event details', eventPlaceholder: 'Enter', selectPlease: 'Select', addEvent: 'Add event', addToDay: 'Add event', eventDate: 'Date', eventTime: 'Time', eventDateTime: 'Date and time', reminderSchedule: 'Reminder time', eventRepeat: 'Repeat',
     noteOptional: 'Note (optional)', weatherSearch: 'Search', currentLocation: 'Current location',
     refresh: 'Refresh', searchPlace: 'Search city or district',
     noWeather: 'Search a city or district to get weather.', weatherLoading: 'Loading weather…', weatherLoadFailed: 'Weather failed to load. Click the card to retry.',
@@ -8717,7 +8718,7 @@ function eventDateTimeMarkup(selectedKey, repeatOptions) {
   const parts = eventDateTimeParts(selectedKey);
   return {
     parts,
-    control: '<span class="event-datetime-control"><svg class="event-calendar-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9h16"/></svg><span id="eventDateTimeDisplay" class="event-datetime-display" aria-hidden="true">' + escapeHtml(formatEventDateTimeDisplay(parts.dateTimeValue)) + '</span><input id="eventDateTime" class="event-datetime-input" type="datetime-local" value="' + parts.dateTimeValue + '" step="60" aria-label="' + escapeHtml(t('eventDateTime')) + '"><label class="event-repeat-control"><select id="eventRepeat" aria-label="' + escapeHtml(t('eventRepeat')) + '">' + repeatOptions + '</select><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg></label></span>',
+    control: '<span class="event-datetime-control"><svg class="event-calendar-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9h16"/></svg><span id="eventDateTimeDisplay" class="event-datetime-display" aria-hidden="true">' + escapeHtml(formatEventDateTimeDisplay(parts.dateTimeValue)) + '</span><input id="eventDateTime" class="event-datetime-input" type="datetime-local" value="' + parts.dateTimeValue + '" step="60" aria-label="' + escapeHtml(t('eventDateTime')) + '"><label class="event-repeat-control"><select id="eventRepeat" aria-label="' + escapeHtml(t('eventRepeat')) + '"><option value="" selected disabled hidden>' + escapeHtml(t('selectPlease')) + '</option>' + repeatOptions + '</select><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg></label></span>',
     hidden: '<input type="hidden" id="eventDate" value="' + parts.dateValue + '"><input type="hidden" id="eventTime" value="' + parts.timeValue + '">',
   };
 }
@@ -8740,12 +8741,12 @@ function syncEventDateTimeFields() {
 function renderEventDialog() {
   const dialog = $('#eventDialog');
   if (!dialog) return;
-  const options = ['once', 'daily', 'workdays', 'restdays', 'weekly'].map((value) => '<option value="' + value + '">' + t(value === 'daily' ? 'everyDay' : value) + '</option>').join('');
+  const options = ['once', 'daily', 'workdays', 'restdays', 'weekly'].map((value) => '<option value="' + value + '">' + (value === 'once' ? (state.language === 'en' ? 'Once' : '单次') : t(value === 'daily' ? 'everyDay' : value)) + '</option>').join('');
   const eventWeekdayLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   const weekdays = eventWeekdayLabels.map((label, index) => '<label class="weekday-option"><input type="checkbox" name="eventWeekday" value="' + index + '" ' + (index < 5 ? 'checked' : '') + '><span>' + (state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] : label) + '</span></label>').join('');
   const dateTime = eventDateTimeMarkup(state.selectedDate, options);
   dialog.setAttribute('aria-label', t('newReminder'));
-  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form"><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" required maxlength="60" placeholder="' + t('eventContent') + '"></textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div><button class="primary full-width" type="submit">' + (state.language === 'en' ? 'Save' : '保存') + '</button></form></div>';
+  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form"><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" required maxlength="60" placeholder="' + t('eventPlaceholder') + '"></textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field"><div class="event-schedule-action-row">' + dateTime.control + '<button class="event-save-icon-button" type="submit" aria-label="' + (state.language === 'en' ? 'Save' : '保存') + '" title="' + (state.language === 'en' ? 'Save' : '保存') + '">' + LUCIDE_SAVE_MARKUP + '</button></div></div></div>' + dateTime.hidden + '</div><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
   dialog.hidden = false;
 }
 function closeEventDialog() { const dialog = $('#eventDialog'); if (dialog) dialog.hidden = true; }
@@ -16225,7 +16226,7 @@ $('#eventDialog').addEventListener('change', (event) => {
   if (event.target.id === 'eventDateTime') syncEventDateTimeFields();
   if (event.target.id === 'eventRepeat') {
     const weekly = $('.event-weekdays-field', $('#eventDialog')); if (weekly) weekly.hidden = event.target.value !== 'weekly';
-    const time = $('#eventTime'); if (time) time.required = event.target.value !== 'once';
+    const time = $('#eventTime'); if (time) time.required = Boolean(event.target.value && event.target.value !== 'once');
   }
 });
 $('#eventDialog').addEventListener('input', (event) => {
