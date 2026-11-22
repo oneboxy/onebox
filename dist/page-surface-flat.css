@@ -2993,3 +2993,7 @@ main:has(#workspace[data-tool="mine"]) {
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] .day { min-height: 50px; }
 }
+
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .calendar-layout { row-gap: 12px; }
+}
