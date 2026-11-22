@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.977';
+const APP_VERSION = '2.18.978';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8719,6 +8719,54 @@ function calendar() {
    '<aside class="agenda-panel"><div class="subhead"><h3>' + (isEnglish ? 'Schedule' : '日程安排') + '</h3><button type="button" class="calendar-add-event" data-open-event-dialog aria-label="' + escapeHtml(t('addEvent')) + '" title="' + escapeHtml(t('addEvent')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M12 14v4M10 16h4"/></svg></button></div><div class="event-list">' + eventList + '</div></aside></div>';
 }
 function saveEvents() { saveStored(STORAGE.events, state.events); }
+function deleteCalendarEventById(eventId) {
+  const id = String(eventId || '');
+  if (!id) return false;
+  const removed = calendarEventEntries().map(({ event: item }) => item).find((item) => String(item.id) === id);
+  if (!removed) {
+    toast(state.language === 'en' ? 'This event is no longer available' : '日程不存在或已删除', 'error');
+    return false;
+  }
+  Object.keys(ensureCalendarEventStore()).forEach((day) => {
+    state.events[day] = (Array.isArray(state.events[day]) ? state.events[day] : []).filter((item) => item && String(item.id) !== id);
+    if (!state.events[day].length) delete state.events[day];
+  });
+  if (removed.sourceTicketId) {
+    const ticket = state.ticketWallet.find((item) => String(item.id) === String(removed.sourceTicketId));
+    if (ticket) {
+      ticket.calendarEventDisabled = true;
+      ticket.calendarEventId = '';
+      ticket.calendarEventSourceDate = ticketWalletCalendarSchedule(ticket)?.sourceDate || removed.sourceDate || '';
+      saveTicketWallet();
+    }
+  }
+  saveEvents(); syncAgendaReminders(); scheduleNotificationCheck(); render();
+  toast(state.language === 'en' ? 'Event deleted' : '日程已删除');
+  return true;
+}
+function handleCalendarEventAction(event) {
+  const button = event.target?.closest?.('[data-calendar-event-row] [data-edit-event], [data-calendar-event-row] [data-delete-event]');
+  if (!button) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  if (event.type === 'click' && button.dataset.calendarActionHandled === 'true') {
+    delete button.dataset.calendarActionHandled;
+    return true;
+  }
+  const row = button.closest('[data-calendar-event-row]');
+  const eventId = button.dataset.editEvent || button.dataset.deleteEvent || row?.dataset.eventId || '';
+  if (!eventId) {
+    toast(state.language === 'en' ? 'Could not identify this event' : '无法识别这条日程', 'error');
+    return true;
+  }
+  if (event.type === 'pointerup') button.dataset.calendarActionHandled = 'true';
+  if (button.hasAttribute('data-delete-event')) deleteCalendarEventById(eventId);
+  else renderEventDialog(eventId);
+  return true;
+}
+// Handle row actions during capture so page gestures cannot swallow mobile taps.
+workspace.addEventListener('pointerup', handleCalendarEventAction, true);
+document.addEventListener('click', handleCalendarEventAction, true);
 
 function eventDateTimeParts(selectedKey, preferredTime = '') {
   const validKey = /^\d{4}-\d{2}-\d{2}$/.test(String(selectedKey || ''));
