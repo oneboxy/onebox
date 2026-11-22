@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.985';
+const APP_VERSION = '2.18.986';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8849,6 +8849,7 @@ function renderLunarDialog(key) {
   const weekday = new Intl.DateTimeFormat(isEnglish ? 'en-US' : 'zh-CN', { weekday: 'long' }).format(date);
   const title = formatDate(key, { year: 'numeric', month: 'long', day: 'numeric' });
   const lunarText = lunar ? lunar.monthText + lunar.dayText : (isEnglish ? 'Unavailable' : '农历信息不可用');
+  const lunarAside = isEnglish ? 'Lunar ' + lunarText : '农历' + lunarText;
   const facts = [
     [isEnglish ? 'Day pillar' : '日柱', almanac.dayPillar ? almanac.dayPillar + (isEnglish ? '' : '日') : ''],
     [isEnglish ? 'Zodiac' : '生肖', almanac.zodiac ? (isEnglish ? almanac.zodiac : '属' + almanac.zodiac) : ''],
@@ -8867,7 +8868,7 @@ function renderLunarDialog(key) {
     ? '<div class="lunar-dialog-facts">' + facts.map(([label, value]) => '<div><small>' + escapeHtml(label) + '</small><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div>'
     : '';
   const adviceMarkup = '<div class="lunar-dialog-advice"><div><span class="lunar-dialog-advice-label">' + (isEnglish ? 'Do' : '宜') + '</span><p>' + escapeHtml(almanac.suit.join('、')) + '</p></div><div><span class="lunar-dialog-advice-label lunar-dialog-advice-avoid">' + (isEnglish ? 'Avoid' : '忌') + '</span><p>' + escapeHtml(almanac.avoid.join('、')) + '</p></div></div>';
-  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true" aria-labelledby="lunarDialogTitle"><div class="lunar-dialog-head"><div><h2 id="lunarDialogTitle">' + escapeHtml(title) + '</h2><p>' + escapeHtml(weekday) + '</p></div><button class="icon-btn small" data-close-lunar-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><div class="lunar-dialog-body"><div class="lunar-dialog-lunar"><span>' + (isEnglish ? 'Lunar date' : '农历') + '</span><strong>' + escapeHtml(lunarText) + '</strong></div>' + markerMarkup + adviceMarkup + factsMarkup + '</div></div>';
+  dialog.innerHTML = '<div class="dialog-card lunar-dialog-card" role="dialog" aria-modal="true" aria-labelledby="lunarDialogTitle"><div class="lunar-dialog-head"><div class="lunar-dialog-date-line"><h2 id="lunarDialogTitle">' + escapeHtml(title) + '</h2><p>' + escapeHtml(weekday) + '（' + escapeHtml(lunarAside) + '）</p></div><button class="lunar-dialog-close" type="button" data-close-lunar-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><div class="lunar-dialog-body">' + markerMarkup + adviceMarkup + factsMarkup + '</div></div>';
   dialog.hidden = false;
   state.lunarDialogDate = key;
 }
