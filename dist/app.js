@@ -8763,7 +8763,7 @@ function renderEventDialog() {
   const weekdays = eventWeekdayLabels.map((label, index) => '<label class="weekday-option"><input type="checkbox" name="eventWeekday" value="' + index + '" ' + (index < 5 ? 'checked' : '') + '><span>' + (state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] : label) + '</span></label>').join('');
   const dateTime = eventDateTimeMarkup(state.selectedDate, options);
   dialog.setAttribute('aria-label', t('newReminder'));
-  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form" novalidate><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" maxlength="60" placeholder="' + t('eventPlaceholder') + '"></textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><button class="primary full-width" type="submit">' + (state.language === 'en' ? 'Save' : '保存') + '</button><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
+  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form" novalidate><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" maxlength="60" placeholder="' + t('eventPlaceholder') + '"></textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><button class="primary full-width" type="button" data-event-save>' + (state.language === 'en' ? 'Save' : '保存') + '</button><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
   dialog.hidden = false;
 }
 function closeEventDialog() { const dialog = $('#eventDialog'); if (dialog) dialog.hidden = true; }
@@ -16252,20 +16252,41 @@ $('#eventDialog').addEventListener('change', (event) => {
 $('#eventDialog').addEventListener('input', (event) => {
   if (event.target.id === 'eventDateTime') syncEventDateTimeFields();
 });
-$('#eventDialog').addEventListener('submit', (event) => {
-  event.preventDefault();
-  if (event.target.id !== 'eventForm') return;
+function saveCalendarEventFromDialog() {
+  const form = $('#eventForm');
+  if (!form) return;
   syncEventDateTimeFields();
-  const title = $('#eventTitle').value.trim(); if (!title) return toast(state.language === 'en' ? 'Enter event details' : '请输入日程内容', 'error');
-  const key = $('#eventDate').value || state.selectedDate; const repeat = $('#eventRepeat')?.value || 'once'; const time = $('#eventTime').value;
+  const title = $('#eventTitle')?.value.trim() || ''; if (!title) return toast(state.language === 'en' ? 'Enter event details' : '请输入日程内容', 'error');
+  const key = $('#eventDate')?.value || state.selectedDate; const repeat = $('#eventRepeat')?.value || 'once'; const time = $('#eventTime')?.value || '';
   if (repeat !== 'once' && !time) return toast(state.language === 'en' ? 'Choose a reminder time for a repeating event' : '周期性日程需要选择提醒时间', 'error');
   const weekdays = repeat === 'weekly' ? $$('input[name="eventWeekday"]', $('#eventDialog')).filter((input) => input.checked).map((input) => Number(input.value)) : [];
   if (repeat === 'weekly' && !weekdays.length) return toast(state.language === 'en' ? 'Choose at least one weekday' : '请至少选择一个星期', 'error');
-  if (!Array.isArray(ensureCalendarEventStore()[key])) state.events[key] = [];
-  state.events[key].push({ id: uid(), title, time, repeat, weekdays, createdAt: Date.now() });
-  state.selectedDate = key;
-  const selectedDate = dateFromKey(key); state.month = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-  saveEvents(); syncAgendaReminders(); scheduleNotificationCheck(); closeEventDialog(); render(); toast(state.language === 'en' ? 'Event added' : '日程已添加');
+  try {
+    const store = ensureCalendarEventStore();
+    if (!Array.isArray(store[key])) store[key] = [];
+    store[key].push({ id: uid(), title, time, repeat, weekdays, createdAt: Date.now() });
+    state.selectedDate = key;
+    const selectedDate = dateFromKey(key); state.month = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+    saveEvents();
+    closeEventDialog();
+    try { render(); } catch (error) { console.error('Calendar refresh after saving event failed:', error); }
+    try { syncAgendaReminders(); scheduleNotificationCheck(); } catch (error) { console.error('Calendar reminder sync failed:', error); }
+    toast(state.language === 'en' ? 'Event added' : '日程已添加');
+  } catch (error) {
+    console.error('Calendar event save failed:', error);
+    toast(state.language === 'en' ? 'Could not save the event' : '日程保存失败，请重试', 'error');
+  }
+}
+$('#eventDialog').addEventListener('click', (event) => {
+  if (event.target.closest('[data-event-save]')) {
+    event.preventDefault();
+    saveCalendarEventFromDialog();
+  }
+});
+$('#eventDialog').addEventListener('submit', (event) => {
+  if (event.target.id !== 'eventForm') return;
+  event.preventDefault();
+  saveCalendarEventFromDialog();
 });
 
 $('#lunarDialog').addEventListener('click', (event) => {
