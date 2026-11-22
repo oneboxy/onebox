@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.978';
+const APP_VERSION = '2.18.979';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8744,28 +8744,36 @@ function deleteCalendarEventById(eventId) {
   toast(state.language === 'en' ? 'Event deleted' : '日程已删除');
   return true;
 }
+const calendarActionHandledButtons = new WeakSet();
+let calendarActionSuppressUntil = 0;
 function handleCalendarEventAction(event) {
-  const button = event.target?.closest?.('[data-calendar-event-row] [data-edit-event], [data-calendar-event-row] [data-delete-event]');
+  const actionSelector = '[data-calendar-event-row] [data-edit-event], [data-calendar-event-row] [data-delete-event]';
+  const button = event.composedPath?.().find((node) => node instanceof Element && node.matches(actionSelector))
+    || event.target?.closest?.(actionSelector);
   if (!button) return false;
   event.preventDefault();
-  event.stopPropagation();
-  if (event.type === 'click' && button.dataset.calendarActionHandled === 'true') {
-    delete button.dataset.calendarActionHandled;
+  event.stopImmediatePropagation();
+  if (Date.now() < calendarActionSuppressUntil) return true;
+  if (calendarActionHandledButtons.has(button)) {
     return true;
   }
+  calendarActionHandledButtons.add(button);
+  window.setTimeout(() => calendarActionHandledButtons.delete(button), 800);
+  if (event.type !== 'click') calendarActionSuppressUntil = Date.now() + 700;
   const row = button.closest('[data-calendar-event-row]');
   const eventId = button.dataset.editEvent || button.dataset.deleteEvent || row?.dataset.eventId || '';
   if (!eventId) {
     toast(state.language === 'en' ? 'Could not identify this event' : '无法识别这条日程', 'error');
     return true;
   }
-  if (event.type === 'pointerup') button.dataset.calendarActionHandled = 'true';
   if (button.hasAttribute('data-delete-event')) deleteCalendarEventById(eventId);
   else renderEventDialog(eventId);
   return true;
 }
-// Handle row actions during capture so page gestures cannot swallow mobile taps.
-workspace.addEventListener('pointerup', handleCalendarEventAction, true);
+// Handle all input paths at document capture: iOS may deliver the touchend
+// target differently from the synthetic click after a swipe reveal.
+document.addEventListener('pointerup', handleCalendarEventAction, true);
+document.addEventListener('touchend', handleCalendarEventAction, { capture: true, passive: false });
 document.addEventListener('click', handleCalendarEventAction, true);
 
 function eventDateTimeParts(selectedKey, preferredTime = '') {
