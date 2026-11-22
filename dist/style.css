@@ -9957,6 +9957,11 @@ html.ios-safari-browser.reader-focus.reader-safari-surface .reader-reference-she
   font-size: 10px;
   line-height: 1.3;
 }
+.lunar-dialog-advice { display: grid; gap: 7px; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.lunar-dialog-advice > div { display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: start; gap: 8px; }
+.lunar-dialog-advice-label { color: var(--primary); font-size: 11px; font-weight: 650; line-height: 1.6; }
+.lunar-dialog-advice-avoid { color: var(--muted); }
+.lunar-dialog-advice p { margin: 0; color: var(--ink); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
 .lunar-dialog-facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
