@@ -2268,12 +2268,14 @@ main:has(#workspace[data-tool="mine"]) {
 }
 #workspace[data-tool="calendar"] .calendar-nav-btn:hover,
 #workspace[data-tool="calendar"] .calendar-nav-btn:focus-visible,
+#workspace[data-tool="calendar"] .calendar-nav-btn:active,
 #workspace[data-tool="calendar"] .calendar-today:hover,
 #workspace[data-tool="calendar"] .calendar-today:focus-visible {
-  background: var(--panel-2) !important;
-  color: var(--ink);
+  background: transparent !important;
+  color: var(--primary);
+  outline: none !important;
 }
-#workspace[data-tool="calendar"] .calendar-nav-btn svg { width: 24px; height: 24px; }
+#workspace[data-tool="calendar"] .calendar-nav-btn svg { width: 27px; height: 27px; }
 #workspace[data-tool="calendar"] .calendar-today svg {
   display: block;
   width: 18px;
@@ -2996,8 +2998,150 @@ main:has(#workspace[data-tool="mine"]) {
 
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] {
-    padding-right: 0;
-    padding-left: 0;
+    margin-right: -8px !important;
+    margin-left: -8px !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
   }
-  #workspace[data-tool="calendar"] .calendar-layout { row-gap: 12px; }
+  #workspace[data-tool="calendar"] .calendar-layout { row-gap: 0; }
+}
+
+/* Calendar uses a fixed viewport frame; only the agenda entries scroll. */
+main:has(#workspace[data-tool="calendar"]) {
+  height: 100dvh !important;
+  min-height: 0 !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  padding-bottom: 0 !important;
+}
+body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
+#pageSwipeStage:has(> #workspace[data-tool="calendar"]) {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+#workspace[data-tool="calendar"] {
+  box-sizing: border-box;
+  height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 58px - 70px);
+  min-height: 0 !important;
+  max-height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 58px - 70px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+  padding: 10px 12px !important;
+}
+#workspace[data-tool="calendar"] .calendar-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+}
+#workspace[data-tool="calendar"] .calendar-card { min-height: 0; }
+#workspace[data-tool="calendar"] .agenda-panel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#workspace[data-tool="calendar"] .agenda-panel .event-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
+}
+#workspace[data-tool="calendar"] .event-list::-webkit-scrollbar { width: 4px; }
+#workspace[data-tool="calendar"] .event-list::-webkit-scrollbar-thumb { border-radius: 4px; background: color-mix(in srgb, var(--muted) 45%, transparent); }
+#workspace[data-tool="calendar"] .event-item {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#workspace[data-tool="calendar"] .event-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: baseline;
+  gap: 12px;
+}
+#workspace[data-tool="calendar"] .event-copy strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#workspace[data-tool="calendar"] .event-copy small {
+  flex: 0 0 auto;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+#workspace[data-tool="calendar"] .event-actions { display: none; flex: 0 0 auto; align-items: center; gap: 10px; }
+#workspace[data-tool="calendar"] .event-item.event-actions-visible .event-actions { display: flex; }
+#workspace[data-tool="calendar"] .event-action-edit,
+#workspace[data-tool="calendar"] .event-action-delete {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+  transform: none !important;
+}
+#workspace[data-tool="calendar"] .event-action-delete { color: var(--danger, #e45858); }
+#workspace[data-tool="calendar"] .event-action-edit svg,
+#workspace[data-tool="calendar"] .event-action-delete svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#workspace[data-tool="calendar"] .event-actions-visible .event-copy { gap: 6px; }
+
+@media (max-width: 760px) {
+  html:has(#workspace[data-tool="calendar"]),
+  html:has(#workspace[data-tool="calendar"]) body { overflow: hidden !important; }
+  html:has(#workspace[data-tool="calendar"]) main,
+  html.ios-safari-browser:not(.standalone-pwa):not(.reader-focus) main:has(#workspace[data-tool="calendar"]) {
+    height: var(--onebox-visual-height, 100dvh) !important;
+    min-height: 0 !important;
+    max-height: var(--onebox-visual-height, 100dvh) !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+  }
+  html:has(#workspace[data-tool="calendar"]) #workspace[data-tool="calendar"] {
+    height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 54px - 70px);
+    max-height: calc(var(--onebox-visual-height, 100dvh) - var(--app-header-height) - 54px - 70px);
+    padding: 8px 0 !important;
+  }
+  #workspace[data-tool="calendar"] .calendar-layout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0;
+  }
+  #workspace[data-tool="calendar"] .calendar-card { flex: 0 0 auto; }
+  #workspace[data-tool="calendar"] .agenda-panel {
+    flex: 1 1 auto;
+    padding-top: 8px;
+  }
+  #workspace[data-tool="calendar"] .calendar-top { margin-bottom: 6px; }
+  #workspace[data-tool="calendar"] .calendar-grid { grid-template-rows: 26px repeat(5, minmax(43px, auto)); }
+  #workspace[data-tool="calendar"] .calendar-grid:has(> .day:nth-of-type(42)) { grid-template-rows: 26px repeat(6, minmax(43px, auto)); }
+  #workspace[data-tool="calendar"] .day { min-height: 43px; }
 }

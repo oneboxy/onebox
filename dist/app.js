@@ -8705,7 +8705,7 @@ function calendar() {
     return right.localeCompare(left) || Number(b.createdAt || 0) - Number(a.createdAt || 0);
   }); } catch (error) { console.error('Selected calendar events failed:', error); }
   const eventList = selectedEvents.length
-    ? selectedEvents.map((item) => '<div class="swipe-row event-swipe-row" data-swipe-row><div class="event-item swipe-content"><div><strong>' + escapeHtml(item.title) + '</strong><small>' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div></div><button class="swipe-delete" data-delete-event="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>').join('')
+    ? selectedEvents.map((item) => '<div class="event-item" data-calendar-event-row data-event-id="' + escapeHtml(item.id) + '"><div class="event-copy"><strong>' + escapeHtml(item.title) + '</strong><small class="event-time">' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div><div class="event-actions"><button type="button" class="event-action-edit" data-edit-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Edit event' : '编辑日程') + '" title="' + (state.language === 'en' ? 'Edit' : '编辑') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16.5-.7 3.2 3.2-.7L18.8 7.7a2.2 2.2 0 0 0-3.1-3.1L5 16.5Z"/><path d="m14.5 6.5 3 3"/></svg></button><button type="button" class="event-action-delete" data-delete-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Delete event' : '删除日程') + '" title="' + (state.language === 'en' ? 'Delete' : '删除') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5M14 11v5"/></svg></button></div></div>').join('')
     : '<p class="empty compact">' + t('noAgenda') + '</p>';
   const isEnglish = state.language === 'en';
   const monthNames = Array.from({ length: 12 }, (_, index) => isEnglish ? new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, index, 1)) : String(index + 1));
@@ -8720,19 +8720,20 @@ function calendar() {
 }
 function saveEvents() { saveStored(STORAGE.events, state.events); }
 
-function eventDateTimeParts(selectedKey) {
+function eventDateTimeParts(selectedKey, preferredTime = '') {
   const validKey = /^\d{4}-\d{2}-\d{2}$/.test(String(selectedKey || ''));
   const date = validKey ? dateFromKey(selectedKey) : new Date();
   const now = new Date();
   const year = date.getFullYear(); const month = date.getMonth() + 1; const day = date.getDate();
-  const hour = now.getHours(); const minute = now.getMinutes();
+  const timeMatch = /^(\d{2}):(\d{2})/.exec(String(preferredTime || ''));
+  const hour = timeMatch ? Number(timeMatch[1]) : now.getHours(); const minute = timeMatch ? Number(timeMatch[2]) : now.getMinutes();
   const pad2 = (value) => String(value).padStart(2, '0');
   const dateValue = year + '-' + pad2(month) + '-' + pad2(day);
   const timeValue = pad2(hour) + ':' + pad2(minute);
   return { year, month, day, hour, minute, dateValue, timeValue, dateTimeValue: dateValue + 'T' + timeValue };
 }
-function eventDateTimeMarkup(selectedKey, repeatOptions) {
-  const parts = eventDateTimeParts(selectedKey);
+function eventDateTimeMarkup(selectedKey, repeatOptions, preferredTime = '') {
+  const parts = eventDateTimeParts(selectedKey, preferredTime);
   return {
     parts,
     control: '<span class="event-datetime-control"><svg class="event-calendar-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9h16"/></svg><span id="eventDateTimeDisplay" class="event-datetime-display" aria-hidden="true">' + escapeHtml(formatEventDateTimeDisplay(parts.dateTimeValue)) + '</span><input id="eventDateTime" class="event-datetime-input" type="datetime-local" value="' + parts.dateTimeValue + '" step="60" aria-label="' + escapeHtml(t('eventDateTime')) + '"><label class="event-repeat-control"><select id="eventRepeat" aria-label="' + escapeHtml(t('eventRepeat')) + '"><option value="" selected disabled hidden>' + escapeHtml(t('selectPlease')) + '</option>' + repeatOptions + '</select><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg></label></span>',
@@ -8755,18 +8756,25 @@ function syncEventDateTimeFields() {
   const date = $('#eventDate'); if (date) date.value = match[1];
   const time = $('#eventTime'); if (time) time.value = match[2] + ':' + match[3];
 }
-function renderEventDialog() {
+let calendarEventEditingId = '';
+function renderEventDialog(eventId = '') {
   const dialog = $('#eventDialog');
   if (!dialog) return;
-  const options = ['once', 'daily', 'workdays', 'restdays', 'weekly'].map((value) => '<option value="' + value + '">' + (value === 'once' ? (state.language === 'en' ? 'Once' : '单次') : t(value === 'daily' ? 'everyDay' : value)) + '</option>').join('');
+  const entry = eventId ? calendarEventEntries().find(({ event }) => event.id === eventId) : null;
+  const item = entry?.event || null;
+  calendarEventEditingId = item ? eventId : '';
+  const repeatValue = item?.repeat || 'once';
+  const options = ['once', 'daily', 'workdays', 'restdays', 'weekly'].map((value) => '<option value="' + value + '" ' + (repeatValue === value ? 'selected' : '') + '>' + (value === 'once' ? (state.language === 'en' ? 'Once' : '单次') : t(value === 'daily' ? 'everyDay' : value)) + '</option>').join('');
   const eventWeekdayLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-  const weekdays = eventWeekdayLabels.map((label, index) => '<label class="weekday-option"><input type="checkbox" name="eventWeekday" value="' + index + '" ' + (index < 5 ? 'checked' : '') + '><span>' + (state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] : label) + '</span></label>').join('');
-  const dateTime = eventDateTimeMarkup(state.selectedDate, options);
-  dialog.setAttribute('aria-label', t('newReminder'));
-  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form" novalidate><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" maxlength="60" placeholder="' + t('eventPlaceholder') + '"></textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><button class="primary full-width" type="button" data-event-save>' + (state.language === 'en' ? 'Save' : '保存') + '</button><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
+  const selectedWeekdays = Array.isArray(item?.weekdays) ? item.weekdays.map(Number) : [0, 1, 2, 3, 4];
+  const weekdays = eventWeekdayLabels.map((label, index) => '<label class="weekday-option"><input type="checkbox" name="eventWeekday" value="' + index + '" ' + (selectedWeekdays.includes(index) ? 'checked' : '') + '><span>' + (state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] : label) + '</span></label>').join('');
+  const dateTime = eventDateTimeMarkup(entry?.day || state.selectedDate, options, item?.time || '');
+  const title = item ? (state.language === 'en' ? 'Edit event' : '编辑日程') : t('newReminder');
+  dialog.setAttribute('aria-label', title);
+  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + title + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form" novalidate><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" maxlength="60" placeholder="' + t('eventPlaceholder') + '">' + escapeHtml(item?.title || '') + '</textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><button class="primary full-width" type="button" data-event-save>' + (state.language === 'en' ? 'Save' : '保存') + '</button><div class="field event-weekdays-field" ' + (repeatValue === 'weekly' ? '' : 'hidden') + '><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
   dialog.hidden = false;
 }
-function closeEventDialog() { const dialog = $('#eventDialog'); if (dialog) dialog.hidden = true; }
+function closeEventDialog() { const dialog = $('#eventDialog'); if (dialog) dialog.hidden = true; calendarEventEditingId = ''; }
 function renderLunarDialog(key) {
   const dialog = $('#lunarDialog');
   if (!dialog) return;
@@ -13687,6 +13695,8 @@ let ticketWalletReorderFrame = 0;
 let ticketWalletReorderPoint = null;
 let swipeGesture = null;
 let swipeSuppressClickUntil = 0;
+let calendarEventLongPress = null;
+let calendarEventSuppressClickUntil = 0;
 let ticketWalletSuppressSyntheticClick = false;
 let ticketWalletSyntheticClickPoint = null;
 let ticketWalletDetailClosingId = '';
@@ -15391,6 +15401,7 @@ workspace.addEventListener('keydown', (event) => {
 });
 workspace.addEventListener('click', async (event) => {
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
+  if (Date.now() < calendarEventSuppressClickUntil && event.target.closest('[data-calendar-event-row]') && !event.target.closest('[data-edit-event], [data-delete-event]')) { event.preventDefault(); event.stopPropagation(); return; }
   if (event.target.closest('[data-mine-page-back]')) { closeMineSubpage(); return; }
   if (state.minePage === 'pet') {
     const outfit = event.target.closest('[data-pet-outfit]');
@@ -15940,6 +15951,8 @@ workspace.addEventListener('click', async (event) => {
   if (deleteCalcHistory) { state.calcHistory = state.calcHistory.filter((item) => String(item.id || item.at || item.expression) !== deleteCalcHistory.dataset.deleteCalcHistory); saveCalculator(); return render(); }
   if (event.target.closest('[data-clear-calc-history]')) { state.calcHistory = []; saveCalculator(); return render(); }
   if (event.target.closest('[data-open-event-dialog]')) return renderEventDialog();
+  const editEvent = event.target.closest('[data-edit-event]');
+  if (editEvent) return renderEventDialog(editEvent.dataset.editEvent);
   const calendarPicker = event.target.closest('[data-calendar-picker]');
   if (calendarPicker) return renderCalendarPickerDialog(calendarPicker.dataset.calendarPicker, true);
   const month = event.target.closest('[data-month]');
@@ -16263,15 +16276,23 @@ function saveCalendarEventFromDialog() {
   if (repeat === 'weekly' && !weekdays.length) return toast(state.language === 'en' ? 'Choose at least one weekday' : '请至少选择一个星期', 'error');
   try {
     const store = ensureCalendarEventStore();
+    const editing = Boolean(calendarEventEditingId);
+    const original = calendarEventEditingId ? calendarEventEntries().find(({ event }) => event.id === calendarEventEditingId)?.event : null;
+    if (calendarEventEditingId) {
+      Object.keys(store).forEach((day) => {
+        store[day] = (Array.isArray(store[day]) ? store[day] : []).filter((event) => event && event.id !== calendarEventEditingId);
+        if (!store[day].length) delete store[day];
+      });
+    }
     if (!Array.isArray(store[key])) store[key] = [];
-    store[key].push({ id: uid(), title, time, repeat, weekdays, createdAt: Date.now() });
+    store[key].push({ ...(original || {}), id: original?.id || uid(), title, time, repeat, weekdays, createdAt: original?.createdAt || Date.now() });
     state.selectedDate = key;
     const selectedDate = dateFromKey(key); state.month = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
     saveEvents();
     closeEventDialog();
     try { render(); } catch (error) { console.error('Calendar refresh after saving event failed:', error); }
     try { syncAgendaReminders(); scheduleNotificationCheck(); } catch (error) { console.error('Calendar reminder sync failed:', error); }
-    toast(state.language === 'en' ? 'Event added' : '日程已添加');
+    toast(editing ? (state.language === 'en' ? 'Event updated' : '日程已更新') : (state.language === 'en' ? 'Event added' : '日程已添加'));
   } catch (error) {
     console.error('Calendar event save failed:', error);
     toast(state.language === 'en' ? 'Could not save the event' : '日程保存失败，请重试', 'error');
@@ -16291,6 +16312,42 @@ $('#eventDialog').addEventListener('submit', (event) => {
 
 $('#lunarDialog').addEventListener('click', (event) => {
   if (event.target === $('#lunarDialog') || event.target.closest('[data-close-lunar-dialog]')) closeLunarDialog();
+});
+
+workspace.addEventListener('pointerdown', (event) => {
+  const row = event.target.closest('[data-calendar-event-row]');
+  if (!row || event.target.closest('[data-edit-event], [data-delete-event]')) return;
+  $$('.event-item.event-actions-visible', workspace).forEach((item) => item.classList.remove('event-actions-visible'));
+  const press = { row, x: event.clientX, y: event.clientY, pointerId: event.pointerId, timer: 0 };
+  press.timer = window.setTimeout(() => {
+    if (!row.isConnected) return;
+    row.classList.add('event-actions-visible');
+    calendarEventSuppressClickUntil = Date.now() + 750;
+    press.timer = 0;
+  }, 520);
+  calendarEventLongPress = press;
+}, { passive: true });
+document.addEventListener('pointermove', (event) => {
+  const press = calendarEventLongPress;
+  if (!press || (press.pointerId != null && event.pointerId !== press.pointerId)) return;
+  if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10 && press.timer) {
+    clearTimeout(press.timer);
+    press.timer = 0;
+    calendarEventLongPress = null;
+  }
+}, { passive: true });
+const endCalendarEventLongPress = () => {
+  if (calendarEventLongPress?.timer) clearTimeout(calendarEventLongPress.timer);
+  calendarEventLongPress = null;
+};
+document.addEventListener('pointerup', endCalendarEventLongPress, { passive: true });
+document.addEventListener('pointercancel', endCalendarEventLongPress, { passive: true });
+workspace.addEventListener('contextmenu', (event) => {
+  const row = event.target.closest('[data-calendar-event-row]');
+  if (!row) return;
+  event.preventDefault();
+  $$('.event-item.event-actions-visible', workspace).forEach((item) => item.classList.remove('event-actions-visible'));
+  row.classList.add('event-actions-visible');
 });
 
 function applyReaderDialogChoice(choice) {
