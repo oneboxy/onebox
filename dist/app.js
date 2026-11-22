@@ -8717,9 +8717,25 @@ function eventDateTimeMarkup(selectedKey) {
   const parts = eventDateTimeParts(selectedKey);
   return {
     parts,
-    control: '<div class="event-date-time-controls"><label class="event-date-time-field event-date-control"><input id="eventDate" class="event-date-input" type="date" value="' + parts.dateValue + '" aria-label="' + escapeHtml(t('eventDate')) + '"></label><label class="event-date-time-field event-time-control"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><input id="eventTime" class="event-time-input" type="time" value="' + parts.timeValue + '" step="60" aria-label="' + escapeHtml(state.language === 'en' ? 'Specific time' : '指定时间') + '"></label></div>',
-    hidden: '',
+    control: '<span class="event-datetime-control"><span id="eventDateTimeDisplay" class="event-datetime-display" aria-hidden="true">' + escapeHtml(formatEventDateTimeDisplay(parts.dateTimeValue)) + '</span><svg class="event-datetime-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9h16"/></svg><input id="eventDateTime" class="event-datetime-input" type="datetime-local" value="' + parts.dateTimeValue + '" step="60" aria-label="' + escapeHtml(t('eventDateTime')) + '"></span>',
+    hidden: '<input type="hidden" id="eventDate" value="' + parts.dateValue + '"><input type="hidden" id="eventTime" value="' + parts.timeValue + '">',
   };
+}
+function formatEventDateTimeDisplay(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(value || ''));
+  return match ? match.slice(1, 4).join('/') + ' ' + match[4] + ':' + match[5] : String(value || '');
+}
+function updateEventDateTimeDisplay(value = $('#eventDateTime')?.value || '') {
+  const display = $('#eventDateTimeDisplay');
+  if (display) display.textContent = formatEventDateTimeDisplay(value);
+}
+function syncEventDateTimeFields() {
+  const value = $('#eventDateTime')?.value || '';
+  updateEventDateTimeDisplay(value);
+  const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return;
+  const date = $('#eventDate'); if (date) date.value = match[1];
+  const time = $('#eventTime'); if (time) time.value = match[2] + ':' + match[3];
 }
 function renderEventDialog() {
   const dialog = $('#eventDialog');
@@ -8729,7 +8745,7 @@ function renderEventDialog() {
   const weekdays = eventWeekdayLabels.map((label, index) => '<label class="weekday-option"><input type="checkbox" name="eventWeekday" value="' + index + '" ' + (index < 5 ? 'checked' : '') + '><span>' + (state.language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] : label) + '</span></label>').join('');
   const dateTime = eventDateTimeMarkup(state.selectedDate);
   dialog.setAttribute('aria-label', t('newReminder'));
-  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form"><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" required maxlength="60" placeholder="' + t('eventContent') + '"></textarea></div><div class="field"><label>' + t('reminderSchedule') + '</label><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><div class="field event-repeat-field"><label for="eventRepeat">' + t('eventRepeat') + '</label><select id="eventRepeat">' + options + '</select></div><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div><button class="primary full-width" type="submit">' + (state.language === 'en' ? 'Save' : '保存') + '</button></form></div>';
+  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + t('newReminder') + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form"><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" required maxlength="60" placeholder="' + t('eventContent') + '"></textarea></div><div class="field"><label>' + t('reminderSchedule') + '</label><div class="event-date-time-grid"><label class="event-date-time-field event-datetime-field">' + dateTime.control + '</label></div>' + dateTime.hidden + '</div><div class="field event-repeat-field"><label for="eventRepeat">' + t('eventRepeat') + '</label><select id="eventRepeat">' + options + '</select></div><div class="field event-weekdays-field" hidden><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div><button class="primary full-width" type="submit">' + (state.language === 'en' ? 'Save' : '保存') + '</button></form></div>';
   dialog.hidden = false;
 }
 function closeEventDialog() { const dialog = $('#eventDialog'); if (dialog) dialog.hidden = true; }
@@ -16206,14 +16222,19 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !$('#calendarPickerDialog').hidden) closeCalendarPickerDialog();
 });
 $('#eventDialog').addEventListener('change', (event) => {
+  if (event.target.id === 'eventDateTime') syncEventDateTimeFields();
   if (event.target.id === 'eventRepeat') {
     const weekly = $('.event-weekdays-field', $('#eventDialog')); if (weekly) weekly.hidden = event.target.value !== 'weekly';
     const time = $('#eventTime'); if (time) time.required = event.target.value !== 'once';
   }
 });
+$('#eventDialog').addEventListener('input', (event) => {
+  if (event.target.id === 'eventDateTime') syncEventDateTimeFields();
+});
 $('#eventDialog').addEventListener('submit', (event) => {
   event.preventDefault();
   if (event.target.id !== 'eventForm') return;
+  syncEventDateTimeFields();
   const title = $('#eventTitle').value.trim(); if (!title) return;
   const key = $('#eventDate').value || state.selectedDate; const repeat = $('#eventRepeat')?.value || 'once'; const time = $('#eventTime').value;
   if (repeat !== 'once' && !time) return toast(state.language === 'en' ? 'Choose a reminder time for a repeating event' : '周期性日程需要选择提醒时间', 'error');
