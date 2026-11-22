@@ -15788,9 +15788,9 @@ html[data-theme-mode="dark-gray"] .ticket-wallet-cafe-tag-groups { background: c
 @keyframes app-boot-progress { 0% { transform: translateX(0); } 100% { transform: translateX(340%); } }
 @media (prefers-reduced-motion: reduce) { .app-boot-progress i { animation: none; left: 0; width: 100%; opacity: .55; } }
 html[data-theme="dark"] .app-boot-mark,
-html[data-theme-mode="dark-gray"] .app-boot-mark { background: #f7f7f8; }
+html[data-theme-mode="dark-gray"] .app-boot-mark { background: #111; }
 html[data-theme="dark"] .app-boot-mark svg,
-html[data-theme-mode="dark-gray"] .app-boot-mark svg { stroke: #17181c; }
+html[data-theme-mode="dark-gray"] .app-boot-mark svg { stroke: #f7f7f8; }
 
 /* Realistic portrait receipt sticker for the currently supported Luckin template. */
 .ticket-wallet-cup-label {

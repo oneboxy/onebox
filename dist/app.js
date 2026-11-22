@@ -1320,7 +1320,7 @@ function ticketWalletCalendarEventTitle(record) {
 function ticketWalletCalendarRemoveLinkedEvents(record) {
   let changed = false;
   Object.keys(state.events || {}).forEach((day) => {
-    const before = state.events[day] || [];
+    const before = Array.isArray(state.events[day]) ? state.events[day] : [];
     const after = before.filter((event) => event.sourceTicketId !== record.id && (!record.calendarEventId || event.id !== record.calendarEventId));
     if (after.length !== before.length) changed = true;
     if (after.length) state.events[day] = after; else delete state.events[day];
@@ -1337,9 +1337,9 @@ function syncTicketWalletCalendarEvents(persistWallet = true) {
   (state.ticketWallet || []).forEach((record) => {
     const schedule = ticketWalletCalendarSchedule(record);
     const linked = [];
-    Object.entries(state.events || {}).forEach(([day, events]) => (events || []).forEach((event) => {
+    calendarEventEntries().forEach(({ day, event }) => {
       if (event.sourceTicketId === record.id || record.calendarEventId && event.id === record.calendarEventId) linked.push({ day, event });
-    }));
+    });
     if (!schedule) {
       if (ticketWalletCalendarRemoveLinkedEvents(record)) eventsChanged = true;
       if (record.calendarEventId || record.calendarEventSourceDate || record.calendarEventDisabled) {
@@ -1358,7 +1358,7 @@ function syncTicketWalletCalendarEvents(persistWallet = true) {
     const isCurrent = linked.length === 1 && linked[0].day === schedule.key && linked[0].event.id === eventId && linked[0].event.title === nextEvent.title && String(linked[0].event.time || '') === schedule.time && (linked[0].event.repeat || 'once') === 'once' && linked[0].event.source === 'ticket-wallet' && linked[0].event.sourceTicketId === record.id;
     if (!isCurrent) {
       if (ticketWalletCalendarRemoveLinkedEvents(record)) eventsChanged = true;
-      state.events[schedule.key] ||= [];
+      if (!Array.isArray(state.events[schedule.key])) state.events[schedule.key] = [];
       state.events[schedule.key].push(nextEvent);
       eventsChanged = true;
     }
@@ -8194,10 +8194,23 @@ function reader() {
 }
 
 // Calendar data --------------------------------------------------------------
+function ensureCalendarEventStore() {
+  if (!state.events || typeof state.events !== 'object' || Array.isArray(state.events)) state.events = {};
+  Object.keys(state.events).forEach((day) => {
+    if (!Array.isArray(state.events[day])) delete state.events[day];
+    else if (state.events[day].some((event) => !event || typeof event !== 'object')) state.events[day] = state.events[day].filter((event) => event && typeof event === 'object');
+  });
+  return state.events;
+}
+function calendarEventEntries() {
+  const store = ensureCalendarEventStore();
+  return Object.entries(store).flatMap(([day, events]) => Array.isArray(events) ? events.filter((event) => event && typeof event === 'object').map((event) => ({ day, event })) : []);
+}
 function eventsForDate(key) {
-  const direct = [...(state.events[key] || [])];
+  const eventStore = ensureCalendarEventStore();
+  const direct = Array.isArray(eventStore[key]) ? eventStore[key].filter((event) => event && typeof event === 'object') : [];
   const directIds = new Set(direct.map((event) => event.id));
-  const recurring = Object.values(state.events || {}).flat().filter((event) => !directIds.has(event.id) && eventMatchesDay(event, key));
+  const recurring = calendarEventEntries().map(({ event }) => event).filter((event) => !directIds.has(event.id) && eventMatchesDay(event, key));
   return direct.concat(recurring);
 }
 const holidayStore = { ...(window.ONEBOX_HOLIDAY_DATA || {}) };
@@ -10767,15 +10780,17 @@ function playAlertChime() {
 }
 function eventMatchesDay(event, key) {
   const weekday = (dateFromKey(key).getDay() + 6) % 7;
+  if (!event || typeof event !== 'object') return false;
   if (!event.repeat || event.repeat === 'once') return false;
   if (event.repeat === 'daily') return true;
   if (event.repeat === 'workdays') return isWorkdayKey(key);
   if (event.repeat === 'restdays') return !isWorkdayKey(key);
-  return event.repeat === 'weekly' && (event.weekdays || [weekday]).map(Number).includes(weekday);
+  const weekdays = Array.isArray(event.weekdays) ? event.weekdays : [weekday];
+  return event.repeat === 'weekly' && weekdays.map(Number).includes(weekday);
 }
 function syncAgendaReminders() {
   const agendaItems = [];
-  Object.entries(state.events || {}).forEach(([day, events]) => (events || []).forEach((event) => {
+  calendarEventEntries().forEach(({ day, event }) => {
     if (!event.time) return;
     if (!event.repeat || event.repeat === 'once') {
       const at = new Date(day + 'T' + event.time).getTime();
@@ -10788,7 +10803,7 @@ function syncAgendaReminders() {
       const at = new Date(key + 'T' + event.time).getTime();
       if (Number.isFinite(at) && at > Date.now() - 60000) agendaItems.push({ id: 'agenda:' + event.id + ':' + key, text: event.title, at, read: true, delivered: false, source: 'agenda', eventId: event.id });
     }
-  }));
+  });
   const reminderIds = new Set(agendaItems.map((item) => item.id));
   state.notifications = state.notifications.filter((item) => item.source !== 'agenda' || reminderIds.has(item.id));
   agendaItems.forEach((item) => {
@@ -12349,6 +12364,7 @@ function hydrateGithubRuntimeState() {
   if (Object.keys(TOOL_DEFS).includes(activeTool) && activeTool !== 'track') state.tool = activeTool;
   const activeHomeFeed = localStorage.getItem(STORAGE.homeFeedActive);
   if (activeHomeFeed && homeTabIds().includes(activeHomeFeed)) state.homeFeed.active = activeHomeFeed;
+  ensureCalendarEventStore();
   syncTicketWalletCalendarEvents();
 }
 let githubExternalStorageChanged = false;
@@ -15937,8 +15953,8 @@ workspace.addEventListener('click', async (event) => {
   }
   const deleteEvent = event.target.closest('[data-delete-event]');
   if (deleteEvent) {
-    const removed = Object.values(state.events || {}).flat().find((item) => item.id === deleteEvent.dataset.deleteEvent);
-    Object.keys(state.events).forEach((day) => { state.events[day] = (state.events[day] || []).filter((item) => item.id !== deleteEvent.dataset.deleteEvent); if (!state.events[day].length) delete state.events[day]; });
+    const removed = calendarEventEntries().map(({ event: item }) => item).find((item) => item.id === deleteEvent.dataset.deleteEvent);
+    Object.keys(ensureCalendarEventStore()).forEach((day) => { state.events[day] = (Array.isArray(state.events[day]) ? state.events[day] : []).filter((item) => item && item.id !== deleteEvent.dataset.deleteEvent); if (!state.events[day].length) delete state.events[day]; });
     if (removed?.sourceTicketId) {
       const ticket = state.ticketWallet.find((item) => item.id === removed.sourceTicketId);
       if (ticket) {
@@ -16240,7 +16256,7 @@ $('#eventDialog').addEventListener('submit', (event) => {
   if (repeat !== 'once' && !time) return toast(state.language === 'en' ? 'Choose a reminder time for a repeating event' : '周期性日程需要选择提醒时间', 'error');
   const weekdays = repeat === 'weekly' ? $$('input[name="eventWeekday"]', $('#eventDialog')).filter((input) => input.checked).map((input) => Number(input.value)) : [];
   if (repeat === 'weekly' && !weekdays.length) return toast(state.language === 'en' ? 'Choose at least one weekday' : '请至少选择一个星期', 'error');
-  state.events[key] ||= [];
+  if (!Array.isArray(ensureCalendarEventStore()[key])) state.events[key] = [];
   state.events[key].push({ id: uid(), title, time, repeat, weekdays, createdAt: Date.now() });
   state.selectedDate = key;
   const selectedDate = dateFromKey(key); state.month = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -16828,6 +16844,7 @@ function bootApp() {
     state.section = 'mine';
     state.tool = 'calculator';
   }
+  ensureCalendarEventStore();
   syncTicketWalletCalendarEvents();
   try { history.scrollRestoration = 'manual'; } catch { /* unsupported */ }
   mountMascot();
