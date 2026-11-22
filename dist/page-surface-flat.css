@@ -3236,8 +3236,8 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   #workspace[data-tool="calendar"] .calendar-legend span { gap: 2px; }
   #workspace[data-tool="calendar"] .calendar-legend .dot { width: 4px; height: 4px; flex-basis: 4px; }
   #workspace[data-tool="calendar"] .agenda-panel .event-list {
-    flex: 0 1 240px;
-    height: 240px;
+    flex: 0 1 280px;
+    height: 280px;
   }
 }
 
@@ -3271,10 +3271,10 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 #workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event:focus-visible { background: transparent !important; color: var(--primary); }
 #workspace[data-tool="calendar"] .agenda-panel .event-list {
   display: flex;
-  flex: 0 1 252px;
+  flex: 0 1 294px;
   flex-direction: column;
   justify-content: flex-start;
-  height: 252px;
+  height: 294px;
   max-height: 100%;
   min-height: 0;
   overflow-x: hidden;
@@ -3390,24 +3390,4 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   #workspace[data-tool="calendar"] .calendar-event-swipe-row { flex-basis: 40px; height: 40px; min-height: 40px; }
   #workspace[data-tool="calendar"] .calendar-event-swipe-row .event-item { height: 39px; min-height: 39px; }
   #workspace[data-tool="calendar"] .calendar-event-swipe-action { height: 32px; }
-}
-
-/* On short phone viewports, compact the six-week grid so six agenda rows
-   remain visible above the browser controls. */
-@media (max-width: 760px) {
-  #workspace[data-tool="calendar"].calendar-compact-viewport .calendar-grid {
-    grid-template-rows: 22px repeat(5, minmax(27px, auto)) !important;
-    row-gap: 0 !important;
-  }
-  #workspace[data-tool="calendar"].calendar-compact-viewport .calendar-grid:has(> .day:nth-of-type(42)) {
-    grid-template-rows: 22px repeat(6, minmax(27px, auto)) !important;
-  }
-  #workspace[data-tool="calendar"].calendar-compact-viewport .day {
-    min-height: 27px !important;
-    gap: 0 !important;
-    padding: 0 1px !important;
-  }
-  #workspace[data-tool="calendar"].calendar-compact-viewport .day > span { font-size: 14px !important; line-height: 16px !important; }
-  #workspace[data-tool="calendar"].calendar-compact-viewport .day-meta { min-height: 9px !important; font-size: 8px !important; line-height: 9px !important; }
-  #workspace[data-tool="calendar"] .agenda-panel .event-list { flex-basis: 240px; height: 240px; }
 }
