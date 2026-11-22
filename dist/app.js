@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.981';
+const APP_VERSION = '2.18.983';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8677,6 +8677,7 @@ function calendar() {
   const start = (first.getDay() + 6) % 7;
   const days = new Date(year, month + 1, 0).getDate();
   const cellCount = start + days > 35 ? 42 : 35;
+  const commonChineseFestivals = new Set(['春节', '元宵节', '清明节', '端午节', '七夕', '中秋节', '重阳节', '腊八节', '除夕']);
   let selectedEvents = [];
   try { selectedEvents = eventsForDate(state.selectedDate).sort((a, b) => {
     const left = String(a.time || '00:00:00'); const right = String(b.time || '00:00:00');
@@ -8699,9 +8700,10 @@ function calendar() {
     const hasPriorityLabel = Boolean(meta.term || meta.holiday || meta.festival);
     const lunarCell = !hasPriorityLabel && meta.lunar ? (meta.lunar.day === 1 ? meta.lunar.monthText + meta.lunar.dayText : meta.lunar.dayText) : '';
     const cellLabel = label || lunarCell;
+    const isHighlightedLabel = Boolean(meta.term || meta.holiday || (!meta.festival && commonChineseFestivals.has(meta.lunar?.festival)));
     let dateLabel = key;
     try { dateLabel = formatDate(key); } catch { /* retain the ISO date */ }
-    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + (eventCount ? 'has-events ' : '') + holidayClass + ' ' + termClass + ' ' + festivalClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(dateLabel + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (label ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small></button>';
+    cells += '<button class="day ' + (outside ? 'muted ' : '') + (key === dateKey(today) ? 'today ' : '') + (key === state.selectedDate ? 'selected ' : '') + (eventCount ? 'has-events ' : '') + holidayClass + ' ' + termClass + ' ' + festivalClass + '" data-date="' + key + '" data-outside="' + outside + '" aria-label="' + escapeHtml(dateLabel + (cellLabel ? '，' + cellLabel : '') + (eventCount ? '，' + eventCount + ' 个日程' : '')) + '"><span>' + date.getDate() + '</span><small class="day-meta ' + (isHighlightedLabel ? 'priority' : '') + '">' + escapeHtml(cellLabel) + '</small></button>';
   }
   const eventList = selectedEvents.length
     ? selectedEvents.map((item) => '<div class="swipe-row event-swipe-row calendar-event-swipe-row" data-swipe-row data-calendar-event-row data-event-id="' + escapeHtml(item.id) + '"><div class="event-item swipe-content"><div class="event-copy"><strong>' + escapeHtml(item.title) + '</strong><small class="event-time">' + (item.time ? escapeHtml(item.time) : (state.language === 'en' ? 'All day' : '全天')) + '</small></div></div><div class="event-swipe-actions"><button type="button" class="event-swipe-action event-action-edit" data-edit-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Edit event' : '编辑日程') + '" title="' + (state.language === 'en' ? 'Edit' : '编辑') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16.5-.7 3.2 3.2-.7L18.8 7.7a2.2 2.2 0 0 0-3.1-3.1L5 16.5Z"/><path d="m14.5 6.5 3 3"/></svg></button><button type="button" class="event-swipe-action event-action-delete" data-delete-event="' + escapeHtml(item.id) + '" aria-label="' + (state.language === 'en' ? 'Delete event' : '删除日程') + '" title="' + (state.language === 'en' ? 'Delete' : '删除') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5M14 11v5"/></svg></button></div></div>').join('')
