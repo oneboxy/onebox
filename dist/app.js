@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.958';
+const APP_VERSION = '2.18.976';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -15425,6 +15425,26 @@ workspace.addEventListener('keydown', (event) => {
   requestAnimationFrame(() => workspace.querySelector('[data-conversion-category="' + key + '"]')?.focus({ preventScroll: true }));
 });
 workspace.addEventListener('click', async (event) => {
+  const calendarDeleteButton = event.target.closest('[data-calendar-event-row] [data-delete-event]');
+  if (calendarDeleteButton) {
+    event.preventDefault(); event.stopPropagation();
+    const eventId = calendarDeleteButton.dataset.deleteEvent;
+    const removed = calendarEventEntries().map(({ event: item }) => item).find((item) => item.id === eventId);
+    Object.keys(ensureCalendarEventStore()).forEach((day) => { state.events[day] = (Array.isArray(state.events[day]) ? state.events[day] : []).filter((item) => item && item.id !== eventId); if (!state.events[day].length) delete state.events[day]; });
+    if (removed?.sourceTicketId) {
+      const ticket = state.ticketWallet.find((item) => item.id === removed.sourceTicketId);
+      if (ticket) {
+        ticket.calendarEventDisabled = true;
+        ticket.calendarEventId = '';
+        ticket.calendarEventSourceDate = ticketWalletCalendarSchedule(ticket)?.sourceDate || removed.sourceDate || '';
+        saveTicketWallet();
+      }
+    }
+    saveEvents(); syncAgendaReminders(); scheduleNotificationCheck(); render();
+    return;
+  }
+  const calendarEditButton = event.target.closest('[data-calendar-event-row] [data-edit-event]');
+  if (calendarEditButton) { event.preventDefault(); event.stopPropagation(); return renderEventDialog(calendarEditButton.dataset.editEvent); }
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }
   if (event.target.closest('[data-mine-page-back]')) { closeMineSubpage(); return; }
   if (state.minePage === 'pet') {
@@ -15975,8 +15995,6 @@ workspace.addEventListener('click', async (event) => {
   if (deleteCalcHistory) { state.calcHistory = state.calcHistory.filter((item) => String(item.id || item.at || item.expression) !== deleteCalcHistory.dataset.deleteCalcHistory); saveCalculator(); return render(); }
   if (event.target.closest('[data-clear-calc-history]')) { state.calcHistory = []; saveCalculator(); return render(); }
   if (event.target.closest('[data-open-event-dialog]')) return renderEventDialog();
-  const editEvent = event.target.closest('[data-edit-event]');
-  if (editEvent) return renderEventDialog(editEvent.dataset.editEvent);
   const calendarPicker = event.target.closest('[data-calendar-picker]');
   if (calendarPicker) return renderCalendarPickerDialog(calendarPicker.dataset.calendarPicker, true);
   const month = event.target.closest('[data-month]');
@@ -15992,21 +16010,6 @@ workspace.addEventListener('click', async (event) => {
     render();
     if (repeated) renderLunarDialog(day.dataset.date);
     return;
-  }
-  const deleteEvent = event.target.closest('[data-delete-event]');
-  if (deleteEvent) {
-    const removed = calendarEventEntries().map(({ event: item }) => item).find((item) => item.id === deleteEvent.dataset.deleteEvent);
-    Object.keys(ensureCalendarEventStore()).forEach((day) => { state.events[day] = (Array.isArray(state.events[day]) ? state.events[day] : []).filter((item) => item && item.id !== deleteEvent.dataset.deleteEvent); if (!state.events[day].length) delete state.events[day]; });
-    if (removed?.sourceTicketId) {
-      const ticket = state.ticketWallet.find((item) => item.id === removed.sourceTicketId);
-      if (ticket) {
-        ticket.calendarEventDisabled = true;
-        ticket.calendarEventId = '';
-        ticket.calendarEventSourceDate = ticketWalletCalendarSchedule(ticket)?.sourceDate || removed.sourceDate || '';
-        saveTicketWallet();
-      }
-    }
-    saveEvents(); syncAgendaReminders(); scheduleNotificationCheck(); return render();
   }
   const weatherClear = event.target.closest('[data-weather-clear]');
   if (weatherClear) {
