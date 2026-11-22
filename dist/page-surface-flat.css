@@ -3337,7 +3337,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   font-size: 11px;
   white-space: nowrap;
 }
-#workspace[data-tool="calendar"] .calendar-event-swipe-actions {
+#workspace[data-tool="calendar"] .event-swipe-actions {
   position: absolute;
   inset: 0 0 1px auto;
   z-index: 0;
