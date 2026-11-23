@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.1020';
+const APP_VERSION = '2.18.1021';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9181,7 +9181,7 @@ function weatherLineChart(points, mode, currentIndex = 0, timeZone = '', startHo
   const clockAttrs = single ? ' data-timezone="' + escapeHtml(timeZone) + '" data-start-hour="' + Math.max(0, Math.min(23, Number(startHour) || 0)) + '" data-start-date="' + escapeHtml(startDate) + '" data-window-anchor="' + escapeHtml(anchorKey) + '"' : '';
   const nowMarker = single ? '<span class="weather-chart-now-marker" aria-hidden="true"></span>' : '';
   const todayIndex = mode === 'range' ? points.findIndex((point) => point.isToday) : -1;
-  const todayMarkerTop = todayIndex >= 0 ? Math.max(4, y(points[todayIndex].high) - 22) : 0;
+  const todayMarkerTop = todayIndex >= 0 ? Math.max(4, y(points[todayIndex].high) - 30) : 0;
   const todayMarker = todayIndex >= 0 ? '<span class="weather-chart-today-marker" style="left:' + (todayIndex * columnWidth + 3) + 'px;width:' + (columnWidth - 6) + 'px;top:' + todayMarkerTop + 'px" aria-hidden="true"></span>' : '';
   return '<div class="weather-chart-scroll' + (single ? ' weather-chart-scroll-single' : '') + '" data-current-index="' + selectedIndex + '" data-column-width="' + columnWidth + '"' + clockAttrs + ' role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly weather forecast' : '逐小时天气预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px">' + nowMarker + todayMarker + '<svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg>' + precipitationLine + '<div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
 }
