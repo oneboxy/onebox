@@ -3460,6 +3460,33 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   font-weight: 600;
   white-space: nowrap;
 }
+#workspace[data-tool="calculator"] .calculator-history-clear {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: 2;
+  display: grid;
+  width: 26px;
+  height: 24px;
+  transform: translateY(-50%);
+  place-items: center;
+  padding: 0 0 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+}
+#workspace[data-tool="calculator"] .calculator-history-clear svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+#workspace[data-tool="calculator"] .calculator-history-clear:hover { color: var(--ink); }
 #workspace[data-tool="calculator"] .display-history-list {
   max-height: min(176px, 24dvh) !important;
   overflow: auto;
