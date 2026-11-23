@@ -21729,7 +21729,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-advice-item-4 i { color: #7788b8; }
 #workspace[data-tool="weather"] .weather-advice-item-5 i { color: #c49a5a; }
 #workspace[data-tool="weather"] .weather-updated-note { margin: -16px 0 0; }
-#workspace[data-tool="weather"] .weather-chart-section { min-width: 0; padding-top: 18px; border-top: 1px solid var(--line); }
+#workspace[data-tool="weather"] .weather-chart-section { min-width: 0; padding-top: 18px; border-top: 1px dashed color-mix(in srgb, var(--line) 58%, transparent); }
 #workspace[data-tool="weather"] .weather-chart-heading { display: flex; align-items: center; justify-content: space-between; gap: 11px; margin-bottom: 6px; }
 #workspace[data-tool="weather"] .weather-chart-heading h2 { margin: 0; color: var(--ink); font-size: 15px; font-weight: 700; }
 #workspace[data-tool="weather"] .weather-chart-legend { display: flex; gap: 15px; color: var(--muted); font-size: 11px; }
