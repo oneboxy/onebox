@@ -21855,3 +21855,4 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
   .weather-location-dialog > header { padding: 13px 14px 8px; }
   .weather-location-dialog-body { padding: 4px 14px 13px; }
 }
+#workspace[data-tool="calendar"] .calendar-layout { padding-inline: 3px; }
