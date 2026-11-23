@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.1000';
+const APP_VERSION = '2.18.1001';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1552,7 +1552,7 @@ function applyTheme() {
   document.documentElement.dataset.color = state.color;
   document.documentElement.style.colorScheme = resolved;
   if (!isIosSafariReaderSurfaceActive()) {
-    $$('meta[name="theme-color"]').forEach((meta) => { meta.content = resolved === 'dark' ? '#000000' : '#f3f5fa'; });
+    $$('meta[name="theme-color"]').forEach((meta) => { meta.content = resolved === 'dark' ? '#000000' : '#ffffff'; });
   }
   const appleStatusBar = $('meta[name="apple-mobile-web-app-status-bar-style"]');
   if (appleStatusBar) appleStatusBar.content = resolved === 'dark' ? 'black-translucent' : 'default';
