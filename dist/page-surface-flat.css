@@ -3474,7 +3474,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   border: 0;
   border-radius: 0;
   background: var(--bg);
-  color: var(--muted);
+  color: var(--danger);
   cursor: pointer;
 }
 #workspace[data-tool="calculator"] .calculator-history-clear svg {
@@ -3486,7 +3486,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   stroke-linejoin: round;
   stroke-width: 1.7;
 }
-#workspace[data-tool="calculator"] .calculator-history-clear:hover { color: var(--ink); }
+#workspace[data-tool="calculator"] .calculator-history-clear:hover { color: var(--danger); }
 #workspace[data-tool="calculator"] .display-history-list {
   max-height: 64px !important;
   overflow-x: hidden;
@@ -3515,23 +3515,24 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   height: 31px;
   min-height: 31px;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 0;
   padding: 2px 44px 2px 2px;
   border: 0;
   background: transparent !important;
-  color: var(--ink);
+  color: var(--muted);
   font-size: 12px;
+  font-weight: 400;
   text-align: left;
 }
 #workspace[data-tool="calculator"] .calculator-history-item span {
   min-width: 0;
   overflow: hidden;
   color: var(--muted);
+  font-weight: 400;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-#workspace[data-tool="calculator"] .calculator-history-item b { flex: 0 0 auto; font-weight: 600; }
 #workspace[data-tool="calculator"] .calculator-history-delete {
   position: absolute;
   top: 50%;
@@ -3547,9 +3548,8 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   border-radius: 50%;
   background: transparent;
   color: var(--muted);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease;
+  opacity: 1;
+  pointer-events: auto;
 }
 #workspace[data-tool="calculator"] .calculator-history-delete svg {
   width: 15px;
@@ -3559,10 +3559,6 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.7;
-}
-#workspace[data-tool="calculator"] .calculator-history-row.is-actions-visible .calculator-history-delete {
-  opacity: 1;
-  pointer-events: auto;
 }
 #workspace[data-tool="calculator"] .calculator-history-row,
 #workspace[data-tool="calculator"] .calculator-history-item { -webkit-touch-callout: none; user-select: none; }
