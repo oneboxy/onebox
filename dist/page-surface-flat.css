@@ -3488,7 +3488,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 }
 #workspace[data-tool="calculator"] .calculator-history-clear:hover { color: var(--ink); }
 #workspace[data-tool="calculator"] .display-history-list {
-  max-height: min(176px, 24dvh) !important;
+  max-height: min(136px, 18dvh) !important;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -3671,7 +3671,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   }
   #workspace[data-tool="calculator"] .expression { min-height: 42px; }
   #workspace[data-tool="calculator"] .display-history-list:not(:has(.calculator-history-empty)) {
-    min-height: min(112px, 16dvh);
+    min-height: min(52px, 8dvh);
   }
   #workspace[data-tool="calculator"] .calculator-keyboard {
     display: flex;
