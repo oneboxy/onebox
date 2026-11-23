@@ -21710,7 +21710,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-legend-high,
 #workspace[data-tool="weather"] .weather-legend-temperature { background: var(--ink); }
 #workspace[data-tool="weather"] .weather-legend-low { background: var(--muted); }
-#workspace[data-tool="weather"] .weather-legend-precipitation { background: color-mix(in srgb, var(--muted) 30%, #397b76); }
+#workspace[data-tool="weather"] .weather-legend-precipitation { background: var(--ink); }
 #workspace[data-tool="weather"] .weather-chart-scroll { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 3px 0 7px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 55%, transparent) transparent; cursor: grab; }
 #workspace[data-tool="weather"] .weather-chart-scroll-single { padding-top: 0; padding-bottom: 3px; }
 #workspace[data-tool="weather"] .weather-chart-scroll::-webkit-scrollbar { height: 5px; }
@@ -21723,11 +21723,12 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-chart-temperature { stroke: var(--ink); fill: none; }
 #workspace[data-tool="weather"] .weather-chart-high { stroke: var(--ink); fill: none; }
 #workspace[data-tool="weather"] .weather-chart-low { stroke: var(--muted); fill: none; stroke-dasharray: 4 3; }
-#workspace[data-tool="weather"] .weather-chart-precipitation { stroke: color-mix(in srgb, var(--muted) 30%, #397b76); fill: none; stroke-width: 1.5; }
+#workspace[data-tool="weather"] .weather-chart-precipitation { stroke: var(--ink); fill: none; stroke-width: 1.5; }
 #workspace[data-tool="weather"] .weather-chart-dot.weather-chart-temperature,
 #workspace[data-tool="weather"] .weather-chart-dot.weather-chart-high { fill: var(--panel); stroke: var(--ink); stroke-width: 1.4; }
 #workspace[data-tool="weather"] .weather-chart-dot.weather-chart-low { fill: var(--panel); stroke: var(--muted); stroke-width: 1.4; }
-#workspace[data-tool="weather"] .weather-chart-dot.weather-chart-precipitation { fill: var(--panel); stroke: color-mix(in srgb, var(--muted) 30%, #397b76); stroke-width: 1.3; }
+#workspace[data-tool="weather"] .weather-chart-dot.weather-chart-precipitation { fill: var(--panel); stroke: var(--ink); stroke-width: 1.3; }
+#workspace[data-tool="weather"] .weather-chart-precipitation-value { fill: var(--muted); font: 8px system-ui, sans-serif; font-weight: 500; }
 #workspace[data-tool="weather"] .weather-chart-value { fill: var(--muted); font: 9px system-ui, sans-serif; font-weight: 500; }
 #workspace[data-tool="weather"] .weather-chart-labels { display: grid; }
 #workspace[data-tool="weather"] .weather-chart-label { display: grid; justify-items: center; gap: 3px; min-width: 0; color: var(--muted); }
