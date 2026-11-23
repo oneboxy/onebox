@@ -3472,14 +3472,14 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   border-bottom: 1px dashed color-mix(in srgb, var(--line) 64%, transparent);
   border-radius: 0;
 }
-#workspace[data-tool="calculator"] .calculator-history-item {
+#workspace[data-tool="calculator"] .display-history-list .calculator-history-item {
   display: flex;
   width: 100%;
   min-height: 36px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 6px 34px 6px 2px;
+  padding: 6px 44px 6px 2px;
   border: 0;
   background: transparent !important;
   color: var(--ink);
@@ -3498,6 +3498,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   position: absolute;
   top: 50%;
   right: 1px;
+  z-index: 2;
   display: grid;
   width: 26px;
   height: 26px;
