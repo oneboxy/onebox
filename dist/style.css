@@ -828,7 +828,7 @@ main { padding-top: calc(58px + env(safe-area-inset-top) + 55.5px + 12px); }
 #workspace[data-tool="calendar"] .calendar-top strong { font-size: 18px; letter-spacing: -.02em; }
 #workspace[data-tool="calendar"] .calendar-month { gap: 12px; }
 #workspace[data-tool="calendar"] .calendar-legend,
-#workspace[data-tool="calendar"] .calendar-today { position: relative; left: 5px; }
+#workspace[data-tool="calendar"] .calendar-today { position: relative; left: 15px; }
 #workspace[data-tool="calendar"] .calendar-today { border: 1px solid var(--line); border-radius: 9px; background: var(--panel); color: var(--primary); padding: 5px 10px; font-size: 12px; font-weight: 750; }
 #workspace[data-tool="calendar"] .day i { top: 4px; right: 4px; bottom: auto; width: 16px; height: 16px; line-height: 16px; font-size: 8px; }
 #workspace[data-tool="calendar"] .day > span { width: 100%; padding-right: 10px; }
