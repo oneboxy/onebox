@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.990';
+const APP_VERSION = '2.18.991';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9125,24 +9125,6 @@ function weatherWindLabel(value) {
   const level = weatherWindLevel(value);
   return state.language === 'en' ? 'Bft ' + level.force + ' · ' + level.en : level.force + '级 · ' + level.zh;
 }
-function weatherAdvice(weather, current) {
-  const temperature = Number(current.temperature_2m ?? 20);
-  const rain = Number(current.precipitation ?? 0);
-  const probability = Number(weather.daily?.precipitation_probability_max?.[0] ?? 0);
-  const wind = Number(current.wind_speed_10m ?? 0);
-  const windLevel = weatherWindLevel(wind);
-  const uv = Number(weather.daily?.uv_index_max?.[0] ?? 0);
-  const code = Number(current.weather_code);
-  const rainy = rain > .1 || probability >= 55 || [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code);
-  return [
-    { icon: '🚶', title: t('commute'), body: rainy ? (state.language === 'en' ? 'Take an umbrella and allow extra travel time.' : '有降雨可能，带伞并预留出行时间。') : (state.language === 'en' ? 'Good conditions for normal travel.' : '适合正常出行，路上注意安全。') },
-    { icon: '🏃', title: t('sport'), body: wind > 35 || rainy ? (state.language === 'en' ? 'Consider an indoor workout.' : '风雨较明显，建议选择室内运动。') : (state.language === 'en' ? 'Suitable for outdoor exercise; hydrate.' : '适合户外运动，注意补水。') },
-    { icon: '💨', title: t('windAdvice'), body: (state.language === 'en' ? 'Bft ' + windLevel.force + ' · ' + windLevel.en + ' · ' + windLevel.speed + ' km/h. ' + windLevel.enAdvice : windLevel.force + '级 · ' + windLevel.zh + ' · ' + windLevel.speed + ' km/h。' + windLevel.zhAdvice) },
-    { icon: '🧥', title: t('clothing'), body: temperature < 10 ? (state.language === 'en' ? 'Layer up with a warm coat.' : '气温偏低，建议分层保暖。') : temperature > 28 ? (state.language === 'en' ? 'Light, breathable clothing is best.' : '天气偏热，穿轻薄透气衣物。') : (state.language === 'en' ? 'A light layer should be comfortable.' : '薄外套或长袖即可，体感舒适。') },
-    { icon: '🕶️', title: t('sunscreen'), body: uv >= 6 ? (state.language === 'en' ? 'High UV: sunscreen, hat and sunglasses recommended.' : '紫外线偏强，建议防晒、戴帽和太阳镜。') : (state.language === 'en' ? 'UV is moderate; sunscreen is still useful.' : '紫外线中等，外出仍建议做好防晒。') },
-    { icon: '🥾', title: t('hiking'), body: rainy || wind > 40 ? (state.language === 'en' ? 'Trail may be slippery or windy; check conditions first.' : '山路可能湿滑或风大，出发前确认路况。') : (state.language === 'en' ? 'Good for a short hike; bring water.' : '适合短途爬山，带足饮水。') },
-  ];
-}
 function weatherCurrentDayKey(weather) {
   try {
     const parts = new Intl.DateTimeFormat('en-US', { timeZone: weather.timezone || undefined, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -9235,8 +9217,7 @@ function weather() {
   }
   const updatedTime = active.updatedAt ? new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(active.updatedAt) : '—';
   const condition = weatherCode(Number(current.weather_code));
-  const adviceItems = weatherAdvice(active, current).slice(0, 4).map((item) => '<p class="weather-advice-item"><span aria-hidden="true">' + escapeHtml(item.icon) + '：</span>' + escapeHtml(item.body) + '</p>').join('');
-  const summary = '<div class="weather-current-overview"><div class="weather-current-main"><div class="weather-current-summary"><span class="weather-current-icon" aria-hidden="true">' + condition[0] + '</span><strong class="weather-current-temperature">' + Math.round(Number(current.temperature_2m) || 0) + '°</strong><span class="weather-current-copy"><strong>' + escapeHtml(condition[1]) + '</strong></span></div><p class="weather-current-meta">' + escapeHtml((state.language === 'en' ? 'Feels ' : '体感 ') + Math.round(Number(current.apparent_temperature ?? current.temperature_2m) || 0) + '° · ' + (state.language === 'en' ? 'Humidity ' : '湿度 ') + (current.relative_humidity_2m ?? '—') + '% · ' + weatherWindLabel(current.wind_speed_10m) + ' (' + (state.language === 'en' ? 'Updated ' : '更新于 ') + updatedTime + ')') + (state.weatherError ? ' · ' + escapeHtml(state.weatherError) : '') + '</p></div><aside class="weather-advice-inline"><h2>' + (state.language === 'en' ? 'Weather advice' : '天气建议') + '</h2><div>' + adviceItems + '</div></aside></div>';
+  const summary = '<div class="weather-current-main"><div class="weather-current-summary"><span class="weather-current-icon" aria-hidden="true">' + condition[0] + '</span><strong class="weather-current-temperature">' + Math.round(Number(current.temperature_2m) || 0) + '°</strong><span class="weather-current-copy"><strong>' + escapeHtml(condition[1]) + '</strong></span></div><p class="weather-current-meta">' + escapeHtml((state.language === 'en' ? 'Feels ' : '体感 ') + Math.round(Number(current.apparent_temperature ?? current.temperature_2m) || 0) + '° · ' + (state.language === 'en' ? 'Humidity ' : '湿度 ') + (current.relative_humidity_2m ?? '—') + '% · ' + weatherWindLabel(current.wind_speed_10m) + ' (' + (state.language === 'en' ? 'Updated ' : '更新于 ') + updatedTime + ')') + (state.weatherError ? ' · ' + escapeHtml(state.weatherError) : '') + '</p></div>';
   const currentHourPosition = Math.max(0, hourlyPoints.findIndex((point) => point.label === (state.language === 'en' ? 'Now' : '现在')));
   const todayLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-temperature"></i>' + (state.language === 'en' ? 'Temperature' : '气温') + '</span><span><i class="weather-legend-precipitation"></i>' + (state.language === 'en' ? 'Precipitation · 0–100%' : '降水概率 · 0–100%') + '</span></div>';
   const forecastLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-high"></i>' + (state.language === 'en' ? 'High' : '最高温') + '</span><span><i class="weather-legend-low"></i>' + (state.language === 'en' ? 'Low' : '最低温') + '</span></div>';
