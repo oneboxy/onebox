@@ -3286,7 +3286,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] .agenda-panel { position: relative; border-top-color: transparent; }
-  #workspace[data-tool="calendar"] .agenda-panel::before { content: ""; position: absolute; top: 1px; right: 0; left: 0; border-top: 1px solid var(--line); pointer-events: none; }
+  #workspace[data-tool="calendar"] .agenda-panel::before { content: ""; position: absolute; top: 1px; right: 0; left: 0; border-top: 1px dashed color-mix(in srgb, var(--line) 82%, transparent); pointer-events: none; }
 }
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] .agenda-panel .event-list {
