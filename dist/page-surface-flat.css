@@ -3548,8 +3548,9 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   border-radius: 50%;
   background: transparent;
   color: var(--muted);
-  opacity: 1;
+  opacity: .48;
   pointer-events: auto;
+  transition: opacity 120ms ease, filter 120ms ease;
 }
 #workspace[data-tool="calculator"] .calculator-history-delete svg {
   width: 15px;
@@ -3559,7 +3560,14 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.7;
+  filter: blur(.2px);
 }
+#workspace[data-tool="calculator"] .calculator-history-delete:hover,
+#workspace[data-tool="calculator"] .calculator-history-delete:focus-visible,
+#workspace[data-tool="calculator"] .calculator-history-delete:active { opacity: 1; }
+#workspace[data-tool="calculator"] .calculator-history-delete:hover svg,
+#workspace[data-tool="calculator"] .calculator-history-delete:focus-visible svg,
+#workspace[data-tool="calculator"] .calculator-history-delete:active svg { filter: none; }
 #workspace[data-tool="calculator"] .calculator-history-row,
 #workspace[data-tool="calculator"] .calculator-history-item { -webkit-touch-callout: none; user-select: none; }
 #workspace[data-tool="calculator"] .calculator-history-empty { margin: 2px 0; padding: 5px 0; font-size: 11px; }
