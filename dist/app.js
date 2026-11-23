@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.1005';
+const APP_VERSION = '2.18.1006';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9152,9 +9152,10 @@ function weatherLineChart(points, mode, currentIndex = 0) {
   const columnWidth = 56;
   const width = points.length * columnWidth;
   const compact = window.matchMedia?.('(max-width: 600px)').matches === true;
-  const height = compact ? 104 : 146;
-  const top = compact ? 16 : 22;
-  const bottom = compact ? 84 : 126;
+  const single = mode === 'single';
+  const height = single ? (compact ? 78 : 98) : (compact ? 104 : 146);
+  const top = single ? (compact ? 13 : 16) : (compact ? 16 : 22);
+  const bottom = single ? (compact ? 59 : 78) : (compact ? 84 : 126);
   const values = points.flatMap((point) => mode === 'range' ? [Number(point.high), Number(point.low)] : [Number(point.value)]).filter(Number.isFinite);
   const min = Math.floor(Math.min(...values) - 2);
   const max = Math.ceil(Math.max(...values) + 2);
@@ -9170,20 +9171,22 @@ function weatherLineChart(points, mode, currentIndex = 0) {
     ? '<polyline class="weather-chart-line weather-chart-high" points="' + line('high') + '"/><polyline class="weather-chart-line weather-chart-low" points="' + line('low') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-high" cx="' + x(index) + '" cy="' + y(point.high) + '" r="3"/><circle class="weather-chart-dot weather-chart-low" cx="' + x(index) + '" cy="' + y(point.low) + '" r="3"/><text class="weather-chart-value weather-chart-high-label" x="' + x(index) + '" y="' + Math.max(12, y(point.high) - 8) + '" text-anchor="middle">' + Math.round(point.high) + '°</text><text class="weather-chart-value weather-chart-low-label" x="' + x(index) + '" y="' + Math.min(143, y(point.low) + 15) + '" text-anchor="middle">' + Math.round(point.low) + '°</text>').join('')
     : '<polyline class="weather-chart-line weather-chart-temperature" points="' + line('value') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-temperature" cx="' + x(index) + '" cy="' + y(point.value) + '" r="3"/><text class="weather-chart-value" x="' + x(index) + '" y="' + Math.max(12, y(point.value) - 9) + '" text-anchor="middle">' + Math.round(point.value) + '°</text>').join('');
   const precipitationPoints = mode === 'single' ? points.filter((point) => point.probability != null && Number.isFinite(Number(point.probability))) : [];
-  const precipitationHeight = compact ? 60 : 86;
-  const precipitationTop = compact ? 9 : 12;
-  const precipitationBottom = compact ? 43 : 61;
+  const precipitationHeight = single ? (compact ? 42 : 52) : (compact ? 60 : 86);
+  const precipitationTop = single ? (compact ? 6 : 8) : (compact ? 9 : 12);
+  const precipitationBottom = single ? (compact ? 29 : 38) : (compact ? 43 : 61);
   const precipitationY = (value) => precipitationBottom - Math.max(0, Math.min(100, Number(value) || 0)) / 100 * (precipitationBottom - precipitationTop);
   const precipitationLine = precipitationPoints.length ? '<svg class="weather-chart-svg weather-chart-precipitation-svg" viewBox="0 0 ' + width + ' ' + precipitationHeight + '" width="' + width + '" height="' + precipitationHeight + '" aria-hidden="true">' + [0, 50, 100].map((value) => '<line class="weather-chart-gridline" x1="0" y1="' + precipitationY(value) + '" x2="' + width + '" y2="' + precipitationY(value) + '"/>').join('') + '<polyline class="weather-chart-line weather-chart-precipitation" points="' + ['0,' + precipitationY(precipitationPoints[0].probability), ...points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? x(index) + ',' + precipitationY(point.probability) : null).filter(Boolean), width + ',' + precipitationY(precipitationPoints[precipitationPoints.length - 1].probability)].join(' ') + '"/>' + points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? '<circle class="weather-chart-dot weather-chart-precipitation" cx="' + x(index) + '" cy="' + precipitationY(point.probability) + '" r="2.5"/>' : '').join('') + '</svg>' : '';
-  const labels = points.map((point) => { const weatherName = weatherCode(point.code)[1]; return '<div class="weather-chart-label"><span class="weather-chart-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(weatherName) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + weatherName) + '" title="' + escapeHtml(weatherName) + '">' + weatherIconMarkup(point.code) + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + (state.language === 'en' ? 'Bft ' + weatherWindLevel(point.wind).force : weatherWindLevel(point.wind).force + '级') + '</small>' : '') + '</div>'; }).join('');
-  return '<div class="weather-chart-scroll" data-current-index="' + Math.max(0, Math.min(points.length - 1, Number(currentIndex) || 0)) + '" data-column-width="' + columnWidth + '" role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly weather forecast' : '逐小时天气预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px"><svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg>' + precipitationLine + '<div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
+  const selectedIndex = Math.max(0, Math.min(points.length - 1, Number(currentIndex) || 0));
+  const labels = points.map((point, index) => { const weatherName = weatherCode(point.code)[1]; const isCurrent = single && index === selectedIndex; return '<div class="weather-chart-label' + (isCurrent ? ' is-current' : '') + '"' + (isCurrent ? ' aria-current="time"' : '') + '><span class="weather-chart-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(weatherName) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + weatherName) + '" title="' + escapeHtml(weatherName) + '">' + weatherIconMarkup(point.code) + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + (state.language === 'en' ? 'Bft ' + weatherWindLevel(point.wind).force : weatherWindLevel(point.wind).force + '级') + '</small>' : '') + '</div>'; }).join('');
+  return '<div class="weather-chart-scroll' + (single ? ' weather-chart-scroll-single' : '') + '" data-current-index="' + selectedIndex + '" data-column-width="' + columnWidth + '" role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly weather forecast' : '逐小时天气预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px"><svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg>' + precipitationLine + '<div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
 }
 function syncWeatherChartScrollPosition() {
   const chart = workspace.querySelector('.weather-chart-scroll[data-current-index]');
   if (!chart || chart.clientWidth <= 0) return;
   const columnWidth = Number(chart.dataset.columnWidth) || 56;
   const index = Number(chart.dataset.currentIndex) || 0;
-  chart.scrollLeft = Math.max(0, Math.min(chart.scrollWidth - chart.clientWidth, index * columnWidth - (chart.clientWidth - columnWidth) / 2));
+  const targetLeft = Math.max(0, Math.min(chart.scrollWidth - chart.clientWidth, index * columnWidth - (chart.clientWidth - columnWidth) / 2));
+  chart.scrollLeft = targetLeft;
 }
 function weatherLocationDialogMarkup() {
   if (!state.weatherLocationDialogOpen) return '';
