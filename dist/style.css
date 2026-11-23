@@ -21669,7 +21669,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-current-summary { display: flex; align-items: center; gap: 15px; min-height: 82px; padding: 6px 0 2px; }
 #workspace[data-tool="weather"] .weather-current-icon { display: inline-flex; width: 38px; height: 38px; flex: 0 0 38px; align-items: center; justify-content: center; line-height: 1; }
 #workspace[data-tool="weather"] .weather-line-icon { display: block; width: 100%; height: 100%; }
-#workspace[data-tool="weather"] { --weather-cloud-fill: #cce7f2; --weather-cloud-line: #4d92af; --weather-sun-fill: #f5bd4e; --weather-sun-line: #dc8c21; --weather-water: #248ab7; --weather-bolt: #e7a52e; }
+#workspace[data-tool="weather"] { --weather-cloud-fill: var(--bg); --weather-cloud-line: var(--ink); --weather-sun-fill: #f5bd4e; --weather-sun-line: #dc8c21; --weather-water: #248ab7; --weather-bolt: #e7a52e; }
 #workspace[data-tool="weather"] .weather-line-icon { color: var(--weather-cloud-line); }
 #workspace[data-tool="weather"] .weather-line-clear { color: var(--weather-sun-line); }
 #workspace[data-tool="weather"] .weather-icon-cloud { fill: var(--weather-cloud-fill); stroke: var(--weather-cloud-line); stroke-width: 1.5; }
@@ -21681,7 +21681,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-icon-target { cursor: pointer; touch-action: manipulation; }
 #workspace[data-tool="weather"] .weather-icon-target:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 #workspace[data-tool="weather"] .weather-current-icon { border: 0; background: transparent; }
-[data-theme="dark"] #workspace[data-tool="weather"] { --weather-cloud-fill: #315b6c; --weather-cloud-line: #9bd0e2; --weather-sun-fill: #e9bd5b; --weather-sun-line: #e6a743; --weather-water: #77c8e7; --weather-bolt: #efb63d; }
+[data-theme="dark"] #workspace[data-tool="weather"] { --weather-sun-fill: #e9bd5b; --weather-sun-line: #e6a743; --weather-water: #77c8e7; --weather-bolt: #efb63d; }
 #workspace[data-tool="weather"] .weather-current-temperature { font-size: 43px; line-height: 1; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
 #workspace[data-tool="weather"] .weather-current-copy { display: grid; gap: 5px; }
 #workspace[data-tool="weather"] .weather-current-copy strong { color: var(--ink); font-size: 14px; font-weight: 550; }
