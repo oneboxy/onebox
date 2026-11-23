@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.996';
+const APP_VERSION = '2.18.997';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9219,6 +9219,9 @@ function weather() {
   }
   const updatedTime = active.updatedAt ? new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(active.updatedAt) : '—';
   const condition = weatherCode(Number(current.weather_code));
+  const rainLikely = Number(current.precipitation || 0) > .1 || Number(active.daily?.precipitation_probability_max?.[0] || 0) >= 50 || [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(Number(current.weather_code));
+  const windForce = weatherWindLevel(current.wind_speed_10m).force;
+  const temperatureNow = Number(current.temperature_2m ?? 20);
   const adviceIcons = [
     '<svg viewBox="0 0 24 24"><path d="m20.38 3.46-4.4-1.42a4 4 0 0 1-7.96 0l-4.4 1.42A2 2 0 0 0 2 5.36V8a1 1 0 0 0 1 1h2v12h14V9h2a1 1 0 0 0 1-1V5.36a2 2 0 0 0-1.62-1.9Z"/></svg>',
     '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><path d="m9 21 3-6 3 6M6 9l6 2 6-2M12 11v4"/></svg>',
@@ -9226,8 +9229,20 @@ function weather() {
     '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="M12 8v4m0 4h.01"/></svg>',
     '<svg viewBox="0 0 24 24"><path d="m5 17-1-6 2-5h12l2 5-1 6H5Z"/><path d="M4 11h16M7 6l1-2m8 2-1-2M7 17v2m10-2v2"/><circle cx="7.5" cy="14" r=".7"/><circle cx="16.5" cy="14" r=".7"/></svg>',
   ];
-  const adviceNames = state.language === 'en' ? ['Clothing', 'Exercise', 'Fishing', 'Health', 'Car wash'] : ['穿衣', '运动', '钓鱼', '易发', '洗车'];
-  const adviceItems = adviceNames.map((name, index) => '<span class="weather-advice-item weather-advice-item-' + index + '"><i aria-hidden="true">' + adviceIcons[index] + '</i>' + escapeHtml(name) + '</span>').join('');
+  const advice = state.language === 'en' ? [
+    ['Clothing', temperatureNow < 10 ? 'Warm layers' : temperatureNow < 18 ? 'Add a jacket' : temperatureNow > 28 ? 'Light clothes' : 'Dress lightly'],
+    ['Exercise', rainLikely || windForce >= 6 ? 'Stay indoors' : 'Outdoors is fine'],
+    ['Fishing', rainLikely || windForce >= 5 ? 'Not ideal' : 'Good conditions'],
+    ['Health', temperatureNow < 12 ? 'Keep warm' : 'Watch temperature changes'],
+    ['Car wash', rainLikely ? 'Wait for clear skies' : 'Good to go'],
+  ] : [
+    ['穿衣', temperatureNow < 10 ? '注意保暖' : temperatureNow < 18 ? '加件外套' : temperatureNow > 28 ? '穿着轻薄' : '轻便穿着'],
+    ['运动', rainLikely || windForce >= 6 ? '适合室内' : '适宜户外'],
+    ['钓鱼', rainLikely || windForce >= 5 ? '暂不适宜' : '适宜垂钓'],
+    ['易发', temperatureNow < 12 ? '注意保暖' : '留意温差'],
+    ['洗车', rainLikely ? '建议改天' : '适宜洗车'],
+  ];
+  const adviceItems = advice.map(([name, note], index) => '<span class="weather-advice-item weather-advice-item-' + index + '"><i aria-hidden="true">' + adviceIcons[index] + '</i><strong>' + escapeHtml(name) + '</strong><span>' + escapeHtml(note) + '</span></span>').join('');
   const summary = '<div class="weather-current-overview"><div class="weather-current-main"><div class="weather-current-summary"><span class="weather-current-icon" aria-hidden="true">' + condition[0] + '</span><strong class="weather-current-temperature">' + Math.round(Number(current.temperature_2m) || 0) + '°</strong><span class="weather-current-copy"><strong>' + escapeHtml(condition[1]) + '</strong></span></div><p class="weather-current-meta">' + escapeHtml((state.language === 'en' ? 'Feels ' : '体感 ') + Math.round(Number(current.apparent_temperature ?? current.temperature_2m) || 0) + '° · ' + (state.language === 'en' ? 'Humidity ' : '湿度 ') + (current.relative_humidity_2m ?? '—') + '% · ' + weatherWindLabel(current.wind_speed_10m) + ' (' + (state.language === 'en' ? 'Updated ' : '更新于 ') + updatedTime + ')') + (state.weatherError ? ' · ' + escapeHtml(state.weatherError) : '') + '</p></div><aside class="weather-advice-inline"><div>' + adviceItems + '</div></aside></div>';
   const currentHourPosition = Math.max(0, hourlyPoints.findIndex((point) => point.label === (state.language === 'en' ? 'Now' : '现在')));
   const todayLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-temperature"></i>' + (state.language === 'en' ? 'Temperature' : '气温') + '</span><span><i class="weather-legend-precipitation"></i>' + (state.language === 'en' ? 'Precipitation · 0–100%' : '降水概率 · 0–100%') + '</span></div>';
