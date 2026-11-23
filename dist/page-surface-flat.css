@@ -2990,7 +2990,7 @@ main:has(#workspace[data-tool="mine"]) {
 }
 
 /* Tighten the calendar's vertical rhythm without squeezing its labels. */
-#workspace[data-tool="calendar"] .calendar-grid { row-gap: 0; }
+#workspace[data-tool="calendar"] .calendar-grid { row-gap: 6px; }
 #workspace[data-tool="calendar"] .day { min-height: 60px; }
 @media (max-width: 760px) {
   #workspace[data-tool="calendar"] .day { min-height: 50px; }
