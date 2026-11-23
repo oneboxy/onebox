@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.1007';
+const APP_VERSION = '2.18.1008';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9147,7 +9147,7 @@ function weatherCurrentDayKey(weather) {
     return values.year + '-' + values.month + '-' + values.day;
   } catch { return dateKey(new Date()); }
 }
-function weatherLineChart(points, mode, currentIndex = 0) {
+function weatherLineChart(points, mode, currentIndex = 0, timeZone = '', startHour = 0) {
   if (!points.length) return '<p class="weather-chart-empty">' + (state.language === 'en' ? 'Forecast data unavailable' : '暂无预报数据') + '</p>';
   const columnWidth = 56;
   const width = points.length * columnWidth;
@@ -9177,8 +9177,48 @@ function weatherLineChart(points, mode, currentIndex = 0) {
   const precipitationY = (value) => precipitationBottom - Math.max(0, Math.min(100, Number(value) || 0)) / 100 * (precipitationBottom - precipitationTop);
   const precipitationLine = precipitationPoints.length ? '<svg class="weather-chart-svg weather-chart-precipitation-svg" viewBox="0 0 ' + width + ' ' + precipitationHeight + '" width="' + width + '" height="' + precipitationHeight + '" aria-hidden="true">' + [0, 50, 100].map((value) => '<line class="weather-chart-gridline" x1="0" y1="' + precipitationY(value) + '" x2="' + width + '" y2="' + precipitationY(value) + '"/>').join('') + '<polyline class="weather-chart-line weather-chart-precipitation" points="' + ['0,' + precipitationY(precipitationPoints[0].probability), ...points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? x(index) + ',' + precipitationY(point.probability) : null).filter(Boolean), width + ',' + precipitationY(precipitationPoints[precipitationPoints.length - 1].probability)].join(' ') + '"/>' + points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? '<circle class="weather-chart-dot weather-chart-precipitation" cx="' + x(index) + '" cy="' + precipitationY(point.probability) + '" r="2.5"/><text class="weather-chart-value weather-chart-precipitation-value" x="' + x(index) + '" y="' + Math.max(10, precipitationY(point.probability) - 7) + '" text-anchor="middle">' + Math.round(Number(point.probability)) + '%</text>' : '').join('') + '</svg>' : '';
   const selectedIndex = Math.max(0, Math.min(points.length - 1, Number(currentIndex) || 0));
-  const labels = points.map((point, index) => { const weatherName = weatherCode(point.code)[1]; const isCurrent = single && index === selectedIndex; return '<div class="weather-chart-label' + (isCurrent ? ' is-current' : '') + '"' + (isCurrent ? ' aria-current="time"' : '') + '><span class="weather-chart-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(weatherName) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + weatherName) + '" title="' + escapeHtml(weatherName) + '">' + weatherIconMarkup(point.code) + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + (state.language === 'en' ? 'Bft ' + weatherWindLevel(point.wind).force : weatherWindLevel(point.wind).force + '级') + '</small>' : '') + '</div>'; }).join('');
-  return '<div class="weather-chart-scroll' + (single ? ' weather-chart-scroll-single' : '') + '" data-current-index="' + selectedIndex + '" data-column-width="' + columnWidth + '" role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly weather forecast' : '逐小时天气预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px"><svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg>' + precipitationLine + '<div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
+  const labels = points.map((point, index) => { const weatherName = weatherCode(point.code)[1]; const isCurrent = single && index === selectedIndex; const clockLabel = point.clockLabel || point.label; return '<div class="weather-chart-label' + (isCurrent ? ' is-current' : '') + '" data-weather-hour-index="' + index + '"' + (single ? ' data-clock-label="' + escapeHtml(clockLabel) + '"' : '') + (isCurrent ? ' aria-current="time"' : '') + '><span class="weather-chart-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(weatherName) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + weatherName) + '" title="' + escapeHtml(weatherName) + '">' + weatherIconMarkup(point.code) + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + (state.language === 'en' ? 'Bft ' + weatherWindLevel(point.wind).force : weatherWindLevel(point.wind).force + '级') + '</small>' : '') + '</div>'; }).join('');
+  const clockAttrs = single ? ' data-timezone="' + escapeHtml(timeZone) + '" data-start-hour="' + Math.max(0, Math.min(23, Number(startHour) || 0)) + '"' : '';
+  const nowMarker = single ? '<span class="weather-chart-now-marker" aria-hidden="true"></span>' : '';
+  return '<div class="weather-chart-scroll' + (single ? ' weather-chart-scroll-single' : '') + '" data-current-index="' + selectedIndex + '" data-column-width="' + columnWidth + '"' + clockAttrs + ' role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly weather forecast' : '逐小时天气预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px">' + nowMarker + '<svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg>' + precipitationLine + '<div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
+}
+let weatherChartClockTimer = null;
+function updateWeatherChartClock() {
+  const chart = workspace.querySelector('.weather-chart-scroll-single[data-timezone]');
+  if (!chart || chart.clientWidth <= 0) return;
+  let clock;
+  try {
+    clock = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: chart.dataset.timezone || undefined, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).map((part) => [part.type, part.value]));
+  } catch { return; }
+  const labels = [...chart.querySelectorAll('.weather-chart-label[data-weather-hour-index]')];
+  if (!labels.length) return;
+  const startHour = Number(chart.dataset.startHour) || 0;
+  const position = Math.max(0, Math.min(labels.length - 1, Number(clock.hour) % 24 - startHour + Number(clock.minute) / 60));
+  const columnWidth = Number(chart.dataset.columnWidth) || 56;
+  const marker = chart.querySelector('.weather-chart-now-marker');
+  if (marker) marker.style.left = ((position + .5) * columnWidth) + 'px';
+  const currentIndex = Math.min(labels.length - 1, Math.floor(position + .5));
+  labels.forEach((label) => {
+    const active = Number(label.dataset.weatherHourIndex) === currentIndex;
+    label.classList.toggle('is-current', active);
+    if (active) label.setAttribute('aria-current', 'time');
+    else label.removeAttribute('aria-current');
+    const time = label.querySelector('small');
+    if (time) time.textContent = active ? (state.language === 'en' ? 'Now' : '现在') : label.dataset.clockLabel;
+  });
+  chart.dataset.currentIndex = String(currentIndex);
+  if (!chart.dataset.followEventsBound) {
+    const pauseFollow = () => { chart.dataset.manualScrollUntil = String(Date.now() + 8000); };
+    chart.addEventListener('touchstart', pauseFollow, { passive: true });
+    chart.addEventListener('pointerdown', pauseFollow, { passive: true });
+    chart.addEventListener('wheel', pauseFollow, { passive: true });
+    chart.dataset.followEventsBound = 'true';
+  }
+  if (Date.now() > Number(chart.dataset.manualScrollUntil || 0)) {
+    const targetLeft = Math.max(0, Math.min(chart.scrollWidth - chart.clientWidth, (position + .5) * columnWidth - chart.clientWidth / 2));
+    chart.dataset.autoScrollAt = String(Date.now());
+    chart.scrollLeft = targetLeft;
+  }
 }
 function syncWeatherChartScrollPosition() {
   const chart = workspace.querySelector('.weather-chart-scroll[data-current-index]');
@@ -9187,6 +9227,8 @@ function syncWeatherChartScrollPosition() {
   const index = Number(chart.dataset.currentIndex) || 0;
   const targetLeft = Math.max(0, Math.min(chart.scrollWidth - chart.clientWidth, index * columnWidth - (chart.clientWidth - columnWidth) / 2));
   chart.scrollLeft = targetLeft;
+  updateWeatherChartClock();
+  if (!weatherChartClockTimer) weatherChartClockTimer = window.setInterval(updateWeatherChartClock, 15000);
 }
 function weatherLocationDialogMarkup() {
   if (!state.weatherLocationDialogOpen) return '';
@@ -9218,8 +9260,10 @@ function weather() {
     const code = Number(active.hourly?.weather_code?.[index] ?? current.weather_code);
     const probability = active.hourly?.precipitation_probability?.[index];
     const wind = active.hourly?.wind_speed_10m?.[index];
-    const label = index === selectedHour ? (state.language === 'en' ? 'Now' : '现在') : String(time).slice(11, 16).replace(/^0/, '');
-    return hasTemperature(value) ? { label, value: Number(value), code, probability: probability == null ? null : Number(probability), wind: wind == null ? null : Number(wind) } : null;
+    const timeText = String(time).slice(11, 16);
+    const clockLabel = String(Number(timeText.slice(0, 2))) + timeText.slice(2);
+    const label = index === selectedHour ? (state.language === 'en' ? 'Now' : '现在') : clockLabel;
+    return hasTemperature(value) ? { label, clockLabel, time: String(time), value: Number(value), code, probability: probability == null ? null : Number(probability), wind: wind == null ? null : Number(wind) } : null;
   }).filter(Boolean);
   const dailyTimes = (active.daily?.time || []).filter((day) => day >= currentDay).slice(0, 16);
   const dailyPoints = dailyTimes.map((day, offset) => {
@@ -9263,7 +9307,7 @@ function weather() {
   const currentHourPosition = Math.max(0, hourlyPoints.findIndex((point) => point.label === (state.language === 'en' ? 'Now' : '现在')));
   const todayLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-temperature"></i>' + (state.language === 'en' ? 'Temperature' : '气温') + '</span><span><i class="weather-legend-precipitation"></i>' + (state.language === 'en' ? 'Precipitation · 0–100%' : '降水概率 · 0–100%') + '</span></div>';
   const forecastLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-high"></i>' + (state.language === 'en' ? 'High' : '最高温') + '</span><span><i class="weather-legend-low"></i>' + (state.language === 'en' ? 'Low' : '最低温') + '</span></div>';
-  const todayChart = weatherLineChart(hourlyPoints, 'single', currentHourPosition);
+  const todayChart = weatherLineChart(hourlyPoints, 'single', currentHourPosition, active.timezone, Number(String(hourlyPoints[0]?.time || '').slice(11, 13)));
   const forecastChart = weatherLineChart(dailyPoints, 'range', 0);
   return '<section class="weather-page">' + header + (active.loading ? '<p class="weather-updated-note">' + escapeHtml(t('weatherLoading')) + '</p>' : '') + summary + '<section class="weather-chart-section"><div class="weather-chart-heading"><h2>' + (state.language === 'en' ? 'Today' : '今日天气') + '</h2>' + todayLegend + '</div>' + todayChart + '</section><section class="weather-chart-section weather-forecast-section"><div class="weather-chart-heading"><h2>' + (state.language === 'en' ? 'Forecast' : '未来预报') + '</h2>' + forecastLegend + '</div>' + forecastChart + '</section>' + weatherLocationDialogMarkup() + '</section>';
 }
