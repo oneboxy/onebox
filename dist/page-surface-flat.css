@@ -3460,7 +3460,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 #workspace[data-tool="calculator"] .calculator-grid .key.equal:active { background: var(--primary); }
 
 @media (max-width: 760px) {
-  #workspace[data-tool="calculator"] { padding: 14px 0 20px; }
+  #workspace[data-tool="calculator"] { padding: 9px 0 20px; }
   #workspace[data-tool="calculator"] .display { min-height: 112px; padding: 8px 4px 10px; }
   #workspace[data-tool="calculator"] .calculator-keyboard { margin-top: 10px; }
   #workspace[data-tool="calculator"] .calculator-mobile-grid { gap: 6px; }
