@@ -3547,7 +3547,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #b4bac4;
+  color: #d1d5db !important;
   opacity: 1;
   pointer-events: auto;
 }
@@ -3555,7 +3555,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   width: 15px;
   height: 15px;
   fill: none;
-  stroke: currentColor;
+  stroke: currentColor !important;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.7;
