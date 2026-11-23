@@ -3464,7 +3464,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 
 @media (max-width: 760px) {
   main:has(#workspace[data-tool="calculator"]) { padding-top: calc(var(--app-header-height) + 32px) !important; }
-  #workspace[data-tool="calculator"] { margin-top: -6px; padding: 0 0 20px; padding-top: 10px !important; }
+  #workspace[data-tool="calculator"] { margin-top: -4px; padding: 0 0 20px; padding-top: 10px !important; }
   #workspace[data-tool="calculator"] .display { min-height: 80px; padding: 8px 4px 10px; }
   #workspace[data-tool="calculator"] .calculator-keyboard { margin-top: 10px; }
   #workspace[data-tool="calculator"] .calculator-mobile-grid { gap: 6px; }
