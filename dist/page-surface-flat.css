@@ -3640,9 +3640,12 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   #workspace[data-tool="calculator"] .display {
     flex: 0 0 auto;
     min-height: 66px;
-    padding: 4px 4px 6px;
+    padding: 12px 4px 12px;
   }
-  #workspace[data-tool="calculator"] .expression { min-height: 30px; }
+  #workspace[data-tool="calculator"] .expression { min-height: 42px; }
+  #workspace[data-tool="calculator"] .display-history-list:not(:has(.calculator-history-empty)) {
+    min-height: min(112px, 16dvh);
+  }
   #workspace[data-tool="calculator"] .calculator-keyboard {
     display: flex;
     flex: 1 1 auto;
