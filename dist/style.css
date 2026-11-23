@@ -21844,7 +21844,8 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
   #workspace[data-tool="weather"] .weather-chart-label small { font-size: 9px; }
   #workspace[data-tool="weather"] .weather-updated-note { margin-top: -12px; }
   .weather-location-overlay { padding: 12px; }
-  .weather-location-dialog { max-height: calc(100dvh - 24px - env(safe-area-inset-top)); border-radius: 14px; }
+  .weather-location-dialog { box-sizing: border-box; width: min(400px, 100%); max-height: calc(100dvh - 24px - env(safe-area-inset-top)); border-radius: 14px; }
+  #workspace[data-tool="weather"] .weather-location-dialog .weather-search-field input { font-size: 16px; }
   .weather-location-dialog > header { padding: 13px 14px 8px; }
   .weather-location-dialog-body { padding: 4px 14px 13px; }
 }
