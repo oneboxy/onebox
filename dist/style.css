@@ -21746,7 +21746,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-chart-scroll::-webkit-scrollbar-thumb { border-radius: 999px; background: color-mix(in srgb, var(--muted) 55%, transparent); }
 #workspace[data-tool="weather"] .weather-chart-inner { position: relative; min-width: 100%; }
 #workspace[data-tool="weather"] .weather-chart-now-marker { position: absolute; z-index: 2; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--muted); opacity: .5; pointer-events: none; transition: left 10s linear; }
-#workspace[data-tool="weather"] .weather-chart-today-marker { position: absolute; z-index: 2; top: 0; bottom: -4px; width: 0; border-left: 1px dashed color-mix(in srgb, var(--muted) 52%, transparent); pointer-events: none; }
+#workspace[data-tool="weather"] .weather-chart-today-marker { position: absolute; z-index: 2; top: 0; bottom: 6px; box-sizing: border-box; border: 1px dashed color-mix(in srgb, var(--muted) 48%, transparent); border-radius: 8px; pointer-events: none; }
 #workspace[data-tool="weather"] .weather-chart-svg { display: block; overflow: visible; }
 #workspace[data-tool="weather"] .weather-chart-gridline { stroke: var(--line); stroke-width: 1; opacity: .22; }
 #workspace[data-tool="weather"] .weather-chart-line { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
