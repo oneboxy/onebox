@@ -3671,9 +3671,9 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   #workspace[data-tool="calculator"] .display {
     flex: 0 0 auto;
     min-height: 66px;
-    padding: 12px 4px 12px;
+    padding: 6px 4px 6px;
   }
-  #workspace[data-tool="calculator"] .expression { min-height: 42px; }
+  #workspace[data-tool="calculator"] .expression { min-height: 30px; }
   #workspace[data-tool="calculator"] .calculator-keyboard {
     display: flex;
     flex: 1 1 auto;
