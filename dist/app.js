@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.987';
+const APP_VERSION = '2.18.988';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9150,7 +9150,7 @@ function weatherCurrentDayKey(weather) {
     return values.year + '-' + values.month + '-' + values.day;
   } catch { return dateKey(new Date()); }
 }
-function weatherLineChart(points, mode) {
+function weatherLineChart(points, mode, currentIndex = 0) {
   if (!points.length) return '<p class="weather-chart-empty">' + (state.language === 'en' ? 'Forecast data unavailable' : '暂无预报数据') + '</p>';
   const columnWidth = 56;
   const width = points.length * columnWidth;
@@ -9172,7 +9172,14 @@ function weatherLineChart(points, mode) {
     ? '<polyline class="weather-chart-line weather-chart-high" points="' + line('high') + '"/><polyline class="weather-chart-line weather-chart-low" points="' + line('low') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-high" cx="' + x(index) + '" cy="' + y(point.high) + '" r="3"/><circle class="weather-chart-dot weather-chart-low" cx="' + x(index) + '" cy="' + y(point.low) + '" r="3"/><text class="weather-chart-value weather-chart-high-label" x="' + x(index) + '" y="' + Math.max(12, y(point.high) - 8) + '" text-anchor="middle">' + Math.round(point.high) + '°</text><text class="weather-chart-value weather-chart-low-label" x="' + x(index) + '" y="' + Math.min(143, y(point.low) + 15) + '" text-anchor="middle">' + Math.round(point.low) + '°</text>').join('')
     : '<polyline class="weather-chart-line weather-chart-temperature" points="' + line('value') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-temperature" cx="' + x(index) + '" cy="' + y(point.value) + '" r="3"/><text class="weather-chart-value" x="' + x(index) + '" y="' + Math.max(12, y(point.value) - 9) + '" text-anchor="middle">' + Math.round(point.value) + '°</text>').join('');
   const labels = points.map((point) => '<div class="weather-chart-label"><span aria-hidden="true">' + escapeHtml(point.icon || '') + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.rain != null ? '<small class="weather-chart-rain">' + Math.round(Number(point.rain) || 0) + '%</small>' : '') + '</div>').join('');
-  return '<div class="weather-chart-scroll" role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly temperature forecast' : '逐小时温度预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px"><svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg><div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
+  return '<div class="weather-chart-scroll" data-current-index="' + Math.max(0, Math.min(points.length - 1, Number(currentIndex) || 0)) + '" data-column-width="' + columnWidth + '" role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly temperature forecast' : '逐小时温度预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px"><svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg><div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
+}
+function syncWeatherChartScrollPosition() {
+  const chart = workspace.querySelector('.weather-chart-scroll[data-current-index]');
+  if (!chart || chart.clientWidth <= 0) return;
+  const columnWidth = Number(chart.dataset.columnWidth) || 56;
+  const index = Number(chart.dataset.currentIndex) || 0;
+  chart.scrollLeft = Math.max(0, Math.min(chart.scrollWidth - chart.clientWidth, index * columnWidth - (chart.clientWidth - columnWidth) / 2));
 }
 function weatherLocationDialogMarkup() {
   if (!state.weatherLocationDialogOpen) return '';
@@ -9199,7 +9206,7 @@ function weather() {
   const selectedHour = currentHourIndex(active);
   const hasTemperature = (value) => value != null && value !== '' && Number.isFinite(Number(value));
   const currentDay = weatherCurrentDayKey(active);
-  const todayIndices = hourlyTimes.map((time, index) => ({ time, index })).filter((item) => String(item.time).slice(0, 10) === currentDay && item.index >= Math.max(0, selectedHour));
+  const todayIndices = hourlyTimes.map((time, index) => ({ time, index })).filter((item) => String(item.time).slice(0, 10) === currentDay);
   const fallbackHour = Math.max(0, selectedHour);
   const hourlyPoints = (todayIndices.length ? todayIndices : hourlyTimes.map((time, index) => ({ time, index })).slice(fallbackHour, fallbackHour + 24)).map(({ time, index }) => {
     const value = hourlyTemperatures[index] ?? (index === selectedHour ? current.temperature_2m : null);
@@ -9208,7 +9215,7 @@ function weather() {
     const label = index === selectedHour ? (state.language === 'en' ? 'Now' : '现在') : String(time).slice(11, 16).replace(/^0/, '');
     return hasTemperature(value) ? { label, value: Number(value), icon: weatherCode(code)[0], rain: Number(rain) || 0 } : null;
   }).filter(Boolean);
-  const dailyTimes = (active.daily?.time || []).filter((day) => day > currentDay).slice(0, 15);
+  const dailyTimes = (active.daily?.time || []).filter((day) => day >= currentDay).slice(0, 16);
   const dailyPoints = dailyTimes.map((day, offset) => {
     const index = (active.daily.time || []).indexOf(day);
     const date = dateFromKey(day);
@@ -9226,7 +9233,8 @@ function weather() {
   const updated = '<p class="weather-updated-note">' + (state.language === 'en' ? 'Updated ' : '更新于 ') + updatedTime + (state.weatherError ? ' · ' + escapeHtml(state.weatherError) : '') + '</p>';
   const chartTitle = viewTab === 'today' ? (state.language === 'en' ? 'Hourly temperature' : '今日气温') : (state.language === 'en' ? '15-day temperature range' : '未来 15 天气温');
   const chartLegend = viewTab === 'forecast' ? '<div class="weather-chart-legend"><span><i class="weather-legend-high"></i>' + (state.language === 'en' ? 'High' : '最高温') + '</span><span><i class="weather-legend-low"></i>' + (state.language === 'en' ? 'Low' : '最低温') + '</span></div>' : '';
-  const chart = viewTab === 'today' ? weatherLineChart(hourlyPoints, 'single') : weatherLineChart(dailyPoints, 'range');
+  const currentHourPosition = Math.max(0, hourlyPoints.findIndex((point) => point.label === (state.language === 'en' ? 'Now' : '现在')));
+  const chart = viewTab === 'today' ? weatherLineChart(hourlyPoints, 'single', currentHourPosition) : weatherLineChart(dailyPoints, 'range', 0);
   return '<section class="weather-page">' + header + (active.loading ? '<p class="weather-updated-note">' + escapeHtml(t('weatherLoading')) + '</p>' : '') + summary + updated + '<section class="weather-chart-section"><div class="weather-chart-heading"><h2>' + chartTitle + '</h2>' + chartLegend + '</div>' + chart + '</section>' + weatherLocationDialogMarkup() + '</section>';
 }
 
@@ -13726,7 +13734,7 @@ function render() {
   }
   if (state.section === 'tools' && state.tool === 'calendar') ensureHolidayYear(state.month.getFullYear());
   renderBottomNav();
-  requestAnimationFrame(() => { updateToolTabOverflowControls(); focusActiveToolTab(false); syncDeveloperFullscreenFrame(); });
+  requestAnimationFrame(() => { updateToolTabOverflowControls(); focusActiveToolTab(false); syncDeveloperFullscreenFrame(); if (state.section === 'tools' && state.tool === 'weather') syncWeatherChartScrollPosition(); });
   updateNotificationBadge();
   syncMascotContext();
   if (state.recentReadingOpen) renderRecentReading();
@@ -14308,7 +14316,7 @@ function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
   if (state.section === 'mine' && state.ticketWalletOpen && (state.ticketWalletSelectedId || ticketWalletMapReturnContext)) return null;
-  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher, .ticket-wallet-template-options.is-airlines')) return null;
+  if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .weather-chart-scroll, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher, .ticket-wallet-template-options.is-airlines')) return null;
   if (event.target.closest('[data-swipe-row]')) return null;
   const items = pageSwipeItems();
   const index = pageSwipeIndex(items);
