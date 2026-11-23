@@ -3549,16 +3549,17 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   }
   #workspace[data-tool="calculator"] .calculator-mobile-grid {
     flex: 1 1 auto;
-    grid-template-rows: repeat(9, minmax(0, 1fr));
-    align-content: stretch;
+    grid-template-rows: repeat(5, 36px) repeat(4, 44px);
+    align-content: start;
     min-height: 0;
-    gap: 4px;
+    gap: 5px;
   }
   #workspace[data-tool="calculator"] .calculator-mobile-grid .key {
     box-sizing: border-box;
     height: 100%;
-    min-height: 0;
+    min-height: 0 !important;
     padding-block: 0;
-    border-radius: 12px;
+    border-radius: 11px;
+    font-size: 14px;
   }
 }
