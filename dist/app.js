@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.988';
+const APP_VERSION = '2.18.989';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9163,7 +9163,7 @@ function weatherLineChart(points, mode, currentIndex = 0) {
   const span = Math.max(1, max - min);
   const y = (value) => bottom - ((Number(value) - min) / span) * (bottom - top);
   const x = (index) => index * columnWidth + columnWidth / 2;
-  const line = (field) => points.map((point, index) => x(index) + ',' + y(point[field])).join(' ');
+  const line = (field) => ['0,' + y(points[0][field]), ...points.map((point, index) => x(index) + ',' + y(point[field])), width + ',' + y(points[points.length - 1][field])].join(' ');
   const grid = [0, 1, 2].map((index) => {
     const gy = top + ((bottom - top) / 2) * index;
     return '<line class="weather-chart-gridline" x1="0" y1="' + gy + '" x2="' + width + '" y2="' + gy + '"/>';
