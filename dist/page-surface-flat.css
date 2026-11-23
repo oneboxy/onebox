@@ -3451,7 +3451,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 #workspace[data-tool="calculator"] .calculator-grid .angle-toggle { background: var(--panel-2); }
 #workspace[data-tool="calculator"] .angle-toggle span { color: var(--muted); transition: color .12s ease; }
 #workspace[data-tool="calculator"] .angle-toggle[data-angle="deg"] span:first-child,
-#workspace[data-tool="calculator"] .angle-toggle[data-angle="rad"] span:last-child { color: var(--ink); font-weight: 650; }
+#workspace[data-tool="calculator"] .angle-toggle[data-angle="rad"] span:last-child { color: var(--ink); font-weight: 800; }
 #workspace[data-tool="calculator"] .calculator-grid .key.equal {
   background: var(--primary);
   color: var(--primary-contrast, #fff);
