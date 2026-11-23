@@ -3430,7 +3430,49 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 }
 #workspace[data-tool="calculator"] .display-meta { color: var(--muted); }
 #workspace[data-tool="calculator"] .expression { font-weight: 500; }
-#workspace[data-tool="calculator"] .display-history { border-top: 1px dashed var(--line); }
+#workspace[data-tool="calculator"] .display-history { margin-top: 9px; padding-top: 0; border-top: 0; }
+#workspace[data-tool="calculator"] .display-history-head {
+  position: relative;
+  display: grid;
+  min-height: 20px;
+  place-items: center;
+  margin: 0 0 3px;
+}
+#workspace[data-tool="calculator"] .display-history-head::before {
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: 1px dashed color-mix(in srgb, var(--line) 82%, transparent);
+  content: "";
+}
+#workspace[data-tool="calculator"] .display-history-head span {
+  position: relative;
+  z-index: 1;
+  padding: 0 11px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+#workspace[data-tool="calculator"] .history-swipe-row {
+  border-bottom: 1px dashed color-mix(in srgb, var(--line) 64%, transparent);
+  border-radius: 0;
+}
+#workspace[data-tool="calculator"] .history-swipe-row .history-item {
+  min-height: 32px;
+  padding: 5px 2px;
+  border: 0;
+  background: transparent !important;
+  color: var(--ink);
+  font-size: 12px;
+}
+#workspace[data-tool="calculator"] .history-swipe-row .history-item span { color: var(--muted); }
+#workspace[data-tool="calculator"] .history-swipe-row .history-item b { font-weight: 600; }
+#workspace[data-tool="calculator"] .calculator-history-empty { margin: 2px 0; padding: 5px 0; font-size: 11px; }
+#workspace[data-tool="calculator"] .display-history-toggle[aria-expanded="true"] {
+  background: transparent !important;
+  color: var(--ink);
+}
+#workspace[data-tool="calculator"] .display-history-toggle[aria-expanded="true"] svg { stroke-width: 2.35; }
 #workspace[data-tool="calculator"] .calculator-keyboard { margin-top: 14px; }
 #workspace[data-tool="calculator"] .calculator-grid { gap: 8px; }
 #workspace[data-tool="calculator"] .calculator-grid .key {
