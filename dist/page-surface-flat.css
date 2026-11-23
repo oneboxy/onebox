@@ -3449,6 +3449,9 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   color: var(--muted);
 }
 #workspace[data-tool="calculator"] .calculator-grid .angle-toggle { background: var(--panel-2); }
+#workspace[data-tool="calculator"] .angle-toggle span { color: var(--muted); transition: color .12s ease; }
+#workspace[data-tool="calculator"] .angle-toggle[data-angle="deg"] span:first-child,
+#workspace[data-tool="calculator"] .angle-toggle[data-angle="rad"] span:last-child { color: var(--ink); font-weight: 650; }
 #workspace[data-tool="calculator"] .calculator-grid .key.equal {
   background: var(--primary);
   color: var(--primary-contrast, #fff);
@@ -3461,7 +3464,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 
 @media (max-width: 760px) {
   #workspace[data-tool="calculator"] { margin-top: -6px; padding: 0 0 20px; }
-  #workspace[data-tool="calculator"] .display { min-height: 112px; padding: 8px 4px 10px; }
+  #workspace[data-tool="calculator"] .display { min-height: 80px; padding: 8px 4px 10px; }
   #workspace[data-tool="calculator"] .calculator-keyboard { margin-top: 10px; }
   #workspace[data-tool="calculator"] .calculator-mobile-grid { gap: 6px; }
   #workspace[data-tool="calculator"] .calculator-mobile-grid .key {
