@@ -3488,9 +3488,11 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 }
 #workspace[data-tool="calculator"] .calculator-history-clear:hover { color: var(--ink); }
 #workspace[data-tool="calculator"] .display-history-list {
-  max-height: min(136px, 18dvh) !important;
-  overflow: auto;
+  max-height: 96px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
 #workspace[data-tool="calculator"] .calculator-history-row {
@@ -3500,13 +3502,15 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   border-radius: 0;
 }
 #workspace[data-tool="calculator"] .display-history-list .calculator-history-item {
+  box-sizing: border-box;
   display: flex;
   width: 100%;
-  min-height: 36px;
+  height: 31px;
+  min-height: 31px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 6px 44px 6px 2px;
+  padding: 2px 44px 2px 2px;
   border: 0;
   background: transparent !important;
   color: var(--ink);
@@ -3670,9 +3674,6 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     padding: 12px 4px 12px;
   }
   #workspace[data-tool="calculator"] .expression { min-height: 42px; }
-  #workspace[data-tool="calculator"] .display-history-list:not(:has(.calculator-history-empty)) {
-    min-height: min(52px, 8dvh);
-  }
   #workspace[data-tool="calculator"] .calculator-keyboard {
     display: flex;
     flex: 1 1 auto;
