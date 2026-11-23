@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.999';
+const APP_VERSION = '2.18.1000';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -8891,13 +8891,14 @@ function weatherIconMarkup(code, className = '') {
   const value = Number.isFinite(Number(code)) ? Number(code) : 3;
   const weatherKind = value === 0 ? 'clear' : [1, 2].includes(value) ? 'partly' : value === 3 ? 'cloudy' : [45, 48].includes(value) ? 'fog' : [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(value) ? 'rain' : [71, 73, 75, 77].includes(value) ? 'snow' : 'storm';
   let shape = '';
+  const cloud = '<path class="weather-icon-cloud" d="M5 15a4 4 0 0 1 .4-8A6 6 0 0 1 17 8h1a3.5 3.5 0 0 1 0 7H5Z"/>';
   if (value === 0) shape = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>';
-  else if ([1, 2].includes(value)) shape = '<path d="M8 7a4 4 0 0 1 7.7-1.5A4 4 0 0 1 20 9a3 3 0 0 1-1 5.83H8a4 4 0 0 1 0-8Z"/><path d="M6 12a4 4 0 1 1 7.7-1.5"/>';
-  else if (value === 3) shape = '<path d="M7 8h11a4 4 0 0 1 0 8H6a4 4 0 0 1-1.1-7.85M4 19h13M8 22h9"/>';
-  else if ([45, 48].includes(value)) shape = '<path d="M5 14a4 4 0 0 1 2-7.46A5 5 0 0 1 16.5 8H18a3 3 0 0 1 0 6H5Z"/><path d="M3 18h18M6 21h12"/>';
-  else if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(value)) shape = '<path d="M5 14a4 4 0 0 1 2-7.46A5 5 0 0 1 16.5 8H18a3 3 0 0 1 0 6H5Z"/><path d="m8 17-1 3m6-3-1 3m6-3-1 3"/>';
-  else if ([71, 73, 75, 77].includes(value)) shape = '<path d="M5 13a4 4 0 0 1 2-7.46A5 5 0 0 1 16.5 7H18a3 3 0 0 1 0 6H5Z"/><path d="M8 16v4m-2-2h4m5-2v4m-2-2h4"/>';
-  else shape = '<path d="M5 14a4 4 0 0 1 2-7.46A5 5 0 0 1 16.5 8H18a3 3 0 0 1 0 6H5Z"/><path d="m13 14-3 4h3l-1 4 4-6h-3l1-2"/>';
+  else if ([1, 2].includes(value)) shape = '<circle class="weather-icon-sun" cx="9" cy="8" r="3"/><path class="weather-icon-sun" d="M9 2v1m0 10v1M3 8h1m10 0h1M4.8 3.8l.8.8m6.8 6.8.8.8"/>' + cloud;
+  else if (value === 3) shape = '<path class="weather-icon-cloud" d="M4 16a4 4 0 0 1 .5-8 6.5 6.5 0 0 1 12.2 1A3.5 3.5 0 1 1 18 16Z"/>';
+  else if ([45, 48].includes(value)) shape = cloud + '<path d="M3 19h18M7 22h10"/>';
+  else if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(value)) shape = cloud + '<path class="weather-icon-drops" d="m8 18-1 2m6-2-1 2m6-2-1 2"/>';
+  else if ([71, 73, 75, 77].includes(value)) shape = cloud + '<path class="weather-icon-snow" d="M8 18v4m-2-2h4m7-2v4m-2-2h4"/>';
+  else shape = cloud + '<path class="weather-icon-bolt" d="m14 16-4 4h3l-1 3 5-6h-3l1-1"/>';
   return '<svg class="weather-line-icon weather-line-' + weatherKind + (className ? ' ' + className : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + shape + '</svg>';
 }
 const weatherUrl = (lat, lon) => 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lon) + '&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m,precipitation&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,uv_index,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,wind_speed_10m_max&wind_speed_unit=kmh&timezone=auto&past_days=3&forecast_days=16';

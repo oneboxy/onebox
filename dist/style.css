@@ -21676,6 +21676,10 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-line-rain { color: #66889b; }
 #workspace[data-tool="weather"] .weather-line-snow { color: #87989e; }
 #workspace[data-tool="weather"] .weather-line-storm { color: #997446; }
+#workspace[data-tool="weather"] .weather-line-partly .weather-icon-sun { color: #b8833e; }
+#workspace[data-tool="weather"] .weather-line-rain .weather-icon-drops { color: #66889b; }
+#workspace[data-tool="weather"] .weather-line-snow .weather-icon-snow { color: #66889b; }
+#workspace[data-tool="weather"] .weather-line-storm .weather-icon-bolt { color: #b8833e; }
 [data-theme="dark"] #workspace[data-tool="weather"] .weather-line-clear { color: #c69a60; }
 [data-theme="dark"] #workspace[data-tool="weather"] .weather-line-partly { color: #9aa9ad; }
 [data-theme="dark"] #workspace[data-tool="weather"] .weather-line-cloudy,
@@ -21683,6 +21687,10 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 [data-theme="dark"] #workspace[data-tool="weather"] .weather-line-rain { color: #82a5b4; }
 [data-theme="dark"] #workspace[data-tool="weather"] .weather-line-snow { color: #a3b1b6; }
 [data-theme="dark"] #workspace[data-tool="weather"] .weather-line-storm { color: #b59a70; }
+[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-partly .weather-icon-sun,
+[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-storm .weather-icon-bolt { color: #c69a60; }
+[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-rain .weather-icon-drops,
+[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-snow .weather-icon-snow { color: #82a5b4; }
 #workspace[data-tool="weather"] .weather-current-temperature { font-size: 43px; line-height: 1; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
 #workspace[data-tool="weather"] .weather-current-copy { display: grid; gap: 5px; }
 #workspace[data-tool="weather"] .weather-current-copy strong { color: var(--ink); font-size: 14px; font-weight: 550; }
@@ -21731,8 +21739,8 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-chart-value { fill: var(--muted); font: 9px system-ui, sans-serif; font-weight: 500; }
 #workspace[data-tool="weather"] .weather-chart-labels { display: grid; }
 #workspace[data-tool="weather"] .weather-chart-label { display: grid; justify-items: center; gap: 3px; min-width: 0; color: var(--muted); }
-#workspace[data-tool="weather"] .weather-chart-label > span { display: inline-flex; width: 15px; height: 15px; align-items: center; justify-content: center; line-height: 1; }
-#workspace[data-tool="weather"] .weather-chart-label > span .weather-line-icon { width: 14px; height: 14px; }
+#workspace[data-tool="weather"] .weather-chart-label > span { display: inline-flex; width: 19px; height: 19px; align-items: center; justify-content: center; line-height: 1; }
+#workspace[data-tool="weather"] .weather-chart-label > span .weather-line-icon { width: 18px; height: 18px; }
 #workspace[data-tool="weather"] .weather-chart-label small { font-size: 9px; line-height: 1.2; white-space: nowrap; }
 #workspace[data-tool="weather"] .weather-chart-label .weather-chart-rain { opacity: .75; }
 #workspace[data-tool="weather"] .weather-chart-label .weather-chart-wind { color: var(--muted); opacity: .8; }
@@ -21811,8 +21819,8 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
   #workspace[data-tool="weather"] .weather-chart-legend i { width: 8px; }
   #workspace[data-tool="weather"] .weather-chart-scroll { padding: 1px 0 3px; }
   #workspace[data-tool="weather"] .weather-chart-label { gap: 1px; }
-  #workspace[data-tool="weather"] .weather-chart-label > span { width: 12px; height: 12px; }
-  #workspace[data-tool="weather"] .weather-chart-label > span .weather-line-icon { width: 11px; height: 11px; }
+  #workspace[data-tool="weather"] .weather-chart-label > span { width: 16px; height: 16px; }
+  #workspace[data-tool="weather"] .weather-chart-label > span .weather-line-icon { width: 15px; height: 15px; }
   #workspace[data-tool="weather"] .weather-chart-label small { font-size: 8px; }
   #workspace[data-tool="weather"] .weather-updated-note { margin-top: -12px; }
   .weather-location-overlay { padding: 12px; }
