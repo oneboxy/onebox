@@ -3417,8 +3417,11 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   max-width: none;
 }
 #workspace[data-tool="calculator"] .display {
-  min-height: 150px;
-  padding: 12px 4px 18px;
+  display: flex;
+  min-height: 132px;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px 4px 14px;
   border: 0;
   border-bottom: 1px solid var(--line);
   border-radius: 0;
@@ -3442,7 +3445,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 #workspace[data-tool="calculator"] .calculator-grid .calc-science-key,
 #workspace[data-tool="calculator"] .calculator-grid .key.op,
 #workspace[data-tool="calculator"] .calculator-grid .key.danger {
-  background: transparent;
+  background: var(--panel-2);
   color: var(--muted);
 }
 #workspace[data-tool="calculator"] .calculator-grid .angle-toggle { background: var(--panel-2); }
@@ -3452,11 +3455,13 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   font-weight: 650;
 }
 #workspace[data-tool="calculator"] .calculator-grid .key:hover,
-#workspace[data-tool="calculator"] .calculator-grid .key:active { transform: none; }
+#workspace[data-tool="calculator"] .calculator-grid .key:active { background: var(--soft); transform: none; }
+#workspace[data-tool="calculator"] .calculator-grid .key.equal:hover,
+#workspace[data-tool="calculator"] .calculator-grid .key.equal:active { background: var(--primary); }
 
 @media (max-width: 760px) {
   #workspace[data-tool="calculator"] { padding: 14px 0 20px; }
-  #workspace[data-tool="calculator"] .display { min-height: 126px; padding: 8px 4px 14px; }
+  #workspace[data-tool="calculator"] .display { min-height: 112px; padding: 8px 4px 10px; }
   #workspace[data-tool="calculator"] .calculator-keyboard { margin-top: 10px; }
   #workspace[data-tool="calculator"] .calculator-mobile-grid { gap: 6px; }
   #workspace[data-tool="calculator"] .calculator-mobile-grid .key {
@@ -3470,7 +3475,11 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   }
   #workspace[data-tool="calculator"] .calculator-mobile-grid .calc-science-key,
   #workspace[data-tool="calculator"] .calculator-mobile-grid .key.op,
-  #workspace[data-tool="calculator"] .calculator-mobile-grid .key.danger { background: transparent; color: var(--muted); }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key.danger { background: var(--panel-2); color: var(--muted); }
   #workspace[data-tool="calculator"] .calculator-mobile-grid .angle-toggle { background: var(--panel-2); }
   #workspace[data-tool="calculator"] .calculator-mobile-grid .key.equal { background: var(--primary); color: var(--primary-contrast, #fff); font-weight: 650; }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key:hover,
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key:active { background: var(--soft); transform: none; }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key.equal:hover,
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key.equal:active { background: var(--primary); }
 }
