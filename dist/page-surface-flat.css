@@ -3495,6 +3495,13 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
 }
+#workspace[data-tool="calculator"] .display-history-list:has(.calculator-history-row:nth-child(3)) {
+  box-sizing: border-box;
+  flex: 0 0 64px;
+  height: 64px;
+  min-height: 0;
+  max-height: 64px !important;
+}
 #workspace[data-tool="calculator"] .calculator-history-row {
   position: relative;
   min-width: 0;
