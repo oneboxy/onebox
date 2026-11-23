@@ -8577,7 +8577,7 @@ function calculator() {
   const calcHistoryLabel = state.language === 'en' ? 'Calculation history' : '历史计算';
   const history = state.calcHistory.length ? state.calcHistory.slice(0, 8).map((item) => {
     const id = item.id || String(item.at || item.expression);
-    return '<div class="swipe-row history-swipe-row" data-swipe-row><button class="history-item swipe-content" data-history-expression="' + escapeHtml(item.expression) + '"><span>' + escapeHtml(item.expression) + '</span><b>' + escapeHtml(item.result) + '</b></button><button class="swipe-delete" data-delete-calc-history="' + escapeHtml(id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>';
+    return '<div class="calculator-history-row" data-calculator-history-row><button type="button" class="history-item calculator-history-item" data-history-expression="' + escapeHtml(item.expression) + '"><span>' + escapeHtml(item.expression) + '</span><b>' + escapeHtml(item.result) + '</b></button><button type="button" class="calculator-history-delete" data-delete-calc-history="' + escapeHtml(id) + '" aria-label="' + (state.language === 'en' ? 'Delete calculation' : '删除记录') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5M14 11v5"/></svg></button></div>';
   }).join('') : '<p class="empty compact calculator-history-empty">' + (state.language === 'en' ? 'No history yet' : '暂无历史记录') + '</p>';
   const scienceButton = (label, key, extra = '') => '<button class="key calc-science-key" data-science-key="' + escapeHtml(key) + '" ' + extra + '>' + label + '</button>';
   const normalButton = (label, extra = '') => '<button class="key ' + (/[÷×−+%]/.test(label) ? 'op ' : '') + (label === '=' ? 'equal ' : '') + (label === 'CE' ? 'danger ' : '') + '" data-key="' + escapeHtml(label) + '" ' + extra + '>' + label + '</button>';
@@ -15290,6 +15290,40 @@ workspace.addEventListener('pointerdown', (event) => {
 });
 
 workspace.addEventListener('pointerdown', (event) => { const card = event.target.closest('[data-weather-card]'); if (card && !event.target.closest('[data-delete-weather]')) startLongPress(card, 'weather', Number(card.dataset.weatherIndex), event); });
+let calculatorHistoryPress = null;
+workspace.addEventListener('pointerdown', (event) => {
+  const row = event.target.closest('[data-calculator-history-row]');
+  if (!row || event.target.closest('[data-delete-calc-history]') || event.button !== 0) return;
+  workspace.querySelectorAll('.calculator-history-row.is-actions-visible').forEach((item) => {
+    if (item !== row) item.classList.remove('is-actions-visible');
+  });
+  clearTimeout(calculatorHistoryPress?.timer);
+  const press = { row, pointerId: event.pointerId, x: event.clientX, y: event.clientY, timer: 0 };
+  calculatorHistoryPress = press;
+  press.timer = window.setTimeout(() => {
+    if (calculatorHistoryPress !== press || !row.isConnected) return;
+    row.classList.add('is-actions-visible');
+    row.dataset.longPressHandled = 'true';
+  }, 480);
+}, true);
+document.addEventListener('pointermove', (event) => {
+  const press = calculatorHistoryPress;
+  if (!press || press.pointerId !== event.pointerId) return;
+  if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10) {
+    clearTimeout(press.timer);
+    calculatorHistoryPress = null;
+  }
+}, { passive: true });
+const endCalculatorHistoryPress = (event) => {
+  if (!calculatorHistoryPress || (event.pointerId != null && calculatorHistoryPress.pointerId !== event.pointerId)) return;
+  clearTimeout(calculatorHistoryPress.timer);
+  calculatorHistoryPress = null;
+};
+document.addEventListener('pointerup', endCalculatorHistoryPress, { passive: true });
+document.addEventListener('pointercancel', endCalculatorHistoryPress, { passive: true });
+workspace.addEventListener('contextmenu', (event) => {
+  if (event.target.closest('[data-calculator-history-row]')) event.preventDefault();
+}, true);
 // Weather cards are draggable and also own a long-press gesture. Handle the
 // delete control during capture so touch/PWA pointer events cannot be claimed
 // by the card's reorder lifecycle before the delegated click handler sees it.
@@ -15631,6 +15665,12 @@ workspace.addEventListener('click', async (event) => {
     const eventId = calendarEditButton.dataset.editEvent || calendarEditButton.closest('[data-calendar-event-row]')?.dataset.eventId || '';
     if (eventId) return renderEventDialog(eventId);
     toast(state.language === 'en' ? 'Could not identify this event' : '无法识别这条日程', 'error');
+    return;
+  }
+  const calculatorHistoryRow = event.target.closest('[data-calculator-history-row]');
+  if (calculatorHistoryRow?.dataset.longPressHandled === 'true' && !event.target.closest('[data-delete-calc-history]')) {
+    event.preventDefault(); event.stopPropagation();
+    delete calculatorHistoryRow.dataset.longPressHandled;
     return;
   }
   if (Date.now() < reorderSuppressClickUntil || Date.now() < pageSwipeSuppressClickUntil) { event.preventDefault(); return; }

@@ -3460,20 +3460,73 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   font-weight: 600;
   white-space: nowrap;
 }
-#workspace[data-tool="calculator"] .history-swipe-row {
+#workspace[data-tool="calculator"] .display-history-list {
+  max-height: min(176px, 24dvh) !important;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+#workspace[data-tool="calculator"] .calculator-history-row {
+  position: relative;
+  min-width: 0;
   border-bottom: 1px dashed color-mix(in srgb, var(--line) 64%, transparent);
   border-radius: 0;
 }
-#workspace[data-tool="calculator"] .history-swipe-row .history-item {
-  min-height: 32px;
-  padding: 5px 2px;
+#workspace[data-tool="calculator"] .calculator-history-item {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 34px 6px 2px;
   border: 0;
   background: transparent !important;
   color: var(--ink);
   font-size: 12px;
+  text-align: left;
 }
-#workspace[data-tool="calculator"] .history-swipe-row .history-item span { color: var(--muted); }
-#workspace[data-tool="calculator"] .history-swipe-row .history-item b { font-weight: 600; }
+#workspace[data-tool="calculator"] .calculator-history-item span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#workspace[data-tool="calculator"] .calculator-history-item b { flex: 0 0 auto; font-weight: 600; }
+#workspace[data-tool="calculator"] .calculator-history-delete {
+  position: absolute;
+  top: 50%;
+  right: 1px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  transform: translateY(-50%);
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+#workspace[data-tool="calculator"] .calculator-history-delete svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+#workspace[data-tool="calculator"] .calculator-history-row.is-actions-visible .calculator-history-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+#workspace[data-tool="calculator"] .calculator-history-row,
+#workspace[data-tool="calculator"] .calculator-history-item { -webkit-touch-callout: none; user-select: none; }
 #workspace[data-tool="calculator"] .calculator-history-empty { margin: 2px 0; padding: 5px 0; font-size: 11px; }
 #workspace[data-tool="calculator"] .display-history-toggle[aria-expanded="true"] {
   background: transparent !important;
