@@ -3402,3 +3402,75 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   #workspace[data-tool="calendar"] .calendar-event-swipe-row .event-item { height: 39px; min-height: 39px; }
   #workspace[data-tool="calendar"] .calendar-event-swipe-action { height: 32px; }
 }
+
+/* Calculator: a quiet display and flat, consistent keypad. */
+#workspace[data-tool="calculator"] {
+  min-height: 0;
+  padding: 18px 0 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#workspace[data-tool="calculator"] .calculator-surface {
+  width: min(640px, 100%);
+  max-width: none;
+}
+#workspace[data-tool="calculator"] .display {
+  min-height: 150px;
+  padding: 12px 4px 18px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#workspace[data-tool="calculator"] .display-meta { color: var(--muted); }
+#workspace[data-tool="calculator"] .expression { font-weight: 500; }
+#workspace[data-tool="calculator"] .display-history { border-top: 1px dashed var(--line); }
+#workspace[data-tool="calculator"] .calculator-keyboard { margin-top: 14px; }
+#workspace[data-tool="calculator"] .calculator-grid { gap: 8px; }
+#workspace[data-tool="calculator"] .calculator-grid .key {
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font-weight: 500;
+  box-shadow: none;
+}
+#workspace[data-tool="calculator"] .calculator-grid .calc-science-key,
+#workspace[data-tool="calculator"] .calculator-grid .key.op,
+#workspace[data-tool="calculator"] .calculator-grid .key.danger {
+  background: transparent;
+  color: var(--muted);
+}
+#workspace[data-tool="calculator"] .calculator-grid .angle-toggle { background: var(--panel-2); }
+#workspace[data-tool="calculator"] .calculator-grid .key.equal {
+  background: var(--primary);
+  color: var(--primary-contrast, #fff);
+  font-weight: 650;
+}
+#workspace[data-tool="calculator"] .calculator-grid .key:hover,
+#workspace[data-tool="calculator"] .calculator-grid .key:active { transform: none; }
+
+@media (max-width: 760px) {
+  #workspace[data-tool="calculator"] { padding: 14px 0 20px; }
+  #workspace[data-tool="calculator"] .display { min-height: 126px; padding: 8px 4px 14px; }
+  #workspace[data-tool="calculator"] .calculator-keyboard { margin-top: 10px; }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid { gap: 6px; }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key {
+    min-height: 46px;
+    border-radius: 12px;
+    font-size: 15px;
+    background: var(--panel-2);
+    color: var(--ink);
+    font-weight: 500;
+    box-shadow: none;
+  }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .calc-science-key,
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key.op,
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key.danger { background: transparent; color: var(--muted); }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .angle-toggle { background: var(--panel-2); }
+  #workspace[data-tool="calculator"] .calculator-mobile-grid .key.equal { background: var(--primary); color: var(--primary-contrast, #fff); font-weight: 650; }
+}
