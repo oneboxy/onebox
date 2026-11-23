@@ -21860,3 +21860,5 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="calendar"] .calendar-grid .day { border: 1px dashed color-mix(in srgb, var(--line) 82%, transparent); }
 #workspace[data-tool="calendar"] .calendar-grid .day.today,
 #workspace[data-tool="calendar"] .calendar-grid .day.selected { border-style: solid; }
+#workspace[data-tool="calendar"] .calendar-grid { row-gap: 6px; }
+#workspace[data-tool="calendar"] .calendar-grid .day.selected { border-width: 2px; }
