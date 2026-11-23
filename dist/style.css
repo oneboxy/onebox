@@ -21856,3 +21856,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
   .weather-location-dialog-body { padding: 4px 14px 13px; }
 }
 #workspace[data-tool="calendar"] .calendar-layout { padding-inline: 3px; }
+#workspace[data-tool="calendar"] .agenda-panel > .subhead h3 { font-size: 15px; }
+#workspace[data-tool="calendar"] .calendar-grid .day { border: 1px dashed color-mix(in srgb, var(--line) 82%, transparent); }
+#workspace[data-tool="calendar"] .calendar-grid .day.today,
+#workspace[data-tool="calendar"] .calendar-grid .day.selected { border-style: solid; }
