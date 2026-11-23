@@ -21718,6 +21718,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-chart-scroll::-webkit-scrollbar-thumb { border-radius: 999px; background: color-mix(in srgb, var(--muted) 55%, transparent); }
 #workspace[data-tool="weather"] .weather-chart-inner { position: relative; min-width: 100%; }
 #workspace[data-tool="weather"] .weather-chart-now-marker { position: absolute; z-index: 2; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--muted); opacity: .5; pointer-events: none; transition: left 10s linear; }
+#workspace[data-tool="weather"] .weather-chart-today-marker { position: absolute; z-index: 2; top: 0; bottom: 0; box-sizing: border-box; border: 1px dashed var(--muted); opacity: .5; pointer-events: none; }
 #workspace[data-tool="weather"] .weather-chart-svg { display: block; overflow: visible; }
 #workspace[data-tool="weather"] .weather-chart-gridline { stroke: var(--line); stroke-width: 1; opacity: .22; }
 #workspace[data-tool="weather"] .weather-chart-line { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
@@ -21734,8 +21735,6 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-chart-labels { display: grid; }
 #workspace[data-tool="weather"] .weather-chart-label { display: grid; justify-items: center; gap: 4px; min-width: 0; color: var(--muted); }
 #workspace[data-tool="weather"] .weather-chart-label.is-current { color: var(--ink); font-weight: 600; }
-#workspace[data-tool="weather"] .weather-chart-label.is-today small:first-of-type { color: var(--primary); font-weight: 650; }
-#workspace[data-tool="weather"] .weather-chart-dot.weather-chart-today-dot { fill: var(--panel); stroke: var(--primary); stroke-width: 2.2; }
 #workspace[data-tool="weather"] .weather-chart-icon-target { display: inline-flex; width: 26px; height: 23px; flex: 0 0 26px; align-items: center; justify-content: center; }
 #workspace[data-tool="weather"] .weather-chart-icon-target .weather-line-icon { width: 20px; height: 20px; }
 #workspace[data-tool="weather"] .weather-chart-label small { font-size: 10px; line-height: 1.2; white-space: nowrap; }
