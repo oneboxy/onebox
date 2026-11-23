@@ -21674,9 +21674,10 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-icon-drops,
 #workspace[data-tool="weather"] .weather-icon-snow,
 #workspace[data-tool="weather"] .weather-icon-bolt { color: inherit; }
-#workspace[data-tool="weather"] .weather-icon-button { display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); box-shadow: none; cursor: pointer; }
+#workspace[data-tool="weather"] button.weather-icon-button { display: inline-flex !important; min-width: 0 !important; min-height: 0 !important; align-items: center; justify-content: center; padding: 0 !important; border: 0 !important; border-radius: 0 !important; appearance: none; -webkit-appearance: none; background: transparent !important; color: var(--ink); box-shadow: none !important; outline: 0; cursor: pointer; }
 #workspace[data-tool="weather"] .weather-icon-button:hover,
 #workspace[data-tool="weather"] .weather-icon-button:active { transform: none; background: transparent; color: var(--ink); box-shadow: none; }
+#workspace[data-tool="weather"] .weather-icon-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 #workspace[data-tool="weather"] .weather-current-temperature { font-size: 43px; line-height: 1; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
 #workspace[data-tool="weather"] .weather-current-copy { display: grid; gap: 5px; }
 #workspace[data-tool="weather"] .weather-current-copy strong { color: var(--ink); font-size: 14px; font-weight: 550; }
@@ -21725,7 +21726,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-chart-value { fill: var(--muted); font: 9px system-ui, sans-serif; font-weight: 500; }
 #workspace[data-tool="weather"] .weather-chart-labels { display: grid; }
 #workspace[data-tool="weather"] .weather-chart-label { display: grid; justify-items: center; gap: 3px; min-width: 0; color: var(--muted); }
-#workspace[data-tool="weather"] .weather-chart-icon-button { width: 24px; height: 21px; }
+#workspace[data-tool="weather"] button.weather-chart-icon-button { width: 24px !important; height: 21px !important; flex: 0 0 24px !important; }
 #workspace[data-tool="weather"] .weather-chart-icon-button .weather-line-icon { width: 18px; height: 18px; }
 #workspace[data-tool="weather"] .weather-chart-label small { font-size: 9px; line-height: 1.2; white-space: nowrap; }
 #workspace[data-tool="weather"] .weather-chart-label .weather-chart-rain { opacity: .75; }
@@ -21805,7 +21806,7 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
   #workspace[data-tool="weather"] .weather-chart-legend i { width: 8px; }
   #workspace[data-tool="weather"] .weather-chart-scroll { padding: 1px 0 3px; }
   #workspace[data-tool="weather"] .weather-chart-label { gap: 1px; }
-  #workspace[data-tool="weather"] .weather-chart-icon-button { width: 20px; height: 18px; }
+  #workspace[data-tool="weather"] button.weather-chart-icon-button { width: 20px !important; height: 18px !important; flex-basis: 20px !important; }
   #workspace[data-tool="weather"] .weather-chart-icon-button .weather-line-icon { width: 15px; height: 15px; }
   #workspace[data-tool="weather"] .weather-chart-label small { font-size: 8px; }
   #workspace[data-tool="weather"] .weather-updated-note { margin-top: -12px; }
