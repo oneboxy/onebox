@@ -1003,3 +1003,38 @@ html[data-theme-mode="dark-gray"] .reader-opds-dialog .reader-opds-pagination bu
   .reader-opds-dialog > header { padding: 12px 14px 8px; }
   .reader-opds-dialog .reader-extra-body { gap: 8px; padding: 7px 14px 12px; }
 }
+
+.reader-opds-dialog .reader-opds-source-row .reader-opds-input-wrap,
+.reader-opds-dialog .reader-opds-search .reader-opds-input-wrap {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.reader-opds-dialog .reader-opds-input-wrap input { width: 100%; padding-right: 40px; }
+.reader-opds-dialog .reader-opds-input-action {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  display: grid;
+  flex: 0 0 28px;
+  place-items: center;
+  width: 28px;
+  min-height: 28px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50%;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink, #252a35) !important;
+  opacity: .35;
+  transform: translateY(-50%);
+  transition: opacity .16s ease;
+}
+.reader-opds-dialog .reader-opds-input-action svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.reader-opds-dialog .reader-opds-input-wrap.has-value .reader-opds-input-action { opacity: 1; }
+.reader-opds-dialog .reader-opds-input-action:hover,
+.reader-opds-dialog .reader-opds-input-action:active { background: transparent !important; box-shadow: none !important; transform: translateY(-50%) !important; }
+.reader-opds-dialog .reader-opds-heading { display: flex; align-items: baseline; gap: 6px; margin-top: 2px; }
+.reader-opds-dialog .reader-opds-heading strong { color: var(--ink, #252a35); font-size: 13px; font-weight: 550; }
+.reader-opds-dialog .reader-opds-heading small { color: var(--muted, #737b8c); font-size: 10px; font-weight: 400; }
