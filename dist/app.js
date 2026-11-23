@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.1015';
+const APP_VERSION = '2.18.1016';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9087,7 +9087,7 @@ function weatherSearchResultsMarkup() {
     ? '<div class="weather-search-message" role="status">' + escapeHtml(state.weatherSearchError) + '</div>'
     : '';
   const results = state.weatherSearchResults.length
-    ? '<div class="weather-search-results">' + state.weatherSearchResults.map((place, index) => '<button type="button" class="weather-result" data-weather-result-index="' + index + '"><span><strong>' + escapeHtml(place.name) + '</strong><small>' + escapeHtml(placeLabel(place)) + '</small></span><span class="weather-result-chevron" aria-hidden="true">›</span></button>').join('') + '</div>'
+    ? '<div class="weather-search-results">' + state.weatherSearchResults.map((place, index) => '<div class="weather-result"><span><strong>' + escapeHtml(place.name) + '</strong><small>' + escapeHtml(placeLabel(place)) + '</small></span><button type="button" class="weather-result-add" data-weather-result-index="' + index + '" aria-label="' + (state.language === 'en' ? 'Add ' : '添加') + escapeHtml(place.name) + '" title="' + (state.language === 'en' ? 'Add location' : '添加地点') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>').join('') + '</div>'
     : '';
   return status + error + results;
 }

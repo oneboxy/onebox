@@ -6807,7 +6807,10 @@ html[data-theme-mode="dark-gray"] .key {
 #workspace[data-tool="weather"] .weather-result > span:first-child { display: grid; min-width: 0; gap: 2px; }
 #workspace[data-tool="weather"] .weather-result strong { overflow: hidden; font-size: 13px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
 #workspace[data-tool="weather"] .weather-result small { overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-#workspace[data-tool="weather"] .weather-result-chevron { color: var(--muted); font-size: 19px; line-height: 1; }
+#workspace[data-tool="weather"] .weather-result-add { display: grid; flex: 0 0 28px; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--primary); box-shadow: none; }
+#workspace[data-tool="weather"] .weather-result-add svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+#workspace[data-tool="weather"] .weather-result-add:hover,
+#workspace[data-tool="weather"] .weather-result-add:active { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); box-shadow: none; transform: none; }
 #workspace[data-tool="weather"] .weather-search-status,
 #workspace[data-tool="weather"] .weather-search-message {
   display: flex;
@@ -21783,16 +21786,18 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search { display: block; margin: 0; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-field { min-width: 0; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-field input { height: 40px; padding: 0 70px 0 45px; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--ink); font-size: 13px; }
+#workspace[data-tool="weather"] .weather-location-dialog .weather-search-field input::placeholder { color: var(--muted); font-size: 12px; opacity: .75; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-clear { right: 36px; }
 #workspace[data-tool="weather"] .weather-location-search-submit { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 31px; height: 32px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--muted); box-shadow: none; }
 #workspace[data-tool="weather"] .weather-location-search-submit svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #workspace[data-tool="weather"] .weather-location-search-submit:hover,
 #workspace[data-tool="weather"] .weather-location-search-submit:active { background: transparent; color: var(--ink); box-shadow: none; transform: none; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-result-slot { max-height: min(36vh, 280px); }
-.weather-use-location { position: absolute; z-index: 1; top: 4px; left: 5px; display: grid; place-items: center; width: 30px; height: 32px; margin: 0; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--primary); box-shadow: none; }
+.weather-use-location { position: absolute; z-index: 1; top: 4px; left: 5px; display: grid; place-items: center; width: 30px; height: 32px; margin: 0; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--muted); box-shadow: none; }
 .weather-use-location svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .weather-use-location:hover,
-.weather-use-location:active { background: transparent; color: var(--primary); box-shadow: none; transform: none; }
+.weather-use-location:active { background: transparent; color: var(--muted); box-shadow: none; transform: none; }
+.weather-saved-places { margin-top: 4px; }
 .weather-place-row { display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 .weather-place-select { display: flex; flex: 1; align-items: center; gap: 0; min-width: 0; padding: 7px 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); text-align: left; box-shadow: none; }
 .weather-place-select:hover,
