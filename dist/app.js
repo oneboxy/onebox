@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.986';
+const APP_VERSION = '2.18.987';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1432,6 +1432,7 @@ const state = {
   events: parseStored(STORAGE.events, {}) || {},
   weatherCards: initialWeatherCards.map((item) => ({ ...item, id: item.id || uid() })),
   activeWeatherId: initialWeatherCards[0]?.id || null, weatherLoading: false, weatherError: '', weatherRequest: 0,
+  weatherViewTab: 'today', weatherLocationDialogOpen: false,
   weatherSearchQuery: '', weatherSearchTerm: '', weatherSearchLoading: false, weatherSearchError: '', weatherSearchRequest: 0, weatherSearchResults: [],
   lunarDialogDate: null, lastCalendarTap: { key: '', at: 0 },
   translation: { source: 'auto', target: 'zh', input: '', result: '', loading: false, error: '' },
@@ -9071,7 +9072,7 @@ function weatherSearchResultsMarkup() {
     ? '<div class="weather-search-message" role="status">' + escapeHtml(state.weatherSearchError) + '</div>'
     : '';
   const results = state.weatherSearchResults.length
-    ? '<div class="weather-search-results"><div class="search-results-head"><strong>' + (state.language === 'en' ? 'Search results' : '搜索结果') + '</strong><small>' + (state.language === 'en' ? 'Choose a place, then add it to weather cards' : '选择地点后再添加到天气卡片') + '</small></div>' + state.weatherSearchResults.map((place, index) => '<div class="weather-result"><span><strong>' + escapeHtml(place.name) + '</strong><small>' + escapeHtml(placeLabel(place)) + '</small></span><button class="secondary" data-weather-result-index="' + index + '">' + t('addCard') + '</button></div>').join('') + '</div>'
+    ? '<div class="weather-search-results"><div class="search-results-head"><strong>' + (state.language === 'en' ? 'Search results' : '搜索结果') + '</strong><small>' + (state.language === 'en' ? 'Choose a place to view its weather' : '选择地点查看天气') + '</small></div>' + state.weatherSearchResults.map((place, index) => '<div class="weather-result"><span><strong>' + escapeHtml(place.name) + '</strong><small>' + escapeHtml(placeLabel(place)) + '</small></span><button class="secondary" data-weather-result-index="' + index + '">' + (state.language === 'en' ? 'Select' : '选择') + '</button></div>').join('') + '</div>'
     : '';
   return status + error + results;
 }
@@ -9142,83 +9143,91 @@ function weatherAdvice(weather, current) {
     { icon: '🥾', title: t('hiking'), body: rainy || wind > 40 ? (state.language === 'en' ? 'Trail may be slippery or windy; check conditions first.' : '山路可能湿滑或风大，出发前确认路况。') : (state.language === 'en' ? 'Good for a short hike; bring water.' : '适合短途爬山，带足饮水。') },
   ];
 }
+function weatherCurrentDayKey(weather) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: weather.timezone || undefined, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+    const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    return values.year + '-' + values.month + '-' + values.day;
+  } catch { return dateKey(new Date()); }
+}
+function weatherLineChart(points, mode) {
+  if (!points.length) return '<p class="weather-chart-empty">' + (state.language === 'en' ? 'Forecast data unavailable' : '暂无预报数据') + '</p>';
+  const columnWidth = 56;
+  const width = points.length * columnWidth;
+  const height = 146;
+  const top = 22;
+  const bottom = 126;
+  const values = points.flatMap((point) => mode === 'range' ? [Number(point.high), Number(point.low)] : [Number(point.value)]).filter(Number.isFinite);
+  const min = Math.floor(Math.min(...values) - 2);
+  const max = Math.ceil(Math.max(...values) + 2);
+  const span = Math.max(1, max - min);
+  const y = (value) => bottom - ((Number(value) - min) / span) * (bottom - top);
+  const x = (index) => index * columnWidth + columnWidth / 2;
+  const line = (field) => points.map((point, index) => x(index) + ',' + y(point[field])).join(' ');
+  const grid = [0, 1, 2].map((index) => {
+    const gy = top + ((bottom - top) / 2) * index;
+    return '<line class="weather-chart-gridline" x1="0" y1="' + gy + '" x2="' + width + '" y2="' + gy + '"/>';
+  }).join('');
+  const series = mode === 'range'
+    ? '<polyline class="weather-chart-line weather-chart-high" points="' + line('high') + '"/><polyline class="weather-chart-line weather-chart-low" points="' + line('low') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-high" cx="' + x(index) + '" cy="' + y(point.high) + '" r="3"/><circle class="weather-chart-dot weather-chart-low" cx="' + x(index) + '" cy="' + y(point.low) + '" r="3"/><text class="weather-chart-value weather-chart-high-label" x="' + x(index) + '" y="' + Math.max(12, y(point.high) - 8) + '" text-anchor="middle">' + Math.round(point.high) + '°</text><text class="weather-chart-value weather-chart-low-label" x="' + x(index) + '" y="' + Math.min(143, y(point.low) + 15) + '" text-anchor="middle">' + Math.round(point.low) + '°</text>').join('')
+    : '<polyline class="weather-chart-line weather-chart-temperature" points="' + line('value') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-temperature" cx="' + x(index) + '" cy="' + y(point.value) + '" r="3"/><text class="weather-chart-value" x="' + x(index) + '" y="' + Math.max(12, y(point.value) - 9) + '" text-anchor="middle">' + Math.round(point.value) + '°</text>').join('');
+  const labels = points.map((point) => '<div class="weather-chart-label"><span aria-hidden="true">' + escapeHtml(point.icon || '') + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.rain != null ? '<small class="weather-chart-rain">' + Math.round(Number(point.rain) || 0) + '%</small>' : '') + '</div>').join('');
+  return '<div class="weather-chart-scroll" role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly temperature forecast' : '逐小时温度预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px"><svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg><div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
+}
+function weatherLocationDialogMarkup() {
+  if (!state.weatherLocationDialogOpen) return '';
+  const saved = state.weatherCards.map((card) => {
+    const item = card.current ? weatherCode(Number(card.current.weather_code)) : ['⌖', ''];
+    const region = [card.admin2, card.admin1, card.country].filter(Boolean).join(' · ');
+    return '<div class="weather-place-row"><button type="button" class="weather-place-select ' + (card.id === state.activeWeatherId ? 'active' : '') + '" data-weather-place-id="' + escapeHtml(card.id) + '"><span class="weather-place-icon" aria-hidden="true">' + item[0] + '</span><span class="weather-place-copy"><strong>' + escapeHtml(card.name) + '</strong><small>' + escapeHtml(region || (card.isCurrentLocation ? t('currentLocation') : '')) + '</small></span><strong class="weather-place-temperature">' + (card.current ? Math.round(Number(card.current.temperature_2m) || 0) + '°' : card.loading ? '…' : '') + '</strong></button><button type="button" class="weather-place-remove" data-delete-weather="' + escapeHtml(card.id) + '" aria-label="' + (state.language === 'en' ? 'Remove place' : '移除地点') + '">' + LUCIDE_X_MARKUP + '</button></div>';
+  }).join('');
+  const search = '<form id="weatherSearch" class="weather-search"><label class="sr-only" for="cityInput">' + t('searchPlace') + '</label><div class="weather-search-field"><input id="cityInput" value="' + escapeHtml(state.weatherSearchQuery) + '" placeholder="' + t('searchPlace') + '" autocomplete="off"><button class="weather-search-clear" type="button" data-weather-clear aria-label="' + (state.language === 'en' ? 'Clear search' : '清空搜索') + '"' + (state.weatherSearchQuery.trim() ? '' : ' hidden') + '>' + LUCIDE_X_MARKUP + '</button></div><button class="weather-location-search-submit" type="submit" aria-label="' + t('weatherSearch') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button></form>';
+  return '<div class="weather-location-overlay" data-weather-location-overlay><section class="weather-location-dialog" role="dialog" aria-modal="true" aria-labelledby="weatherLocationTitle"><header><h2 id="weatherLocationTitle">' + (state.language === 'en' ? 'Choose a location' : '选择地点') + '</h2><button type="button" class="weather-location-close" data-weather-location-close aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></header><div class="weather-location-dialog-body"><div class="weather-search-area">' + search + '<div id="weatherSearchResults" class="weather-search-result-slot" aria-live="polite">' + weatherSearchResultsMarkup() + '</div></div><button type="button" class="weather-use-location" data-locate><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>' + (state.language === 'en' ? 'Use current location' : '使用当前位置') + '</span></button><div class="weather-saved-places"><h3>' + (state.language === 'en' ? 'Saved locations' : '已添加地点') + '</h3>' + (saved || '<p class="weather-places-empty">' + (state.language === 'en' ? 'No saved locations' : '还没有添加地点') + '</p>') + '</div></div></section></div>';
+}
 function weather() {
   const active = state.weatherCards.find((item) => item.id === state.activeWeatherId) || state.weatherCards[0];
-  const search = '<form id="weatherSearch" class="weather-search"><label class="sr-only" for="cityInput">' + t('searchPlace') + '</label><div class="weather-search-field"><input id="cityInput" value="' + escapeHtml(state.weatherSearchQuery) + '" placeholder="' + t('searchPlace') + '" autocomplete="off"><button class="weather-search-clear" type="button" data-weather-clear aria-label="' + (state.language === 'en' ? 'Clear search' : '清空搜索') + '" title="' + (state.language === 'en' ? 'Clear search' : '清空搜索') + '"' + (state.weatherSearchQuery.trim() ? '' : ' hidden') + '>' + LUCIDE_X_MARKUP + '</button><button class="weather-location-button" type="button" data-locate aria-label="' + t('currentLocation') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg></button></div><button class="primary" type="submit">' + t('weatherSearch') + '</button></form>';
-  const results = '<div id="weatherSearchResults" class="weather-search-result-slot" aria-live="polite">' + weatherSearchResultsMarkup() + '</div>';
-  const searchArea = '<div class="weather-search-area">' + search + results + '</div>';
-  if (!active) return heading(t('weather'), t('weatherDesc')) + searchArea + '<div class="empty weather-empty">' + (state.weatherLoading ? '<span class="loader"></span>' + t('weatherLoading') : t('noWeather')) + (state.weatherError ? '<strong class="error-text">' + escapeHtml(state.weatherError) + '</strong>' : '') + '</div>';
+  const currentAddress = active ? [active.name, active.admin2, active.admin1].filter(Boolean).join(' · ') : (state.language === 'en' ? 'Choose location' : '选择地点');
+  const viewTab = state.weatherViewTab === 'forecast' ? 'forecast' : 'today';
+  const header = '<div class="weather-view-head"><div class="weather-view-tabs" role="tablist"><button type="button" role="tab" aria-selected="' + (viewTab === 'today') + '" class="weather-view-tab ' + (viewTab === 'today' ? 'active' : '') + '" data-weather-view-tab="today">' + (state.language === 'en' ? 'Today' : '今日天气') + '</button><button type="button" role="tab" aria-selected="' + (viewTab === 'forecast') + '" class="weather-view-tab ' + (viewTab === 'forecast' ? 'active' : '') + '" data-weather-view-tab="forecast">' + (state.language === 'en' ? 'Forecast' : '未来预报') + '</button></div><button type="button" class="weather-current-place" data-weather-locations-open aria-label="' + (state.language === 'en' ? 'Change location' : '切换地点') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span><small>' + (state.language === 'en' ? 'Location' : '当前位置') + '</small><strong>' + escapeHtml(currentAddress) + '</strong></span><svg class="weather-place-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>';
+  if (!active) return '<section class="weather-page">' + header + '<div class="weather-empty"><span class="weather-empty-icon">☀️</span><p>' + (state.weatherLoading ? t('weatherLoading') : (state.language === 'en' ? 'Choose a location to see the weather' : '选择地点查看天气')) + '</p>' + (state.weatherError ? '<small>' + escapeHtml(state.weatherError) + '</small>' : '') + '</div>' + weatherLocationDialogMarkup() + '</section>';
   const current = active.current || {};
-  const cards = state.weatherCards.map((card, index) => {
-    const failed = Boolean(card.loadError && !card.current);
-    const item = card.loading && !card.current ? ['⏳', t('weatherLoading')] : failed ? ['⚠️', t('weatherLoadFailed')] : weatherCode(card.current?.weather_code);
-    const cardCurrent = card.current || {};
-    const temperature = card.loading && !card.current ? '…' : failed ? '—' : Math.round(cardCurrent.temperature_2m ?? 0) + '°';
-    const details = card.loading && !card.current ? '<span class="weather-card-meta-line">' + escapeHtml(t('weatherLoading')) + '</span>' : failed ? '<span class="weather-card-meta-line">' + escapeHtml(t('weatherLoadFailed')) + '</span>' : '<span class="weather-card-meta-line">' + escapeHtml((state.language === 'en' ? 'Feels ' : '体感 ') + Math.round(cardCurrent.apparent_temperature ?? cardCurrent.temperature_2m ?? 0) + '° · ' + (state.language === 'en' ? 'Humidity ' : '湿度 ') + (cardCurrent.relative_humidity_2m ?? '—') + '%') + '</span><span class="weather-card-meta-line weather-card-meta-secondary"><span>' + escapeHtml((state.language === 'en' ? 'Wind ' : '风力 ') + weatherWindLabel(cardCurrent.wind_speed_10m) + ' · ' + Math.round(cardCurrent.wind_speed_10m ?? 0) + ' km/h') + '</span><span>' + escapeHtml(t('elevation') + ' ' + weatherElevationLabel(card.elevation)) + '</span></span>';
-    return '<article class="weather-card ' + (card.id === active.id ? 'active' : '') + (card.loading ? ' loading' : '') + (failed ? ' has-error' : '') + '" draggable="true" data-weather-card="' + escapeHtml(card.id) + '" data-weather-index="' + index + '"><button type="button" class="weather-card-delete" data-delete-weather="' + escapeHtml(card.id) + '" data-delete-weather-index="' + index + '" aria-label="' + (state.language === 'en' ? 'Delete weather card' : '删除天气卡片') + '">' + LUCIDE_X_MARKUP + '</button><div class="weather-card-head"><span><strong>' + escapeHtml(card.name) + '</strong><small>' + escapeHtml([card.admin2, card.admin1].filter(Boolean).join(' · ') || card.country || '') + '</small></span><span class="weather-card-icon" aria-hidden="true">' + item[0] + '</span></div><div class="weather-card-main"><span class="weather-card-temp">' + temperature + '</span><span class="weather-card-condition">' + escapeHtml(item[1]) + '</span></div><span class="weather-card-meta">' + details + '</span></article>';
-  }).join('');
-  const title = [active.name, active.admin2, active.admin1, active.country].filter(Boolean).join(' · ');
   if ((active.loading || active.loadError) && !active.current) {
-    const failure = active.loadError ? '<div class="inline-alert">' + escapeHtml(t('weatherLoadFailed')) + '</div>' : '';
-    return heading(t('weather'), escapeHtml(title)) + searchArea + failure + '<div class="weather-card-list">' + cards + '</div>';
+    return '<section class="weather-page">' + header + '<div class="weather-empty"><span class="weather-empty-icon">' + (active.loadError ? '⚠️' : '⏳') + '</span><p>' + (active.loadError ? escapeHtml(t('weatherLoadFailed')) : escapeHtml(t('weatherLoading'))) + '</p>' + (state.weatherError ? '<small>' + escapeHtml(state.weatherError) + '</small>' : '') + '</div>' + weatherLocationDialogMarkup() + '</section>';
   }
   const hourlyTimes = Array.isArray(active.hourly?.time) ? active.hourly.time : [];
   const hourlyTemperatures = Array.isArray(active.hourly?.temperature_2m) ? active.hourly.temperature_2m : [];
   const selectedHour = currentHourIndex(active);
-  const currentHour = selectedHour >= 0 ? selectedHour : 0;
-  const hourlyPastHours = 12;
-  const hourlyFutureHours = 24;
-  const hourlyWindowSize = hourlyPastHours + hourlyFutureHours;
-  const hourlyStart = Math.min(Math.max(0, currentHour - hourlyPastHours), Math.max(0, hourlyTimes.length - hourlyWindowSize));
-  const hourlyEnd = Math.min(hourlyTimes.length, hourlyStart + hourlyWindowSize);
   const hasTemperature = (value) => value != null && value !== '' && Number.isFinite(Number(value));
-  const needsHourlyRepair = hourlyTimes.slice(hourlyStart, hourlyEnd).some((_, offset) => {
-    const index = hourlyStart + offset;
-    const temperature = hourlyTemperatures[index] ?? (index === currentHour ? active.current?.temperature_2m : null);
-    return !hasTemperature(temperature);
-  });
-  if (needsHourlyRepair && Date.now() - Number(active.hourlyRepairAttemptAt || 0) > 5 * 60 * 1000) {
+  const currentDay = weatherCurrentDayKey(active);
+  const todayIndices = hourlyTimes.map((time, index) => ({ time, index })).filter((item) => String(item.time).slice(0, 10) === currentDay && item.index >= Math.max(0, selectedHour));
+  const fallbackHour = Math.max(0, selectedHour);
+  const hourlyPoints = (todayIndices.length ? todayIndices : hourlyTimes.map((time, index) => ({ time, index })).slice(fallbackHour, fallbackHour + 24)).map(({ time, index }) => {
+    const value = hourlyTemperatures[index] ?? (index === selectedHour ? current.temperature_2m : null);
+    const code = Number(active.hourly?.weather_code?.[index] ?? current.weather_code);
+    const rain = active.hourly?.precipitation_probability?.[index] ?? 0;
+    const label = index === selectedHour ? (state.language === 'en' ? 'Now' : '现在') : String(time).slice(11, 16).replace(/^0/, '');
+    return hasTemperature(value) ? { label, value: Number(value), icon: weatherCode(code)[0], rain: Number(rain) || 0 } : null;
+  }).filter(Boolean);
+  const dailyTimes = (active.daily?.time || []).filter((day) => day > currentDay).slice(0, 15);
+  const dailyPoints = dailyTimes.map((day, offset) => {
+    const index = (active.daily.time || []).indexOf(day);
+    const date = dateFromKey(day);
+    const label = new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { month: 'numeric', day: 'numeric', weekday: 'short' }).format(date);
+    return { label, high: Number(active.daily.temperature_2m_max?.[index]), low: Number(active.daily.temperature_2m_min?.[index]), icon: weatherCode(Number(active.daily.weather_code?.[index]))[0], rain: Number(active.daily.precipitation_probability_max?.[index]) || 0 };
+  }).filter((point) => Number.isFinite(point.high) && Number.isFinite(point.low));
+  const hourlyMissing = hourlyPoints.length === 0;
+  if (hourlyMissing && Date.now() - Number(active.hourlyRepairAttemptAt || 0) > 5 * 60 * 1000) {
     active.hourlyRepairAttemptAt = Date.now();
     setTimeout(() => { if (state.activeWeatherId === active.id && !state.weatherLoading) void refreshWeatherCard(active); }, 0);
   }
-  const hourly = hourlyTimes.slice(hourlyStart, hourlyEnd).map((time, offset) => {
-    const index = hourlyStart + offset;
-    const code = active.hourly?.weather_code?.[index] ?? active.current?.weather_code;
-    const item = weatherCode(Number(code));
-    const date = new Date(time);
-    const isCurrent = index === currentHour;
-    const label = isCurrent ? (state.language === 'en' ? 'Now' : '现在') : new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(date);
-    const temperature = hourlyTemperatures[index] ?? (isCurrent ? active.current?.temperature_2m : null);
-    const temperatureLabel = hasTemperature(temperature) ? Math.round(Number(temperature)) + '°' : '—';
-    const rainChance = active.hourly?.precipitation_probability?.[index];
-    return '<div class="hour-card ' + (isCurrent ? 'current' : '') + '" ' + (isCurrent ? 'data-current-hour' : '') + '><small>' + label + '</small><strong>' + item[0] + '</strong><span>' + temperatureLabel + '</span><small>' + (Number.isFinite(Number(rainChance)) ? Number(rainChance) : 0) + '%</small></div>';
-  }).join('');
-  const dailyTimes = (active.daily?.time || []).slice(0, 19);
-  const currentDay = (() => { try { const parts = new Intl.DateTimeFormat('en-US', { timeZone: active.timezone || undefined, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()); const values = Object.fromEntries(parts.map((part) => [part.type, part.value])); return values.year + '-' + values.month + '-' + values.day; } catch { return dateKey(new Date()); } })();
-  const days = dailyTimes.map((day, index) => {
-    const item = weatherCode(active.daily.weather_code[index]);
-    const isCurrent = day === currentDay;
-    const label = isCurrent ? (state.language === 'en' ? 'Today' : '今天') : new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { month: 'numeric', day: 'numeric', weekday: 'short' }).format(dateFromKey(day));
-    return '<div class="forecast ' + (isCurrent ? 'current' : '') + '" ' + (isCurrent ? 'data-current-day' : '') + '><small>' + label + '</small><b>' + item[0] + '</b><span>' + Math.round(active.daily.temperature_2m_max[index]) + '° / ' + Math.round(active.daily.temperature_2m_min[index]) + '°</span><small>' + (active.daily.precipitation_probability_max?.[index] ?? 0) + '% ' + (state.language === 'en' ? 'rain' : '降水') + '</small></div>';
-  }).join('');
-  const advice = weatherAdvice(active, current).map((item) => '<article class="advice-card"><b>' + item.icon + ' ' + item.title + '</b><p>' + item.body + '</p></article>').join('');
   const updatedTime = active.updatedAt ? new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(active.updatedAt) : '—';
-  const weatherDataNote = t('weatherData').replace('{time}', updatedTime);
-  setTimeout(() => {
-    const activeCard = $$('.weather-card[data-weather-card]').find((card) => card.dataset.weatherCard === state.activeWeatherId);
-    const cardList = $('.weather-card-list');
-    if (activeCard && cardList) cardList.scrollTo({ left: Math.max(0, activeCard.offsetLeft - 2), behavior: 'smooth' });
-    [['[data-current-hour]', '.hourly-strip'], ['[data-current-day]', '.weather-days']].forEach(([cardSelector, stripSelector]) => {
-      const card = $(cardSelector); const strip = $(stripSelector); if (!card || !strip) return;
-      // Keep the selected period at the leading edge. Centering the current
-      // card made the strip jump on refresh and hid the beginning of the list.
-      strip.scrollTo({ left: Math.max(0, card.offsetLeft - 2), behavior: 'smooth' });
-    });
-  }, 0);
-  return heading(t('weather'), escapeHtml(title) + ' · ' + (state.language === 'en' ? 'updated' : '更新于') + ' ' + (active.updatedAt ? new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(active.updatedAt) : (state.language === 'en' ? 'cached' : '本机缓存'))) +
-    searchArea + (state.weatherError ? '<div class="inline-alert">' + escapeHtml(state.weatherError) + '，' + (state.language === 'en' ? 'showing the last successful result' : '当前显示上次成功结果') + '。</div>' : '') +
-    '<div class="weather-card-list">' + cards + '</div>' +
-    '<div class="weather-section-heading"><h3 class="weather-section-title">' + t('hourly') + '</h3><p class="weather-data-note">' + (needsHourlyRepair ? '<span class="inline-alert">' + escapeHtml(t('weatherHourlyRepairing')) + '</span> ' : '') + escapeHtml(weatherDataNote) + '</p></div><div class="hourly-strip">' + hourly + '</div><h3 class="weather-section-title">' + t('advice') + '</h3><div class="advice-strip">' + advice + '</div><h3 class="weather-section-title">' + t('daily') + '</h3><div class="weather-days">' + days + '</div>';
+  const condition = weatherCode(Number(current.weather_code));
+  const summary = '<div class="weather-current-summary"><span class="weather-current-icon" aria-hidden="true">' + condition[0] + '</span><strong class="weather-current-temperature">' + Math.round(Number(current.temperature_2m) || 0) + '°</strong><span class="weather-current-copy"><strong>' + escapeHtml(condition[1]) + '</strong><small>' + escapeHtml((state.language === 'en' ? 'Feels ' : '体感 ') + Math.round(Number(current.apparent_temperature ?? current.temperature_2m) || 0) + '° · ' + (state.language === 'en' ? 'Humidity ' : '湿度 ') + (current.relative_humidity_2m ?? '—') + '% · ' + weatherWindLabel(current.wind_speed_10m)) + '</small></span></div>';
+  const updated = '<p class="weather-updated-note">' + (state.language === 'en' ? 'Updated ' : '更新于 ') + updatedTime + (state.weatherError ? ' · ' + escapeHtml(state.weatherError) : '') + '</p>';
+  const chartTitle = viewTab === 'today' ? (state.language === 'en' ? 'Hourly temperature' : '今日气温') : (state.language === 'en' ? '15-day temperature range' : '未来 15 天气温');
+  const chartLegend = viewTab === 'forecast' ? '<div class="weather-chart-legend"><span><i class="weather-legend-high"></i>' + (state.language === 'en' ? 'High' : '最高温') + '</span><span><i class="weather-legend-low"></i>' + (state.language === 'en' ? 'Low' : '最低温') + '</span></div>' : '';
+  const chart = viewTab === 'today' ? weatherLineChart(hourlyPoints, 'single') : weatherLineChart(dailyPoints, 'range');
+  return '<section class="weather-page">' + header + (active.loading ? '<p class="weather-updated-note">' + escapeHtml(t('weatherLoading')) + '</p>' : '') + summary + updated + '<section class="weather-chart-section"><div class="weather-chart-heading"><h2>' + chartTitle + '</h2>' + chartLegend + '</div>' + chart + '</section>' + weatherLocationDialogMarkup() + '</section>';
 }
 
 // Developer tools ------------------------------------------------------------
@@ -16078,8 +16087,21 @@ workspace.addEventListener('click', async (event) => {
     updateWeatherSearchResults();
     return;
   }
+  if (event.target.closest('[data-weather-location-close]') || event.target === event.target.closest('[data-weather-location-overlay]')) {
+    state.weatherLocationDialogOpen = false;
+    closeWeatherSearchPopover();
+    return render();
+  }
+  const weatherTab = event.target.closest('[data-weather-view-tab]');
+  if (weatherTab) { state.weatherViewTab = weatherTab.dataset.weatherViewTab === 'forecast' ? 'forecast' : 'today'; return render(); }
+  if (event.target.closest('[data-weather-locations-open]')) { state.weatherLocationDialogOpen = true; return render(); }
   const weatherResult = event.target.closest('[data-weather-result-index]');
-  if (weatherResult) return addWeatherPlace(state.weatherSearchResults[Number(weatherResult.dataset.weatherResultIndex)]);
+  if (weatherResult) {
+    const place = state.weatherSearchResults[Number(weatherResult.dataset.weatherResultIndex)];
+    state.weatherLocationDialogOpen = false;
+    state.weatherSearchQuery = ''; state.weatherSearchTerm = '';
+    return addWeatherPlace(place);
+  }
   const deleteWeather = event.target.closest('[data-delete-weather]');
   if (deleteWeather) {
     if (deleteWeather.dataset.weatherDeleteHandled === 'true') return;
@@ -16095,8 +16117,19 @@ workspace.addEventListener('click', async (event) => {
     if (selectedCard?.loadError && !selectedCard.current) return refreshWeatherCard(selectedCard);
     return render();
   }
+  const weatherPlace = event.target.closest('[data-weather-place-id]');
+  if (weatherPlace) {
+    state.weatherLocationDialogOpen = false;
+    state.weatherSearchRequest += 1; state.weatherSearchQuery = ''; state.weatherSearchTerm = ''; state.weatherSearchResults = []; state.weatherSearchError = ''; state.weatherSearchLoading = false;
+    state.activeWeatherId = weatherPlace.dataset.weatherPlaceId;
+    const selectedCard = state.weatherCards.find((card) => card.id === state.activeWeatherId);
+    if (selectedCard?.loadError && !selectedCard.current) return refreshWeatherCard(selectedCard);
+    closeWeatherSearchPopover();
+    return render();
+  }
   if (event.target.closest('[data-add-weather-card]')) { $('#cityInput')?.focus(); return toast(state.language === 'en' ? 'Search a city or district to add a card' : '搜索城市或区县即可添加天气卡片'); }
   if (event.target.closest('[data-locate]')) {
+    state.weatherLocationDialogOpen = false;
     if (!navigator.geolocation) {
       state.weatherLoading = false;
       state.weatherError = state.language === 'en' ? 'This browser does not support location access.' : '当前浏览器不支持定位。';
