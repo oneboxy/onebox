@@ -21669,35 +21669,19 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-current-summary { display: flex; align-items: center; gap: 15px; min-height: 82px; padding: 6px 0 2px; }
 #workspace[data-tool="weather"] .weather-current-icon { display: inline-flex; width: 38px; height: 38px; flex: 0 0 38px; align-items: center; justify-content: center; line-height: 1; }
 #workspace[data-tool="weather"] .weather-line-icon { display: block; width: 100%; height: 100%; }
-#workspace[data-tool="weather"] .weather-line-clear { color: #d28a2e; }
-#workspace[data-tool="weather"] .weather-line-partly,
-#workspace[data-tool="weather"] .weather-line-cloudy,
-#workspace[data-tool="weather"] .weather-line-fog,
-#workspace[data-tool="weather"] .weather-line-rain,
-#workspace[data-tool="weather"] .weather-line-snow,
-#workspace[data-tool="weather"] .weather-line-storm { color: #4f8198; }
-#workspace[data-tool="weather"] .weather-icon-sun,
+#workspace[data-tool="weather"] { --weather-cloud-fill: #e5f0f5; --weather-cloud-line: #648da0; --weather-sun-fill: #f5cf71; --weather-sun-line: #d58e2d; --weather-water: #438fb6; --weather-bolt: #e8ac3d; }
+#workspace[data-tool="weather"] .weather-line-icon { color: var(--weather-cloud-line); }
+#workspace[data-tool="weather"] .weather-line-clear { color: var(--weather-sun-line); }
+#workspace[data-tool="weather"] .weather-icon-cloud { fill: var(--weather-cloud-fill); stroke: var(--weather-cloud-line); stroke-width: 1.5; }
+#workspace[data-tool="weather"] .weather-icon-sun-disc { fill: var(--weather-sun-fill); stroke: var(--weather-sun-line); stroke-width: 1.2; }
+#workspace[data-tool="weather"] .weather-icon-sun-rays { fill: none; stroke: var(--weather-sun-line); stroke-width: 1.7; }
 #workspace[data-tool="weather"] .weather-icon-drops,
-#workspace[data-tool="weather"] .weather-icon-snow,
-#workspace[data-tool="weather"] .weather-icon-bolt { stroke: currentColor; }
-#workspace[data-tool="weather"] .weather-icon-sun,
-#workspace[data-tool="weather"] .weather-icon-bolt { color: #d28a2e; }
-#workspace[data-tool="weather"] .weather-icon-drops,
-#workspace[data-tool="weather"] .weather-icon-snow { color: #347da0; }
+#workspace[data-tool="weather"] .weather-icon-snow { fill: none; stroke: var(--weather-water); stroke-width: 1.8; }
+#workspace[data-tool="weather"] .weather-icon-bolt { fill: var(--weather-bolt); stroke: #cf8b26; stroke-width: 1.1; }
 #workspace[data-tool="weather"] .weather-icon-target { cursor: pointer; touch-action: manipulation; }
 #workspace[data-tool="weather"] .weather-icon-target:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 #workspace[data-tool="weather"] .weather-current-icon { border: 0; background: transparent; }
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-clear { color: #e6ad57; }
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-partly,
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-cloudy,
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-fog,
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-rain,
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-snow,
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-line-storm { color: #90b8cb; }
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-icon-sun,
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-icon-bolt { color: #e6ad57; }
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-icon-drops,
-[data-theme="dark"] #workspace[data-tool="weather"] .weather-icon-snow { color: #77b5d0; }
+[data-theme="dark"] #workspace[data-tool="weather"] { --weather-cloud-fill: #2d4a59; --weather-cloud-line: #91b9ca; --weather-sun-fill: #e6bd62; --weather-sun-line: #e6ad57; --weather-water: #79b9d4; --weather-bolt: #edbd55; }
 #workspace[data-tool="weather"] .weather-current-temperature { font-size: 43px; line-height: 1; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
 #workspace[data-tool="weather"] .weather-current-copy { display: grid; gap: 5px; }
 #workspace[data-tool="weather"] .weather-current-copy strong { color: var(--ink); font-size: 14px; font-weight: 550; }
