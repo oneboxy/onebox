@@ -3547,7 +3547,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #b17b80 !important;
+  color: #8a5d62 !important;
   opacity: 1;
   pointer-events: auto;
 }
