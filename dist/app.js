@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.993';
+const APP_VERSION = '2.18.994';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -9124,7 +9124,7 @@ function weatherElevationLabel(value) {
 }
 function weatherWindLabel(value) {
   const level = weatherWindLevel(value);
-  return state.language === 'en' ? 'Bft ' + level.force + ' · ' + level.en : level.force + '级 · ' + level.zh;
+  return state.language === 'en' ? 'Bft ' + level.force + ' · ' + level.en : level.force + '级';
 }
 function weatherCurrentDayKey(weather) {
   try {
@@ -9161,7 +9161,7 @@ function weatherLineChart(points, mode, currentIndex = 0) {
   const precipitationBottom = compact ? 43 : 61;
   const precipitationY = (value) => precipitationBottom - Math.max(0, Math.min(100, Number(value) || 0)) / 100 * (precipitationBottom - precipitationTop);
   const precipitationLine = precipitationPoints.length ? '<svg class="weather-chart-svg weather-chart-precipitation-svg" viewBox="0 0 ' + width + ' ' + precipitationHeight + '" width="' + width + '" height="' + precipitationHeight + '" aria-hidden="true">' + [0, 50, 100].map((value) => '<line class="weather-chart-gridline" x1="0" y1="' + precipitationY(value) + '" x2="' + width + '" y2="' + precipitationY(value) + '"/>').join('') + '<polyline class="weather-chart-line weather-chart-precipitation" points="' + ['0,' + precipitationY(precipitationPoints[0].probability), ...points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? x(index) + ',' + precipitationY(point.probability) : null).filter(Boolean), width + ',' + precipitationY(precipitationPoints[precipitationPoints.length - 1].probability)].join(' ') + '"/>' + points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? '<circle class="weather-chart-dot weather-chart-precipitation" cx="' + x(index) + '" cy="' + precipitationY(point.probability) + '" r="2.5"/>' : '').join('') + '</svg>' : '';
-  const labels = points.map((point) => '<div class="weather-chart-label"><span aria-hidden="true">' + escapeHtml(point.icon || '') + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + (state.language === 'en' ? 'Bft ' + weatherWindLevel(point.wind).force : weatherWindLevel(point.wind).force + '级风') + '</small>' : '') + '</div>').join('');
+  const labels = points.map((point) => '<div class="weather-chart-label"><span aria-hidden="true">' + escapeHtml(point.icon || '') + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + (state.language === 'en' ? 'Bft ' + weatherWindLevel(point.wind).force : weatherWindLevel(point.wind).force + '级') + '</small>' : '') + '</div>').join('');
   return '<div class="weather-chart-scroll" data-current-index="' + Math.max(0, Math.min(points.length - 1, Number(currentIndex) || 0)) + '" data-column-width="' + columnWidth + '" role="region" aria-label="' + (mode === 'range' ? (state.language === 'en' ? 'Daily temperature forecast' : '每日温度预报') : (state.language === 'en' ? 'Hourly weather forecast' : '逐小时天气预报')) + '"><div class="weather-chart-inner" style="width:' + width + 'px"><svg class="weather-chart-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '" aria-hidden="true">' + grid + series + '</svg>' + precipitationLine + '<div class="weather-chart-labels" style="grid-template-columns:repeat(' + points.length + ',' + columnWidth + 'px)">' + labels + '</div></div></div>';
 }
 function syncWeatherChartScrollPosition() {
