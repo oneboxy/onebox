@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.991';
+const APP_VERSION = '2.18.992';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -1788,6 +1788,7 @@ function selectTool(id) {
   }
   state.section = 'tools';
   state.tool = id;
+  if (id === 'weather') document.querySelector('main')?.scrollTo(0, 0);
   saveActiveToolPreference();
   if (location.hash.slice(1) !== id) history.replaceState(null, '', '#' + id);
   renderNav(); renderBottomNav(); render();
@@ -9136,9 +9137,10 @@ function weatherLineChart(points, mode, currentIndex = 0) {
   if (!points.length) return '<p class="weather-chart-empty">' + (state.language === 'en' ? 'Forecast data unavailable' : '暂无预报数据') + '</p>';
   const columnWidth = 56;
   const width = points.length * columnWidth;
-  const height = 146;
-  const top = 22;
-  const bottom = 126;
+  const compact = window.matchMedia?.('(max-width: 600px)').matches === true;
+  const height = compact ? 104 : 146;
+  const top = compact ? 16 : 22;
+  const bottom = compact ? 84 : 126;
   const values = points.flatMap((point) => mode === 'range' ? [Number(point.high), Number(point.low)] : [Number(point.value)]).filter(Number.isFinite);
   const min = Math.floor(Math.min(...values) - 2);
   const max = Math.ceil(Math.max(...values) + 2);
@@ -9154,9 +9156,9 @@ function weatherLineChart(points, mode, currentIndex = 0) {
     ? '<polyline class="weather-chart-line weather-chart-high" points="' + line('high') + '"/><polyline class="weather-chart-line weather-chart-low" points="' + line('low') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-high" cx="' + x(index) + '" cy="' + y(point.high) + '" r="3"/><circle class="weather-chart-dot weather-chart-low" cx="' + x(index) + '" cy="' + y(point.low) + '" r="3"/><text class="weather-chart-value weather-chart-high-label" x="' + x(index) + '" y="' + Math.max(12, y(point.high) - 8) + '" text-anchor="middle">' + Math.round(point.high) + '°</text><text class="weather-chart-value weather-chart-low-label" x="' + x(index) + '" y="' + Math.min(143, y(point.low) + 15) + '" text-anchor="middle">' + Math.round(point.low) + '°</text>').join('')
     : '<polyline class="weather-chart-line weather-chart-temperature" points="' + line('value') + '"/>' + points.map((point, index) => '<circle class="weather-chart-dot weather-chart-temperature" cx="' + x(index) + '" cy="' + y(point.value) + '" r="3"/><text class="weather-chart-value" x="' + x(index) + '" y="' + Math.max(12, y(point.value) - 9) + '" text-anchor="middle">' + Math.round(point.value) + '°</text>').join('');
   const precipitationPoints = mode === 'single' ? points.filter((point) => point.probability != null && Number.isFinite(Number(point.probability))) : [];
-  const precipitationHeight = 86;
-  const precipitationTop = 12;
-  const precipitationBottom = 61;
+  const precipitationHeight = compact ? 60 : 86;
+  const precipitationTop = compact ? 9 : 12;
+  const precipitationBottom = compact ? 43 : 61;
   const precipitationY = (value) => precipitationBottom - Math.max(0, Math.min(100, Number(value) || 0)) / 100 * (precipitationBottom - precipitationTop);
   const precipitationLine = precipitationPoints.length ? '<svg class="weather-chart-svg weather-chart-precipitation-svg" viewBox="0 0 ' + width + ' ' + precipitationHeight + '" width="' + width + '" height="' + precipitationHeight + '" aria-hidden="true">' + [0, 50, 100].map((value) => '<line class="weather-chart-gridline" x1="0" y1="' + precipitationY(value) + '" x2="' + width + '" y2="' + precipitationY(value) + '"/>').join('') + '<polyline class="weather-chart-line weather-chart-precipitation" points="' + ['0,' + precipitationY(precipitationPoints[0].probability), ...points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? x(index) + ',' + precipitationY(point.probability) : null).filter(Boolean), width + ',' + precipitationY(precipitationPoints[precipitationPoints.length - 1].probability)].join(' ') + '"/>' + points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? '<circle class="weather-chart-dot weather-chart-precipitation" cx="' + x(index) + '" cy="' + precipitationY(point.probability) + '" r="2.5"/>' : '').join('') + '</svg>' : '';
   const labels = points.map((point) => '<div class="weather-chart-label"><span aria-hidden="true">' + escapeHtml(point.icon || '') + '</span><small>' + escapeHtml(point.label) + '</small>' + (point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + Math.round(Number(point.wind)) + ' km/h</small>' : '') + '</div>').join('');
