@@ -21755,7 +21755,9 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 .weather-location-close:hover,
 .weather-location-close:active { background: transparent; color: var(--ink); box-shadow: none; transform: none; }
 .weather-location-dialog-body { min-height: 0; overflow: auto; padding: 4px 15px 13px; }
+#workspace[data-tool="weather"] .weather-location-search-row { display: flex; align-items: flex-start; gap: 8px; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-area { z-index: 2; margin: 0; }
+#workspace[data-tool="weather"] .weather-location-search-row .weather-search-area { flex: 1; min-width: 0; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search { display: block; margin: 0; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-field { min-width: 0; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-field input { height: 40px; padding: 0 70px 0 11px; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--ink); font-size: 13px; }
@@ -21765,11 +21767,10 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="weather"] .weather-location-search-submit:hover,
 #workspace[data-tool="weather"] .weather-location-search-submit:active { background: transparent; color: var(--ink); box-shadow: none; transform: none; }
 #workspace[data-tool="weather"] .weather-location-dialog .weather-search-result-slot { max-height: min(36vh, 280px); }
-.weather-use-location { display: inline-flex; align-items: center; gap: 7px; margin: 10px 0 13px; padding: 0; border: 0; background: transparent; color: var(--primary); font: inherit; font-size: 12px; box-shadow: none; }
-.weather-use-location svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.weather-use-location { display: grid; flex: 0 0 34px; place-items: center; width: 34px; height: 40px; margin: 0; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--primary); box-shadow: none; }
+.weather-use-location svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .weather-use-location:hover,
 .weather-use-location:active { background: transparent; color: var(--primary); box-shadow: none; transform: none; }
-.weather-saved-places h3 { margin: 0 0 3px; color: var(--muted); font-size: 10px; font-weight: 500; }
 .weather-place-row { display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 .weather-place-select { display: flex; flex: 1; align-items: center; gap: 0; min-width: 0; padding: 7px 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); text-align: left; box-shadow: none; }
 .weather-place-select:hover,
