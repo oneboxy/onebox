@@ -9668,7 +9668,7 @@ function developerJsonLineNumbers(value) {
 }
 function developerJsonLineGutterWidth(lineCount) {
   const digits = String(Math.max(1, Number(lineCount) || 1)).length;
-  return 'calc(' + digits + 'ch + 8px)';
+  return 'calc(' + digits + 'ch + 5px)';
 }
 function developerJsonLineNumberMarkup(value, highlightedLines = new Set()) {
   const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
@@ -10700,7 +10700,7 @@ document.addEventListener('pointerup', finishTimestampCityDrag);
 document.addEventListener('pointercancel', finishTimestampCityDrag);
 window.addEventListener('blur', () => finishTimestampCityDrag());
 function developerTool() {
-  const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '"><span class="dev-mode-icon" aria-hidden="true">' + devModeIcon(id) + '</span><span class="dev-mode-label">' + devModeLabel(id) + '</span></button>').join('');
+  const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '" aria-label="' + escapeHtml(devModeLabel(id)) + '" title="' + escapeHtml(devModeLabel(id)) + '"><span class="dev-mode-icon" aria-hidden="true">' + devModeIcon(id) + '</span><span class="dev-mode-label">' + devModeLabel(id) + '</span></button>').join('');
   const mode = state.devTools.active;
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : mode === 'file-compare' ? window.OneBoxFileCompareUI.render() : convert();
   const modalOverlay = mode === 'json-compare' && state.devTools.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
@@ -10714,7 +10714,8 @@ function syncDeveloperFullscreenFrame() {
   const header = document.querySelector('.app-header');
   if (!header) return;
   const headerBottom = Math.max(0, header.getBoundingClientRect().bottom);
-  document.body.style.setProperty('--dev-fullscreen-top', Math.ceil(headerBottom + 4) + 'px');
+  const toolNavBottom = nav.hidden ? 0 : Math.max(0, nav.getBoundingClientRect().bottom);
+  document.body.style.setProperty('--dev-fullscreen-top', Math.ceil(Math.max(headerBottom, toolNavBottom) + 2) + 'px');
 }
 
 let developerTimestampLiveTimer = null;
