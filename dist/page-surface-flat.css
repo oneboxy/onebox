@@ -4405,3 +4405,10 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
   #workspace[data-tool="dev"] .converter-panel .conversion-field .conversion-result { height: 28px; min-height: 28px; padding-inline: 4px; font-size: 9px; }
   #workspace[data-tool="dev"] .converter-panel .conversion-result strong { font-size: 10px; }
 }
+
+/* Keep the desktop calculator display closer to the navigation divider. */
+@media (min-width: 761px) {
+  #workspace[data-tool="calculator"] .display {
+    min-height: 116px;
+  }
+}
