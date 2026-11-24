@@ -1,0 +1,110 @@
+/* Keep the formatted output above the editor grid while it is expanded. The
+   flat-page rules set output panes to position:relative, so this explicit
+   override must load after them. */
+#workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen.dev-output-modal-open {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#workspace[data-tool="dev"] .dev-json-output-pane.is-floating {
+  position: fixed !important;
+  z-index: 1001 !important;
+  inset: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
+  display: flex !important;
+  box-sizing: border-box;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex-direction: column;
+  margin: 0 !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: var(--panel);
+  box-shadow: none;
+}
+#workspace[data-tool="dev"] .dev-json-output-pane.is-floating > .dev-json-live-output {
+  display: flex !important;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  flex-direction: column;
+  overflow: hidden !important;
+}
+#workspace[data-tool="dev"] .dev-json-output-pane.is-floating > .dev-history-content {
+  flex: 0 1 auto;
+  max-height: min(28dvh, 220px);
+  overflow: auto;
+}
+#workspace[data-tool="dev"] .dev-json-output-pane.is-floating .dev-json-tree,
+#workspace[data-tool="dev"] .dev-json-output-pane.is-floating .dev-json-empty,
+#workspace[data-tool="dev"] .dev-json-output-pane.is-floating .dev-result-pre {
+  border: 0 !important;
+  border-radius: 0;
+}
+#workspace[data-tool="dev"] .dev-json-output-backdrop {
+  position: fixed !important;
+  z-index: 1000 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-tools-page.dev-output-modal-open {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  #workspace[data-tool="dev"] .dev-json-output-pane.is-floating {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh;
+    padding: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 12px) !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #workspace[data-tool="dev"] .dev-json-output-pane.is-floating .dev-json-live-output > .dev-editor-action-dock {
+    right: 4px;
+    left: 4px;
+    bottom: 4px;
+    width: auto;
+    max-width: none;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 2px;
+    overflow: visible;
+    white-space: nowrap;
+  }
+  #workspace[data-tool="dev"] .dev-json-output-pane.is-floating .dev-json-live-output > .dev-editor-action-dock > * {
+    flex: 0 0 auto;
+  }
+  #workspace[data-tool="dev"] .dev-json-output-backdrop {
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+}

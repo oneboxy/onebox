@@ -122,7 +122,8 @@ function boundedHomeFeedIdMap(value, limit = HOME_FEED_PENDING_LIMIT) {
 const DEFAULT_HOME_FEED_ORDER = RSS_SOURCES.map((source) => source.id);
 const DEFAULT_HOME_FEED_VISIBLE = RSS_SOURCES.filter((source) => source.visibleByDefault !== false).map((source) => source.id);
 const NAVIGATION_SESSION_KEY = 'onebox-navigation-position';
-const DEFAULT_TOOL_ORDER = Object.keys(TOOL_DEFS).filter((id) => id !== 'navigation' && id !== 'track');
+const HIDDEN_TOOL_TABS = new Set(['translate']);
+const DEFAULT_TOOL_ORDER = Object.keys(TOOL_DEFS).filter((id) => id !== 'navigation' && id !== 'track' && !HIDDEN_TOOL_TABS.has(id));
 const nav = $('#toolNav');
 const desktopPageTabs = $('#desktopPageTabs');
 const toolNavPlaceholder = document.createComment('tool navigation position');
@@ -630,7 +631,7 @@ const storedToolActive = localStorage.getItem(STORAGE.toolActive) || '';
 const rawWeatherCards = parseStored(STORAGE.weatherCards, []);
 const legacyWeather = parseStored(STORAGE.legacyWeather, null);
 const normalizeToolOrder = (value, includeNavigation = false, navigationFirst = false) => {
-  const allowed = includeNavigation ? Object.keys(TOOL_DEFS).filter((id) => id !== 'track') : DEFAULT_TOOL_ORDER;
+  const allowed = includeNavigation ? Object.keys(TOOL_DEFS).filter((id) => id !== 'track' && !HIDDEN_TOOL_TABS.has(id)) : DEFAULT_TOOL_ORDER;
   const order = Array.isArray(value) ? value.map((id) => id === 'convert' ? 'translate' : id).filter((id) => allowed.includes(id)) : [];
   const normalized = [...new Set(order.concat(allowed))];
   if (includeNavigation && navigationFirst) return ['navigation', ...normalized.filter((id) => id !== 'navigation')].slice(0, allowed.length);
@@ -1643,14 +1644,14 @@ function firstAvailableRoute() {
     const key = section === 'mine' ? 'settings' : section;
     if (cloudModuleEnabled(key) && (section !== 'navigation' || state.navigationLocation === 'main')) return section;
   }
-  const tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && id !== 'track' && cloudModuleEnabled(toolModuleKey(id)));
+  const tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && id !== 'track' && !HIDDEN_TOOL_TABS.has(id) && cloudModuleEnabled(toolModuleKey(id)));
   return tool ? tool : '';
 }
 function renderNav() {
   const includeNavigation = state.navigationLocation === 'tools';
   const normalizedOrder = normalizeToolOrder(state.toolOrder, includeNavigation);
   if (normalizedOrder.join('|') !== state.toolOrder.join('|')) { state.toolOrder = normalizedOrder; saveToolOrder(); }
-  const toolIds = (includeNavigation ? normalizedOrder : normalizedOrder.filter((id) => id !== 'navigation')).filter((id) => cloudModuleEnabled(toolModuleKey(id)));
+  const toolIds = (includeNavigation ? normalizedOrder : normalizedOrder.filter((id) => id !== 'navigation')).filter((id) => !HIDDEN_TOOL_TABS.has(id) && cloudModuleEnabled(toolModuleKey(id)));
   const previousTabs = nav.querySelector('.tool-tabs');
   const previousScrollLeft = previousTabs?.scrollLeft || 0;
   const tabsMarkup = toolIds.map((id, index) => {
@@ -1804,8 +1805,8 @@ function selectSection(section) {
   const previousTool = state.tool;
   if (section === 'tools') {
     if (state.navigationLocation === 'tools' && cloudModuleEnabled('navigation')) state.tool = 'navigation';
-    else if (!TOOL_DEFS[state.tool] || state.tool === 'track' || !cloudModuleEnabled(toolModuleKey(state.tool))) {
-      state.tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && id !== 'track' && cloudModuleEnabled(toolModuleKey(id))) || 'calculator';
+    else if (!TOOL_DEFS[state.tool] || state.tool === 'track' || HIDDEN_TOOL_TABS.has(state.tool) || !cloudModuleEnabled(toolModuleKey(state.tool))) {
+      state.tool = Object.keys(TOOL_DEFS).find((id) => id !== 'navigation' && id !== 'track' && !HIDDEN_TOOL_TABS.has(id) && cloudModuleEnabled(toolModuleKey(id))) || 'calculator';
     }
   }
   const unchanged = state.section === section && state.tool === previousTool;
@@ -9879,12 +9880,17 @@ function devJsonOutputFullscreenButton(open) {
 function renderDeveloperJsonFormat() {
   const dev = state.devTools;
   const inputActions = devJsonAdjustControls('input', dev.jsonInputFontSize, dev.jsonInputHeight) + devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-clear', t('devClear'));
-  const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + (dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '') + devJsonOutputFullscreenButton(dev.formatOutputFullscreen) + devHistoryToggle('json-format');
-  const overlay = dev.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' : '';
-  return '<div class="dev-workbench dev-json-format' + (dev.formatOutputFullscreen ? ' is-output-floating' : '') + '">' + overlay + '<div class="dev-editor-grid" data-dev-pane-grid ' + devPaneSplitStyle('format') + '>' +
+  if (dev.formatOutputFullscreen) return '';
+  return '<div class="dev-workbench dev-json-format"><div class="dev-editor-grid" data-dev-pane-grid ' + devPaneSplitStyle('format') + '>' +
     '<section class="dev-pane dev-editor-pane" aria-label="' + escapeHtml(t('devInput')) + '">' + developerJsonEditorWithActions('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}', inputActions) + '</section>' + devPaneSplitter('format') +
-    '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '" aria-label="' + escapeHtml(t('devOutput')) + '"><div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '<div class="dev-editor-action-dock">' + outputActions + '</div></div>' + devHistoryContent('json-format') + '</section>' +
+    developerJsonOutputPaneMarkup(false) +
     '</div></div>';
+}
+function developerJsonOutputPaneMarkup(floating = false) {
+  const dev = state.devTools;
+  const formatActions = dev.formatOutput ? (floating ? devActionButton('dev-copy-output', t('devCopy')) : devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy'))) : '';
+  const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + formatActions + devJsonOutputFullscreenButton(floating) + devHistoryToggle('json-format');
+  return '<section class="dev-pane dev-output-pane dev-json-output-pane' + (floating ? ' is-floating' : '') + '" aria-label="' + escapeHtml(t('devOutput')) + '"><div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '<div class="dev-editor-action-dock">' + outputActions + '</div></div>' + devHistoryContent('json-format') + '</section>';
 }
 function developerCompareInlineStatusMarkup(comparison) {
   const status = comparison.status || '';
@@ -10700,11 +10706,15 @@ document.addEventListener('pointerup', finishTimestampCityDrag);
 document.addEventListener('pointercancel', finishTimestampCityDrag);
 window.addEventListener('blur', () => finishTimestampCityDrag());
 function developerTool() {
-  const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '" aria-label="' + escapeHtml(devModeLabel(id)) + '" title="' + escapeHtml(devModeLabel(id)) + '"><span class="dev-mode-icon" aria-hidden="true">' + devModeIcon(id) + '</span><span class="dev-mode-label">' + devModeLabel(id) + '</span></button>').join('');
-  const mode = state.devTools.active;
+  const visibleModes = DEV_TOOL_IDS.filter((id) => id !== 'unit-convert');
+  const mode = visibleModes.includes(state.devTools.active) ? state.devTools.active : visibleModes[0];
+  if (state.devTools.active !== mode) { state.devTools.active = mode; saveDevTools(); }
+  const modeLabel = devModeLabel(mode);
+  const modes = visibleModes.map((id) => '<button type="button" class="dev-mode-option" role="menuitemradio" aria-checked="' + String(mode === id) + '" data-dev-mode="' + id + '"><span>' + escapeHtml(devModeLabel(id)) + '</span>' + (mode === id ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</button>').join('');
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : mode === 'file-compare' ? window.OneBoxFileCompareUI.render() : convert();
   const modalOverlay = mode === 'json-compare' && state.devTools.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
-  return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '">' + modalOverlay + '<nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div></section>';
+  const outputOverlay = mode === 'json-format' && state.devTools.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' + developerJsonOutputPaneMarkup(true) : '';
+  return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '">' + modalOverlay + '<nav class="dev-mode-tabs" aria-label="' + escapeHtml(t('development')) + '"><div class="dev-mode-picker"><button type="button" class="dev-mode-picker-trigger" data-dev-mode-menu-toggle aria-haspopup="menu" aria-expanded="false"><span>' + escapeHtml(modeLabel) + '</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="dev-mode-menu" role="menu" aria-label="' + escapeHtml(t('development')) + '" hidden>' + modes + '</div></div></nav><div class="dev-tools-body"><div class="dev-current-tool">' + content + '</div></div>' + outputOverlay + '</section>';
 }
 function syncDeveloperFullscreenFrame() {
   if (!document.body.classList.contains('dev-tools-fullscreen')) {
@@ -13826,7 +13836,7 @@ function render() {
     const fallback = firstAvailableRoute();
     state.ticketWalletOpen = false;
     if (fallback) {
-      if (SECTION_DEFS[fallback]) { state.section = fallback; if (fallback === 'tools') state.tool = Object.keys(TOOL_DEFS).find((id) => cloudModuleEnabled(toolModuleKey(id))) || 'calculator'; }
+      if (SECTION_DEFS[fallback]) { state.section = fallback; if (fallback === 'tools') state.tool = Object.keys(TOOL_DEFS).find((id) => !HIDDEN_TOOL_TABS.has(id) && cloudModuleEnabled(toolModuleKey(id))) || 'calculator'; }
       else { state.section = 'tools'; state.tool = fallback; }
       history.replaceState(null, '', '#' + (state.section === 'tools' ? state.tool : state.section));
     }
@@ -15619,6 +15629,38 @@ workspace.addEventListener('contextmenu', (event) => {
   scheduleReaderNativeSelectionMenuSync();
 });
 workspace.addEventListener('keydown', (event) => {
+  const modeItem = event.target.closest('.dev-mode-option[role="menuitemradio"]');
+  if (modeItem) {
+    const items = [...modeItem.closest('[role="menu"]').querySelectorAll('.dev-mode-option')];
+    const index = items.indexOf(modeItem);
+    const nextIndex = event.key === 'ArrowDown' ? (index + 1) % items.length : event.key === 'ArrowUp' ? (index + items.length - 1) % items.length : event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : -1;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      const picker = modeItem.closest('.dev-mode-picker');
+      picker.querySelector('[data-dev-mode-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+      picker.querySelector('[role="menu"]').hidden = true;
+      picker.querySelector('[data-dev-mode-menu-toggle]')?.focus();
+      return;
+    }
+    if (event.key === 'Tab') {
+      const picker = modeItem.closest('.dev-mode-picker');
+      picker.querySelector('[role="menu"]').hidden = true;
+      picker.querySelector('[data-dev-mode-menu-toggle]')?.setAttribute('aria-expanded', 'false');
+      return;
+    }
+    if (nextIndex >= 0) { event.preventDefault(); items[nextIndex]?.focus(); }
+    return;
+  }
+  const modeToggle = event.target.closest('[data-dev-mode-menu-toggle]');
+  if (modeToggle && (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ')) {
+    event.preventDefault();
+    const picker = modeToggle.closest('.dev-mode-picker');
+    const menu = picker.querySelector('[role="menu"]');
+    menu.hidden = false;
+    modeToggle.setAttribute('aria-expanded', 'true');
+    menu.querySelector('[aria-checked="true"]')?.focus();
+    return;
+  }
   const current = event.target.closest('.dev-converter-mode [role="tab"]');
   if (!current) return;
   const tabs = [...current.closest('[role="tablist"]').querySelectorAll('[role="tab"]')];
@@ -15630,6 +15672,13 @@ workspace.addEventListener('keydown', (event) => {
   const key = tabs[nextIndex].dataset.conversionCategory;
   tabs[nextIndex].click();
   requestAnimationFrame(() => workspace.querySelector('[data-conversion-category="' + key + '"]')?.focus({ preventScroll: true }));
+});
+document.addEventListener('pointerdown', (event) => {
+  const picker = document.querySelector('.dev-mode-picker');
+  if (!picker || picker.contains(event.target)) return;
+  const toggle = picker.querySelector('[data-dev-mode-menu-toggle]');
+  const menu = picker.querySelector('[role="menu"]');
+  if (menu && !menu.hidden) { menu.hidden = true; toggle?.setAttribute('aria-expanded', 'false'); }
 });
 workspace.addEventListener('click', async (event) => {
   const calendarDeleteButton = event.target.closest('[data-calendar-event-row] [data-delete-event]');
@@ -16005,6 +16054,17 @@ workspace.addEventListener('click', async (event) => {
     state.devTools.records[kind] = [];
     saveDevTools(); return render();
   }
+  const devModeMenuToggle = event.target.closest('[data-dev-mode-menu-toggle]');
+  if (devModeMenuToggle) {
+    const picker = devModeMenuToggle.closest('.dev-mode-picker');
+    const menu = picker?.querySelector('[role="menu"]');
+    if (menu) {
+      menu.hidden = !menu.hidden;
+      devModeMenuToggle.setAttribute('aria-expanded', String(!menu.hidden));
+      if (!menu.hidden) requestAnimationFrame(() => menu.querySelector('[aria-checked="true"]')?.focus());
+    }
+    return;
+  }
   const devMode = event.target.closest('[data-dev-mode]');
   if (devMode) { state.devTools.active = DEV_TOOL_IDS.includes(devMode.dataset.devMode) ? devMode.dataset.devMode : DEV_TOOL_IDS[0]; state.devTools.historyOpen = false; saveDevTools(); return render(); }
   const devRecord = event.target.closest('[data-dev-record]');
@@ -16359,6 +16419,12 @@ document.addEventListener('click', (event) => {
 workspace.addEventListener('dblclick', (event) => {
   const day = event.target.closest('[data-date]');
   if (day && state.section === 'tools' && state.tool === 'calendar') { event.preventDefault(); renderLunarDialog(day.dataset.date); }
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || !state.devTools.formatOutputFullscreen || state.devTools.active !== 'json-format') return;
+  event.preventDefault();
+  state.devTools.formatOutputFullscreen = false;
+  render();
 });
 workspace.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && state.devTools.formatOutputFullscreen && state.devTools.active === 'json-format') {
