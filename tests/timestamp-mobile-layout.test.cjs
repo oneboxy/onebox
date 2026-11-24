@@ -47,6 +47,16 @@ test('timestamp mobile controls use short unit text and aligned, accessible icon
   assert.match(styles, /\.dev-timestamp-datetime-clear\s*\{[^}]*right:\s*3px/s);
 });
 
+test('timestamp layout keeps the country and city time output attached', () => {
+  const frame = read('timestamp-input-output-frame.js');
+  const app = read('app.js');
+
+  assert.match(frame, /frame\.replaceChildren\(input, output\)/);
+  assert.doesNotMatch(frame, /output\.remove\(\)/);
+  assert.match(app, /dev-timestamp-world-result/);
+  assert.match(app, /dev-timestamp-country-list/);
+});
+
 test('timestamp mobile layout removes the outer input card and compacts fields and results', () => {
   const frame = read('timestamp-input-output-frame.js');
 

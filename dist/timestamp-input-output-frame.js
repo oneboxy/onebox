@@ -271,8 +271,8 @@
     input.dataset.unifiedLayout = 'true';
     inputGrid?.remove();
     input.replaceChildren(module);
-    output.remove();
-    frame.replaceChildren(input);
+    // Preserve the output pane: city clocks and the history/copy actions live there.
+    frame.replaceChildren(input, output);
   }
 
   function relocateUnit() {
