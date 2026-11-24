@@ -4409,7 +4409,7 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
 /* Keep the desktop calculator display closer to the navigation divider. */
 @media (min-width: 761px) {
   #workspace[data-tool="calculator"] .display {
-    min-height: 116px;
+    min-height: 96px;
   }
 }
 
