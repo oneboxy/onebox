@@ -160,7 +160,18 @@
     module.className = 'dev-timestamp-bidirectional';
     const title = document.createElement('h3');
     title.className = 'dev-timestamp-bidirectional-title';
-    title.textContent = '时间 ⇄ 时间戳';
+    const titleDate = document.createElement('span');
+    titleDate.textContent = '时间';
+    const titleTimestamp = document.createElement('span');
+    titleTimestamp.textContent = '时间戳';
+    const swapButton = document.createElement('button');
+    swapButton.type = 'button';
+    swapButton.className = 'dev-timestamp-bidirectional-swap';
+    swapButton.setAttribute('aria-label', '交换时间和时间戳的位置');
+    swapButton.title = '交换时间和时间戳的位置';
+    swapButton.setAttribute('aria-pressed', 'false');
+    swapButton.textContent = '⇄';
+    title.append(titleDate, swapButton, titleTimestamp);
     module.appendChild(title);
 
     const fields = document.createElement('div');
@@ -177,17 +188,11 @@
     timestampLabel.textContent = '时间戳';
     dateField.append(dateLabel, dateRow);
     timestampField.append(timestampLabel, timestampRow);
-    const swapButton = document.createElement('button');
-    swapButton.type = 'button';
-    swapButton.className = 'dev-timestamp-bidirectional-swap';
-    swapButton.setAttribute('aria-label', '交换时间和时间戳的位置');
-    swapButton.title = '交换位置';
-    swapButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>';
     swapButton.addEventListener('click', () => {
       const reversed = fields.classList.toggle('is-reversed');
       swapButton.setAttribute('aria-pressed', String(reversed));
     });
-    fields.append(dateField, swapButton, timestampField);
+    fields.append(dateField, timestampField);
     module.appendChild(fields);
 
     const resultTitle = result.querySelector(':scope > h4');
