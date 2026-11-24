@@ -693,6 +693,125 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   #workspace[data-tool="dev"] .dev-file-compare-result { padding: 0; }
 }
 
+/* Keep developer pages closer to the screen edges and keep JSON controls
+   inside each editor instead of spending space on pane headings. */
+#workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
+  padding-right: max(12px, env(safe-area-inset-right));
+  padding-left: max(12px, env(safe-area-inset-left));
+}
+#workspace[data-tool="dev"] .dev-editor-pane {
+  position: relative;
+  padding: 0 !important;
+}
+#workspace[data-tool="dev"] .dev-editor-pane > .dev-code-editor { position: relative; }
+#workspace[data-tool="dev"] .dev-editor-action-dock {
+  position: absolute;
+  z-index: 10;
+  right: 6px;
+  bottom: 6px;
+  display: flex;
+  max-width: calc(100% - 12px);
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 3px 4px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+}
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-action,
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-json-adjust,
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-history-toggle {
+  min-width: 26px;
+  min-height: 27px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 550;
+  box-shadow: none;
+}
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-action:hover,
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-json-adjust:hover,
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-history-toggle:hover {
+  background: var(--soft);
+  color: var(--ink);
+}
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-action.primary {
+  color: var(--primary);
+}
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-json-adjustments {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-json-adjust-readout { display: none; }
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-inline-toggle {
+  gap: 4px;
+  min-height: 27px;
+  padding: 2px 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+#workspace[data-tool="dev"] .dev-editor-action-dock .dev-toggle-track { transform: scale(.86); }
+#workspace[data-tool="dev"] .dev-editor-pane .dev-code-input { padding-bottom: 72px; }
+#workspace[data-tool="dev"] .dev-editor-pane > .dev-text-editor { padding-bottom: 72px; }
+#workspace[data-tool="dev"] .dev-editor-pane .dev-compare-editor .dev-code-highlight { padding-bottom: 72px; }
+#workspace[data-tool="dev"] .dev-json-output-pane { position: relative; padding-bottom: 70px !important; }
+#workspace[data-tool="dev"] .dev-json-output-pane .dev-json-live-output {
+  height: calc(var(--dev-json-output-height, 460px) - 70px) !important;
+  min-height: 180px;
+}
+#workspace[data-tool="dev"] .dev-json-output-pane > .dev-editor-action-dock { bottom: 6px; }
+#workspace[data-tool="dev"] .dev-json-output-pane .dev-json-line-count { display: none !important; }
+#workspace[data-tool="dev"] .dev-json-output-pane .dev-history-toggle-wrap { margin-inline: 2px; }
+#workspace[data-tool="dev"] .dev-compare-inline-status {
+  position: static;
+  flex: 1 1 100%;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#workspace[data-tool="dev"] .dev-code-input::placeholder,
+#workspace[data-tool="dev"] .dev-text-editor::placeholder {
+  color: var(--muted);
+  -webkit-text-fill-color: var(--muted);
+  font-size: 11px;
+  opacity: .56;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-left: max(8px, env(safe-area-inset-left));
+  }
+  #workspace[data-tool="dev"] .dev-editor-action-dock {
+    right: 4px;
+    bottom: 4px;
+    gap: 1px;
+    padding: 2px;
+  }
+  #workspace[data-tool="dev"] .dev-editor-action-dock .dev-action,
+  #workspace[data-tool="dev"] .dev-editor-action-dock .dev-json-adjust,
+  #workspace[data-tool="dev"] .dev-editor-action-dock .dev-history-toggle {
+    min-width: 24px;
+    min-height: 26px;
+    padding-inline: 4px;
+  }
+  #workspace[data-tool="dev"] .dev-editor-pane .dev-code-input { padding-bottom: 48px; }
+  #workspace[data-tool="dev"] .dev-editor-pane .dev-code-input { padding-bottom: 78px; }
+  #workspace[data-tool="dev"] .dev-editor-pane > .dev-text-editor { padding-bottom: 78px; }
+  #workspace[data-tool="dev"] .dev-editor-pane .dev-compare-editor .dev-code-highlight { padding-bottom: 78px; }
+  #workspace[data-tool="dev"] .dev-json-output-pane { padding-bottom: 78px !important; }
+  #workspace[data-tool="dev"] .dev-json-output-pane .dev-json-live-output {
+    height: calc(var(--dev-json-output-height, 460px) - 78px) !important;
+    min-height: 150px;
+  }
+}
+
 #workspace[data-tool="reader"] .reader-reading-shell .reader-content {
   border: 1px solid var(--line) !important;
   border-radius: 12px !important;
