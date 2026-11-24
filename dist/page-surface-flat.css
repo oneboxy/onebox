@@ -2063,7 +2063,7 @@ main:has(#workspace[data-tool="mine"]) {
   width: 100%;
   min-width: 0;
 }
-#toolNav [data-tool="convert"] { display: none !important; }
+#toolNav [data-tool="translate"] { display: none !important; }
 #toolNav .tool-tabs {
   width: 100%;
   min-width: 0;
