@@ -12,6 +12,7 @@ test('timestamp swap control lives in the heading and swaps the two field column
   assert.match(script, /title\.append\(titleDate, swapButton, titleTimestamp\)/);
   assert.match(script, /fields\.append\(dateField, timestampField\)/);
   assert.match(script, /fields\.classList\.toggle\('is-reversed'\)/);
+  assert.match(script, /title\.classList\.toggle\('is-reversed', reversed\)/);
   assert.doesNotMatch(script, /fields\.append\(dateField,\s*swapButton/);
   assert.match(styles, /\.dev-timestamp-bidirectional-fields\.is-reversed > \.is-datetime\s*\{\s*grid-column:\s*2/);
   assert.match(styles, /\.dev-timestamp-bidirectional-fields\.is-reversed > \.is-timestamp\s*\{\s*grid-column:\s*1/);
@@ -26,6 +27,22 @@ test('timestamp mobile layout keeps both inputs side by side and uses theme colo
   assert.match(mobile, /\.dev-timestamp-content\s*\{[^}]*padding-inline:\s*10px/s);
   assert.match(mobile, /\.dev-timestamp-bidirectional-fields\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1fr\)/s);
   assert.match(mobile, /\.dev-timestamp-unit-picker\s*\{[^}]*width:\s*52px/s);
+  assert.match(mobile, /\.dev-timestamp-bidirectional-label\s*\{\s*display:\s*none/);
+  assert.match(mobile, /\.dev-timestamp-bidirectional\s*\{[^}]*border:\s*0/);
+  assert.match(mobile, /\.dev-timestamp-summary-card\s*\{[^}]*background:\s*transparent/s);
   assert.match(mobile, /color:\s*var\(--muted\)/);
   assert.match(styles, /border-color:\s*var\(--line\)/);
+});
+
+test('timestamp mobile controls use short unit text and aligned, accessible icons', () => {
+  const app = read('app.js');
+  const frame = read('timestamp-input-output-frame.js');
+  const dateControl = read('timestamp-date-time-control.js');
+  const styles = read('page-surface-flat.css');
+
+  assert.match(app, /english \? 'Auto' : '自动'/);
+  assert.match(frame, /setAttribute\('aria-label'.*'时间戳'/);
+  assert.match(dateControl, /aria-label="' \+ \(english \? 'Date and time' : '时间'\)/);
+  assert.match(styles, /\.dev-timestamp-datetime-trigger svg\s*\{[^}]*right:\s*auto[^}]*left:\s*7px/s);
+  assert.match(styles, /\.dev-timestamp-datetime-clear\s*\{[^}]*right:\s*3px/s);
 });

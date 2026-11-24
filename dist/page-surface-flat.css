@@ -5214,4 +5214,93 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     color: var(--muted) !important;
     font-size: 10px !important;
   }
+
+  /* The title names both fields; keep their labels visually only once. */
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title > span:first-child { order: 1; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title > .dev-timestamp-bidirectional-swap { order: 2; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title > span:last-child { order: 3; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title.is-reversed > span:first-child { order: 3; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title.is-reversed > span:last-child { order: 1; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-label { display: none !important; }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger {
+    justify-content: flex-start !important;
+    padding-left: 27px !important;
+    padding-right: 27px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger svg {
+    right: auto !important;
+    left: 7px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-clear {
+    right: 3px !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional > .dev-timestamp-result-block {
+    max-height: 132px !important;
+    margin-top: 2px !important;
+    padding: 4px 0 0 !important;
+    border: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    max-height: 126px !important;
+    gap: 0 !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) 22px !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+    min-height: 34px !important;
+    padding: 3px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    font-size: 11px !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    padding: 3px !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+  }
 }

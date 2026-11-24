@@ -107,7 +107,7 @@
     const wrapper = document.createElement('div');
     wrapper.className = 'dev-timestamp-date-time-control';
     wrapper.innerHTML =
-      '<button type="button" class="dev-timestamp-datetime-trigger" data-datetime-picker-toggle aria-haspopup="dialog" aria-expanded="false">' +
+      '<button type="button" class="dev-timestamp-datetime-trigger" data-datetime-picker-toggle aria-label="' + (english ? 'Date and time' : '时间') + '" aria-haspopup="dialog" aria-expanded="false">' +
         '<span class="dev-timestamp-datetime-value"></span>' +
         '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M4 9h16"/></svg>' +
       '</button>' +

@@ -57,6 +57,7 @@
     const timestampInput = timestampRow?.querySelector('.dev-plain-input');
     const dateInput = dateRow?.querySelector('input[data-dev-field="timestampDate"]');
     if (!timestampRow || !dateRow || !timestampInput || !dateInput) return;
+    timestampInput.setAttribute('aria-label', /^en(?:-|$)/i.test(document.documentElement.lang || '') ? 'Timestamp' : '时间戳');
 
     const resultBlocks = Array.from(output.querySelectorAll('.dev-timestamp-overview-results > .dev-timestamp-result-block'));
     const result = resultBlocks[1] || resultBlocks[0];
@@ -190,6 +191,7 @@
     timestampField.append(timestampLabel, timestampRow);
     swapButton.addEventListener('click', () => {
       const reversed = fields.classList.toggle('is-reversed');
+      title.classList.toggle('is-reversed', reversed);
       swapButton.setAttribute('aria-pressed', String(reversed));
     });
     fields.append(dateField, timestampField);
