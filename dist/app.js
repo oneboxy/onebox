@@ -9633,11 +9633,8 @@ function devHistoryContent(kind) {
   const list = records.length ? records.map((item) => '<div class="swipe-row dev-history-swipe-row" data-swipe-row><button class="dev-record history-item swipe-content" type="button" data-dev-record-kind="' + kind + '" data-dev-record="' + escapeHtml(item.id) + '" title="' + escapeHtml(devRecordDetail(kind, item)) + '"><strong>' + escapeHtml(devRecordLabel(kind, item)) + '</strong><small>' + escapeHtml(devRecordPreview(kind, item)) + '</small></button><button class="swipe-delete" data-delete-dev-record-kind="' + kind + '" data-delete-dev-record="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>').join('') : '<p class="dev-history-empty">' + t('devNoRecords') + '</p>';
   const open = state.devTools.historyOpen === true;
   const historyBody = '<div class="dev-history-content"><div class="dev-history-head"><strong>' + t('recentCalculations') + '</strong><button class="text-btn" data-clear-dev-records data-dev-record-kind="' + kind + '" ' + (records.length ? '' : 'disabled') + '>' + t('clear') + '</button></div><div class="dev-record-list">' + list + '</div></div>';
-  if (kind === 'timestamp') {
-    if (!open) return '';
-    return '<div class="dialog dev-history-modal" data-dev-history-modal><section class="dialog-card dev-history-modal-card" role="dialog" aria-modal="true" aria-label="' + escapeHtml(t('devRecords')) + '"><div class="dialog-head"><h2>' + escapeHtml(t('devRecords')) + '</h2><button class="icon-btn" type="button" data-close-dev-history aria-label="' + escapeHtml(t('close')) + '">' + LUCIDE_X_MARKUP + '</button></div>' + historyBody + '</section></div>';
-  }
-  return '<div class="dev-history-content" ' + (open ? '' : 'hidden') + '><div class="dev-history-head"><strong>' + t('recentCalculations') + '</strong><button class="text-btn" data-clear-dev-records data-dev-record-kind="' + kind + '" ' + (records.length ? '' : 'disabled') + '>' + t('clear') + '</button></div><div class="dev-record-list">' + list + '</div></div>';
+  if (!open) return '';
+  return '<div class="dialog dev-history-modal" data-dev-history-modal><section class="dialog-card dev-history-modal-card" role="dialog" aria-modal="true" aria-label="' + escapeHtml(t('devRecords')) + '"><div class="dialog-head"><h2>' + escapeHtml(t('devRecords')) + '</h2><button class="icon-btn" type="button" data-close-dev-history aria-label="' + escapeHtml(t('close')) + '">' + LUCIDE_X_MARKUP + '</button></div>' + historyBody + '</section></div>';
 }
 function developerJsonFormattedLineCount() {
   const output = String(state.devTools.formatOutput || '');
@@ -9870,7 +9867,7 @@ function devJsonOutputFullscreenButton(open) {
 }
 function renderDeveloperJsonFormat() {
   const dev = state.devTools;
-  const inputActions = devJsonAdjustControls('input', dev.jsonInputFontSize, dev.jsonInputHeight) + devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-example', t('devExample')) + devActionButton('json-clear', t('devClear'));
+  const inputActions = devJsonAdjustControls('input', dev.jsonInputFontSize, dev.jsonInputHeight) + devInlineToggle('formatUnescape', t('devUnescape'), dev.formatUnescape) + devActionButton('json-clear', t('devClear'));
   const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + (dev.formatOutput ? devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy')) : '') + devJsonOutputFullscreenButton(dev.formatOutputFullscreen) + devHistoryToggle('json-format');
   const overlay = dev.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' : '';
   return '<div class="dev-workbench dev-json-format' + (dev.formatOutputFullscreen ? ' is-output-floating' : '') + '">' + overlay + '<div class="dev-editor-grid" data-dev-pane-grid ' + devPaneSplitStyle('format') + '>' +
@@ -9890,8 +9887,8 @@ function renderDeveloperCompare() {
   lastDeveloperCompareResult = comparison;
   dev.compareOutput = comparison.output;
   dev.compareStatus = comparison.status;
-  const leftActions = devHistoryToggle('json-compare') + devJsonCompareFontControls('jsonCompareLeftFontSize', dev.jsonCompareLeftFontSize, t('devJsonA')) + devActionButton('json-a-example', t('devExample')) + devActionButton('json-a-clear', t('devClear'));
-  const rightActions = developerCompareInlineStatusMarkup(comparison) + devJsonCompareFontControls('jsonCompareRightFontSize', dev.jsonCompareRightFontSize, t('devJsonB')) + devActionButton('json-b-example', t('devExample')) + devActionButton('json-b-clear', t('devClear')) + devJsonCompareFullscreenButton(dev.compareFullscreen);
+  const leftActions = devHistoryToggle('json-compare') + devJsonCompareFontControls('jsonCompareLeftFontSize', dev.jsonCompareLeftFontSize, t('devJsonA')) + devActionButton('json-a-clear', t('devClear'));
+  const rightActions = developerCompareInlineStatusMarkup(comparison) + devJsonCompareFontControls('jsonCompareRightFontSize', dev.jsonCompareRightFontSize, t('devJsonB')) + devActionButton('json-b-clear', t('devClear')) + devJsonCompareFullscreenButton(dev.compareFullscreen);
   return '<div class="dev-workbench dev-json-compare' + (dev.compareFullscreen ? ' is-floating' : '') + '"><div class="dev-compare-grid" data-dev-pane-grid ' + devPaneSplitStyle('compare') + '>' +
     '<svg class="dev-compare-line-map" data-dev-compare-line-map aria-hidden="true"></svg>' +
     '<section class="dev-pane dev-editor-pane" aria-label="' + escapeHtml(t('devJsonA')) + '">' + developerJsonEditorWithActions('compareLeft', dev.compareLeft, '{ "version": 1 }', leftActions, comparison) + '</section>' + devPaneSplitter('compare') +
