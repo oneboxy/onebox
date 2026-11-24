@@ -4196,3 +4196,10 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     min-height: 150px;
   }
 }
+
+#workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
