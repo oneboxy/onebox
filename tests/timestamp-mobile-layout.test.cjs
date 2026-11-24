@@ -50,11 +50,22 @@ test('timestamp mobile controls use short unit text and aligned, accessible icon
 test('timestamp layout keeps the country and city time output attached', () => {
   const frame = read('timestamp-input-output-frame.js');
   const app = read('app.js');
+  const index = read('index.html');
 
   assert.match(frame, /frame\.replaceChildren\(input, output\)/);
   assert.doesNotMatch(frame, /output\.remove\(\)/);
   assert.match(app, /dev-timestamp-world-result/);
   assert.match(app, /dev-timestamp-country-list/);
+  assert.doesNotMatch(index, /timestamp-city-row\.js/);
+});
+
+test('timestamp city list scrolls inside the output pane and is compact on mobile', () => {
+  const styles = read('page-surface-flat.css');
+
+  assert.match(styles, /height: min\(70dvh, calc\(100dvh - 230px\)\)/);
+  assert.match(styles, /dev-timestamp-output-card > \.dev-live-output\s*\{[^}]*overflow-y: auto/s);
+  assert.match(styles, /dev-timestamp-city-cell\s*\{[^}]*min-height: 46px/s);
+  assert.match(styles, /dev-timestamp-result-block:has\(\.dev-timestamp-empty\)\s*\{\s*display: none/);
 });
 
 test('timestamp mobile layout removes the outer input card and compacts fields and results', () => {
