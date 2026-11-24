@@ -53,7 +53,7 @@ test('timestamp mobile layout removes the outer input card and compacts fields a
   assert.match(frame, /const scope = '#workspace\[data-tool="dev"\] \.dev-workbench\.dev-timestamp'/);
   assert.match(frame, /dev-timestamp-card\[data-unified-layout="true"\].*?border:0!important/s);
   assert.match(frame, /dev-timestamp-bidirectional-label\{display:none!important\}/);
-  assert.match(frame, /grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)!important/);
+  assert.match(frame, /grid-template-columns:minmax\(0,42%\) minmax\(0,42%\)!important;justify-content:space-between!important/);
   assert.match(frame, /dev-timestamp-summary-card\{.*?min-height:32px!important/s);
   assert.match(frame, /white-space:nowrap!important/);
   assert.match(frame, /color:var\(--muted\)!important/);
