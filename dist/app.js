@@ -14427,7 +14427,11 @@ function pageSwipeItems() {
   if (state.section === 'mine' && state.ticketWalletOpen && !state.ticketWalletEditorOpen && !state.ticketWalletMemoryDraft) {
     return Object.keys(TICKET_WALLET_CATEGORIES).map((id) => ({ kind: 'ticket-filter', id }));
   }
-  if (state.section === 'tools') return (state.navigationLocation === 'tools' ? state.toolOrder : state.toolOrder.filter((id) => id !== 'navigation')).map((id) => ({ kind: 'tool', id }));
+  if (state.section === 'tools') {
+    // Keep swipe navigation in sync with the tabs that are actually rendered.
+    // Hidden or disabled tools must not remain reachable through page swipes.
+    return [...nav.querySelectorAll('.tool-tabs [data-tool]')].map((tab) => ({ kind: 'tool', id: tab.dataset.tool }));
+  }
   return [];
 }
 function pageSwipeIndex(items) {
