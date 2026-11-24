@@ -384,6 +384,60 @@ main:has(#workspace[data-tool="home"]) { background: transparent !important; }
   }
 }
 
+/* Slim, content-sized line number gutters and keep output tools inside the
+   output surface itself. */
+#workspace[data-tool="dev"] .dev-code-editor.dev-editor-with-lines,
+#workspace[data-tool="dev"] .dev-code-editor.dev-compare-editor {
+  grid-template-columns: var(--dev-line-number-width, calc(1ch + 8px)) minmax(0, 1fr);
+}
+#workspace[data-tool="dev"] .dev-line-numbers {
+  padding-inline: 2px 3px;
+  border-right: 1px solid color-mix(in srgb, var(--line) 48%, transparent);
+  background: transparent;
+  color: color-mix(in srgb, var(--muted) 78%, transparent);
+}
+#workspace[data-tool="dev"] .dev-json-line {
+  grid-template-columns: var(--dev-json-line-number-width, calc(1ch + 8px)) minmax(0, 1fr);
+  padding-left: 0;
+}
+#workspace[data-tool="dev"] .dev-json-line-number {
+  padding-right: 4px;
+  border-right: 1px solid color-mix(in srgb, var(--line) 48%, transparent);
+  background: transparent;
+}
+#workspace[data-tool="dev"] .dev-json-output-pane { padding-bottom: 0 !important; }
+#workspace[data-tool="dev"] .dev-json-output-pane:not(.is-floating) .dev-json-live-output {
+  height: var(--dev-json-output-height, 460px) !important;
+  min-height: 180px;
+  padding-bottom: 0;
+}
+#workspace[data-tool="dev"] .dev-json-output-pane .dev-json-live-output {
+  position: relative;
+  box-sizing: border-box;
+}
+#workspace[data-tool="dev"] .dev-json-live-output > .dev-json-tree,
+#workspace[data-tool="dev"] .dev-json-live-output > .dev-json-empty,
+#workspace[data-tool="dev"] .dev-json-live-output > .dev-result-pre {
+  padding-bottom: 58px !important;
+}
+#workspace[data-tool="dev"] .dev-json-live-output > .dev-editor-action-dock {
+  right: 7px;
+  bottom: 7px;
+  max-width: calc(100% - 14px);
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-json-output-pane:not(.is-floating) .dev-json-live-output {
+    height: var(--dev-json-output-height, 460px) !important;
+    min-height: 150px;
+  }
+  #workspace[data-tool="dev"] .dev-json-live-output > .dev-editor-action-dock {
+    right: 4px;
+    bottom: 4px;
+    max-width: calc(100% - 8px);
+  }
+}
+
 /* Developer tools: simplify every sub-page with the same flat surfaces and
    restrained separators used by the rest of the app. */
 #workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
@@ -4127,5 +4181,18 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     padding-block: 0;
     border-radius: 11px;
     font-size: 14px;
+  }
+}
+
+/* Keep the output toolbar within the bordered result viewport. */
+#workspace[data-tool="dev"] .dev-json-output-pane { padding-bottom: 0 !important; }
+#workspace[data-tool="dev"] .dev-json-output-pane:not(.is-floating) .dev-json-live-output {
+  height: var(--dev-json-output-height, 460px) !important;
+  min-height: 180px;
+}
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-json-output-pane:not(.is-floating) .dev-json-live-output {
+    height: var(--dev-json-output-height, 460px) !important;
+    min-height: 150px;
   }
 }

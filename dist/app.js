@@ -9455,7 +9455,11 @@ function devJsonTreeNode(value, path = '$', label = '', depth = 0, trailingComma
 }
 function renderDeveloperJsonTree() {
   if (!state.devTools.formatOutput) return '<div class="dev-json-empty">' + (state.language === 'en' ? 'Formatted JSON will appear here' : '格式化结果会显示在这里') + '</div>';
-  try { return '<div class="dev-json-tree" role="tree">' + devJsonTreeNode(JSON.parse(state.devTools.formatOutput), '$', '', 0, false, { value: 0 }) + '</div>'; } catch { return '<pre class="dev-result-pre">' + escapeHtml(state.devTools.formatOutput) + '</pre>'; }
+  try {
+    const lineCounter = { value: 0 };
+    const content = devJsonTreeNode(JSON.parse(state.devTools.formatOutput), '$', '', 0, false, lineCounter);
+    return '<div class="dev-json-tree" role="tree" style="--dev-json-line-number-width:' + developerJsonLineGutterWidth(lineCounter.value) + '">' + content + '</div>';
+  } catch { return '<pre class="dev-result-pre">' + escapeHtml(state.devTools.formatOutput) + '</pre>'; }
 }
 function collectDeveloperJsonPaths(value, path = '$', output = []) {
   if (!value || typeof value !== 'object' || Object.keys(value).length === 0) return output;
@@ -9654,6 +9658,10 @@ function developerJsonLineNumbers(value) {
   const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
   return Array.from({ length: count }, (_, index) => index + 1).join('\n');
 }
+function developerJsonLineGutterWidth(lineCount) {
+  const digits = String(Math.max(1, Number(lineCount) || 1)).length;
+  return 'calc(' + digits + 'ch + 8px)';
+}
 function developerJsonLineNumberMarkup(value, highlightedLines = new Set()) {
   const count = Math.max(1, String(value ?? '').split(/\r\n|\r|\n/).length);
   return Array.from({ length: count }, (_, index) => '<span class="dev-line-number ' + (highlightedLines.has(index + 1) ? 'is-diff' : '') + '">' + (index + 1) + '</span>').join('\n');
@@ -9722,7 +9730,7 @@ function developerJsonEditor(field, value, placeholder, compareResult = null) {
   const isCompare = field === 'compareLeft' || field === 'compareRight';
   if (!isCompare) {
     const isFormat = field === 'formatInput';
-    const editorStyle = isFormat ? ' style="--dev-json-input-font-size:' + state.devTools.jsonInputFontSize + 'px;--dev-json-input-height:' + state.devTools.jsonInputHeight + 'px"' : '';
+    const editorStyle = ' style="--dev-line-number-width:' + developerJsonLineGutterWidth(String(value ?? '').split(/\r\n|\r|\n/).length) + (isFormat ? ';--dev-json-input-font-size:' + state.devTools.jsonInputFontSize + 'px;--dev-json-input-height:' + state.devTools.jsonInputHeight + 'px' : '') + '"';
     const editorClass = isFormat ? 'dev-code-editor dev-editor-with-lines dev-format-editor' : 'dev-code-editor dev-editor-with-lines';
     const editorContent = isFormat
       ? '<textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="soft" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea>'
@@ -9733,7 +9741,7 @@ function developerJsonEditor(field, value, placeholder, compareResult = null) {
   const side = field === 'compareLeft' ? 'left' : 'right';
   const result = compareResult || developerCompareResult();
   const fontSize = state.devTools[side === 'left' ? 'jsonCompareLeftFontSize' : 'jsonCompareRightFontSize'];
-  return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '" style="--dev-json-compare-font-size:' + fontSize + 'px"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side], result.lines[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
+  return '<div class="dev-code-editor dev-editor-with-lines dev-compare-editor dev-compare-editor-' + side + '" style="--dev-line-number-width:' + developerJsonLineGutterWidth(String(value ?? '').split(/\r\n|\r|\n/).length) + ';--dev-json-compare-font-size:' + fontSize + 'px"><pre class="dev-line-numbers" data-dev-line-numbers aria-hidden="true">' + developerJsonLineNumberMarkup(value, result.lines[side]) + '</pre><div class="dev-code-input-wrap"><pre class="dev-code-highlight" data-dev-code-highlight aria-hidden="true">' + developerJsonHighlightMarkup(value, result.ranges[side], result.lines[side]) + '</pre><textarea class="dev-code-input" data-dev-line-numbered data-dev-field="' + field + '" wrap="off" spellcheck="false" placeholder="' + escapeHtml(placeholder) + '">' + escapeHtml(value) + '</textarea></div></div>';
 }
 function developerJsonEditorWithActions(field, value, placeholder, actions, compareResult = null) {
   const editor = developerJsonEditor(field, value, placeholder, compareResult);
@@ -9747,6 +9755,7 @@ function syncDeveloperCompareEditor(editor, result = lastDeveloperCompareResult 
   const host = editor.closest('.dev-code-editor');
   const gutter = host?.querySelector('[data-dev-line-numbers]');
   const highlight = host?.querySelector('[data-dev-code-highlight]');
+  if (host) host.style.setProperty('--dev-line-number-width', developerJsonLineGutterWidth(String(editor.value ?? '').split(/\r\n|\r|\n/).length));
   if (refreshMarkup && gutter) gutter.innerHTML = developerJsonLineNumberMarkup(editor.value, result.lines[side]);
   if (refreshMarkup && highlight) highlight.innerHTML = developerJsonHighlightMarkup(editor.value, result.ranges[side], result.lines[side]);
   if (highlight) highlight.style.transform = 'translate(' + (-editor.scrollLeft) + 'px, ' + (-editor.scrollTop) + 'px)';
@@ -9829,14 +9838,11 @@ function devJsonAdjustControls(target, fontSize, height) {
   const english = state.language === 'en';
   const name = target === 'input' ? (english ? 'input' : '输入') : (english ? 'output' : '输出');
   const fontField = target === 'input' ? 'jsonInputFontSize' : 'jsonOutputFontSize';
-  const heightField = target === 'input' ? 'jsonInputHeight' : 'jsonOutputHeight';
   const actions = [
     [fontField, -1, 'A−', english ? 'Decrease ' + name + ' text size' : '缩小' + name + '文字'],
     [fontField, 1, 'A+', english ? 'Increase ' + name + ' text size' : '放大' + name + '文字'],
-    [heightField, -80, '↕−', english ? 'Reduce ' + name + ' panel height' : '缩小' + name + '区域'],
-    [heightField, 80, '↕+', english ? 'Increase ' + name + ' panel height' : '放大' + name + '区域'],
   ];
-  return '<div class="dev-json-adjustments" role="group" aria-label="' + (english ? 'Editor size controls' : '编辑器尺寸调整') + '">' + actions.map(([field, delta, label, title]) => '<button type="button" class="dev-json-adjust" data-dev-json-adjust="' + field + '" data-dev-json-delta="' + delta + '" aria-label="' + title + '" title="' + title + '">' + label + '</button>').join('') + '<span class="dev-json-adjust-readout">' + fontSize + 'px · ' + height + 'px</span></div>';
+  return '<div class="dev-json-adjustments" role="group" aria-label="' + (english ? 'Font size controls' : '字体大小调整') + '">' + actions.map(([field, delta, label, title]) => '<button type="button" class="dev-json-adjust" data-dev-json-adjust="' + field + '" data-dev-json-delta="' + delta + '" aria-label="' + title + '" title="' + title + '">' + label + '</button>').join('') + '</div>';
 }
 function devJsonCompareFontControls(field, fontSize, paneName) {
   const english = state.language === 'en';
@@ -9869,7 +9875,7 @@ function renderDeveloperJsonFormat() {
   const overlay = dev.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' : '';
   return '<div class="dev-workbench dev-json-format' + (dev.formatOutputFullscreen ? ' is-output-floating' : '') + '">' + overlay + '<div class="dev-editor-grid" data-dev-pane-grid ' + devPaneSplitStyle('format') + '>' +
     '<section class="dev-pane dev-editor-pane" aria-label="' + escapeHtml(t('devInput')) + '">' + developerJsonEditorWithActions('formatInput', dev.formatInput, '{\n  "name": "OneBox"\n}', inputActions) + '</section>' + devPaneSplitter('format') +
-    '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '" aria-label="' + escapeHtml(t('devOutput')) + '"><div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '</div><div class="dev-editor-action-dock">' + outputActions + '</div>' + devHistoryContent('json-format') + '</section>' +
+    '<section class="dev-pane dev-output-pane dev-json-output-pane' + (dev.formatOutputFullscreen ? ' is-floating' : '') + '" aria-label="' + escapeHtml(t('devOutput')) + '"><div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '<div class="dev-editor-action-dock">' + outputActions + '</div></div>' + devHistoryContent('json-format') + '</section>' +
     '</div></div>';
 }
 function developerCompareInlineStatusMarkup(comparison) {
@@ -10335,6 +10341,7 @@ function syncDeveloperJsonLineNumbers(editor) {
   const gutter = host?.querySelector('[data-dev-line-numbers]');
   if (!gutter) return;
   const numbers = developerJsonLineNumbers(editor.value);
+  host.style.setProperty('--dev-line-number-width', developerJsonLineGutterWidth(numbers.split('\n').length));
   if (gutter.textContent !== numbers) gutter.textContent = numbers;
   gutter.scrollTop = editor.scrollTop;
 }
