@@ -4493,3 +4493,74 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     padding: 13px 14px 11px;
   }
 }
+
+/* Developer tool switcher: compact icon labels with a quiet active surface. */
+#workspace[data-tool="dev"] .dev-mode-tabs {
+  display: flex !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  margin: 0 0 10px;
+  padding: 0 0 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  scrollbar-width: none;
+}
+#workspace[data-tool="dev"] .dev-mode-tabs::-webkit-scrollbar { display: none; }
+#workspace[data-tool="dev"] .dev-mode-tab,
+#workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen .dev-mode-tab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: max-content;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  margin: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.2;
+  box-shadow: none;
+}
+#workspace[data-tool="dev"] .dev-mode-tab:hover {
+  background: var(--soft);
+  color: var(--ink);
+}
+#workspace[data-tool="dev"] .dev-mode-tab.active,
+#workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen .dev-mode-tab.active {
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg));
+  color: var(--ink);
+  font-weight: 650;
+  box-shadow: none;
+}
+#workspace[data-tool="dev"] .dev-mode-tab.active::after { display: none !important; }
+#workspace[data-tool="dev"] .dev-mode-tab:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  outline-offset: 1px;
+}
+#workspace[data-tool="dev"] .dev-mode-icon { display: inline-grid; width: 14px; height: 14px; flex: 0 0 14px; place-items: center; }
+#workspace[data-tool="dev"] .dev-mode-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#workspace[data-tool="dev"] .dev-mode-tab.active .dev-mode-icon { color: var(--primary); }
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-mode-tabs { min-height: 34px; gap: 3px; margin-bottom: 6px; padding-bottom: 2px; }
+  #workspace[data-tool="dev"] .dev-mode-tab,
+  #workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen .dev-mode-tab { min-height: 30px; padding: 4px 7px; font-size: 10px; }
+}

@@ -9361,6 +9361,17 @@ function addDevRecord(kind, record) {
 function devModeLabel(mode) {
   return mode === 'json-format' ? t('devJsonFormat') : mode === 'json-compare' ? t('devJsonCompare') : mode === 'text-stats' ? t('devTextStats') : mode === 'timestamp' ? t('devTimestamp') : mode === 'file-compare' ? (state.language === 'en' ? 'File diff' : '文件对比') : t('unitConvert');
 }
+function devModeIcon(mode) {
+  const paths = {
+    'json-format': '<path d="M9 4H6a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h3M15 4h3a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-3"/>',
+    'json-compare': '<path d="M7 7h13M7 7l3-3M7 7l3 3M17 17H4m13 0-3-3m3 3-3 3"/>',
+    'text-stats': '<path d="M4 6h16M4 10h10M4 14h16M4 18h8"/>',
+    timestamp: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    'file-compare': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+    'unit-convert': '<path d="M7 7h13m0 0-3-3m3 3-3 3M17 17H4m0 0 3-3m-3 3 3 3"/>'
+  };
+  return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths[mode] || '') + '</svg>';
+}
 function devRecordLabel(kind, item) {
   const date = new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(Number(item.at) || Date.now());
   if (kind === 'json-format') return (item.compact ? t('devMinify') : t('devFormat')) + ' · ' + date;
@@ -10689,7 +10700,7 @@ document.addEventListener('pointerup', finishTimestampCityDrag);
 document.addEventListener('pointercancel', finishTimestampCityDrag);
 window.addEventListener('blur', () => finishTimestampCityDrag());
 function developerTool() {
-  const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '">' + devModeLabel(id) + '</button>').join('');
+  const modes = DEV_TOOL_IDS.map((id) => '<button type="button" class="dev-mode-tab ' + (state.devTools.active === id ? 'active' : '') + '" data-dev-mode="' + id + '"><span class="dev-mode-icon" aria-hidden="true">' + devModeIcon(id) + '</span><span class="dev-mode-label">' + devModeLabel(id) + '</span></button>').join('');
   const mode = state.devTools.active;
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : mode === 'file-compare' ? window.OneBoxFileCompareUI.render() : convert();
   const modalOverlay = mode === 'json-compare' && state.devTools.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
