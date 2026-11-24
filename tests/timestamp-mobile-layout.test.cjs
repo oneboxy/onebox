@@ -61,3 +61,14 @@ test('timestamp mobile layout removes the outer input card and compacts fields a
   assert.match(frame, /white-space:nowrap!important/);
   assert.match(frame, /color:var\(--muted\)!important/);
 });
+
+test('timestamp mobile layout retains the output pane and its conversion, clock, and history features', () => {
+  const frame = read('timestamp-input-output-frame.js');
+  const app = read('app.js');
+
+  assert.match(frame, /frame\.replaceChildren\(input, output\)/);
+  assert.doesNotMatch(frame, /output\.remove\(\)/);
+  assert.match(frame, /dev-timestamp-overview-results/);
+  assert.match(app, /dev-timestamp-world-result/);
+  assert.match(app, /devHistoryContent\('timestamp'\)/);
+});

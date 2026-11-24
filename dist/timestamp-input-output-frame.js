@@ -276,8 +276,9 @@
     input.dataset.unifiedLayout = 'true';
     inputGrid?.remove();
     input.replaceChildren(module);
-    output.remove();
-    frame.replaceChildren(input);
+    // Keep the complete output pane attached. It contains the reverse conversion,
+    // world clocks, history and copy/save actions; dropping it also drops those features.
+    frame.replaceChildren(input, output);
   }
 
   function relocateUnit() {
