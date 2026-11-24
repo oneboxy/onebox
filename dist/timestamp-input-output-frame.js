@@ -13,16 +13,16 @@
       scope + ' .dev-timestamp-bidirectional{display:grid!important;gap:8px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}' +
       scope + ' .dev-timestamp-bidirectional-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;margin:0!important;font-size:14px!important;line-height:1.3!important}' +
       scope + ' .dev-timestamp-bidirectional-title .dev-timestamp-bidirectional-swap{flex:0 0 26px!important;width:26px!important;min-width:26px!important;height:26px!important;min-height:26px!important;padding:0!important;border:0!important;background:transparent!important;color:var(--muted)!important;font-size:18px!important}' +
-      scope + ' .dev-timestamp-bidirectional-fields{display:grid!important;grid-template-columns:minmax(0,37%) minmax(0,37%)!important;justify-content:space-between!important;align-items:end!important;gap:7px!important}' +
+      scope + ' .dev-timestamp-bidirectional-fields{display:grid!important;grid-template-columns:minmax(0,42%) minmax(0,42%)!important;justify-content:space-between!important;align-items:end!important;gap:7px!important}' +
       scope + ' .dev-timestamp-bidirectional-field{display:flex!important;min-width:0!important;flex-direction:column!important;gap:0!important}' +
       scope + ' .dev-timestamp-bidirectional-label{display:none!important}' +
       scope + ' .dev-timestamp-bidirectional-field>.dev-timestamp-input-row{display:block!important;width:100%!important;min-width:0!important;margin:0!important}' +
       scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger,' +
       scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell{box-sizing:border-box!important;width:100%!important;min-width:0!important;height:36px!important;min-height:36px!important}' +
-      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger{justify-content:flex-start!important;padding:4px 22px!important;font-size:9px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger{justify-content:flex-start!important;padding:4px 25px 4px 25px!important;font-size:10px!important}' +
       scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger svg{right:auto!important;left:6px!important;width:14px!important;height:14px!important}' +
       scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-clear{right:2px!important;width:20px!important;min-width:20px!important;height:20px!important;min-height:20px!important}' +
-      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell>.dev-plain-input{box-sizing:border-box!important;width:100%!important;min-width:0!important;padding:4px 70px 4px 7px!important;font-size:10px!important;font-variant-numeric:tabular-nums}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell>.dev-plain-input{box-sizing:border-box!important;width:100%!important;min-width:0!important;padding:4px 74px 4px 7px!important;font-size:11px!important;font-variant-numeric:tabular-nums}' +
       scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-picker{right:24px!important;width:48px!important}' +
       scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger{display:flex!important;justify-content:center!important;white-space:nowrap!important;width:48px!important;min-height:24px!important;padding:2px!important;font-size:9px!important}' +
       scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger svg{width:10px!important;height:10px!important}' +
@@ -34,11 +34,6 @@
       scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card>span{grid-column:1!important;grid-row:1!important;white-space:nowrap!important;font-size:10px!important;color:var(--muted)!important}' +
       scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card>code{grid-column:2!important;grid-row:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;text-align:left!important;font-size:11px!important}' +
       scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy{grid-column:3!important;grid-row:1!important;justify-self:end!important;width:20px!important;min-width:20px!important;height:20px!important;min-height:20px!important;padding:3px!important;border:0!important;background:transparent!important;color:var(--muted)!important}' +
-      '}' +
-      '@media(max-width:430px){' +
-      scope + ' .dev-timestamp-bidirectional-fields{grid-template-columns:minmax(0,132px) minmax(0,132px)!important;justify-content:space-between!important;gap:4px!important}' +
-      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger{font-size:8.5px!important}' +
-      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell>.dev-plain-input{font-size:9px!important}' +
       '}';
     document.head.appendChild(style);
   }
@@ -276,9 +271,8 @@
     input.dataset.unifiedLayout = 'true';
     inputGrid?.remove();
     input.replaceChildren(module);
-    // Keep the complete output pane attached. It contains the reverse conversion,
-    // world clocks, history and copy/save actions; dropping it also drops those features.
-    frame.replaceChildren(input, output);
+    output.remove();
+    frame.replaceChildren(input);
   }
 
   function relocateUnit() {
