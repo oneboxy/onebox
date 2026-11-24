@@ -4913,3 +4913,150 @@ body:has(#workspace[data-tool="calendar"]) { overflow: hidden !important; }
     padding: 4px 2px !important;
   }
 }
+
+/* Mobile developer tools: keep the timestamp form and its city list in separate rows. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-timestamp-content {
+    grid-template-rows: max-content minmax(0, 1fr) !important;
+    grid-auto-rows: auto !important;
+    gap: 7px !important;
+    overflow: hidden !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame {
+    display: block !important;
+    height: auto !important;
+    max-height: min(54vh, 420px) !important;
+    overflow: visible !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame > .dev-timestamp-card {
+    display: block !important;
+    height: auto !important;
+    max-height: inherit !important;
+    overflow: visible !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional {
+    display: grid !important;
+    width: 100% !important;
+    max-height: inherit !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    overflow: hidden !important;
+    gap: 5px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields {
+    grid-template-rows: auto 24px auto !important;
+    row-gap: 3px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields.is-reversed > .dev-timestamp-bidirectional-field {
+    gap: 3px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields > .dev-timestamp-bidirectional-swap {
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    min-height: 24px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    height: 38px !important;
+    min-height: 38px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-live-button {
+    height: 28px !important;
+    min-height: 28px !important;
+    margin-top: 3px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional > .dev-timestamp-result-block {
+    display: block !important;
+    height: auto !important;
+    max-height: 128px !important;
+    overflow: hidden !important;
+    padding: 5px 0 0 !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-rows: max-content !important;
+    max-height: 122px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    min-height: 38px !important;
+    padding: 3px 2px !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-world-result {
+    min-height: 0 !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  #workspace[data-tool="dev"] .dev-file-compare {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    gap: 7px !important;
+    overflow: auto !important;
+    padding: 0 !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-heading {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-heading h2,
+  #workspace[data-tool="dev"] .dev-file-compare-privacy,
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone > span:not(.dev-file-compare-upload-icon),
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone small,
+  #workspace[data-tool="dev"] .dev-file-compare-actions button:disabled,
+  #workspace[data-tool="dev"] .dev-file-compare-run button:disabled {
+    display: none !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-actions { margin-left: auto; }
+  #workspace[data-tool="dev"] .dev-file-compare-pair {
+    grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone {
+    min-height: 92px !important;
+    gap: 5px !important;
+    padding: 10px 5px !important;
+    border-color: var(--line) !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone:hover,
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone:focus-within,
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone.is-dragging {
+    border-color: var(--muted) !important;
+    background: color-mix(in srgb, var(--muted) 5%, var(--panel)) !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-upload-icon,
+  #workspace[data-tool="dev"] .dev-file-compare-file-icon {
+    width: 22px !important;
+    height: 22px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-upload-icon svg { width: 16px !important; height: 16px !important; }
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone > strong { font-size: 11px !important; }
+  #workspace[data-tool="dev"] .dev-file-compare-vs { color: var(--muted) !important; }
+  #workspace[data-tool="dev"] .dev-file-compare-run { margin: 0 !important; }
+  #workspace[data-tool="dev"] .dev-file-compare-run button {
+    min-height: 30px !important;
+    border-color: var(--line) !important;
+    background: transparent !important;
+    color: var(--muted) !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-result {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+}
