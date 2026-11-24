@@ -1,13 +1,40 @@
 (function () {
   'use strict';
-  const scope = '.dev-workbench.dev-timestamp';
+  const scope = '#workspace[data-tool="dev"] .dev-workbench.dev-timestamp';
   const styleId = 'timestamp-input-output-frame-style';
   if (!document.getElementById(styleId)) {
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent =
       scope + ' .dev-timestamp-content{display:grid;grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:max-content!important;gap:12px!important}' +
-      scope + ' .dev-timestamp-input-output-frame{display:block;width:100%;min-width:0;box-sizing:border-box;padding:0;border:0;background:transparent;box-shadow:none}';
+      scope + ' .dev-timestamp-input-output-frame{display:block;width:100%;min-width:0;box-sizing:border-box;padding:0;border:0;background:transparent;box-shadow:none}' +
+      '@media(max-width:760px){' +
+      scope + ' .dev-timestamp-card[data-unified-layout="true"]{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}' +
+      scope + ' .dev-timestamp-bidirectional{display:grid!important;gap:8px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}' +
+      scope + ' .dev-timestamp-bidirectional-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;margin:0!important;font-size:14px!important;line-height:1.3!important}' +
+      scope + ' .dev-timestamp-bidirectional-title .dev-timestamp-bidirectional-swap{flex:0 0 26px!important;width:26px!important;min-width:26px!important;height:26px!important;min-height:26px!important;padding:0!important;border:0!important;background:transparent!important;color:var(--muted)!important;font-size:18px!important}' +
+      scope + ' .dev-timestamp-bidirectional-fields{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;align-items:end!important;gap:7px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field{display:flex!important;min-width:0!important;flex-direction:column!important;gap:0!important}' +
+      scope + ' .dev-timestamp-bidirectional-label{display:none!important}' +
+      scope + ' .dev-timestamp-bidirectional-field>.dev-timestamp-input-row{display:block!important;width:100%!important;min-width:0!important;margin:0!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger,' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell{box-sizing:border-box!important;width:100%!important;min-width:0!important;height:36px!important;min-height:36px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger{justify-content:flex-start!important;padding:4px 25px 4px 25px!important;font-size:10px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger svg{right:auto!important;left:6px!important;width:14px!important;height:14px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-clear{right:2px!important;width:20px!important;min-width:20px!important;height:20px!important;min-height:20px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell>.dev-plain-input{box-sizing:border-box!important;width:100%!important;min-width:0!important;padding:4px 74px 4px 7px!important;font-size:11px!important;font-variant-numeric:tabular-nums}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-picker{right:24px!important;width:48px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger{display:flex!important;justify-content:center!important;white-space:nowrap!important;width:48px!important;min-height:24px!important;padding:2px!important;font-size:9px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger svg{width:10px!important;height:10px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-field-icon.is-clear{right:0!important;width:21px!important;min-width:21px!important;height:21px!important;min-height:21px!important;padding:4px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-live-button{width:max-content!important;height:22px!important;min-height:22px!important;margin:2px 0 0!important;padding:1px 4px!important;border:0!important;background:transparent!important;color:var(--muted)!important;font-size:10px!important}' +
+      scope + ' .dev-timestamp-bidirectional>.dev-timestamp-result-block{max-height:116px!important;min-height:0!important;margin:2px 0 0!important;padding:4px 0 0!important;overflow:auto!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}' +
+      scope + ' .dev-timestamp-bidirectional .dev-timestamp-standard-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;max-height:110px!important;gap:0!important;overflow:auto!important}' +
+      scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card{display:grid!important;grid-template-columns:max-content minmax(0,1fr) 22px!important;grid-template-rows:minmax(0,1fr)!important;align-items:center!important;gap:6px!important;box-sizing:border-box!important;min-height:32px!important;padding:2px 0!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}' +
+      scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card>span{grid-column:1!important;grid-row:1!important;white-space:nowrap!important;font-size:10px!important;color:var(--muted)!important}' +
+      scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card>code{grid-column:2!important;grid-row:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;text-align:left!important;font-size:11px!important}' +
+      scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy{grid-column:3!important;grid-row:1!important;justify-self:end!important;width:20px!important;min-width:20px!important;height:20px!important;min-height:20px!important;padding:3px!important;border:0!important;background:transparent!important;color:var(--muted)!important}' +
+      '}';
     document.head.appendChild(style);
   }
   const localDateTime = (date) =>

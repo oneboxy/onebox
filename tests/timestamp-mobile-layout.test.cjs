@@ -46,3 +46,15 @@ test('timestamp mobile controls use short unit text and aligned, accessible icon
   assert.match(styles, /\.dev-timestamp-datetime-trigger svg\s*\{[^}]*right:\s*auto[^}]*left:\s*7px/s);
   assert.match(styles, /\.dev-timestamp-datetime-clear\s*\{[^}]*right:\s*3px/s);
 });
+
+test('timestamp mobile layout removes the outer input card and compacts fields and results', () => {
+  const frame = read('timestamp-input-output-frame.js');
+
+  assert.match(frame, /const scope = '#workspace\[data-tool="dev"\] \.dev-workbench\.dev-timestamp'/);
+  assert.match(frame, /dev-timestamp-card\[data-unified-layout="true"\].*?border:0!important/s);
+  assert.match(frame, /dev-timestamp-bidirectional-label\{display:none!important\}/);
+  assert.match(frame, /grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)!important/);
+  assert.match(frame, /dev-timestamp-summary-card\{.*?min-height:32px!important/s);
+  assert.match(frame, /white-space:nowrap!important/);
+  assert.match(frame, /color:var\(--muted\)!important/);
+});
