@@ -34,6 +34,11 @@
       scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card>span{grid-column:1!important;grid-row:1!important;white-space:nowrap!important;font-size:10px!important;color:var(--muted)!important}' +
       scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card>code{grid-column:2!important;grid-row:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;text-align:left!important;font-size:11px!important}' +
       scope + ' .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy{grid-column:3!important;grid-row:1!important;justify-self:end!important;width:20px!important;min-width:20px!important;height:20px!important;min-height:20px!important;padding:3px!important;border:0!important;background:transparent!important;color:var(--muted)!important}' +
+      '}' +
+      '@media(max-width:430px){' +
+      scope + ' .dev-timestamp-bidirectional-fields{grid-template-columns:minmax(0,132px) minmax(0,132px)!important;justify-content:space-between!important;gap:4px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger{font-size:8.5px!important}' +
+      scope + ' .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell>.dev-plain-input{font-size:9px!important}' +
       '}';
     document.head.appendChild(style);
   }
