@@ -53,9 +53,51 @@
 }
 
 #workspace[data-tool="calendar"] .calendar-today svg {
-  display: block;
-  width: 19px;
-  height: 19px;
+  display: block !important;
+  flex: 0 0 19px !important;
+  width: 19px !important;
+  height: 19px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  overflow: visible;
+}
+
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event,
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event:hover,
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event:active,
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event:focus-visible {
+  position: static !important;
+  display: grid !important;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 0 0 auto !important;
+  padding: 0 !important;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event > svg {
+  display: block !important;
+  flex: 0 0 19px !important;
+  width: 19px !important;
+  height: 19px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  overflow: visible;
 }
 
 /* Keep the event editor content-sized and make its date/repeat controls one
