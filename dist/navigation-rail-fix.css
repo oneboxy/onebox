@@ -1,0 +1,12 @@
+/* Keep the tool tab scroller at the right edge in both directions. */
+#toolNav .tool-tab-panel > .feed-source-scroll-button[data-tool-scroll="toggle"] {
+  left: auto !important;
+  right: 8px !important;
+  transform: none !important;
+}
+
+/* Remove the obsolete separator beside the homepage source manager. */
+#homeSourceNav .feed-source-panel > .feed-source-manage {
+  border-left: 0 !important;
+  box-shadow: none !important;
+}
