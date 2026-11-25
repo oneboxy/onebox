@@ -1,0 +1,288 @@
+/* Calendar is a page canvas; keep the month controls visually quiet. */
+#workspace[data-tool="calendar"] {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#workspace[data-tool="calendar"] .calendar-month,
+#workspace[data-tool="calendar"] .calendar-legend,
+#workspace[data-tool="calendar"] .calendar-today {
+  position: static;
+  left: auto;
+}
+
+#workspace[data-tool="calendar"] .calendar-nav-btn,
+#workspace[data-tool="calendar"] .calendar-today {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+#workspace[data-tool="calendar"] .calendar-nav-btn:hover,
+#workspace[data-tool="calendar"] .calendar-nav-btn:active,
+#workspace[data-tool="calendar"] .calendar-today:hover,
+#workspace[data-tool="calendar"] .calendar-today:active {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+#workspace[data-tool="calendar"] .calendar-nav-btn:focus-visible,
+#workspace[data-tool="calendar"] .calendar-today:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+#workspace[data-tool="calendar"] .calendar-nav-btn svg {
+  width: 25px;
+  height: 25px;
+}
+
+#workspace[data-tool="calendar"] .calendar-today svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+}
+
+/* Keep the event editor content-sized and make its date/repeat controls one
+   compact row. This also prevents the native controls from expanding the
+   dialog or painting an oversized popup-like block. */
+#eventDialog:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 12px max(16px, env(safe-area-inset-bottom));
+}
+
+#eventDialog .event-dialog-card {
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin: 0 auto;
+  padding: 16px;
+  overflow: auto;
+  border-radius: 16px;
+}
+
+#eventDialog .dialog-head {
+  position: static;
+  align-items: center;
+  min-height: 0;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+#eventDialog .dialog-head h2 {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+#eventDialog .event-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#eventDialog .event-form > .field {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  gap: 6px;
+}
+
+#eventDialog .event-form > .field > label {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: normal;
+}
+
+#eventDialog .event-form textarea#eventTitle {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 80px;
+  min-height: 80px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+#eventDialog .event-date-time-grid,
+#eventDialog .event-datetime-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+#eventDialog .event-datetime-control {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 116px;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-2);
+}
+
+#eventDialog .event-calendar-icon {
+  position: absolute;
+  left: 10px;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+#eventDialog .event-datetime-display {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0 6px 0 34px;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+#eventDialog .event-datetime-control > input.event-datetime-input {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 2;
+  box-sizing: border-box;
+  width: calc(100% - 116px);
+  height: 100%;
+  min-height: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  color: transparent !important;
+  opacity: 0;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#eventDialog .event-repeat-control {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  width: 116px;
+  height: 100%;
+  min-width: 0;
+  padding: 0 9px 0 4px;
+  color: var(--muted);
+}
+
+#eventDialog .event-repeat-control select,
+#eventDialog #eventRepeat {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  padding: 0 14px 0 0;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  text-align: right;
+  text-align-last: right;
+}
+
+#eventDialog .event-repeat-control > svg {
+  position: absolute;
+  right: 7px;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+#eventDialog .event-form > .full-width {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#eventDialog .event-weekdays-field[hidden] { display: none !important; }
+
+@media (max-width: 600px) {
+  #eventDialog:not([hidden]) { padding-inline: 12px; }
+  #eventDialog .event-dialog-card { width: min(440px, 100%); padding: 14px; }
+  #eventDialog .event-datetime-control { height: 40px; min-height: 40px; grid-template-columns: minmax(0, 1fr) 104px; }
+  #eventDialog .event-datetime-control > input.event-datetime-input { width: calc(100% - 104px); }
+  #eventDialog .event-repeat-control { width: 104px; }
+  #eventDialog .event-repeat-control select,
+  #eventDialog #eventRepeat { font-size: 11px; }
+}
