@@ -251,6 +251,22 @@
   height: 18px;
 }
 
+/* Mark the selected calendar day with its outline alone, without a button-like
+   fill, pressed shadow, or tap animation. */
+#workspace[data-tool="calendar"] .calendar-grid > .day.selected,
+#workspace[data-tool="calendar"] .calendar-grid > .day.selected:hover,
+#workspace[data-tool="calendar"] .calendar-grid > .day.selected:active,
+#workspace[data-tool="calendar"] .calendar-grid > .day.selected:focus-visible {
+  border: 2px solid var(--primary) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
 #eventDialog .event-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
