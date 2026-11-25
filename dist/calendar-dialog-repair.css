@@ -100,6 +100,97 @@
   overflow: visible;
 }
 
+/* Keep the month title, legend, and calendar action on one shared centerline. */
+#workspace[data-tool="calendar"] .calendar-month {
+  align-items: center !important;
+  min-height: 36px;
+  line-height: 1;
+}
+
+#workspace[data-tool="calendar"] .calendar-month-pickers {
+  align-items: center !important;
+  min-height: 36px;
+}
+
+#workspace[data-tool="calendar"] .calendar-picker {
+  align-items: center !important;
+  height: 36px;
+  min-height: 36px;
+  line-height: 1;
+}
+
+#workspace[data-tool="calendar"] .calendar-picker-value,
+#workspace[data-tool="calendar"] .calendar-picker-unit {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+#workspace[data-tool="calendar"] .calendar-legend {
+  align-self: center;
+  align-items: center !important;
+  flex-wrap: nowrap;
+  height: 36px;
+  min-height: 36px;
+  margin: 0 0 0 8px !important;
+  line-height: 1;
+}
+
+#workspace[data-tool="calendar"] .calendar-legend > span {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+#workspace[data-tool="calendar"] .calendar-today {
+  align-self: center;
+  margin: 0;
+}
+
+/* The agenda label, count, and add action share a compact centerline too. */
+#workspace[data-tool="calendar"] .agenda-panel > .subhead {
+  display: flex;
+  align-items: center !important;
+  min-height: 32px;
+  padding-right: 0 !important;
+  gap: 8px;
+}
+
+#workspace[data-tool="calendar"] .agenda-panel > .subhead h3 {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+#workspace[data-tool="calendar"] .agenda-count-text {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  line-height: 1;
+}
+
+#workspace[data-tool="calendar"] .agenda-panel > .subhead > .calendar-add-event {
+  align-self: center;
+  margin-left: auto !important;
+}
+
+@media (max-width: 760px) {
+  #workspace[data-tool="calendar"] .calendar-month { gap: 2px; }
+  #workspace[data-tool="calendar"] .calendar-picker { height: 36px; min-height: 36px; }
+  #workspace[data-tool="calendar"] .calendar-legend {
+    gap: 5px;
+    margin-left: 0 !important;
+  }
+  #workspace[data-tool="calendar"] .calendar-today {
+    flex-basis: 32px;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+  }
+}
+
 /* Keep the event editor content-sized and make its date/repeat controls one
    compact row. This also prevents the native controls from expanding the
    dialog or painting an oversized popup-like block. */
