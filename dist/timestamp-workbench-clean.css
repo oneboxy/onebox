@@ -1,0 +1,221 @@
+/* A quiet desktop layout for the timestamp converter. Mobile has its own
+   compact, stacked layout and remains unchanged. */
+@media (min-width: 761px) {
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame,
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame > .dev-timestamp-card,
+  #workspace[data-tool="dev"] .dev-timestamp-output-card {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-card {
+    width: 100%;
+    padding: 0 !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional {
+    box-sizing: border-box;
+    width: min(100%, 1154px) !important;
+    max-width: 1154px !important;
+    gap: 10px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title {
+    display: flex !important;
+    min-height: 28px;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    font-weight: 550 !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title .dev-timestamp-bidirectional-swap {
+    flex: 0 0 28px !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--muted) !important;
+    font-size: 18px !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title .dev-timestamp-bidirectional-swap:hover,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-title .dev-timestamp-bidirectional-swap[aria-pressed="true"] {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--ink) !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 1154px !important;
+    margin: 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: auto !important;
+    gap: 22px !important;
+    align-items: center !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields > .is-datetime { grid-column: 1 !important; grid-row: 1 !important; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields > .is-timestamp { grid-column: 2 !important; grid-row: 1 !important; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields.is-reversed > .is-datetime { grid-column: 2 !important; }
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-fields.is-reversed > .is-timestamp { grid-column: 1 !important; }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field {
+    display: grid !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-label { display: none !important; }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime > .dev-timestamp-input-row {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-date-time-control,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-datetime .dev-timestamp-datetime-trigger,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-input-shell > .dev-plain-input {
+    height: 40px !important;
+    min-height: 40px !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 7px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp > .dev-timestamp-input-row {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-live-button,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-field-icon,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-row-copy {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--muted) !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-live-button {
+    min-width: 0 !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 0 2px !important;
+    white-space: nowrap;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-live-button:hover,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-unit-trigger:hover,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional-field.is-timestamp .dev-timestamp-field-icon:hover,
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-row-copy:hover {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--ink) !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional > .dev-timestamp-result-block {
+    max-width: 1154px;
+    margin: 8px 0 0 !important;
+    padding: 10px 0 0 !important;
+    border: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card {
+    position: relative !important;
+    display: flex !important;
+    min-width: 0 !important;
+    min-height: 54px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 4px 26px 4px 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card > span {
+    color: var(--muted) !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card > code {
+    max-width: 100% !important;
+    color: var(--ink) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-summary-card .dev-timestamp-row-copy {
+    position: absolute !important;
+    top: 50% !important;
+    right: 0 !important;
+    width: 22px !important;
+    min-width: 22px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 3px !important;
+    transform: translateY(-50%) !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1199px) {
+  #workspace[data-tool="dev"] .dev-timestamp-bidirectional .dev-timestamp-standard-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}

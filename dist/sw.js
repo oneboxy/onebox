@@ -1,5 +1,5 @@
 // Mobile editor toolbar assets use the current compact controls.
-const CACHE = 'onebox-v1207';
+const CACHE = 'onebox-v1208';
 const APP_SHELL = [
   './',
   'index.html',
@@ -11,6 +11,7 @@ const APP_SHELL = [
   'track-module.css?v=1.0.20',
   'page-surface-flat.css?v=1.0.211',
   'navigation-rail-fix.css?v=1.0.1',
+  'timestamp-workbench-clean.css?v=1.0.1',
   'converter-mobile-fix.js?v=2.18.810',
   'converter-select-popup.js?v=2.18.885',
   'converter-result-fit.js?v=2.18.895',
@@ -31,7 +32,7 @@ const APP_SHELL = [
   'timestamp-clean.css?v=2.18.873',
   'select-focus-clean.css?v=2.18.829',
   'navigation-icon-refinement.css?v=2.18.2',
-    'timestamp-input-output-frame.js?v=2.18.884',
+    'timestamp-input-output-frame.js?v=2.18.885',
   'timestamp-city-auto-height.js?v=2.18.819',
   'timestamp-date-time-control.js?v=2.18.877',
   'timestamp-layout-restore.css?v=2.18.816',

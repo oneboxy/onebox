@@ -84,6 +84,7 @@
     const timestampInput = timestampRow?.querySelector('.dev-plain-input');
     const dateInput = dateRow?.querySelector('input[data-dev-field="timestampDate"]');
     if (!timestampRow || !dateRow || !timestampInput || !dateInput) return;
+    dateInput.setAttribute('aria-label', /^en(?:-|$)/i.test(document.documentElement.lang || '') ? 'Date and time' : '时间');
     timestampInput.setAttribute('aria-label', /^en(?:-|$)/i.test(document.documentElement.lang || '') ? 'Timestamp' : '时间戳');
 
     const resultBlocks = Array.from(output.querySelectorAll('.dev-timestamp-overview-results > .dev-timestamp-result-block'));

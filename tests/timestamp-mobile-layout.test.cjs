@@ -79,3 +79,15 @@ test('timestamp mobile layout removes the outer input card and compacts fields a
   assert.match(frame, /white-space:nowrap!important/);
   assert.match(frame, /color:var\(--muted\)!important/);
 });
+
+test('timestamp desktop layout keeps two balanced fields and removes decorative cards', () => {
+  const styles = read('timestamp-workbench-clean.css');
+  const index = read('index.html');
+
+  assert.match(styles, /@media \(min-width: 761px\)/);
+  assert.match(styles, /dev-timestamp-bidirectional-fields\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/s);
+  assert.match(styles, /dev-timestamp-bidirectional\s*\{[^}]*border:\s*0 !important/s);
+  assert.match(styles, /dev-timestamp-summary-card\s*\{[^}]*border:\s*0 !important[^}]*background:\s*transparent !important/s);
+  assert.match(styles, /dev-timestamp-bidirectional-swap:hover[^}]*background:\s*transparent !important/s);
+  assert.match(index, /timestamp-workbench-clean\.css\?v=1\.0\.1/);
+});
