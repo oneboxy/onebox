@@ -385,7 +385,7 @@ const DICT = {
     keyboard: '键盘：数字、+ − × ÷、括号、Enter 等号、Esc 清空',
     today: '今天', off: '休', work: '补班', normalCalendar: '工作日历',
     legalHoliday: '法定休息', makeUpWorkday: '补班', solarTerm: '节气', selectedDay: '选中日期',
-    noAgenda: '这一天还没有安排。', agenda: '日程', addAgenda: '新增日程', newReminder: '新增', eventContent: '日程内容', eventPlaceholder: '请输入', selectPlease: '请选择', addEvent: '添加日程', addToDay: '添加日程', eventDate: '日期', eventTime: '时间', eventDateTime: '选择提醒时间', reminderSchedule: '提醒日程', eventRepeat: '重复',
+    noAgenda: '这一天还没有安排。', agenda: '日程', addAgenda: '新增日程', newReminder: '新增', eventContent: '日程内容', eventPlaceholder: '请输入日程内容', selectPlease: '请选择', addEvent: '添加日程', addToDay: '添加日程', eventDate: '日期', eventTime: '时间', eventDateTime: '选择提醒时间', reminderSchedule: '提醒日程', eventRepeat: '重复',
     noteOptional: '备注（可选）', weatherSearch: '搜索', currentLocation: '当前位置',
     refresh: '刷新', searchPlace: '搜索城市或区县',
     noWeather: '天气需要联网，搜索一个城市或区县开始。', weatherLoading: '正在获取天气…', weatherLoadFailed: '天气获取失败，点击卡片重试。',
@@ -432,7 +432,7 @@ const DICT = {
     keyboard: 'Keyboard: numbers, + − × ÷, parentheses, Enter and Escape',
     today: 'Today', off: 'Off', work: 'Make-up workday', normalCalendar: 'Work calendar',
     legalHoliday: 'Public holiday', makeUpWorkday: 'Make-up workday', solarTerm: 'Solar term', selectedDay: 'Selected day',
-    noAgenda: 'Nothing planned for this day.', agenda: 'Events', addAgenda: 'New event', newReminder: 'New', eventContent: 'Event details', eventPlaceholder: 'Enter', selectPlease: 'Select', addEvent: 'Add event', addToDay: 'Add event', eventDate: 'Date', eventTime: 'Time', eventDateTime: 'Date and time', reminderSchedule: 'Reminder time', eventRepeat: 'Repeat',
+    noAgenda: 'Nothing planned for this day.', agenda: 'Events', addAgenda: 'New event', newReminder: 'New', eventContent: 'Event details', eventPlaceholder: 'Enter event details', selectPlease: 'Select', addEvent: 'Add event', addToDay: 'Add event', eventDate: 'Date', eventTime: 'Time', eventDateTime: 'Date and time', reminderSchedule: 'Reminder time', eventRepeat: 'Repeat',
     noteOptional: 'Note (optional)', weatherSearch: 'Search', currentLocation: 'Current location',
     refresh: 'Refresh', searchPlace: 'Search city or district',
     noWeather: 'Search a city or district to get weather.', weatherLoading: 'Loading weather…', weatherLoadFailed: 'Weather failed to load. Click the card to retry.',
@@ -8837,7 +8837,7 @@ function renderEventDialog(eventId = '') {
   const dateTime = eventDateTimeMarkup(entry?.day || state.selectedDate, options, item?.time || '');
   const title = item ? (state.language === 'en' ? 'Edit event' : '编辑日程') : t('newReminder');
   dialog.setAttribute('aria-label', title);
-  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + title + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form" novalidate><div class="field"><label for="eventTitle">' + t('eventContent') + '</label><textarea id="eventTitle" rows="3" maxlength="60" placeholder="' + t('eventPlaceholder') + '">' + escapeHtml(item?.title || '') + '</textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><button class="primary full-width" type="button" data-event-save>' + (state.language === 'en' ? 'Save' : '保存') + '</button><div class="field event-weekdays-field" ' + (repeatValue === 'weekly' ? '' : 'hidden') + '><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
+  dialog.innerHTML = '<div class="dialog-card event-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><h2>' + title + '</h2><button class="icon-btn small" data-close-event-dialog aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><form id="eventForm" class="event-form" novalidate><div class="field"><textarea id="eventTitle" aria-label="' + t('eventContent') + '" rows="3" maxlength="60" placeholder="' + t('eventPlaceholder') + '">' + escapeHtml(item?.title || '') + '</textarea></div><div class="field"><div class="event-date-time-grid"><div class="event-date-time-field event-datetime-field">' + dateTime.control + '</div></div>' + dateTime.hidden + '</div><button class="primary full-width" type="button" data-event-save>' + (state.language === 'en' ? 'Save' : '保存') + '</button><div class="field event-weekdays-field" ' + (repeatValue === 'weekly' ? '' : 'hidden') + '><label>' + t('weekdays') + '</label><div class="weekday-options">' + weekdays + '</div></div></form></div>';
   dialog.hidden = false;
 }
 function closeEventDialog() { const dialog = $('#eventDialog'); if (dialog) dialog.hidden = true; calendarEventEditingId = ''; }
