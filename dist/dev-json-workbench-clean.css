@@ -1,0 +1,191 @@
+/* Keep the paired JSON panes level on desktop. The previous output footer
+   spacer made the result panel end below its visible editor. */
+@media (min-width: 761px) {
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-format > .dev-editor-grid[data-dev-pane-grid],
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-compare > .dev-compare-grid[data-dev-pane-grid] {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-format > .dev-editor-grid > .dev-pane,
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-compare > .dev-compare-grid > .dev-pane {
+    box-sizing: border-box;
+    min-width: 0;
+    align-self: stretch;
+  }
+
+  #workspace[data-tool="dev"] .dev-json-output-pane {
+    padding-bottom: 0 !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-json-output-pane:not(.is-floating) .dev-json-live-output {
+    box-sizing: border-box;
+    height: var(--dev-json-output-height, 460px) !important;
+    min-height: 240px;
+    max-height: none;
+  }
+
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-compare > .dev-compare-grid {
+    align-items: stretch;
+  }
+
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-compare > .dev-compare-grid > .dev-pane {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-compare .dev-code-editor {
+    box-sizing: border-box;
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    resize: none;
+  }
+}
+
+/* The JSON pages use the history icon without a numeric badge. */
+#workspace[data-tool="dev"] .dev-workbench.dev-json-format .dev-history-count,
+#workspace[data-tool="dev"] .dev-workbench.dev-json-compare .dev-history-count {
+  display: none !important;
+}
+
+/* Keep the JSON history popup compact and free of heavy button chrome. */
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal.dialog {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, .38);
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-modal-card {
+  display: flex;
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(72vh, 520px);
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 15px 16px 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 16px 44px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal-head {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal-head h2 {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-clear,
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-close {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  padding: 2px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transform: none !important;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-clear:hover,
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-close:hover {
+  background: transparent !important;
+  color: var(--ink);
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-close {
+  width: 24px;
+  height: 24px;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-close svg {
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-content,
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-record-list {
+  min-height: 0;
+  margin: 0;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-record-list {
+  max-height: min(58vh, 380px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-swipe-row {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-swipe-row .dev-record {
+  min-height: 0;
+  padding: 8px 1px;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--ink);
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-record:hover,
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-record:focus-visible {
+  background: var(--soft);
+  outline: 0;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-record strong {
+  font-size: 11px;
+  font-weight: 550;
+}
+
+#workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-record small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+@media (max-width: 560px) {
+  #workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal.dialog { padding: 12px; }
+  #workspace[data-tool="dev"] .dev-workbench:is(.dev-json-format, .dev-json-compare) .dev-history-modal .dev-history-modal-card {
+    width: min(440px, calc(100vw - 24px));
+    padding: 13px 14px 11px;
+  }
+}

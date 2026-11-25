@@ -1,5 +1,5 @@
-// Mobile editor toolbar assets use the current compact controls.
-const CACHE = 'onebox-v1209';
+// Refresh the compact JSON workbench and history dialog styles.
+const CACHE = 'onebox-v1211';
 const APP_SHELL = [
   './',
   'index.html',
@@ -12,6 +12,7 @@ const APP_SHELL = [
   'page-surface-flat.css?v=1.0.211',
   'navigation-rail-fix.css?v=1.0.1',
   'developer-canvas-clean.css?v=1.0.1',
+  'dev-json-workbench-clean.css?v=1.0.2',
   'timestamp-workbench-clean.css?v=1.0.1',
   'converter-mobile-fix.js?v=2.18.810',
   'converter-select-popup.js?v=2.18.885',
