@@ -1,5 +1,5 @@
 // Refresh fullscreen history controls and JSON workbench styles.
-const CACHE = 'onebox-v1214';
+const CACHE = 'onebox-v1215';
 const APP_SHELL = [
   './',
   'index.html',
