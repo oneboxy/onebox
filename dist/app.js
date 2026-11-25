@@ -9323,6 +9323,11 @@ function weather() {
     active.hourlyRepairAttemptAt = Date.now();
     setTimeout(() => { if (state.activeWeatherId === active.id && !state.weatherLoading) void refreshWeatherCard(active); }, 0);
   }
+  const missingWindDirection = current.wind_direction_10m == null || current.wind_direction_10m === '' || !Number.isFinite(Number(current.wind_direction_10m));
+  if (missingWindDirection && Number(current.wind_speed_10m) >= 1 && Date.now() - Number(active.windDirectionRepairAttemptAt || 0) > 5 * 60 * 1000) {
+    active.windDirectionRepairAttemptAt = Date.now();
+    setTimeout(() => { if (state.activeWeatherId === active.id && !state.weatherLoading) void refreshWeatherCard(active); }, 0);
+  }
   const updatedTime = active.updatedAt ? new Intl.DateTimeFormat(state.language === 'en' ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit' }).format(active.updatedAt) : '—';
   const condition = weatherCode(Number(current.weather_code));
   const nearbyHours = Array.from({ length: 6 }, (_, offset) => anchorIndex + offset).filter((index) => index >= 0 && index < hourlyTimes.length);
