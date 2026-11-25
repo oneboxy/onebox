@@ -257,7 +257,7 @@
 #workspace[data-tool="calendar"] .calendar-grid > .day.selected:hover,
 #workspace[data-tool="calendar"] .calendar-grid > .day.selected:active,
 #workspace[data-tool="calendar"] .calendar-grid > .day.selected:focus-visible {
-  border: 2px solid var(--line) !important;
+  border: 2px solid color-mix(in srgb, var(--ink) 26%, var(--line)) !important;
   background: transparent !important;
   box-shadow: none !important;
   outline: none !important;
