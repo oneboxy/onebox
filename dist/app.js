@@ -9642,7 +9642,8 @@ function devHistoryToggle(kind) {
 function devHistoryContent(kind) {
   const records = state.devTools.records[kind] || [];
   if (!records.length) return '';
-  const list = records.length ? records.map((item) => '<div class="swipe-row dev-history-swipe-row" data-swipe-row><button class="dev-record history-item swipe-content" type="button" data-dev-record-kind="' + kind + '" data-dev-record="' + escapeHtml(item.id) + '" title="' + escapeHtml(devRecordDetail(kind, item)) + '"><strong>' + escapeHtml(devRecordLabel(kind, item)) + '</strong><small>' + escapeHtml(devRecordPreview(kind, item)) + '</small></button><button class="swipe-delete" data-delete-dev-record-kind="' + kind + '" data-delete-dev-record="' + escapeHtml(item.id) + '">' + (state.language === 'en' ? 'Delete' : '删除') + '</button></div>').join('') : '<p class="dev-history-empty">' + t('devNoRecords') + '</p>';
+  const deleteLabel = state.language === 'en' ? 'Delete record' : '删除记录';
+  const list = records.length ? records.map((item) => '<div class="swipe-row dev-history-swipe-row" data-swipe-row><button class="dev-record history-item swipe-content" type="button" data-dev-record-kind="' + kind + '" data-dev-record="' + escapeHtml(item.id) + '" title="' + escapeHtml(devRecordDetail(kind, item)) + '"><strong>' + escapeHtml(devRecordLabel(kind, item)) + '</strong><small>' + escapeHtml(devRecordPreview(kind, item)) + '</small></button><button class="swipe-delete dev-history-delete" type="button" data-delete-dev-record-kind="' + kind + '" data-delete-dev-record="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(deleteLabel) + '" title="' + escapeHtml(deleteLabel) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5M14 11v5"/></svg></button></div>').join('') : '<p class="dev-history-empty">' + t('devNoRecords') + '</p>';
   const open = state.devTools.historyOpen === true;
   const historyBody = '<div class="dev-history-content"><div class="dev-record-list">' + list + '</div></div>';
   if (!open) return '';
@@ -9889,8 +9890,10 @@ function renderDeveloperJsonFormat() {
 function developerJsonOutputPaneMarkup(floating = false) {
   const dev = state.devTools;
   const formatActions = dev.formatOutput ? (floating ? devActionButton('dev-copy-output', t('devCopy')) : devActionButton('json-minify', t('devMinify')) + devActionButton('json-expand-all', t('devExpandAll')) + devActionButton('json-collapse-all', t('devCollapseAll')) + devActionButton('dev-copy-output', t('devCopy'))) : '';
-  const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + formatActions + devJsonOutputFullscreenButton(floating) + devHistoryToggle('json-format');
-  return '<section class="dev-pane dev-output-pane dev-json-output-pane' + (floating ? ' is-floating' : '') + '" aria-label="' + escapeHtml(t('devOutput')) + '"><div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '<div class="dev-editor-action-dock">' + outputActions + '</div></div>' + devHistoryContent('json-format') + '</section>';
+  const historyActions = floating ? '' : devHistoryToggle('json-format');
+  const historyContent = floating ? '' : devHistoryContent('json-format');
+  const outputActions = devJsonAdjustControls('output', dev.jsonOutputFontSize, dev.jsonOutputHeight) + formatActions + devJsonOutputFullscreenButton(floating) + historyActions;
+  return '<section class="dev-pane dev-output-pane dev-json-output-pane' + (floating ? ' is-floating' : '') + '" aria-label="' + escapeHtml(t('devOutput')) + '"><div class="dev-live-output dev-json-live-output" data-dev-live-output style="--dev-json-output-font-size:' + dev.jsonOutputFontSize + 'px;--dev-json-output-height:' + dev.jsonOutputHeight + 'px">' + developerLiveOutputMarkup() + '<div class="dev-editor-action-dock">' + outputActions + '</div></div>' + historyContent + '</section>';
 }
 function developerCompareInlineStatusMarkup(comparison) {
   const status = comparison.status || '';
