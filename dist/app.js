@@ -390,7 +390,7 @@ const DICT = {
     refresh: '刷新', searchPlace: '搜索城市或区县',
     noWeather: '天气需要联网，搜索一个城市或区县开始。', weatherLoading: '正在获取天气…', weatherLoadFailed: '天气获取失败，点击卡片重试。',
     weatherData: '数据来自 Open-Meteo，最近更新 {time}，离线可查看。', weatherHourlyRepairing: '逐小时预报数据不完整，正在重新获取…',
-    sortWeather: '', hourly: '36 小时', daily: '前 3 天 · 今天 · 未来 15 天', advice: '天气建议',
+    sortWeather: '', hourly: '48 小时', daily: '前 3 天 · 今天 · 未来 15 天', advice: '天气建议',
     commute: '出行', sport: '运动', clothing: '穿衣', sunscreen: '防晒', hiking: '爬山', windAdvice: '风力建议', windLevel: '风力', elevation: '海拔',
     addCard: '添加', noResults: '没有找到匹配地点，请换个关键词。',
     home: '首页', tools: '工具', navigation: '导航', messages: '消息', mine: '我的', quickTools: '常用工具', openSettings: '打开设置', noMessages: '还没有消息。', homeTabs: '首页', homeTabsSelected: '已选择 {count} 项', homeSourceManage: '添加信息源', homeSourceManageHint: '选择要显示在首页导航中的来源', homeSourceAdd: '添加', homeSourceRemove: '移除', homeSourceEmpty: '暂时没有其他来源',
@@ -437,7 +437,7 @@ const DICT = {
     refresh: 'Refresh', searchPlace: 'Search city or district',
     noWeather: 'Search a city or district to get weather.', weatherLoading: 'Loading weather…', weatherLoadFailed: 'Weather failed to load. Click the card to retry.',
     weatherData: 'Weather data from Open-Meteo · updated {time} · saved locally for offline viewing.', weatherHourlyRepairing: 'Hourly forecast is incomplete. Refreshing…',
-    sortWeather: '', hourly: '36 hours', daily: '3 days before · today · next 15 days', advice: 'Advice',
+    sortWeather: '', hourly: '48 hours', daily: '3 days before · today · next 15 days', advice: 'Advice',
     commute: 'Travel', sport: 'Sport', clothing: 'Clothing', sunscreen: 'Sun care', hiking: 'Hiking', windAdvice: 'Wind advice', windLevel: 'Wind', elevation: 'Elevation',
     addCard: 'Add', noResults: 'No matching place. Try another query.',
     home: 'Home', tools: 'Tools', navigation: 'Navigation', messages: 'Messages', mine: 'Me', quickTools: 'Quick tools', openSettings: 'Open settings', noMessages: 'No messages yet.', homeTabs: 'Home', homeTabsSelected: '{count} selected',
@@ -9292,7 +9292,7 @@ function weather() {
   const exactAnchorIndex = anchorKey ? hourlyTimes.findIndex((time) => String(time).slice(0, 13) === anchorKey) : -1;
   const anchorIndex = exactAnchorIndex >= 0 ? exactAnchorIndex : Math.max(0, selectedHour);
   const windowStartIndex = Math.max(0, anchorIndex - 12);
-  const hourlyWindow = hourlyTimes.map((time, index) => ({ time, index })).slice(windowStartIndex, windowStartIndex + 37);
+  const hourlyWindow = hourlyTimes.map((time, index) => ({ time, index })).slice(windowStartIndex, windowStartIndex + 49);
   const hourlyPoints = hourlyWindow.map(({ time, index }) => {
     const value = hourlyTemperatures[index] ?? (index === selectedHour ? current.temperature_2m : null);
     const code = Number(active.hourly?.weather_code?.[index] ?? current.weather_code);
@@ -9370,7 +9370,7 @@ function weather() {
   const forecastLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-high"></i>' + (state.language === 'en' ? 'High' : '最高温') + '</span><span><i class="weather-legend-low"></i>' + (state.language === 'en' ? 'Low' : '最低温') + '</span></div>';
   const todayChart = weatherLineChart(hourlyPoints, 'single', currentHourPosition, active.timezone, Number(String(hourlyPoints[0]?.time || '').slice(11, 13)), String(hourlyPoints[0]?.time || '').slice(0, 10), anchorKey);
   const forecastChart = weatherLineChart(dailyPoints, 'range', 0);
-  return '<section class="weather-page">' + header + (active.loading ? '<p class="weather-updated-note">' + escapeHtml(t('weatherLoading')) + '</p>' : '') + summary + '<section class="weather-chart-section"><div class="weather-chart-heading"><h2>' + (state.language === 'en' ? '36 hours' : '36小时') + '</h2>' + todayLegend + '</div>' + todayChart + '</section><section class="weather-chart-section weather-forecast-section"><div class="weather-chart-heading"><h2>' + (state.language === 'en' ? 'Recent weather' : '最近天气') + '</h2>' + forecastLegend + '</div>' + forecastChart + '</section>' + weatherLocationDialogMarkup() + '</section>';
+  return '<section class="weather-page">' + header + (active.loading ? '<p class="weather-updated-note">' + escapeHtml(t('weatherLoading')) + '</p>' : '') + summary + '<section class="weather-chart-section"><div class="weather-chart-heading"><h2>' + (state.language === 'en' ? '48 hours' : '48小时') + '</h2>' + todayLegend + '</div>' + todayChart + '</section><section class="weather-chart-section weather-forecast-section"><div class="weather-chart-heading"><h2>' + (state.language === 'en' ? 'Recent weather' : '最近天气') + '</h2>' + forecastLegend + '</div>' + forecastChart + '</section>' + weatherLocationDialogMarkup() + '</section>';
 }
 
 // Developer tools ------------------------------------------------------------
