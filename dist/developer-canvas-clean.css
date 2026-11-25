@@ -1,0 +1,73 @@
+/* Keep the developer workspace on the page canvas without an outer card. */
+#workspace[data-tool="dev"],
+#workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Reserve the divider's 14px right inset for the tool arrow so it never
+   covers the last tab. */
+#toolNav .tool-tab-panel {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 0;
+  width: auto !important;
+  min-width: 0;
+  margin-right: 14px;
+}
+
+#toolNav .tool-tab-panel.has-tool-overflow {
+  grid-template-columns: minmax(0, 1fr) 26px;
+}
+
+#toolNav .tool-tab-panel .tool-tabs {
+  grid-column: 1;
+  width: 100% !important;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="toggle"] {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  z-index: 3;
+  display: grid;
+  grid-column: 2;
+  grid-row: 1;
+  place-items: center end;
+  width: 26px;
+  min-width: 26px;
+  height: auto;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--muted);
+}
+
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="toggle"]::before,
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="toggle"]::after {
+  content: none !important;
+  display: none !important;
+}
+
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="toggle"] svg {
+  width: 20px;
+  height: 20px;
+  margin-right: -6px;
+}
+
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="toggle"][hidden] {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  #toolNav .tool-tab-panel { margin-right: 14px; }
+}
