@@ -1,0 +1,7 @@
+/* Let the weather page sit directly on the workspace canvas. */
+#workspace[data-tool="weather"] {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
