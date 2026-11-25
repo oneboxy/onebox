@@ -8903,7 +8903,7 @@ function weatherIconMarkup(code, className = '') {
   else shape = cloud + '<path class="weather-icon-bolt" d="m14 16-4 4h3l-1 3.5 5-6.5h-3l1-1Z"/>';
   return '<svg class="weather-line-icon weather-line-' + weatherKind + (className ? ' ' + className : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + shape + '</svg>';
 }
-const weatherUrl = (lat, lon) => 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lon) + '&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m,precipitation&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,uv_index,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,wind_speed_10m_max&wind_speed_unit=kmh&timezone=auto&past_days=3&forecast_days=16';
+const weatherUrl = (lat, lon) => 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lon) + '&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,uv_index,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max,wind_speed_10m_max&wind_speed_unit=kmh&timezone=auto&past_days=3&forecast_days=16';
 const weatherElevationUrl = (lat, lon) => 'https://api.open-meteo.com/v1/elevation?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lon);
 function normalizeWeatherCards(value) {
   const seen = new Set();
@@ -9142,6 +9142,24 @@ function weatherWindLabel(value) {
   const level = weatherWindLevel(value);
   return state.language === 'en' ? 'Bft ' + level.force + ' · ' + level.en : level.force + '级';
 }
+function weatherWindDirectionLabel(value) {
+  if (value == null || value === '') return '';
+  const degrees = Number(value);
+  if (!Number.isFinite(degrees)) return '';
+  const directions = state.language === 'en'
+    ? ['North wind', 'Northeast wind', 'East wind', 'Southeast wind', 'South wind', 'Southwest wind', 'West wind', 'Northwest wind']
+    : ['北风', '东北风', '东风', '东南风', '南风', '西南风', '西风', '西北风'];
+  const index = Math.round((((degrees % 360) + 360) % 360) / 45) % directions.length;
+  return directions[index];
+}
+function weatherCurrentMetaLabel(current) {
+  const direction = weatherWindDirectionLabel(current.wind_direction_10m);
+  const base = (state.language === 'en' ? 'Feels ' : '体感 ')
+    + Math.round(Number(current.apparent_temperature ?? current.temperature_2m) || 0) + '° · '
+    + (state.language === 'en' ? 'Humidity ' : '湿度 ')
+    + (current.relative_humidity_2m ?? '—') + '% · ' + weatherWindLabel(current.wind_speed_10m);
+  return base + (direction ? (state.language === 'en' ? ' (' + direction + ')' : '（' + direction + '）') : '');
+}
 function weatherCurrentDayKey(weather) {
   try {
     const parts = new Intl.DateTimeFormat('en-US', { timeZone: weather.timezone || undefined, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -9179,7 +9197,7 @@ function weatherLineChart(points, mode, currentIndex = 0, timeZone = '', startHo
   const precipitationY = (value) => precipitationBottom - Math.max(0, Math.min(100, Number(value) || 0)) / 100 * (precipitationBottom - precipitationTop);
   const precipitationLine = precipitationPoints.length ? '<svg class="weather-chart-svg weather-chart-precipitation-svg" viewBox="0 0 ' + width + ' ' + precipitationHeight + '" width="' + width + '" height="' + precipitationHeight + '" aria-hidden="true">' + [0, 50, 100].map((value) => '<line class="weather-chart-gridline" x1="0" y1="' + precipitationY(value) + '" x2="' + width + '" y2="' + precipitationY(value) + '"/>').join('') + '<polyline class="weather-chart-line weather-chart-precipitation" points="' + ['0,' + precipitationY(precipitationPoints[0].probability), ...points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? x(index) + ',' + precipitationY(point.probability) : null).filter(Boolean), width + ',' + precipitationY(precipitationPoints[precipitationPoints.length - 1].probability)].join(' ') + '"/>' + points.map((point, index) => point.probability != null && Number.isFinite(Number(point.probability)) ? '<circle class="weather-chart-dot weather-chart-precipitation" cx="' + x(index) + '" cy="' + precipitationY(point.probability) + '" r="2.5"/><text class="weather-chart-value weather-chart-precipitation-value" x="' + x(index) + '" y="' + Math.max(10, precipitationY(point.probability) - 7) + '" text-anchor="middle">' + Math.round(Number(point.probability)) + '%</text>' : '').join('') + '</svg>' : '';
   const selectedIndex = Math.max(0, Math.min(points.length - 1, Number(currentIndex) || 0));
-  const labels = points.map((point, index) => { const weatherName = weatherCode(point.code)[1]; const isCurrent = single && index === selectedIndex; const isToday = mode === 'range' && point.isToday; const clockLabel = point.clockLabel || point.label; const dateLabel = mode === 'range' ? '<small>' + escapeHtml(point.dateLabel || point.label) + '</small><small>' + escapeHtml(point.weekdayLabel || '') + '</small>' : '<small>' + escapeHtml(point.label) + '</small>'; return '<div class="weather-chart-label' + (isCurrent ? ' is-current' : '') + '" data-weather-hour-index="' + index + '"' + (single ? ' data-clock-label="' + escapeHtml(clockLabel) + '"' : '') + (isCurrent ? ' aria-current="time"' : isToday ? ' aria-current="date"' : '') + '><span class="weather-chart-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(weatherName) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + weatherName) + '" title="' + escapeHtml(weatherName) + '">' + weatherIconMarkup(point.code) + '</span>' + dateLabel + (mode !== 'range' && point.wind != null && Number.isFinite(Number(point.wind)) ? '<small class="weather-chart-wind">' + (state.language === 'en' ? 'Bft ' + weatherWindLevel(point.wind).force : weatherWindLevel(point.wind).force + '级') + '</small>' : '') + '</div>'; }).join('');
+  const labels = points.map((point, index) => { const weatherName = weatherCode(point.code)[1]; const isCurrent = single && index === selectedIndex; const isToday = mode === 'range' && point.isToday; const clockLabel = point.clockLabel || point.label; const dateLabel = mode === 'range' ? '<small>' + escapeHtml(point.dateLabel || point.label) + '</small><small>' + escapeHtml(point.weekdayLabel || '') + '</small>' : '<small>' + escapeHtml(point.label) + '</small>'; return '<div class="weather-chart-label' + (isCurrent ? ' is-current' : '') + '" data-weather-hour-index="' + index + '"' + (single ? ' data-clock-label="' + escapeHtml(clockLabel) + '"' : '') + (isCurrent ? ' aria-current="time"' : isToday ? ' aria-current="date"' : '') + '><span class="weather-chart-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(weatherName) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + weatherName) + '" title="' + escapeHtml(weatherName) + '">' + weatherIconMarkup(point.code) + '</span>' + dateLabel + '</div>'; }).join('');
   const clockAttrs = single ? ' data-timezone="' + escapeHtml(timeZone) + '" data-start-hour="' + Math.max(0, Math.min(23, Number(startHour) || 0)) + '" data-start-date="' + escapeHtml(startDate) + '" data-window-anchor="' + escapeHtml(anchorKey) + '"' : '';
   const nowMarker = single ? '<span class="weather-chart-now-marker" aria-hidden="true"></span>' : '';
   const todayIndex = mode === 'range' ? points.findIndex((point) => point.isToday) : -1;
@@ -9279,12 +9297,11 @@ function weather() {
     const value = hourlyTemperatures[index] ?? (index === selectedHour ? current.temperature_2m : null);
     const code = Number(active.hourly?.weather_code?.[index] ?? current.weather_code);
     const probability = active.hourly?.precipitation_probability?.[index];
-    const wind = active.hourly?.wind_speed_10m?.[index];
     const timeText = String(time).slice(11, 16);
     const clockLabel = String(Number(timeText.slice(0, 2))) + timeText.slice(2);
     const isCurrent = index === anchorIndex;
     const label = isCurrent ? (state.language === 'en' ? 'Now' : '现在') : clockLabel;
-    return hasTemperature(value) ? { label, clockLabel, time: String(time), isCurrent, value: Number(value), code, probability: probability == null ? null : Number(probability), wind: wind == null ? null : Number(wind) } : null;
+    return hasTemperature(value) ? { label, clockLabel, time: String(time), isCurrent, value: Number(value), code, probability: probability == null ? null : Number(probability) } : null;
   }).filter(Boolean);
   const dailyStartDate = new Date(currentDay + 'T00:00:00Z');
   dailyStartDate.setUTCDate(dailyStartDate.getUTCDate() - 3);
@@ -9342,7 +9359,7 @@ function weather() {
     nearbyUvIndex == null ? '长时间户外先查看紫外线' : nearbyUvIndex >= 6 ? '紫外线强，遮阳并涂防晒' : nearbyUvIndex >= 3 ? '紫外线偏强，注意防晒' : '紫外线较弱，久晒仍需防护',
   ];
   const adviceItems = advice.map((note, index) => '<span class="weather-advice-item weather-advice-item-' + index + '"><i aria-hidden="true">' + adviceIcons[index] + '</i><span>' + escapeHtml(note) + '</span></span>').join('');
-  const summary = '<div class="weather-current-overview"><div class="weather-current-main"><div class="weather-current-summary"><span class="weather-current-icon weather-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(condition[1]) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + condition[1]) + '" title="' + escapeHtml(condition[1]) + '">' + weatherIconMarkup(current.weather_code) + '</span><strong class="weather-current-temperature">' + Math.round(Number(current.temperature_2m) || 0) + '°</strong><span class="weather-current-copy"><strong>' + escapeHtml(condition[1]) + '</strong></span></div><p class="weather-current-meta">' + escapeHtml((state.language === 'en' ? 'Feels ' : '体感 ') + Math.round(Number(current.apparent_temperature ?? current.temperature_2m) || 0) + '° · ' + (state.language === 'en' ? 'Humidity ' : '湿度 ') + (current.relative_humidity_2m ?? '—') + '% · ' + weatherWindLabel(current.wind_speed_10m)) + (state.weatherError ? ' · ' + escapeHtml(state.weatherError) : '') + '</p><p class="weather-current-updated">' + escapeHtml((state.language === 'en' ? 'Updated ' : '更新于 ') + updatedTime) + '</p></div><aside class="weather-advice-inline"><div>' + adviceItems + '</div></aside></div>';
+  const summary = '<div class="weather-current-overview"><div class="weather-current-main"><div class="weather-current-summary"><span class="weather-current-icon weather-icon-target" role="button" tabindex="0" data-weather-icon-name="' + escapeHtml(condition[1]) + '" aria-label="' + escapeHtml((state.language === 'en' ? 'Weather: ' : '天气：') + condition[1]) + '" title="' + escapeHtml(condition[1]) + '">' + weatherIconMarkup(current.weather_code) + '</span><strong class="weather-current-temperature">' + Math.round(Number(current.temperature_2m) || 0) + '°</strong><span class="weather-current-copy"><strong>' + escapeHtml(condition[1]) + '</strong></span></div><p class="weather-current-meta">' + escapeHtml(weatherCurrentMetaLabel(current)) + (state.weatherError ? ' · ' + escapeHtml(state.weatherError) : '') + '</p><p class="weather-current-updated">' + escapeHtml((state.language === 'en' ? 'Updated ' : '更新于 ') + updatedTime) + '</p></div><aside class="weather-advice-inline"><div>' + adviceItems + '</div></aside></div>';
   const currentHourPosition = Math.max(0, hourlyPoints.findIndex((point) => point.isCurrent));
   const todayLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-temperature"></i>' + (state.language === 'en' ? 'Temperature' : '气温') + '</span><span><i class="weather-legend-precipitation"></i>' + (state.language === 'en' ? 'Precipitation' : '降水概率') + '</span></div>';
   const forecastLegend = '<div class="weather-chart-legend"><span><i class="weather-legend-high"></i>' + (state.language === 'en' ? 'High' : '最高温') + '</span><span><i class="weather-legend-low"></i>' + (state.language === 'en' ? 'Low' : '最低温') + '</span></div>';
