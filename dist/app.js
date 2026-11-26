@@ -148,6 +148,20 @@ homeSourceAddFloatingButton.hidden = true;
 homeSourceAddFloatingButton.setAttribute('aria-label', '添加信息源');
 homeSourceAddFloatingButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a1.99 1.99 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.831z"/><path d="M16 17h6M19 14v6M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 .825.178M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l2.116-.962"/></svg>';
 document.body.appendChild(homeSourceAddFloatingButton);
+function syncModalPageScrollLock() {
+  const candidates = document.querySelectorAll('.dialog:not([hidden]), [aria-modal="true"]');
+  const hasOpenModal = [...candidates].some((modal) => {
+    if (!modal.isConnected) return false;
+    for (let node = modal; node && node !== document.body; node = node.parentElement) {
+      if (node.hidden || node.getAttribute('aria-hidden') === 'true') return false;
+    }
+    return true;
+  });
+  document.body.classList.toggle('has-open-modal', hasOpenModal);
+}
+const modalPageScrollObserver = new MutationObserver(syncModalPageScrollLock);
+modalPageScrollObserver.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden', 'aria-modal', 'aria-hidden'] });
+syncModalPageScrollLock();
 function syncDesktopPageTabs() {
   if (!desktopPageTabs) return;
   if (window.matchMedia('(min-width: 761px)').matches) {
@@ -3701,7 +3715,7 @@ function homeSourcePickerMarkup() {
     const actionIcon = selected ? '<path d="M6 12h12"/>' : '<path d="M12 6v12M6 12h12"/>';
     return '<div class="home-source-option ' + (selected ? 'is-selected' : '') + '"><span class="home-source-option-mark">' + homeTabMarkMarkup(entry) + '</span><span class="home-source-option-copy"><strong>' + escapeHtml(entry.name) + '</strong></span><button class="home-source-option-action" type="button" data-home-source-toggle="' + escapeHtml(entry.id) + '" aria-label="' + escapeHtml(actionLabel + ' ' + entry.name) + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + actionIcon + '</svg></button></div>';
   }).join('');
-  return '<div class="dialog-card home-source-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(t('homeSourceManage')) + '</h2></div><button class="icon-btn small home-source-dialog-close" type="button" data-close-home-source aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><div class="home-source-options">' + (options || '<p class="empty compact">' + escapeHtml(t('homeSourceEmpty')) + '</p>') + '</div></div>';
+  return '<div class="dialog-card home-source-dialog-card" role="dialog" aria-modal="true"><div class="dialog-head"><div><h2>' + escapeHtml(t('homeSourceManage')) + '</h2></div><button class="home-source-dialog-close" type="button" data-close-home-source aria-label="' + t('close') + '">' + LUCIDE_X_MARKUP + '</button></div><div class="home-source-options">' + (options || '<p class="empty compact">' + escapeHtml(t('homeSourceEmpty')) + '</p>') + '</div></div>';
 }
 function renderHomeSourceDialog() {
   const dialog = $('#homeSourceDialog');

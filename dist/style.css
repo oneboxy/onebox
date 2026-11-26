@@ -7183,6 +7183,27 @@ html[data-theme-mode="dark-gray"] .key {
   gap: 10px;
 }
 #homeSourceDialog .dialog-head h2 { margin: 0; font-size: 19px; }
+#homeSourceDialog .home-source-dialog-close {
+  display: grid;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+#homeSourceDialog .home-source-dialog-close:hover,
+#homeSourceDialog .home-source-dialog-close:active {
+  transform: none;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+}
+#homeSourceDialog .home-source-dialog-close svg { width: 18px; height: 18px; }
 #homeSourceDialog .home-source-dialog-hint {
   min-width: 0;
   margin: 0;
@@ -7192,6 +7213,11 @@ html[data-theme-mode="dark-gray"] .key {
   line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+body.has-open-modal main {
+  overflow: hidden !important;
+  overscroll-behavior: none;
 }
 #homeSourceDialog .home-source-options {
   display: grid;
