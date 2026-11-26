@@ -1,5 +1,5 @@
-const CACHE = 'onebox-admin-shell-v3';
-const SHELL = ['./', './index.html', './admin.css', './admin.js', './manifest.webmanifest', '../reader-sync-config.js', '../icons/onebox-brand-v317-192.png', '../icons/onebox-brand-v317-512.png'];
+const CACHE = 'onebox-admin-shell-v4';
+const SHELL = ['./', './index.html', './admin.css?v=1.0.1', './admin.js', './manifest.webmanifest', '../reader-sync-config.js', '../icons/onebox-brand-v317-192.png', '../icons/onebox-brand-v317-512.png'];
 const SHELL_URLS = new Set(SHELL.map((path) => new URL(path, self.location.href).pathname));
 self.addEventListener('install', (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', (event) => event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith('onebox-admin-shell-') && key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim())));

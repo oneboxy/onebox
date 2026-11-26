@@ -1,11 +1,11 @@
 // Refresh fullscreen history controls and JSON workbench styles.
-const CACHE = 'onebox-v1220';
+const CACHE = 'onebox-v1221';
 const APP_SHELL = [
   './',
   'index.html',
   'ticket-wallet-layout.js?v=2.18.768',
   'dev-json-editor.js?v=2.18.761',
-  'style.css?v=2.18.869',
+  'style.css?v=2.18.870',
   'app.js?v=2.18.1045',
   'track-module.js?v=1.0.23',
   'track-module.css?v=1.0.20',
@@ -45,7 +45,7 @@ const APP_SHELL = [
   'reader-cloud-sync.js?v=2.18.761',
   'cloud-sync.js?v=2.18.761',
   'cloud-sync.html',
-  'cloud-sync.css',
+  'cloud-sync.css?v=1.0.1',
   'cloud-migration.js',
   'manifest.webmanifest',
   'manifest.webmanifest?v=2.18.761',
