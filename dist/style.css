@@ -22032,3 +22032,17 @@ html[data-theme-mode="dark-gray"] {
     --shadow: 0 20px 60px rgba(0, 0, 0, .48);
   }
 }
+
+/* Keep the startup homepage skeleton as compact as the live feed. */
+body:has(#workspace > .app-boot-splash.is-home-placeholder) .header-actions { visibility: hidden; }
+body:has(#workspace > .app-boot-splash.is-home-placeholder) #toolNav:empty,
+body:has(#workspace > .app-boot-splash.is-home-placeholder) #bottomNav:empty { display: none !important; }
+#workspace:has(> .app-boot-splash.is-home-placeholder) {
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.app-boot-splash.is-home-placeholder { min-height: 0; padding-top: 8px; }
