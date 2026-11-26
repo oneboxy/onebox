@@ -4284,6 +4284,7 @@ main:has(#workspace[data-tool="calculator"]) {
 #workspace[data-tool="home"] .feed-item p { margin: 6px 0 11px; -webkit-line-clamp: 2; font-size: 12px; line-height: 1.5; }
 #workspace[data-tool="home"] .feed-item-side { align-self: start; padding-top: 1px; }
 #workspace[data-tool="home"] .feed-item-media { width: 100%; height: auto; aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel-2); }
+#workspace[data-tool="home"] .feed-item-meta { grid-column: 1 / -1; }
 #workspace[data-tool="home"] .feed-item.is-read { background: color-mix(in srgb, var(--primary) 4%, var(--panel)); }
 #workspace[data-tool="home"] .feed-item.is-read h2 { color: var(--muted); }
 .feed-item-reactions { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; margin-left: auto; }
