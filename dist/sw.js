@@ -1,11 +1,11 @@
-// Lock background scrolling while a modal is open and simplify its close control.
-const CACHE = 'onebox-v1226';
+// Show a lightweight home layout while the app bundle is starting.
+const CACHE = 'onebox-v1227';
 const APP_SHELL = [
   './',
   'index.html',
   'ticket-wallet-layout.js?v=2.18.768',
   'dev-json-editor.js?v=2.18.761',
-  'style.css?v=2.18.875',
+  'style.css?v=2.18.876',
   'app.js?v=2.18.1047',
   'track-module.js?v=1.0.23',
   'track-module.css?v=1.0.20',
