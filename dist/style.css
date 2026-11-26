@@ -15829,7 +15829,10 @@ html[data-theme-mode="dark-gray"] .ticket-wallet-cafe-tag-groups { background: c
 .app-boot-progress i { position: absolute; inset: 0 auto 0 -42%; width: 42%; border-radius: inherit; background: var(--primary); animation: app-boot-progress 1.25s ease-in-out infinite; }
 .app-boot-hint { margin-top: 10px; color: var(--muted); font-size: 10px; }
 .app-boot-retry { min-height: 34px; margin-top: 15px; padding: 0 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 11px; cursor: pointer; }
-.app-boot-splash.is-stalled .app-boot-progress { display: none; }
+.app-boot-splash:not(.is-home-placeholder) > .app-boot-status { order: 2; }
+.app-boot-splash:not(.is-home-placeholder) > .app-boot-progress { order: 3; }
+.app-boot-splash:not(.is-home-placeholder) > .app-boot-retry { order: 4; }
+.app-boot-splash.is-stalled:not(.is-home-placeholder) .app-boot-progress { display: none; }
 .app-boot-retry:not([hidden]) { display: inline-flex; align-items: center; justify-content: center; }
 .app-boot-home { display: none; }
 .app-boot-splash.is-home-placeholder {
@@ -15861,6 +15864,7 @@ html[data-theme-mode="dark-gray"] .ticket-wallet-cafe-tag-groups { background: c
 .app-boot-splash.is-home-placeholder .app-boot-status { display: none; }
 .app-boot-splash.is-home-placeholder .app-boot-progress { margin: 15px auto 0; }
 .app-boot-splash.is-home-placeholder.is-stalled .app-boot-status { display: block; margin-top: 10px; text-align: center; }
+.app-boot-splash.is-home-placeholder .app-boot-retry:not([hidden]) { display: flex; width: fit-content; margin: 10px auto 0; }
 @media (max-width: 620px) {
   .app-boot-splash.is-home-placeholder { min-height: calc(100dvh - var(--app-header-height) - 88px); padding-top: 8px; }
   .app-boot-home-tabs { gap: 14px; height: 38px; padding-inline: 10px; }
