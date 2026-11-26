@@ -7114,6 +7114,9 @@ html[data-theme-mode="dark-gray"] .key {
   -webkit-user-select: none;
   transition: background .18s ease, box-shadow .18s ease, color .18s ease;
 }
+.home-source-floating-add[hidden] {
+  display: none !important;
+}
 .home-source-floating-add:hover,
 .home-source-floating-add:active {
   transform: none;
