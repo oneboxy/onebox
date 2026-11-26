@@ -4268,6 +4268,7 @@ main:has(#workspace[data-tool="calculator"]) {
 #workspace[data-tool="home"] .feed-item {
   grid-template-columns: minmax(0, 1fr) 132px;
   gap: 16px;
+  row-gap: 8px;
   padding: 17px 20px 16px;
   background: color-mix(in srgb, var(--panel) 96%, var(--soft));
 }
@@ -4281,7 +4282,7 @@ main:has(#workspace[data-tool="calculator"]) {
   font-size: 16px;
   line-height: 1.4;
 }
-#workspace[data-tool="home"] .feed-item p { margin: 6px 0 11px; -webkit-line-clamp: 2; font-size: 12px; line-height: 1.5; }
+#workspace[data-tool="home"] .feed-item p { margin: 6px 0 6px; -webkit-line-clamp: 2; font-size: 12px; line-height: 1.5; }
 #workspace[data-tool="home"] .feed-item-side { align-self: start; padding-top: 1px; }
 #workspace[data-tool="home"] .feed-item-media { width: 100%; height: auto; aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel-2); }
 #workspace[data-tool="home"] .feed-item-meta { grid-column: 1 / -1; }
@@ -4320,9 +4321,9 @@ main:has(#workspace[data-tool="calculator"]) {
 #workspace[data-tool="reader"] .reader-add-card .reader-empty-plus { position: static; margin: 0; justify-self: end; }
 
 @media (max-width: 600px) {
-  #workspace[data-tool="home"] .feed-item { grid-template-columns: minmax(0, 1fr) 84px; gap: 10px; padding: 14px 12px 13px; }
+  #workspace[data-tool="home"] .feed-item { grid-template-columns: minmax(0, 1fr) 84px; column-gap: 10px; row-gap: 8px; padding: 14px 12px 13px; }
   #workspace[data-tool="home"] .feed-item h2 { font-size: 15px; }
-  #workspace[data-tool="home"] .feed-item p { margin: 5px 0 8px; }
+  #workspace[data-tool="home"] .feed-item p { margin: 5px 0 6px; }
   #workspace[data-tool="home"] .feed-item-media { aspect-ratio: 4 / 3; border-radius: 10px; }
   #workspace[data-tool="translate"] .translation-toolbar .swap { height: 40px !important; }
   #workspace[data-tool="translate"] .translation-result-pane .translation-result-panel { padding: 10px !important; }

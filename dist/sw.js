@@ -1,11 +1,11 @@
 // Refresh fullscreen history controls and JSON workbench styles.
-const CACHE = 'onebox-v1223';
+const CACHE = 'onebox-v1224';
 const APP_SHELL = [
   './',
   'index.html',
   'ticket-wallet-layout.js?v=2.18.768',
   'dev-json-editor.js?v=2.18.761',
-  'style.css?v=2.18.872',
+  'style.css?v=2.18.873',
   'app.js?v=2.18.1046',
   'track-module.js?v=1.0.23',
   'track-module.css?v=1.0.20',
