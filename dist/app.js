@@ -140,6 +140,14 @@ homeSourceNav.setAttribute('aria-label', '首页来源切换');
 const homeSourceNavPlaceholder = document.createComment('home source navigation position');
 pageSwipeStage.parentNode.insertBefore(homeSourceNavPlaceholder, pageSwipeStage);
 pageSwipeStage.parentNode.insertBefore(homeSourceNav, pageSwipeStage);
+const homeSourceAddFloatingButton = document.createElement('button');
+homeSourceAddFloatingButton.id = 'homeSourceAddFloatingButton';
+homeSourceAddFloatingButton.className = 'home-source-floating-add';
+homeSourceAddFloatingButton.type = 'button';
+homeSourceAddFloatingButton.hidden = true;
+homeSourceAddFloatingButton.setAttribute('aria-label', '添加信息源');
+homeSourceAddFloatingButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a1.99 1.99 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.831z"/><path d="M16 17h6M19 14v6M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 .825.178M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l2.116-.962"/></svg>';
+document.body.appendChild(homeSourceAddFloatingButton);
 function syncDesktopPageTabs() {
   if (!desktopPageTabs) return;
   if (window.matchMedia('(min-width: 761px)').matches) {
@@ -159,6 +167,79 @@ window.addEventListener('resize', syncDesktopPageTabs, { passive: true });
 const parseStored = (key, fallback) => {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 };
+const HOME_SOURCE_FLOATING_POSITION_KEY = 'onebox-home-source-floating-position';
+let homeSourceFloatingDrag = null;
+let suppressHomeSourceFloatingClick = false;
+function setHomeSourceFloatingPosition(left, top) {
+  const button = homeSourceAddFloatingButton;
+  const rect = button.getBoundingClientRect();
+  const maxLeft = Math.max(12, window.innerWidth - rect.width - 12);
+  const maxTop = Math.max(12, window.innerHeight - rect.height - 24);
+  button.style.left = Math.min(maxLeft, Math.max(12, left)) + 'px';
+  button.style.top = Math.min(maxTop, Math.max(12, top)) + 'px';
+  button.style.right = 'auto';
+  button.style.bottom = 'auto';
+}
+function restoreHomeSourceFloatingPosition() {
+  const saved = parseStored(HOME_SOURCE_FLOATING_POSITION_KEY, null);
+  if (!saved || !Number.isFinite(Number(saved.x)) || !Number.isFinite(Number(saved.y))) return;
+  const rect = homeSourceAddFloatingButton.getBoundingClientRect();
+  const maxLeft = Math.max(12, window.innerWidth - rect.width - 12);
+  const maxTop = Math.max(12, window.innerHeight - rect.height - 24);
+  setHomeSourceFloatingPosition(12 + Number(saved.x) * Math.max(0, maxLeft - 12), 12 + Number(saved.y) * Math.max(0, maxTop - 12));
+}
+function saveHomeSourceFloatingPosition() {
+  const rect = homeSourceAddFloatingButton.getBoundingClientRect();
+  const maxLeft = Math.max(12, window.innerWidth - rect.width - 12);
+  const maxTop = Math.max(12, window.innerHeight - rect.height - 24);
+  const left = Math.min(maxLeft, Math.max(12, rect.left));
+  const top = Math.min(maxTop, Math.max(12, rect.top));
+  try {
+    localStorage.setItem(HOME_SOURCE_FLOATING_POSITION_KEY, JSON.stringify({
+      x: maxLeft === 12 ? 0 : (left - 12) / (maxLeft - 12),
+      y: maxTop === 12 ? 0 : (top - 12) / (maxTop - 12),
+    }));
+  } catch {}
+}
+homeSourceAddFloatingButton.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0) return;
+  const rect = homeSourceAddFloatingButton.getBoundingClientRect();
+  homeSourceFloatingDrag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
+  homeSourceAddFloatingButton.setPointerCapture(event.pointerId);
+});
+homeSourceAddFloatingButton.addEventListener('pointermove', (event) => {
+  const drag = homeSourceFloatingDrag;
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  const dx = event.clientX - drag.x;
+  const dy = event.clientY - drag.y;
+  if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+  drag.moved = true;
+  homeSourceAddFloatingButton.classList.add('is-dragging');
+  setHomeSourceFloatingPosition(drag.left + dx, drag.top + dy);
+  event.preventDefault();
+});
+function finishHomeSourceFloatingDrag(event) {
+  const drag = homeSourceFloatingDrag;
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  homeSourceFloatingDrag = null;
+  homeSourceAddFloatingButton.classList.remove('is-dragging');
+  if (!drag.moved) return;
+  saveHomeSourceFloatingPosition();
+  suppressHomeSourceFloatingClick = true;
+  window.setTimeout(() => { suppressHomeSourceFloatingClick = false; }, 500);
+}
+homeSourceAddFloatingButton.addEventListener('pointerup', finishHomeSourceFloatingDrag);
+homeSourceAddFloatingButton.addEventListener('pointercancel', finishHomeSourceFloatingDrag);
+homeSourceAddFloatingButton.addEventListener('click', (event) => {
+  if (suppressHomeSourceFloatingClick) {
+    event.preventDefault();
+    event.stopPropagation();
+    suppressHomeSourceFloatingClick = false;
+    return;
+  }
+  openHomeSourceDialog();
+});
+window.addEventListener('resize', restoreHomeSourceFloatingPosition, { passive: true });
 function readOpenModePreference() {
   const raw = localStorage.getItem(STORAGE.openMode);
   if (raw === null) return 'current';
@@ -3639,9 +3720,13 @@ function closeHomeSourceDialog() {
 }
 function renderHomeSourceNav() {
   homeSourceNav.hidden = state.section !== 'home';
+  homeSourceAddFloatingButton.hidden = state.section !== 'home';
+  homeSourceAddFloatingButton.setAttribute('aria-label', t('homeSourceManage'));
+  homeSourceAddFloatingButton.title = (state.language === 'en' ? 'Add sources · Drag to move' : '添加信息源 · 拖动调整位置');
+  if (!homeSourceAddFloatingButton.hidden) restoreHomeSourceFloatingPosition();
   const previousTabs = homeSourceNav.querySelector('.feed-source-tabs');
   const previousScrollLeft = previousTabs?.scrollLeft || 0;
-  homeSourceNav.innerHTML = state.section === 'home' ? '<div class="feed-source-panel"><button class="feed-source-manage" type="button" data-open-home-source-picker aria-label="' + escapeHtml(t('homeSourceManage')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a1.99 1.99 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.831z"/><path d="M16 17h6"/><path d="M19 14v6"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 .825.178"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l2.116-.962"/></svg></button><div class="feed-source-tabs" role="tablist" aria-label="RSS 来源">' + homeSourceTabsMarkup() + '</div><button class="feed-source-scroll-button" data-feed-source-scroll="toggle" data-scroll-direction="right" type="button" hidden aria-label="' + escapeHtml(t('feedTabNext')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg></button></div>' : '';
+  homeSourceNav.innerHTML = state.section === 'home' ? '<div class="feed-source-panel"><div class="feed-source-tabs" role="tablist" aria-label="RSS 来源">' + homeSourceTabsMarkup() + '</div><button class="feed-source-scroll-button" data-feed-source-scroll="toggle" data-scroll-direction="right" type="button" hidden aria-label="' + escapeHtml(t('feedTabNext')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.25 15.75 12 9 18.75"/></svg></button></div>' : '';
   const nextTabs = homeSourceNav.querySelector('.feed-source-tabs');
   if (nextTabs) {
     nextTabs.scrollLeft = Math.min(previousScrollLeft, Math.max(0, nextTabs.scrollWidth - nextTabs.clientWidth));
@@ -15321,11 +15406,6 @@ homeSourceNav.addEventListener('pointerdown', (event) => {
 homeSourceNav.addEventListener('pointerup', endLongPress);
 homeSourceNav.addEventListener('pointercancel', endLongPress);
 homeSourceNav.addEventListener('click', (event) => {
-  if (event.target.closest('[data-open-home-source-picker]')) {
-    event.preventDefault();
-    openHomeSourceDialog();
-    return;
-  }
   const scrollButton = event.target.closest('[data-feed-source-scroll="toggle"]');
   if (scrollButton) {
     event.preventDefault();

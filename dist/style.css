@@ -7083,43 +7083,59 @@ html[data-theme-mode="dark-gray"] .key {
 #settingsDialog .settings-multiselect-option .feed-source-mark img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
 #settingsDialog .settings-multiselect-option .feed-source-fallback { display: none; }
 
-/* 2.18.141: home sources are managed from the source rail itself. Keep the
-   add affordance pinned to the right while the selected tabs scroll beneath
-   the lightweight edge controls. */
+/* Keep the source rail dedicated to navigation; source management floats
+   above the page content and can be repositioned by the user. */
 #homeSourceNav .feed-source-panel {
   padding-right: 0;
 }
 #homeSourceNav .feed-source-scroll-button[data-feed-source-scroll="next"] {
-  right: 34px;
+  right: 0;
 }
-#homeSourceNav .feed-source-manage {
+.home-source-floating-add {
+  position: fixed;
+  z-index: 80;
   display: grid;
-  flex: 0 0 34px;
   place-items: center;
-  width: 34px;
-  height: 30px;
-  margin: 0;
+  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  width: 50px;
+  height: 50px;
   padding: 0;
-  border: 0;
-  border-left: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: color .18s ease, background .18s ease;
-}
-#homeSourceNav .feed-source-manage:hover,
-#homeSourceNav .feed-source-manage:focus-visible {
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel);
   color: var(--ink);
-  background: var(--soft);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background .18s ease, box-shadow .18s ease, color .18s ease;
 }
-#homeSourceNav .feed-source-manage:focus-visible {
+.home-source-floating-add:hover,
+.home-source-floating-add:active {
+  transform: none;
+  color: var(--ink);
+  background: var(--panel-2);
+}
+#homeSourceAddFloatingButton:hover,
+#homeSourceAddFloatingButton:active,
+#homeSourceAddFloatingButton.is-dragging {
+  transform: none;
+}
+#homeSourceAddFloatingButton.is-dragging {
+  z-index: 81;
+  cursor: grabbing;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .24);
+  transition: none;
+}
+.home-source-floating-add:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--ink) 42%, transparent);
-  outline-offset: -4px;
+  outline-offset: 3px;
 }
-#homeSourceNav .feed-source-manage svg {
-  width: 16px;
-  height: 16px;
+.home-source-floating-add svg {
+  width: 21px;
+  height: 21px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -7299,8 +7315,9 @@ html[data-theme-mode="dark-gray"] .key {
 }
 @media (max-width: 600px) {
   #homeSourceNav .feed-source-panel { padding-right: 0; }
-  #homeSourceNav .feed-source-scroll-button[data-feed-source-scroll="next"] { right: 32px; }
-  #homeSourceNav .feed-source-manage { flex-basis: 28px; width: 28px; }
+  #homeSourceNav .feed-source-scroll-button[data-feed-source-scroll="next"] { right: 0; }
+  .home-source-floating-add { right: 16px; bottom: calc(86px + env(safe-area-inset-bottom)); width: 46px; height: 46px; }
+  .home-source-floating-add svg { width: 20px; height: 20px; }
   #homeSourceDialog {
     align-items: flex-end;
     padding: 12px 10px calc(10px + env(safe-area-inset-bottom));
