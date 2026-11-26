@@ -105,6 +105,11 @@ const FEED_SOURCE_REGISTRY = [
 ];
 const RSS_SOURCES = FEED_SOURCE_REGISTRY.filter((source) => source.enabled !== false);
 const RSS_REFRESH_INTERVAL = 2 * 60 * 1000;
+const ITHOME_CATEGORIES = [
+  { id: 'latest', label: '最新', tag: 'newsm' },
+  { id: 'science', label: '科普', tag: 'discoverym' },
+  { id: 'frontier', label: '前沿', tag: 'itm' },
+];
 const HOME_FEED_PENDING_LIMIT = 30;
 // Keep the feed deadline long enough for the reader proxy to return fresh
 // content. The former 2.6/3 second cut-off made the active source look stale
@@ -1537,7 +1542,7 @@ const state = {
   library: normalizeReaderLibrary(storedLibrary),
   readerBookId: null, readerUrl: '', readerAssetUrls: [], readerContent: '', readerHint: '', readerToc: [], readerDialog: '', readerChromeHidden: false, readerImmersive: false, readerMode: 'library', readerReadingMode: 'scroll', readerPage: 0, readerSelectedText: '', readerSelection: null, readerAnnotationDraft: null, readerSelectionInput: 'mouse', readerLayout: storedReaderLayout === 'list' ? 'list' : 'grid', annotationBookId: null,
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
-  homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, activityFilter: 'read', hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
+  homeFeed: { active: initialHomeFeedActive, category: localStorage.getItem('onebox.home-feed-ithome-category') || 'latest', order: initialHomeFeedOrder, visible: initialHomeFeedVisible, activityFilter: 'read', hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
   navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationShowNames: storedNavigationShowNames, navigationDialog: null, navigationFolderDraft: null,
   ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletCardLayout: storedTicketWalletCardLayout, ticketWalletTypeFilter: normalizeTicketWalletFilter(storedTicketWalletTypeFilter), ticketWalletSelectedId: '', ticketWalletDisplayOrder: Array.isArray(storedTicketWalletDisplayOrder) ? storedTicketWalletDisplayOrder.filter((id) => typeof id === 'string') : [], ticketWalletEditorOpen: false, ticketWalletEditorStage: 'choose', ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
@@ -1965,6 +1970,7 @@ function swapHomeFeedSources(from, to) {
 }
 function selectHomeFeedSource(sourceId) {
   if (!homeTabIds().includes(sourceId)) return;
+  if (state.homeFeed.active === sourceId && sourceId === 'ithome') return;
   state.homeFeed.active = sourceId;
   saveActiveHomeFeedPreference();
   if (sourceId === 'footprint') {
@@ -1973,6 +1979,12 @@ function selectHomeFeedSource(sourceId) {
       render();
       requestAnimationFrame(() => focusActiveHomeFeedTab(true));
     }
+    return undefined;
+  }
+  if (sourceId === 'ithome' && state.section === 'home') {
+    render();
+    requestAnimationFrame(() => focusActiveHomeFeedTab(true));
+    loadHomeFeeds(false, sourceId);
     return undefined;
   }
   // A request may already be running from the initial load or background
@@ -1986,9 +1998,23 @@ function selectHomeFeedSource(sourceId) {
     } else renderBottomNav();
     return undefined;
   }
-  loadHomeFeeds(true, sourceId);
+  loadHomeFeeds(sourceId !== 'ithome', sourceId);
   if (state.section === 'home') requestAnimationFrame(() => focusActiveHomeFeedTab(true));
   return undefined;
+}
+function selectHomeFeedCategory(categoryId, force = false) {
+  if (!['latest', 'science', 'frontier', 'all'].includes(categoryId)) return;
+  if (!force && activeITHomeCategory() === categoryId) return;
+  state.homeFeed.category = categoryId;
+  localStorage.setItem('onebox.home-feed-ithome-category', categoryId);
+  delete state.homeFeed.errors.ithome;
+  delete state.homeFeed.stale.ithome;
+  const preservedPosition = captureHomeFeedPosition();
+  if (state.section === 'home' && state.homeFeed.active === 'ithome') {
+    render();
+    restoreHomeFeedPosition(preservedPosition);
+    loadHomeFeeds(force, 'ithome');
+  }
 }
 
 function setHomeTabVisibility(tabId, visible) {
@@ -2121,6 +2147,10 @@ function findHomeFeedItem(id) {
   for (const source of Object.values(state.homeFeed.sources || {})) {
     const found = (source.items || []).find((item) => String(item.id) === String(id));
     if (found) return found;
+    for (const category of Object.values(source.categoryItems || {})) {
+      const categoryItem = (category.items || []).find((item) => String(item.id) === String(id));
+      if (categoryItem) return categoryItem;
+    }
   }
   return state.homeFeedActivity[id]?.item || null;
 }
@@ -2555,6 +2585,64 @@ function mergeFeedItems(source, incoming) {
     .sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0))
     .slice(0, RSS_MAX_ITEMS_PER_SOURCE);
 }
+function activeITHomeCategory() {
+  return ['latest', 'science', 'frontier', 'all'].includes(state.homeFeed.category) ? state.homeFeed.category : 'latest';
+}
+function ithomeCategoriesForView() {
+  const selected = activeITHomeCategory();
+  return selected === 'all' ? ITHOME_CATEGORIES : ITHOME_CATEGORIES.filter((category) => category.id === selected);
+}
+function ithomeCategoryItems(categoryId) {
+  const cache = state.homeFeed.sources.ithome?.categoryItems?.[categoryId];
+  return Array.isArray(cache?.items) ? cache.items : [];
+}
+function homeFeedSourceNeedsRefresh(source, now, force = false) {
+  if (force) return true;
+  if (source.id === 'ithome') {
+    const categories = ithomeCategoriesForView();
+    return categories.some((category) => {
+      const cache = state.homeFeed.sources.ithome?.categoryItems?.[category.id];
+      return !cache?.items?.length || now - Number(cache.updatedAt || 0) >= RSS_REFRESH_INTERVAL;
+    });
+  }
+  const cached = state.homeFeed.sources[source.id];
+  return !cached?.items?.length || state.homeFeed.cacheVersion !== APP_VERSION || now - Number(cached.updatedAt || 0) >= RSS_REFRESH_INTERVAL;
+}
+async function fetchITHomeCategory(category) {
+  const url = 'https://m.ithome.com/api/news/newslistpageget?Tag=' + encodeURIComponent(category.tag) + '&page=1&hitCountAuthority=false';
+  const targetUrl = jinaReaderUrl(url, true);
+  const { response, text } = await fetchTextWithTimeout(targetUrl, { cache: 'no-store', headers: { Accept: 'application/json, text/plain', 'X-No-Cache': 'true' } }, HOME_FEED_REQUEST_TIMEOUT_MS);
+  if (!response.ok) throw Error('HTTP ' + response.status);
+  const payload = jinaJson(text);
+  if (payload?.Success !== 1 || !Array.isArray(payload.Result)) throw Error('Feed empty');
+  const source = RSS_SOURCES.find((entry) => entry.id === 'ithome');
+  const items = payload.Result.map((item) => normalizeFeedItem({
+    title: item.title,
+    link: (() => { const link = String(item.WapNewsUrl || item.url || ''); try { return new URL(link, 'https://www.ithome.com/').href; } catch { return ''; } })(),
+    description: item.description,
+    image: item.image || item.imagelist?.[0],
+    pubDate: (() => { const date = String(item.orderdate || item.postdate || ''); return date && !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(date) ? date + '+08:00' : date; })(),
+  }, source)).filter(Boolean).map((item) => ({ ...item, category: category.id }));
+  if (!items.length) throw Error('Feed empty');
+  return { categoryId: category.id, items, updatedAt: Date.now(), feedUrl: url };
+}
+async function fetchITHomeCategories(categories) {
+  const cached = state.homeFeed.sources.ithome || {};
+  const categoryItems = { ...(cached.categoryItems || {}) };
+  const results = await Promise.allSettled(categories.map((category) => fetchITHomeCategory(category)));
+  let successfulCount = 0;
+  results.forEach((result) => {
+    if (result.status !== 'fulfilled') return;
+    successfulCount += 1;
+    categoryItems[result.value.categoryId] = { items: result.value.items, updatedAt: result.value.updatedAt, feedUrl: result.value.feedUrl };
+  });
+  if (!successfulCount) throw Error('Feed unavailable');
+  const selected = activeITHomeCategory();
+  const viewCategories = selected === 'all' ? ITHOME_CATEGORIES : ITHOME_CATEGORIES.filter((category) => category.id === selected);
+  const items = [...new Map(viewCategories.flatMap((category) => categoryItems[category.id]?.items || []).map((item) => [item.id, item])).values()]
+    .sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0)).slice(0, RSS_MAX_ITEMS_PER_SOURCE);
+  return { items, categoryItems, updatedAt: Date.now(), partialFailure: results.some((result) => result.status === 'rejected'), feedUrl: categories.map((category) => categoryItems[category.id]?.feedUrl).filter(Boolean).join(', ') };
+}
 async function fetchFeedSource(source) {
   const fetchers = Array.isArray(source.fetchers) ? source.fetchers : (source.urls || []).map((url) => ({ kind: 'rss', url }));
   const sourceController = new AbortController();
@@ -2600,10 +2688,18 @@ async function fetchFeedSource(source) {
     .slice(0, RSS_MAX_ITEMS_PER_SOURCE);
   return { items, updatedAt: Date.now(), feedUrl: successful.feedUrl };
 }
-async function refreshHomeFeedSource(source, requestToken) {
+async function refreshHomeFeedSource(source, requestToken, force = false) {
   let result = null;
   let error = '';
-  try { result = await fetchFeedSource(source); }
+  try {
+    if (source.id === 'ithome') {
+      const categories = ithomeCategoriesForView().filter((category) => {
+        const cache = state.homeFeed.sources.ithome?.categoryItems?.[category.id];
+        return force || !cache?.items?.length || Date.now() - Number(cache.updatedAt || 0) >= RSS_REFRESH_INTERVAL;
+      });
+      result = await fetchITHomeCategories(categories);
+    } else result = await fetchFeedSource(source);
+  }
   catch (reason) { error = reason?.message || 'RSS unavailable'; }
   if (homeFeedRequests.get(source.id) !== requestToken) return;
   const isActive = state.section === 'home' && state.homeFeed.active === source.id;
@@ -2631,7 +2727,8 @@ async function refreshHomeFeedSource(source, requestToken) {
     state.homeFeed.cacheVersion = APP_VERSION;
     discoveredNewItems = discoveredIds.length > 0;
     delete state.homeFeed.errors[source.id];
-    delete state.homeFeed.stale[source.id];
+    if (source.id === 'ithome' && result.partialFailure) state.homeFeed.stale[source.id] = true;
+    else delete state.homeFeed.stale[source.id];
   } else if (state.homeFeed.sources[source.id]?.items?.length) {
     state.homeFeed.stale[source.id] = true;
   } else {
@@ -2663,8 +2760,7 @@ function loadHomeFeeds(force = false, sourceId = '') {
     // and are the intentional retry boundary.
     if (!force && (state.homeFeed.errors[source.id] || state.homeFeed.stale[source.id])) return false;
     if (force) return true;
-    const cached = state.homeFeed.sources[source.id];
-    return !cached?.items?.length || state.homeFeed.cacheVersion !== APP_VERSION || now - Number(cached.updatedAt || 0) >= RSS_REFRESH_INTERVAL;
+    return homeFeedSourceNeedsRefresh(source, now, false);
   });
   if (!sourcesToLoad.length) { syncHomeFeedLoading(); return; }
   const preservedPosition = captureHomeFeedPosition();
@@ -2681,7 +2777,7 @@ function loadHomeFeeds(force = false, sourceId = '') {
   const refreshWorker = async () => {
     while (nextSource < sourcesToLoad.length) {
       const source = sourcesToLoad[nextSource++];
-      await refreshHomeFeedSource(source, homeFeedRequests.get(source.id));
+      await refreshHomeFeedSource(source, homeFeedRequests.get(source.id), force);
     }
   };
   const workers = Math.min(HOME_FEED_CONCURRENCY, sourcesToLoad.length);
@@ -3750,7 +3846,12 @@ function renderHomeSourceNav() {
 }
 function renderHome() {
   const isFootprint = state.homeFeed.active === 'footprint';
-  const sourceItems = isFootprint ? recentFeedItems() : (state.homeFeed.sources[state.homeFeed.active]?.items || []);
+  const sourceItems = isFootprint ? recentFeedItems() : state.homeFeed.active === 'ithome'
+    ? (() => {
+      const cached = [...new Map(ithomeCategoriesForView().flatMap((category) => ithomeCategoryItems(category.id)).map((item) => [item.id, item])).values()];
+      return cached.length || activeITHomeCategory() !== 'latest' ? cached : (state.homeFeed.sources.ithome?.items || []);
+    })()
+    : (state.homeFeed.sources[state.homeFeed.active]?.items || []);
   const cutoff = Date.now() - RSS_RETENTION_MS;
   // Also clean the already-rendered cache. A previous build could have saved
   // a street-level local item, so waiting for another network refresh would
@@ -3784,7 +3885,10 @@ function renderHome() {
   const refreshState = state.homeFeed.loading ? '<div class="feed-refresh-state" role="status" aria-label="' + escapeHtml(t('feedLoading')) + '"><span></span></div>' : '';
   const newContentAction = !state.homeFeed.loading && !homeFeedSourceRequesting() && newCount ? '<div class="feed-new-content-action-wrap"><button class="feed-new-content-action" type="button" data-feed-only-new>' + escapeHtml(homeFeedNewActionLabel(newCount)) + '</button></div>' : '';
   const loadMoreAction = hasMoreItems ? '<div class="feed-load-more-wrap"><button class="feed-load-more" type="button" data-feed-load-more>' + escapeHtml(t('feedLoadMore')) + '</button></div>' : '';
-  return '<div class="home-page feed-home"><section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
+  const ithomeCategoryTabs = !isFootprint && state.homeFeed.active === 'ithome'
+    ? '<div class="ithome-category-row" role="tablist" aria-label="之家栏目">' + ITHOME_CATEGORIES.map((category) => '<button type="button" class="ithome-category-tab ' + (activeITHomeCategory() === category.id ? 'active' : '') + '" role="tab" aria-selected="' + (activeITHomeCategory() === category.id) + '" data-ithome-category="' + category.id + '">' + category.label + '</button>').join('') + '<button type="button" class="ithome-category-tab ' + (activeITHomeCategory() === 'all' ? 'active' : '') + '" role="tab" aria-selected="' + (activeITHomeCategory() === 'all') + '" data-ithome-category="all">全部</button><button type="button" class="ithome-refresh-button" data-ithome-refresh aria-label="刷新当前栏目" title="刷新当前栏目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.7-2L20 12M4 12l2.7 5a7 7 0 0 0 11.7-2"/></svg></button></div>'
+    : '';
+  return '<div class="home-page feed-home"><section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + ithomeCategoryTabs + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
 }
 function navigationIconMarkup(site, extraClass = '') {
   const generatedSources = navigationIconSources(site?.url);
@@ -15814,6 +15918,15 @@ document.addEventListener('pointerdown', (event) => {
   if (menu && !menu.hidden) { menu.hidden = true; toggle?.setAttribute('aria-expanded', 'false'); }
 });
 workspace.addEventListener('click', async (event) => {
+  const ithomeCategory = event.target.closest('[data-ithome-category]');
+  if (ithomeCategory) {
+    event.preventDefault(); event.stopPropagation();
+    return selectHomeFeedCategory(ithomeCategory.dataset.ithomeCategory);
+  }
+  if (event.target.closest('[data-ithome-refresh]')) {
+    event.preventDefault(); event.stopPropagation();
+    return selectHomeFeedCategory(activeITHomeCategory(), true);
+  }
   const calendarDeleteButton = event.target.closest('[data-calendar-event-row] [data-delete-event]');
   if (calendarDeleteButton) {
     event.preventDefault(); event.stopPropagation();
