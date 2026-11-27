@@ -136,6 +136,7 @@ const ITHOME_CATEGORIES = [
 ];
 const ITHOME_CATEGORY_FETCH_CONCURRENCY = 5;
 const ITHOME_CATEGORY_ITEM_LIMIT = 12;
+const ITHOME_MAX_ITEMS = ITHOME_CATEGORIES.length * ITHOME_CATEGORY_ITEM_LIMIT;
 const HOME_FEED_PENDING_LIMIT = 30;
 // Keep the feed deadline long enough for the reader proxy to return fresh
 // content. The former 2.6/3 second cut-off made the active source look stale
@@ -2602,7 +2603,7 @@ function mergeITHomeCategoryItems(categoryItems = state.homeFeed.sources.ithome?
   ITHOME_CATEGORIES.forEach((category) => (categoryItems[category.id]?.items || []).forEach((item) => {
     if (!merged.has(item.id)) merged.set(item.id, item);
   }));
-  return [...merged.values()].sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0)).slice(0, RSS_MAX_ITEMS_PER_SOURCE);
+  return [...merged.values()].sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0)).slice(0, ITHOME_MAX_ITEMS);
 }
 function homeFeedSourceNeedsRefresh(source, now, force = false) {
   if (force) return true;
@@ -3924,7 +3925,8 @@ function renderHome() {
     return newOrder || ((feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0));
   });
   const listItems = items;
-  const renderLimit = isFootprint || homeFeedExpanded.has(state.homeFeed.active) ? RSS_MAX_ITEMS_PER_SOURCE : HOME_FEED_RENDER_LIMIT;
+  const sourceItemLimit = state.homeFeed.active === 'ithome' ? ITHOME_MAX_ITEMS : RSS_MAX_ITEMS_PER_SOURCE;
+  const renderLimit = isFootprint || homeFeedExpanded.has(state.homeFeed.active) ? sourceItemLimit : HOME_FEED_RENDER_LIMIT;
   const visibleItems = listItems.slice(0, renderLimit);
   const hasMoreItems = !isFootprint && listItems.length > visibleItems.length;
   const hasItems = visibleItems.length > 0;
