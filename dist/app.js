@@ -1542,7 +1542,7 @@ const state = {
   library: normalizeReaderLibrary(storedLibrary),
   readerBookId: null, readerUrl: '', readerAssetUrls: [], readerContent: '', readerHint: '', readerToc: [], readerDialog: '', readerChromeHidden: false, readerImmersive: false, readerMode: 'library', readerReadingMode: 'scroll', readerPage: 0, readerSelectedText: '', readerSelection: null, readerAnnotationDraft: null, readerSelectionInput: 'mouse', readerLayout: storedReaderLayout === 'list' ? 'list' : 'grid', annotationBookId: null,
   readerPreferences: { theme: ['paper', 'sepia', 'green', 'dark'].includes(storedReaderPreferences.theme) ? storedReaderPreferences.theme : 'paper', fontSize: Number.isFinite(Number(storedReaderPreferences.fontSize)) ? Math.min(26, Math.max(15, Number(storedReaderPreferences.fontSize))) : 18, fontFamily: ['system', 'serif', 'mono'].includes(storedReaderPreferences.fontFamily) ? storedReaderPreferences.fontFamily : 'system', lineHeight: Number.isFinite(Number(storedReaderPreferences.lineHeight)) ? Math.min(2.2, Math.max(1.35, Number(storedReaderPreferences.lineHeight))) : 1.8, paragraphSpacing: Number.isFinite(Number(storedReaderPreferences.paragraphSpacing)) ? Math.min(28, Math.max(6, Number(storedReaderPreferences.paragraphSpacing))) : 14, letterSpacing: Number.isFinite(Number(storedReaderPreferences.letterSpacing)) ? Math.min(2, Math.max(0, Number(storedReaderPreferences.letterSpacing))) : 0, pageAnimation: ['slide', 'none'].includes(storedReaderPreferences.pageAnimation) ? storedReaderPreferences.pageAnimation : 'slide', readingMode: storedReaderPreferences.readingMode === 'pages' ? 'pages' : 'scroll', fullscreenOnOpen: storedReaderPreferences.fullscreenOnOpen === true },
-  homeFeed: { active: initialHomeFeedActive, category: localStorage.getItem('onebox.home-feed-ithome-category') || 'latest', order: initialHomeFeedOrder, visible: initialHomeFeedVisible, activityFilter: 'read', hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
+  homeFeed: { active: initialHomeFeedActive, order: initialHomeFeedOrder, visible: initialHomeFeedVisible, activityFilter: 'read', hasNew: false, loading: false, errors: {}, stale: {}, updatedAt: Number(storedHomeFeeds.updatedAt || 0), cacheVersion: storedHomeFeeds.cacheVersion || '', newItems: boundedHomeFeedIdMap(storedHomeFeeds.newItems, RSS_MAX_ITEMS_PER_SOURCE), newItemsPending: boundedHomeFeedIdMap(storedHomeFeeds.newItemsPending && typeof storedHomeFeeds.newItemsPending === 'object' ? storedHomeFeeds.newItemsPending : storedHomeFeeds.newItems), sources: storedHomeFeeds.sources && typeof storedHomeFeeds.sources === 'object' ? storedHomeFeeds.sources : {} },
   navigation: normalizeNavigation(storedNavigation), navigationLocation: storedNavigationLocation, navigationShowNames: storedNavigationShowNames, navigationDialog: null, navigationFolderDraft: null,
   ticketWalletOpen: initialTicketWalletOpen, ticketWalletView: 'tickets', ticketWalletCardLayout: storedTicketWalletCardLayout, ticketWalletTypeFilter: normalizeTicketWalletFilter(storedTicketWalletTypeFilter), ticketWalletSelectedId: '', ticketWalletDisplayOrder: Array.isArray(storedTicketWalletDisplayOrder) ? storedTicketWalletDisplayOrder.filter((id) => typeof id === 'string') : [], ticketWalletEditorOpen: false, ticketWalletEditorStage: 'choose', ticketWalletEditingId: '', ticketWalletDraft: null, ticketWalletMemoryDraft: null, ticketWalletRecognition: { status: 'idle', progress: 0, message: '' },
   ticketWallet: storedTicketWallet, ticketWalletMemories: storedTicketMemories,
@@ -2002,21 +2002,6 @@ function selectHomeFeedSource(sourceId) {
   if (state.section === 'home') requestAnimationFrame(() => focusActiveHomeFeedTab(true));
   return undefined;
 }
-function selectHomeFeedCategory(categoryId, force = false) {
-  if (!['latest', 'science', 'frontier', 'all'].includes(categoryId)) return;
-  if (!force && activeITHomeCategory() === categoryId) return;
-  state.homeFeed.category = categoryId;
-  localStorage.setItem('onebox.home-feed-ithome-category', categoryId);
-  delete state.homeFeed.errors.ithome;
-  delete state.homeFeed.stale.ithome;
-  const preservedPosition = captureHomeFeedPosition();
-  if (state.section === 'home' && state.homeFeed.active === 'ithome') {
-    render();
-    restoreHomeFeedPosition(preservedPosition);
-    loadHomeFeeds(force, 'ithome');
-  }
-}
-
 function setHomeTabVisibility(tabId, visible) {
   if (!homeTabEntries().some((entry) => entry.id === tabId)) return;
   if (tabId === 'footprint') {
@@ -2585,16 +2570,13 @@ function mergeFeedItems(source, incoming) {
     .sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0))
     .slice(0, RSS_MAX_ITEMS_PER_SOURCE);
 }
-function activeITHomeCategory() {
-  return ['latest', 'science', 'frontier', 'all'].includes(state.homeFeed.category) ? state.homeFeed.category : 'latest';
-}
-function ithomeCategoriesForView() {
-  const selected = activeITHomeCategory();
-  return selected === 'all' ? ITHOME_CATEGORIES : ITHOME_CATEGORIES.filter((category) => category.id === selected);
-}
-function ithomeCategoryItems(categoryId) {
-  const cache = state.homeFeed.sources.ithome?.categoryItems?.[categoryId];
-  return Array.isArray(cache?.items) ? cache.items : [];
+function ithomeCategoriesForView() { return ITHOME_CATEGORIES; }
+function mergeITHomeCategoryItems(categoryItems = state.homeFeed.sources.ithome?.categoryItems || {}) {
+  const merged = new Map();
+  ITHOME_CATEGORIES.forEach((category) => (categoryItems[category.id]?.items || []).forEach((item) => {
+    if (!merged.has(item.id)) merged.set(item.id, item);
+  }));
+  return [...merged.values()].sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0)).slice(0, RSS_MAX_ITEMS_PER_SOURCE);
 }
 function homeFeedSourceNeedsRefresh(source, now, force = false) {
   if (force) return true;
@@ -2637,10 +2619,7 @@ async function fetchITHomeCategories(categories) {
     categoryItems[result.value.categoryId] = { items: result.value.items, updatedAt: result.value.updatedAt, feedUrl: result.value.feedUrl };
   });
   if (!successfulCount) throw Error('Feed unavailable');
-  const selected = activeITHomeCategory();
-  const viewCategories = selected === 'all' ? ITHOME_CATEGORIES : ITHOME_CATEGORIES.filter((category) => category.id === selected);
-  const items = [...new Map(viewCategories.flatMap((category) => categoryItems[category.id]?.items || []).map((item) => [item.id, item])).values()]
-    .sort((a, b) => (feedItemTimestamp(b) || 0) - (feedItemTimestamp(a) || 0)).slice(0, RSS_MAX_ITEMS_PER_SOURCE);
+  const items = mergeITHomeCategoryItems(categoryItems);
   return { items, categoryItems, updatedAt: Date.now(), partialFailure: results.some((result) => result.status === 'rejected'), feedUrl: categories.map((category) => categoryItems[category.id]?.feedUrl).filter(Boolean).join(', ') };
 }
 async function fetchFeedSource(source) {
@@ -2707,7 +2686,9 @@ async function refreshHomeFeedSource(source, requestToken, force = false) {
   let discoveredNewItems = false;
   if (result) {
     const existingItems = state.homeFeed.sources[source.id]?.items || [];
-    const previousIds = new Set(existingItems.map((item) => item.id));
+    const previousIds = source.id === 'ithome'
+      ? new Set(mergeITHomeCategoryItems(state.homeFeed.sources.ithome?.categoryItems || {}).map((item) => item.id))
+      : new Set(existingItems.map((item) => item.id));
     const discoveredIds = previousIds.size ? result.items.filter((item) => !previousIds.has(item.id)).map((item) => item.id) : [];
     const pendingBefore = homeFeedPendingIds(source.id);
     const mergedItems = mergeFeedItems(source, result.items);
@@ -2792,7 +2773,8 @@ function renderFeedItem(item, extraClass = '') {
   const rawThumbnail = usableFeedImage(item.thumbnail, source);
   const thumbnail = feedImageUrl(rawThumbnail) || rawThumbnail;
   const image = rawThumbnail ? '<span class="feed-item-media"><img class="feed-item-image" src="' + escapeHtml(thumbnail) + '" data-fallback="' + escapeHtml(rawThumbnail) + '" alt="" loading="lazy" onerror="if(this.dataset.fallback&&this.getAttribute(\'src\')!==this.dataset.fallback){this.src=this.dataset.fallback;return;}var media=this.closest(\'.feed-item-media\');if(media)media.remove();var side=this.closest(\'.feed-item-side\');if(side&&!side.children.length)side.remove();var article=this.closest(\'.feed-item\');if(article)article.classList.remove(\'has-media\');"></span>' : '';
-  const meta = '<div class="feed-item-meta"><span class="feed-source-tag ' + source.className + '"><b><img src="' + escapeHtml(source.icon) + '" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display=\'inline\'"><span class="feed-source-fallback">' + escapeHtml(source.badge) + '</span></b>' + escapeHtml(source.name) + '</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time>' + feedReactionActionsMarkup(item.id) + '</div>';
+  const ithomeCategory = source.id === 'ithome' ? ITHOME_CATEGORIES.find((category) => category.id === item.category) || ITHOME_CATEGORIES[0] : null;
+  const meta = '<div class="feed-item-meta"><span class="feed-source-tag ' + source.className + '"><b><img src="' + escapeHtml(source.icon) + '" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display=\'inline\'"><span class="feed-source-fallback">' + escapeHtml(source.badge) + '</span></b>' + escapeHtml(source.name) + '</span>' + (ithomeCategory ? '<span class="feed-item-category">· ' + escapeHtml(ithomeCategory.label) + '</span>' : '') + '<time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + (ithomeCategory ? '· ' : '') + escapeHtml(feedDate(item)) + '</time>' + feedReactionActionsMarkup(item.id) + '</div>';
   const read = Boolean(state.homeFeedRead[item.id]);
   return '<article class="feed-item ' + (extraClass ? escapeHtml(extraClass) + ' ' : '') + (thumbnail ? 'has-media ' : '') + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" tabindex="0" role="link"><div class="feed-item-body"><h2>' + escapeHtml(item.title) + '</h2>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + '</div>' + (image ? '<div class="feed-item-side">' + image + '</div>' : '') + meta + '</article>';
 }
@@ -3848,8 +3830,8 @@ function renderHome() {
   const isFootprint = state.homeFeed.active === 'footprint';
   const sourceItems = isFootprint ? recentFeedItems() : state.homeFeed.active === 'ithome'
     ? (() => {
-      const cached = [...new Map(ithomeCategoriesForView().flatMap((category) => ithomeCategoryItems(category.id)).map((item) => [item.id, item])).values()];
-      return cached.length || activeITHomeCategory() !== 'latest' ? cached : (state.homeFeed.sources.ithome?.items || []);
+      const cached = mergeITHomeCategoryItems();
+      return cached.length ? cached : (state.homeFeed.sources.ithome?.items || []);
     })()
     : (state.homeFeed.sources[state.homeFeed.active]?.items || []);
   const cutoff = Date.now() - RSS_RETENTION_MS;
@@ -3885,10 +3867,7 @@ function renderHome() {
   const refreshState = state.homeFeed.loading ? '<div class="feed-refresh-state" role="status" aria-label="' + escapeHtml(t('feedLoading')) + '"><span></span></div>' : '';
   const newContentAction = !state.homeFeed.loading && !homeFeedSourceRequesting() && newCount ? '<div class="feed-new-content-action-wrap"><button class="feed-new-content-action" type="button" data-feed-only-new>' + escapeHtml(homeFeedNewActionLabel(newCount)) + '</button></div>' : '';
   const loadMoreAction = hasMoreItems ? '<div class="feed-load-more-wrap"><button class="feed-load-more" type="button" data-feed-load-more>' + escapeHtml(t('feedLoadMore')) + '</button></div>' : '';
-  const ithomeCategoryTabs = !isFootprint && state.homeFeed.active === 'ithome'
-    ? '<div class="ithome-category-row" role="tablist" aria-label="之家栏目">' + ITHOME_CATEGORIES.map((category) => '<button type="button" class="ithome-category-tab ' + (activeITHomeCategory() === category.id ? 'active' : '') + '" role="tab" aria-selected="' + (activeITHomeCategory() === category.id) + '" data-ithome-category="' + category.id + '">' + category.label + '</button>').join('') + '<button type="button" class="ithome-category-tab ' + (activeITHomeCategory() === 'all' ? 'active' : '') + '" role="tab" aria-selected="' + (activeITHomeCategory() === 'all') + '" data-ithome-category="all">全部</button><button type="button" class="ithome-refresh-button" data-ithome-refresh aria-label="刷新当前栏目" title="刷新当前栏目"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.7-2L20 12M4 12l2.7 5a7 7 0 0 0 11.7-2"/></svg></button></div>'
-    : '';
-  return '<div class="home-page feed-home"><section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + ithomeCategoryTabs + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
+  return '<div class="home-page feed-home"><section class="feed-panel">' + (isFootprint ? renderHomeFeedActivityFilters() : '') + refreshState + newContentAction + feedBody + loadMoreAction + '<p class="feed-hint">' + t('feedProxyHint') + (state.homeFeed.updatedAt ? ' · ' + t('feedLastRefresh') + ' ' + escapeHtml(feedDate(state.homeFeed.updatedAt)) : '') + '</p></section></div>';
 }
 function navigationIconMarkup(site, extraClass = '') {
   const generatedSources = navigationIconSources(site?.url);
@@ -15918,15 +15897,6 @@ document.addEventListener('pointerdown', (event) => {
   if (menu && !menu.hidden) { menu.hidden = true; toggle?.setAttribute('aria-expanded', 'false'); }
 });
 workspace.addEventListener('click', async (event) => {
-  const ithomeCategory = event.target.closest('[data-ithome-category]');
-  if (ithomeCategory) {
-    event.preventDefault(); event.stopPropagation();
-    return selectHomeFeedCategory(ithomeCategory.dataset.ithomeCategory);
-  }
-  if (event.target.closest('[data-ithome-refresh]')) {
-    event.preventDefault(); event.stopPropagation();
-    return selectHomeFeedCategory(activeITHomeCategory(), true);
-  }
   const calendarDeleteButton = event.target.closest('[data-calendar-event-row] [data-delete-event]');
   if (calendarDeleteButton) {
     event.preventDefault(); event.stopPropagation();
