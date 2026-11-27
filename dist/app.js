@@ -89,19 +89,19 @@ const TOOL_DEFS = {
 // every site was the reason several feeds lagged by hours and hit rate limits.
 const FEED_SOURCE_REGISTRY = [
   { id: 'ithome', name: '之家', badge: 'IT', icon: 'icons/ithome.svg?v=2.18.170', className: 'ithome', mobileHost: 'm.ithome.com', visibleByDefault: true, siteUrl: 'https://www.ithome.com/', fetchers: [{ kind: 'rss', url: 'https://www.ithome.com/rss/', timeoutMs: 15000, deadlineMs: 16000 }] },
-  { id: 'huxiu', name: '虎嗅', badge: '虎', icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/be/4c/7f/be4c7f2c-0ebc-7ba8-a60e-c5707c67b0ee/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/128x128bb.png', className: 'huxiu', mobileHost: 'm.huxiu.com', visibleByDefault: true, siteUrl: 'https://www.huxiu.com/', fetchers: [{ kind: 'rss', url: 'https://www.huxiu.com/rss/0.xml' }, { kind: 'rss', url: 'https://rsshub.rssforever.com/huxiu/article' }, { kind: 'rss', url: 'https://rsshub.app/huxiu/article' }] },
-  { id: 'zhihu', name: '知乎', badge: '知', icon: 'https://www.zhihu.com/favicon.ico', className: 'zhihu', mobileHost: 'www.zhihu.com', visibleByDefault: true, siteUrl: 'https://www.zhihu.com/hot', fetchers: [{ kind: 'zhihu-hot', url: 'https://www.zhihu.com/api/v4/search/hot_search' }, { kind: 'zhihu-hot', url: 'https://www.zhihu.com/api/v4/search/hot_search?limit=50' }] },
-  { id: 'v2ex', name: 'V站', badge: 'V', icon: 'https://www.v2ex.com/favicon.ico', className: 'v2ex', visibleByDefault: false, siteUrl: 'https://www.v2ex.com/?tab=all', fetchers: [{ kind: 'v2ex-latest', url: 'https://www.v2ex.com/api/topics/latest.json' }, { kind: 'rss', url: 'https://www.v2ex.com/index.xml' }] },
-  { id: 'weibo', name: '微博', badge: '博', icon: 'icons/weibo.png?v=2.18.105', className: 'weibo', mobileHost: 'm.weibo.cn', visibleByDefault: false, siteUrl: 'https://s.weibo.com/top/summary?cate=realtimehot', fetchers: [{ kind: 'weibo-hot', url: 'https://baiapi.cn/api/weibo?type=json' }, { kind: 'weibo-hot-v2', url: 'https://weibo.com/ajax/side/hotSearch' }] },
-  { id: 'bilibili', name: 'B站', badge: 'B', icon: 'icons/bilibili.ico?v=2.18.124', className: 'bilibili', mobileHost: 'm.bilibili.com', visibleByDefault: false, siteUrl: 'https://search.bilibili.com/all', fetchers: [{ kind: 'bilibili-hot', url: 'https://api.bilibili.com/x/web-interface/search/square?limit=30&platform=web' }, { kind: 'bilibili-hotword', url: 'https://s.search.bilibili.com/main/hotword' }] },
+  { id: 'huxiu', name: '虎嗅', badge: '虎', icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/be/4c/7f/be4c7f2c-0ebc-7ba8-a60e-c5707c67b0ee/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/128x128bb.png', className: 'huxiu', defaultCategory: '资讯', mobileHost: 'm.huxiu.com', visibleByDefault: true, siteUrl: 'https://www.huxiu.com/', fetchers: [{ kind: 'rss', url: 'https://www.huxiu.com/rss/0.xml' }, { kind: 'rss', url: 'https://rsshub.rssforever.com/huxiu/article' }, { kind: 'rss', url: 'https://rsshub.app/huxiu/article' }] },
+  { id: 'zhihu', name: '知乎', badge: '知', icon: 'https://www.zhihu.com/favicon.ico', className: 'zhihu', defaultCategory: '热榜', mobileHost: 'www.zhihu.com', visibleByDefault: true, siteUrl: 'https://www.zhihu.com/hot', fetchers: [{ kind: 'zhihu-hot', url: 'https://www.zhihu.com/api/v4/search/hot_search' }, { kind: 'zhihu-hot', url: 'https://www.zhihu.com/api/v4/search/hot_search?limit=50' }] },
+  { id: 'v2ex', name: 'V站', badge: 'V', icon: 'https://www.v2ex.com/favicon.ico', className: 'v2ex', defaultCategory: '社区', visibleByDefault: false, siteUrl: 'https://www.v2ex.com/?tab=all', fetchers: [{ kind: 'v2ex-latest', url: 'https://www.v2ex.com/api/topics/latest.json' }, { kind: 'rss', url: 'https://www.v2ex.com/index.xml' }] },
+  { id: 'weibo', name: '微博', badge: '博', icon: 'icons/weibo.png?v=2.18.105', className: 'weibo', defaultCategory: '热搜', mobileHost: 'm.weibo.cn', visibleByDefault: false, siteUrl: 'https://s.weibo.com/top/summary?cate=realtimehot', fetchers: [{ kind: 'weibo-hot', url: 'https://baiapi.cn/api/weibo?type=json' }, { kind: 'weibo-hot-v2', url: 'https://weibo.com/ajax/side/hotSearch' }] },
+  { id: 'bilibili', name: 'B站', badge: 'B', icon: 'icons/bilibili.ico?v=2.18.124', className: 'bilibili', defaultCategory: '热搜', mobileHost: 'm.bilibili.com', visibleByDefault: false, siteUrl: 'https://search.bilibili.com/all', fetchers: [{ kind: 'bilibili-hot', url: 'https://api.bilibili.com/x/web-interface/search/square?limit=30&platform=web' }, { kind: 'bilibili-hotword', url: 'https://s.search.bilibili.com/main/hotword' }] },
   // Guancha and Hupu currently need the reader proxy to bypass cross-origin and anti-bot responses.
   // Keep their longer source-specific budget so a healthy fallback is not discarded at 4.5 seconds.
-  { id: 'guancha', name: '风闻', badge: '风', icon: 'icons/guancha.png?v=2.18.124', className: 'guancha', mobileHost: 'user.guancha.cn', visibleByDefault: true, siteUrl: 'https://user.guancha.cn/main/index?s=fwdhsy', fetchers: [{ kind: 'guancha-fengwen', url: 'https://user.guancha.cn/main/index-list.json?page=1&order=1', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'guancha-fengwen', url: 'https://rsshub.app/guancha/topic/0/1', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }] },
-  { id: 'hupu', name: '虎扑', badge: '虎', icon: 'icons/hupu.ico?v=2.18.124', className: 'hupu', mobileHost: 'm.hupu.com', visibleByDefault: true, siteUrl: 'https://bbs.hupu.com/bxj', fetchers: [{ kind: 'hupu-bbs', url: 'https://bbs.hupu.com/bxj', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'hupu-bbs', url: 'https://bbs.hupu.com/topic-daily', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }] },
-  { id: 'xiaohongshu', name: '红书', badge: '红', icon: 'https://www.xiaohongshu.com/favicon.ico?v=2.18.264', className: 'xiaohongshu', visibleByDefault: true, siteUrl: 'https://www.xiaohongshu.com/explore', fetchers: [{ kind: 'xiaohongshu-explore', url: 'https://www.xiaohongshu.com/explore' }, { kind: 'xiaohongshu-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=xiaohongshu&limit=30', direct: true }] },
-  { id: 'douyin', name: '抖音', badge: '音', icon: 'https://www.douyin.com/favicon.ico?v=2.18.264', className: 'douyin', visibleByDefault: true, siteUrl: 'https://www.douyin.com/jingxuan', fetchers: [{ kind: 'douyin-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=douyin&limit=30', direct: true }, { kind: 'douyin-jingxuan', url: 'https://www.douyin.com/jingxuan' }] },
-  { id: 'thepaper', name: '澎湃', badge: '澎', icon: 'https://m.thepaper.cn/_next/static/media/logo.8d76cf45.png?v=2.18.334', className: 'thepaper', mobileHost: 'm.thepaper.cn', visibleByDefault: true, siteUrl: 'https://m.thepaper.cn/', fetchers: [{ kind: 'thepaper-channel', url: 'https://www.thepaper.cn/channel_25950', timeoutMs: 15000, deadlineMs: 18000 }] },
-  { id: 'jiemian', name: '界面', badge: '面', icon: 'https://www.jiemian.com/favicon.ico?v=2.18.334', className: 'jiemian', mobileHost: 'www.jiemian.com', visibleByDefault: true, siteUrl: 'https://www.jiemian.com/lists/4.html', fetchers: [{ kind: 'jiemian-newsflash', url: 'https://www.jiemian.com/lists/1323kb.html', timeoutMs: 15000, deadlineMs: 18000 }] },
+  { id: 'guancha', name: '风闻', badge: '风', icon: 'icons/guancha.png?v=2.18.124', className: 'guancha', defaultCategory: '风闻', mobileHost: 'user.guancha.cn', visibleByDefault: true, siteUrl: 'https://user.guancha.cn/main/index?s=fwdhsy', fetchers: [{ kind: 'guancha-fengwen', url: 'https://user.guancha.cn/main/index-list.json?page=1&order=1', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'guancha-fengwen', url: 'https://rsshub.app/guancha/topic/0/1', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }] },
+  { id: 'hupu', name: '虎扑', badge: '虎', icon: 'icons/hupu.ico?v=2.18.124', className: 'hupu', defaultCategory: '步行街', mobileHost: 'm.hupu.com', visibleByDefault: true, siteUrl: 'https://bbs.hupu.com/bxj', fetchers: [{ kind: 'hupu-bbs', url: 'https://bbs.hupu.com/bxj', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }, { kind: 'hupu-bbs', url: 'https://bbs.hupu.com/topic-daily', noCache: true, timeoutMs: 20000, deadlineMs: 24000 }] },
+  { id: 'xiaohongshu', name: '红书', badge: '红', icon: 'https://www.xiaohongshu.com/favicon.ico?v=2.18.264', className: 'xiaohongshu', defaultCategory: '发现', visibleByDefault: true, siteUrl: 'https://www.xiaohongshu.com/explore', fetchers: [{ kind: 'xiaohongshu-explore', url: 'https://www.xiaohongshu.com/explore' }, { kind: 'xiaohongshu-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=xiaohongshu&limit=30', direct: true }] },
+  { id: 'douyin', name: '抖音', badge: '音', icon: 'https://www.douyin.com/favicon.ico?v=2.18.264', className: 'douyin', defaultCategory: '热榜', visibleByDefault: true, siteUrl: 'https://www.douyin.com/jingxuan', fetchers: [{ kind: 'douyin-hotboard', url: 'https://uapis.cn/api/v1/misc/hotboard?type=douyin&limit=30', direct: true }, { kind: 'douyin-jingxuan', url: 'https://www.douyin.com/jingxuan' }] },
+  { id: 'thepaper', name: '澎湃', badge: '澎', icon: 'https://m.thepaper.cn/_next/static/media/logo.8d76cf45.png?v=2.18.334', className: 'thepaper', defaultCategory: '要闻', mobileHost: 'm.thepaper.cn', visibleByDefault: true, siteUrl: 'https://m.thepaper.cn/', fetchers: [{ kind: 'thepaper-channel', url: 'https://www.thepaper.cn/channel_25950', timeoutMs: 15000, deadlineMs: 18000 }] },
+  { id: 'jiemian', name: '界面', badge: '面', icon: 'https://www.jiemian.com/favicon.ico?v=2.18.334', className: 'jiemian', defaultCategory: '快报', mobileHost: 'www.jiemian.com', visibleByDefault: true, siteUrl: 'https://www.jiemian.com/lists/4.html', fetchers: [{ kind: 'jiemian-newsflash', url: 'https://www.jiemian.com/lists/1323kb.html', timeoutMs: 15000, deadlineMs: 18000 }] },
 ];
 const RSS_SOURCES = FEED_SOURCE_REGISTRY.filter((source) => source.enabled !== false);
 const RSS_REFRESH_INTERVAL = 2 * 60 * 1000;
@@ -2250,12 +2250,33 @@ function feedImageSource(item = {}) {
   const value = item.thumbnail || item.enclosure?.link || item.enclosure?.url || item.image || embedded;
   return safeExternalUrl(String(value).startsWith('//') ? 'https:' + value : value);
 }
+function feedCategoryLabel(item, source) {
+  const values = [item?.categoryLabel, item?.category, item?.node?.title, item?.node_title, item?.categories, item?.tags];
+  for (const value of values) {
+    const candidates = Array.isArray(value) ? value : [value];
+    for (const candidate of candidates) {
+      const label = feedText(typeof candidate === 'object' && candidate ? candidate.name || candidate.title || candidate.label || '' : candidate).trim();
+      if (label && label.length <= 18) return label;
+    }
+  }
+  return source.defaultCategory || '';
+}
+function feedCategoryClass(label, source) {
+  if (/热搜|热榜|热门/.test(label)) return 'rank';
+  if (/科普|知识|科学/.test(label)) return 'science';
+  if (/社区|步行街|问答/.test(label)) return 'network';
+  if (/发现|精选|原创/.test(label)) return 'original';
+  if (/评测|数码|科技/.test(label)) return 'review';
+  if (/快报|要闻|资讯|新闻|风闻/.test(label)) return 'deep-read';
+  return ({ huxiu: 'deep-read', zhihu: 'rank', v2ex: 'network', weibo: 'rank', bilibili: 'rank', guancha: 'deep-read', hupu: 'network', xiaohongshu: 'original', douyin: 'rank', thepaper: 'deep-read', jiemian: 'deep-read' })[source.id] || '';
+}
 function normalizeFeedItem(item, source, overrides = {}) {
   const title = feedText(item.title || item.name); const link = safeExternalUrl(item.link || item.guid);
   if (!title || !link) return null;
   const thumbnail = usableFeedImage(feedImageSource(item), source);
   const publishedAt = item.pubDate || item.published || item.isoDate || item.date || '';
-  return { id: source.id + ':' + link, source: source.id, title, link, description: feedText(item.description || item.content || '').slice(0, 180), thumbnail, publishedAt, publishedMs: parseFeedTimestamp(publishedAt), ...overrides };
+  const categoryLabel = feedCategoryLabel(item, source);
+  return { id: source.id + ':' + link, source: source.id, title, link, description: feedText(item.description || item.content || '').slice(0, 180), thumbnail, publishedAt, publishedMs: parseFeedTimestamp(publishedAt), ...(categoryLabel ? { categoryLabel, categoryClass: feedCategoryClass(categoryLabel, source) } : {}), ...overrides };
 }
 function jinaReaderUrl(url) {
   const value = String(url || '').trim();
@@ -2320,7 +2341,7 @@ function xiaohongshuLocalItems(source) {
     title: city + (state.language === 'en' ? ' local picks' : '本地热门'),
     link: xiaohongshuLocalSearchUrl(city),
     description: state.language === 'en' ? 'Open Xiaohongshu to browse local recommendations.' : '进入小红书查看本地热门推荐。',
-  }, source, { approximate: true, publishedMs: Date.now() + 1000 })].filter(Boolean) : [];
+  }, source, { categoryLabel: '本地', categoryClass: 'network', approximate: true, publishedMs: Date.now() + 1000 })].filter(Boolean) : [];
 }
 function xiaohongshuExploreItems(value, source) {
   const content = jinaContent(value);
@@ -2343,11 +2364,11 @@ function xiaohongshuExploreItems(value, source) {
 function douyinSupplementalItems(source) {
   const city = homeFeedLocalCity();
   const entries = [
-    { title: '抖音精选', link: 'https://www.douyin.com/jingxuan', description: '进入抖音官方精选页。' },
-    { title: '抖音热门', link: 'https://www.douyin.com/hot', description: '进入抖音官方热门页。' },
-    ...(city ? [{ title: city + '本地热门', link: douyinLocalSearchUrl(city), description: '进入抖音查看当前位置的本地热门。' }] : []),
+    { title: '抖音精选', link: 'https://www.douyin.com/jingxuan', description: '进入抖音官方精选页。', categoryLabel: '精选' },
+    { title: '抖音热门', link: 'https://www.douyin.com/hot', description: '进入抖音官方热门页。', categoryLabel: '热门' },
+    ...(city ? [{ title: city + '本地热门', link: douyinLocalSearchUrl(city), description: '进入抖音查看当前位置的本地热门。', categoryLabel: '本地' }] : []),
   ];
-  return entries.map((entry, index) => normalizeFeedItem(entry, source, { approximate: true, publishedMs: Date.now() - (6 + index * 7) * 60 * 1000 })).filter(Boolean);
+  return entries.map((entry, index) => normalizeFeedItem(entry, source, { categoryLabel: entry.categoryLabel, categoryClass: feedCategoryClass(entry.categoryLabel, source), approximate: true, publishedMs: Date.now() - (6 + index * 7) * 60 * 1000 })).filter(Boolean);
 }
 function douyinJingxuanItems(source) { return douyinSupplementalItems(source); }
 function hupuTimestamp(value, index) {
@@ -2376,10 +2397,12 @@ function rssMarkdownItems(value, source) {
     const itunesImage = node.getElementsByTagName('itunes:image')[0];
     const publishedNode = node.querySelector('pubDate, published, updated') || node.getElementsByTagName('dc:date')[0];
     const descriptionNode = node.querySelector('description, summary, content') || node.getElementsByTagName('content:encoded')[0];
+    const categories = [...node.getElementsByTagName('category'), ...node.getElementsByTagName('dc:subject')].map((category) => category.textContent).filter(Boolean);
     return normalizeFeedItem({
       title: node.querySelector('title')?.textContent,
       link,
       description: descriptionNode?.textContent,
+      categories,
       pubDate: publishedNode?.textContent,
       enclosure: { url: enclosure?.getAttribute('url') || mediaContent?.getAttribute('url') || itunesImage?.getAttribute('href') || '' },
     }, source, { approximate: false, publishedMs: parseFeedTimestamp(publishedNode?.textContent) || syntheticFeedTime(index) });
@@ -2517,6 +2540,7 @@ function structuredHotItems(payload, source, kind) {
       link: item.url || (item.id ? 'https://www.v2ex.com/t/' + item.id : ''),
       description: item.content,
       image: item.member?.avatar_normal,
+      node: item.node,
       publishedAt: item.last_modified || item.created ? new Date(Number(item.last_modified || item.created) * 1000).toISOString() : '',
     }, source, { publishedMs: parseFeedTimestamp(item.last_modified || item.created ? new Date(Number(item.last_modified || item.created) * 1000).toISOString() : '') || syntheticFeedTime(index) })).filter(Boolean);
   }
@@ -2526,7 +2550,7 @@ function structuredHotItems(payload, source, kind) {
       const title = feedText(item.title || item.name);
       if (!title) return null;
       const link = safeExternalUrl(item.url) || xiaohongshuLocalSearchUrl(title);
-      return normalizeFeedItem({ title, link, description: item.hot_value ? '热度 ' + item.hot_value : '', image: item.cover || item.extra?.cover }, source, { approximate: true, publishedMs: syntheticFeedTime(index) });
+      return normalizeFeedItem({ title, link, description: item.hot_value ? '热度 ' + item.hot_value : '', image: item.cover || item.extra?.cover }, source, { categoryLabel: '热榜', categoryClass: 'rank', approximate: true, publishedMs: syntheticFeedTime(index) });
     }).filter(Boolean);
     return [...xiaohongshuLocalItems(source), ...items];
   }
@@ -2536,7 +2560,7 @@ function structuredHotItems(payload, source, kind) {
       const title = feedText(item.title || item.name);
       if (!title) return null;
       const link = safeExternalUrl(item.url) || 'https://www.douyin.com/search/' + encodeURIComponent(title) + '?type=general';
-      return normalizeFeedItem({ title, link, description: item.hot_value ? '热度 ' + item.hot_value : '', image: item.cover || item.extra?.cover }, source, { approximate: true, publishedMs: syntheticFeedTime(index) });
+      return normalizeFeedItem({ title, link, description: item.hot_value ? '热度 ' + item.hot_value : '', image: item.cover || item.extra?.cover }, source, { categoryLabel: '热榜', categoryClass: 'rank', approximate: true, publishedMs: syntheticFeedTime(index) });
     }).filter(Boolean);
     return interleaveFeedItems(items, douyinSupplementalItems(source));
   }
@@ -2851,7 +2875,11 @@ function renderFeedItem(item, extraClass = '') {
   const thumbnail = feedImageUrl(rawThumbnail) || rawThumbnail;
   const image = rawThumbnail ? '<span class="feed-item-media"><img class="feed-item-image" src="' + escapeHtml(thumbnail) + '" data-fallback="' + escapeHtml(rawThumbnail) + '" alt="" loading="lazy" onerror="if(this.dataset.fallback&&this.getAttribute(\'src\')!==this.dataset.fallback){this.src=this.dataset.fallback;return;}var media=this.closest(\'.feed-item-media\');if(media)media.remove();var side=this.closest(\'.feed-item-side\');if(side&&!side.children.length)side.remove();var article=this.closest(\'.feed-item\');if(article)article.classList.remove(\'has-media\');"></span>' : '';
   const ithomeCategory = source.id === 'ithome' ? ITHOME_CATEGORIES.find((category) => category.id === item.category) || ITHOME_CATEGORIES[0] : null;
-  const meta = '<div class="feed-item-meta' + (ithomeCategory ? ' has-ithome-category' : '') + '"><span class="feed-source-tag ' + source.className + '"><b><img src="' + escapeHtml(source.icon) + '" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display=\'inline\'"><span class="feed-source-fallback">' + escapeHtml(source.badge) + '</span></b>' + escapeHtml(source.name) + '</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time>' + (ithomeCategory ? '<span class="feed-item-category is-' + escapeHtml(ithomeCategory.id) + '">' + escapeHtml(ithomeCategory.label) + '</span>' : '') + feedReactionActionsMarkup(item.id) + '</div>';
+  const categoryLabel = ithomeCategory?.label || item.categoryLabel || source.defaultCategory || '';
+  const safeCategoryClass = ['rank', 'deep-read', 'original', 'review', 'network', 'science'].includes(item.categoryClass) ? item.categoryClass : feedCategoryClass(categoryLabel, source);
+  const categoryBadgeClass = ithomeCategory ? ithomeCategory.id : safeCategoryClass;
+  const categoryBadge = categoryLabel ? '<span class="feed-item-category' + (categoryBadgeClass ? ' is-' + categoryBadgeClass : '') + '">' + escapeHtml(categoryLabel) + '</span>' : '';
+  const meta = '<div class="feed-item-meta' + (categoryBadge ? ' has-ithome-category' : '') + '"><span class="feed-source-tag ' + source.className + '"><b><img src="' + escapeHtml(source.icon) + '" alt="" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display=\'inline\'"><span class="feed-source-fallback">' + escapeHtml(source.badge) + '</span></b>' + escapeHtml(source.name) + '</span><time datetime="' + escapeHtml(new Date(feedItemTimestamp(item) || Date.now()).toISOString()) + '">' + escapeHtml(feedDate(item)) + '</time>' + categoryBadge + feedReactionActionsMarkup(item.id) + '</div>';
   const read = Boolean(state.homeFeedRead[item.id]);
   return '<article class="feed-item ' + (extraClass ? escapeHtml(extraClass) + ' ' : '') + (thumbnail ? 'has-media ' : '') + (read ? 'is-read' : '') + '" data-feed-id="' + escapeHtml(item.id) + '" data-feed-link="' + escapeHtml(item.link) + '" tabindex="0" role="link"><div class="feed-item-body"><h2>' + escapeHtml(item.title) + '</h2>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + '</div>' + (image ? '<div class="feed-item-side">' + image + '</div>' : '') + meta + '</article>';
 }
