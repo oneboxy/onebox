@@ -1253,8 +1253,23 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 .feed-source-tab.active { background: var(--soft); border-color: var(--primary); color: var(--primary); }
 .feed-item-meta.has-ithome-category { gap: 6px; }
 .feed-item-category { --feed-category-accent: var(--primary); display: inline-flex; align-items: center; flex: 0 0 auto; padding: 1px 5px; border: 1px solid color-mix(in srgb, var(--feed-category-accent) 68%, var(--line)); border-radius: 4px; background: transparent; color: color-mix(in srgb, var(--feed-category-accent) 72%, var(--ink)); font-size: .92em; line-height: 1.25; white-space: nowrap; }
+.feed-item-category.is-rank,
+.feed-item-category.is-live,
+.feed-item-category.is-vote { --feed-category-accent: #b9535a; }
+.feed-item-category.is-deep-read,
+.feed-item-category.is-special,
+.feed-item-category.is-vr,
+.feed-item-category.is-gaming { --feed-category-accent: #7862a9; }
+.feed-item-category.is-original,
+.feed-item-category.is-harmony,
+.feed-item-category.is-android,
 .feed-item-category.is-science { --feed-category-accent: #318d69; }
+.feed-item-category.is-review,
+.feed-item-category.is-jd-picks,
 .feed-item-category.is-frontier { --feed-category-accent: #b77a25; }
+.feed-item-category.is-it-account,
+.feed-item-category.is-5g,
+.feed-item-category.is-network { --feed-category-accent: #477f97; }
 .feed-source-mark, .feed-source-tag b { display: inline-grid; place-items: center; flex: 0 0 auto; width: 22px; height: 22px; border-radius: 7px; font-size: 10px; font-weight: 850; letter-spacing: -.04em; }
 .feed-source-mark.all, .feed-source-tag.all b { background: var(--primary); color: var(--primary-contrast, #fff); }
 .feed-source-mark.ithome, .feed-source-tag.ithome b { background: #d92f36; color: #fff; }

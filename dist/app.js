@@ -107,9 +107,35 @@ const RSS_SOURCES = FEED_SOURCE_REGISTRY.filter((source) => source.enabled !== f
 const RSS_REFRESH_INTERVAL = 2 * 60 * 1000;
 const ITHOME_CATEGORIES = [
   { id: 'latest', label: '最新', tag: 'newsm' },
-  { id: 'science', label: '科普', tag: 'discoverym' },
+  { id: 'rank', label: '热榜', tag: 'rankm', pageOnly: true },
+  { id: 'deep-read', label: '精读', tag: 'jingdum' },
+  { id: 'original', label: '原创', tag: 'originalm' },
+  { id: 'review', label: '评测', tag: 'labsm' },
+  { id: 'harmony', label: '鸿蒙', tag: 'harmonyos' },
+  { id: 'live', label: '直播', tag: 'livem' },
+  { id: 'it-account', label: 'IT号', tag: 'itaccountm' },
+  { id: '5g', label: '5G', tag: '5gm' },
+  { id: 'special', label: '专题', tag: 'specialm', pageOnly: true },
+  { id: 'balcony', label: '阳台', tag: 'balconym' },
+  { id: 'vote', label: '投票', tag: 'votenews' },
+  { id: 'phone', label: '手机', tag: 'phonem' },
+  { id: 'digital', label: '数码', tag: 'digim' },
+  { id: 'academy', label: '学院', tag: 'geekm' },
+  { id: 'vr', label: 'VR', tag: 'vrm' },
+  { id: 'automotive', label: '智能汽车', tag: 'autom' },
+  { id: 'computer', label: '电脑', tag: 'pcm' },
+  { id: 'jd-picks', label: '京东精选', tag: 'jdm' },
+  { id: 'android', label: '安卓', tag: 'androidm' },
+  { id: 'apple', label: '苹果', tag: 'iosm' },
+  { id: 'network', label: '网络焦点', tag: 'internetm' },
   { id: 'frontier', label: '前沿', tag: 'itm' },
+  { id: 'gaming', label: '游戏电竞', tag: 'gamem' },
+  { id: 'windows', label: 'Windows', tag: 'windowsm' },
+  { id: 'linux', label: 'Linux', tag: 'linuxsm' },
+  { id: 'science', label: '科普', tag: 'discoverym' },
 ];
+const ITHOME_CATEGORY_FETCH_CONCURRENCY = 5;
+const ITHOME_CATEGORY_ITEM_LIMIT = 12;
 const HOME_FEED_PENDING_LIMIT = 30;
 // Keep the feed deadline long enough for the reader proxy to return fresh
 // content. The former 2.6/3 second cut-off made the active source look stale
@@ -2592,26 +2618,75 @@ function homeFeedSourceNeedsRefresh(source, now, force = false) {
 }
 async function fetchITHomeCategory(category) {
   const url = 'https://m.ithome.com/api/news/newslistpageget?Tag=' + encodeURIComponent(category.tag) + '&page=1&hitCountAuthority=false';
-  const targetUrl = jinaReaderUrl(url, true);
-  const { response, text } = await fetchTextWithTimeout(targetUrl, { cache: 'no-store', headers: { Accept: 'application/json, text/plain', 'X-No-Cache': 'true' } }, HOME_FEED_REQUEST_TIMEOUT_MS);
-  if (!response.ok) throw Error('HTTP ' + response.status);
-  const payload = jinaJson(text);
-  if (payload?.Success !== 1 || !Array.isArray(payload.Result)) throw Error('Feed empty');
   const source = RSS_SOURCES.find((entry) => entry.id === 'ithome');
-  const items = payload.Result.map((item) => normalizeFeedItem({
-    title: item.title,
-    link: (() => { const link = String(item.WapNewsUrl || item.url || ''); try { return new URL(link, 'https://www.ithome.com/').href; } catch { return ''; } })(),
-    description: item.description,
-    image: item.image || item.imagelist?.[0],
-    pubDate: (() => { const date = String(item.orderdate || item.postdate || ''); return date && !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(date) ? date + '+08:00' : date; })(),
-  }, source)).filter(Boolean).map((item) => ({ ...item, category: category.id }));
+  let payload = null;
+  if (!category.pageOnly) try {
+    const { response, text } = await fetchTextWithTimeout(jinaReaderUrl(url, true), { cache: 'no-store', headers: { Accept: 'application/json, text/plain', 'X-No-Cache': 'true' } }, HOME_FEED_REQUEST_TIMEOUT_MS);
+    if (response.ok) payload = jinaJson(text);
+  } catch {}
+  let items = payload?.Success === 1 && Array.isArray(payload.Result) ? payload.Result.map((item) => normalizeFeedItem({
+      title: item.title,
+      link: (() => { const link = String(item.WapNewsUrl || item.url || ''); try { return new URL(link, 'https://www.ithome.com/').href; } catch { return ''; } })(),
+      description: item.description,
+      image: item.image || item.imagelist?.[0],
+      pubDate: (() => { const date = String(item.orderdate || item.postdate || ''); return date && !/(?:Z|[+-]\d{2}:?\d{2})$/i.test(date) ? date + '+08:00' : date; })(),
+    }, source)).filter(Boolean).slice(0, ITHOME_CATEGORY_ITEM_LIMIT).map((item) => ({ ...item, category: category.id })) : [];
+  if (!items.length) items = await fetchITHomeCategoryPage(category, source);
   if (!items.length) throw Error('Feed empty');
   return { categoryId: category.id, items, updatedAt: Date.now(), feedUrl: url };
+}
+function ithomeFallbackTimestamp(value, index) {
+  const text = String(value || '');
+  const age = text.match(/(\d+)\s*(分钟|小时|天)前/);
+  if (age) return Date.now() - Number(age[1]) * (age[2] === '分钟' ? 60000 : age[2] === '小时' ? 3600000 : 86400000);
+  const clock = text.match(/(今天|昨日|昨天|前天)?\s*(\d{1,2}):(\d{2})/);
+  const monthDay = text.match(/(\d{1,2})月(\d{1,2})日/);
+  const shanghaiNow = new Date(Date.now() + 8 * 3600000);
+  if (clock || monthDay) {
+    const year = shanghaiNow.getUTCFullYear();
+    const month = monthDay ? Number(monthDay[1]) - 1 : shanghaiNow.getUTCMonth();
+    const day = monthDay ? Number(monthDay[2]) : shanghaiNow.getUTCDate() - ({ 今天: 0, 昨日: 1, 昨天: 1, 前天: 2 }[clock[1]] || 0);
+    const hour = clock ? Number(clock[2]) : 12;
+    const minute = clock ? Number(clock[3]) : 0;
+    let timestamp = Date.UTC(year, month, day, hour - 8, minute);
+    if (monthDay && timestamp > Date.now() + 7 * 86400000) timestamp = Date.UTC(year - 1, month, day, hour - 8, minute);
+    return timestamp;
+  }
+  if (/刚刚/.test(text)) return Date.now();
+  return syntheticFeedTime(index + 20);
+}
+async function fetchITHomeCategoryPage(category, source) {
+  const pageUrl = 'https://m.ithome.com/' + category.tag + '/';
+  const { response, text } = await fetchTextWithTimeout(jinaReaderUrl(pageUrl, true), { cache: 'no-store', headers: { Accept: 'text/plain', 'X-No-Cache': 'true' } }, HOME_FEED_REQUEST_TIMEOUT_MS);
+  if (!response.ok) throw Error('HTTP ' + response.status);
+  const markdown = jinaContent(text);
+  const links = [...markdown.matchAll(/^\[(.*)\]\((https?:\/\/m\.ithome\.com\/(?:html\/\d+\.htm|zt\/[^)\s]+))\)\s*$/gm)];
+  return links.slice(0, ITHOME_CATEGORY_ITEM_LIMIT).map((match, index) => {
+    const label = match[1];
+    const date = [...label.matchAll(/(?:今天|昨日|昨天|前天)?\s*\d{1,2}:\d{2}|\d{1,2}月\d{1,2}日|\d+\s*(?:分钟|小时|天)前/g)].at(-1)?.[0] || '';
+    const titleText = label.replace(/!?\[[^\]]*\]\([^)]*\)/g, ' ').replace(/^\s*\d+\s*/, '');
+    const dateIndex = date ? titleText.lastIndexOf(date) : -1;
+    const title = feedText((date && dateIndex >= 0 ? titleText.slice(0, dateIndex) : titleText.replace(/\s+(?:专题|热榜)\s*$/, '')).trim());
+    const thumbnail = label.match(/!?\[[^\]]*\]\((https?:\/\/[^)\s]+)[^)]*\)/)?.[1] || '';
+    return normalizeFeedItem({ title, link: match[2], image: thumbnail, pubDate: date }, source, {
+      category: category.id,
+      publishedMs: ithomeFallbackTimestamp(date, index),
+    });
+  }).filter(Boolean);
 }
 async function fetchITHomeCategories(categories) {
   const cached = state.homeFeed.sources.ithome || {};
   const categoryItems = { ...(cached.categoryItems || {}) };
-  const results = await Promise.allSettled(categories.map((category) => fetchITHomeCategory(category)));
+  const results = new Array(categories.length);
+  let nextCategoryIndex = 0;
+  const fetchWorker = async () => {
+    while (nextCategoryIndex < categories.length) {
+      const index = nextCategoryIndex++;
+      try { results[index] = { status: 'fulfilled', value: await fetchITHomeCategory(categories[index]) }; }
+      catch (reason) { results[index] = { status: 'rejected', reason }; }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(ITHOME_CATEGORY_FETCH_CONCURRENCY, categories.length) }, fetchWorker));
   let successfulCount = 0;
   results.forEach((result) => {
     if (result.status !== 'fulfilled') return;
@@ -2686,10 +2761,11 @@ async function refreshHomeFeedSource(source, requestToken, force = false) {
   let discoveredNewItems = false;
   if (result) {
     const existingItems = state.homeFeed.sources[source.id]?.items || [];
+    const existingITHomeCategoryIds = new Set(Object.entries(state.homeFeed.sources.ithome?.categoryItems || {}).filter(([, cache]) => cache?.items?.length).map(([categoryId]) => categoryId));
     const previousIds = source.id === 'ithome'
       ? new Set(mergeITHomeCategoryItems(state.homeFeed.sources.ithome?.categoryItems || {}).map((item) => item.id))
       : new Set(existingItems.map((item) => item.id));
-    const discoveredIds = previousIds.size ? result.items.filter((item) => !previousIds.has(item.id)).map((item) => item.id) : [];
+    const discoveredIds = previousIds.size ? result.items.filter((item) => !previousIds.has(item.id) && (source.id !== 'ithome' || existingITHomeCategoryIds.has(item.category))).map((item) => item.id) : [];
     const pendingBefore = homeFeedPendingIds(source.id);
     const mergedItems = mergeFeedItems(source, result.items);
     const availableIds = new Set(mergedItems.map((item) => item.id));
