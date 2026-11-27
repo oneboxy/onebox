@@ -21974,7 +21974,8 @@ body.dev-timestamp-country-dragging * { cursor: grabbing !important; }
 #workspace[data-tool="calendar"] .calendar-grid .day.selected { border-style: solid; }
 #workspace[data-tool="calendar"] .calendar-grid .day.selected { border-width: 2px; }
 @media (max-width: 760px) {
-  #workspace[data-tool="calendar"] { margin-inline: -6px; padding-inline: 4px; }
+  #workspace[data-tool="calendar"] { margin-inline: -8px; padding-inline: 3px; }
+  #workspace[data-tool="calendar"] .calendar-layout { padding-inline: 0; }
 }
 
 /* Global color tokens: adjust this palette to tune every OneBox page. */
