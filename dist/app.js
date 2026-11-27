@@ -14777,9 +14777,8 @@ function pageSwipeIndex(items) {
 function pageSwipeTarget(event) {
   const main = event.target.closest('main');
   if (!main || event.pointerType === 'mouse' || pageSwipeAnimationToken) return null;
-  // Calculator keys must receive reliable taps; horizontal page gestures that
-  // begin on a key can otherwise suppress iOS Safari's synthetic click.
-  if (event.target.closest('#workspace[data-tool="calculator"] .calculator-keyboard')) return null;
+  // A calculator key tap remains a normal click unless the pointer actually
+  // moves horizontally; once it becomes a page swipe, suppress the key click.
   if (state.section === 'mine' && state.ticketWalletOpen && (state.ticketWalletSelectedId || ticketWalletMapReturnContext)) return null;
   if (event.target.closest('[data-reader-surface], .reader-reference-shell, [data-reader-book-card], input, textarea, select, [contenteditable="true"], .weather-card-list, .weather-days, .hourly-strip, .advice-strip, .weather-chart-scroll, .translation-history-list, .ticket-wallet-filter-scroll, .ticket-wallet-view-switcher, .ticket-wallet-template-options.is-airlines')) return null;
   if (event.target.closest('[data-swipe-row]')) return null;
