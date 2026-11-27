@@ -1251,7 +1251,10 @@ html.reader-focus #readerDialog .reader-dialog-card { width: min(720px, 100%); m
 .feed-source-scroll-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
 .feed-source-tab { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid transparent; border-radius: 11px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; white-space: nowrap; }
 .feed-source-tab.active { background: var(--soft); border-color: var(--primary); color: var(--primary); }
-.feed-item-category { color: var(--muted); white-space: nowrap; }
+.feed-item-meta.has-ithome-category { gap: 6px; }
+.feed-item-category { --feed-category-accent: var(--primary); display: inline-flex; align-items: center; flex: 0 0 auto; padding: 1px 5px; border: 1px solid color-mix(in srgb, var(--feed-category-accent) 68%, var(--line)); border-radius: 4px; background: transparent; color: color-mix(in srgb, var(--feed-category-accent) 72%, var(--ink)); font-size: .92em; line-height: 1.25; white-space: nowrap; }
+.feed-item-category.is-science { --feed-category-accent: #318d69; }
+.feed-item-category.is-frontier { --feed-category-accent: #b77a25; }
 .feed-source-mark, .feed-source-tag b { display: inline-grid; place-items: center; flex: 0 0 auto; width: 22px; height: 22px; border-radius: 7px; font-size: 10px; font-weight: 850; letter-spacing: -.04em; }
 .feed-source-mark.all, .feed-source-tag.all b { background: var(--primary); color: var(--primary-contrast, #fff); }
 .feed-source-mark.ithome, .feed-source-tag.ithome b { background: #d92f36; color: #fff; }
@@ -1829,6 +1832,7 @@ main:has(#workspace[data-tool="home"]) { padding-top: calc(var(--app-header-heig
   #workspace[data-tool="home"] .feed-item p { margin-top: 5px; margin-bottom: 0; font-size: 12px; line-height: 1.5; }
   #workspace[data-tool="home"] .feed-item-media { height: 58px; }
   #workspace[data-tool="home"] .feed-item-meta { flex-direction: row; gap: 3px 8px; font-size: 10px; }
+  #workspace[data-tool="home"] .feed-item-meta.has-ithome-category { column-gap: 5px; }
   #workspace[data-tool="home"] .feed-source-tag { flex-direction: row; gap: 4px; }
   #workspace[data-tool="home"] .feed-source-tag b { width: 18px; height: 18px; }
   main:has(#workspace[data-tool="home"]) { padding-top: calc(var(--app-header-height) + 1px); padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
