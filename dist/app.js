@@ -248,8 +248,18 @@ function saveHomeSourceFloatingPosition() {
   } catch {}
 }
 const DEV_TOOL_FLOATING_POSITION_KEY = 'onebox-dev-tools-floating-position';
+const DEV_TOOL_FLOATING_EXPANDED_KEY = 'onebox-dev-tools-floating-expanded';
+const DEV_TOOL_ORDER_KEY = 'onebox-dev-tools-floating-order';
+let devToolFloatingExpanded = localStorage.getItem(DEV_TOOL_FLOATING_EXPANDED_KEY) === 'true';
 let devToolFloatingDrag = null;
 let suppressDevToolFloatingClick = false;
+function getVisibleDevToolOrder() {
+  const defaults = DEV_TOOL_IDS.filter((id) => id !== 'unit-convert');
+  const saved = parseStored(DEV_TOOL_ORDER_KEY, []);
+  if (!Array.isArray(saved)) return defaults;
+  const order = [...new Set(saved.filter((id) => defaults.includes(id)))];
+  return [...order, ...defaults.filter((id) => !order.includes(id))];
+}
 function setDevToolFloatingPosition(nav, left, top) {
   const rect = nav.getBoundingClientRect();
   const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
@@ -261,15 +271,12 @@ function setDevToolFloatingPosition(nav, left, top) {
 }
 function restoreDevToolFloatingPosition(nav) {
   if (!nav || !window.matchMedia('(max-width: 760px)').matches) return;
-  const saved = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, {});
-  nav.querySelectorAll('.dev-mode-option[data-dev-mode]').forEach((button) => {
-    const position = saved[button.dataset.devMode];
-    if (!position || !Number.isFinite(Number(position.x)) || !Number.isFinite(Number(position.y))) return;
-    const rect = button.getBoundingClientRect();
-    const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
-    const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
-    setDevToolFloatingPosition(button, 8 + Number(position.x) * Math.max(0, maxLeft - 8), 8 + Number(position.y) * Math.max(0, maxTop - 8));
-  });
+  const saved = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, null);
+  if (!saved || !Number.isFinite(Number(saved.x)) || !Number.isFinite(Number(saved.y))) return;
+  const rect = nav.getBoundingClientRect();
+  const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+  const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+  setDevToolFloatingPosition(nav, 8 + Number(saved.x) * Math.max(0, maxLeft - 8), 8 + Number(saved.y) * Math.max(0, maxTop - 8));
 }
 function syncDevToolFloatingNavLocation(nav = document.querySelector('.dev-mode-floating-nav')) {
   if (!nav) return;
@@ -281,62 +288,88 @@ function syncDevToolFloatingNavLocation(nav = document.querySelector('.dev-mode-
   const page = workspace.querySelector('.dev-tools-page');
   if (page && nav.parentElement !== page) {
     page.insertBefore(nav, page.querySelector('.dev-tools-body'));
-    nav.querySelectorAll('.dev-mode-option').forEach((button) => {
-      button.style.removeProperty('left');
-      button.style.removeProperty('top');
-      button.style.removeProperty('right');
-      button.style.removeProperty('bottom');
-    });
+    nav.style.removeProperty('left');
+    nav.style.removeProperty('top');
+    nav.style.removeProperty('right');
+    nav.style.removeProperty('bottom');
   }
 }
-function saveDevToolFloatingPosition(button) {
-  const rect = button.getBoundingClientRect();
+function saveDevToolFloatingPosition(nav) {
+  const rect = nav.getBoundingClientRect();
   const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
   const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
   const left = Math.min(maxLeft, Math.max(8, rect.left));
   const top = Math.min(maxTop, Math.max(8, rect.top));
   try {
-    const positions = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, {});
-    positions[button.dataset.devMode] = {
+    localStorage.setItem(DEV_TOOL_FLOATING_POSITION_KEY, JSON.stringify({
       x: maxLeft === 8 ? 0 : (left - 8) / (maxLeft - 8),
       y: maxTop === 8 ? 0 : (top - 8) / (maxTop - 8),
-    };
-    localStorage.setItem(DEV_TOOL_FLOATING_POSITION_KEY, JSON.stringify(positions));
+    }));
   } catch {}
 }
 document.addEventListener('pointerdown', (event) => {
-  const button = event.target.closest?.('.dev-mode-floating-nav .dev-mode-option[data-dev-mode]');
-  if (!button || !window.matchMedia('(max-width: 760px)').matches || event.button !== 0) return;
-  const rect = button.getBoundingClientRect();
-  devToolFloatingDrag = { button, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
-  try { button.setPointerCapture(event.pointerId); } catch {}
+  const nav = event.target.closest?.('.dev-mode-floating-nav');
+  if (!nav || !window.matchMedia('(max-width: 760px)').matches || event.button !== 0) return;
+  const rect = nav.getBoundingClientRect();
+  const option = event.target.closest?.('.dev-mode-option[data-dev-mode]');
+  const captureTarget = event.target.closest?.('button') || nav;
+  devToolFloatingDrag = { nav, option, captureTarget, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, mode: 'pending', moved: false, timer: null };
+  if (option) {
+    devToolFloatingDrag.timer = window.setTimeout(() => {
+      if (devToolFloatingDrag?.pointerId !== event.pointerId || devToolFloatingDrag.moved) return;
+      devToolFloatingDrag.mode = 'reorder';
+      nav.classList.add('is-reordering');
+      option.classList.add('is-reordering');
+    }, 420);
+  }
+  try { captureTarget.setPointerCapture(event.pointerId); } catch {}
 });
 document.addEventListener('pointermove', (event) => {
   const drag = devToolFloatingDrag;
   if (!drag || drag.pointerId !== event.pointerId) return;
   const dx = event.clientX - drag.x;
   const dy = event.clientY - drag.y;
-  if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+  if (drag.mode === 'pending' && Math.hypot(dx, dy) < 6) return;
+  if (drag.mode === 'pending') {
+    window.clearTimeout(drag.timer);
+    drag.mode = 'move';
+  }
   drag.moved = true;
-  drag.button.classList.add('is-dragging');
-  setDevToolFloatingPosition(drag.button, drag.left + dx, drag.top + dy);
+  if (drag.mode === 'reorder' && drag.option) {
+    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('.dev-mode-option[data-dev-mode]');
+    if (target && target !== drag.option && target.parentElement === drag.option.parentElement) {
+      const rect = target.getBoundingClientRect();
+      const after = event.clientX > rect.left + rect.width / 2;
+      drag.option.parentElement.insertBefore(drag.option, after ? target.nextSibling : target);
+    }
+    event.preventDefault();
+    return;
+  }
+  drag.nav.classList.add('is-dragging');
+  setDevToolFloatingPosition(drag.nav, drag.left + dx, drag.top + dy);
   event.preventDefault();
 });
 function finishDevToolFloatingDrag(event) {
   const drag = devToolFloatingDrag;
   if (!drag || drag.pointerId !== event.pointerId) return;
   devToolFloatingDrag = null;
-  drag.button.classList.remove('is-dragging');
+  window.clearTimeout(drag.timer);
+  drag.nav.classList.remove('is-dragging');
+  drag.nav.classList.remove('is-reordering');
+  drag.option?.classList.remove('is-reordering');
   if (!drag.moved) return;
-  saveDevToolFloatingPosition(drag.button);
+  if (drag.mode === 'reorder') {
+    const order = [...drag.nav.querySelectorAll('.dev-mode-option[data-dev-mode]')].map((button) => button.dataset.devMode);
+    localStorage.setItem(DEV_TOOL_ORDER_KEY, JSON.stringify(order));
+  } else saveDevToolFloatingPosition(drag.nav);
   suppressDevToolFloatingClick = true;
   window.setTimeout(() => { suppressDevToolFloatingClick = false; }, 500);
 }
 document.addEventListener('pointerup', finishDevToolFloatingDrag);
 document.addEventListener('pointercancel', finishDevToolFloatingDrag);
 document.addEventListener('click', (event) => {
-  const button = event.target.closest?.('.dev-mode-floating-nav .dev-mode-option[data-dev-mode]');
-  if (!button) return;
+  const nav = event.target.closest?.('.dev-mode-floating-nav');
+  if (!nav) return;
   if (suppressDevToolFloatingClick) {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -346,8 +379,27 @@ document.addEventListener('click', (event) => {
   if (!document.body.classList.contains('dev-tools-fullscreen')) return;
   event.preventDefault();
   event.stopImmediatePropagation();
+  if (event.target.closest('[data-dev-tool-menu-toggle]')) {
+    devToolFloatingExpanded = !devToolFloatingExpanded;
+    localStorage.setItem(DEV_TOOL_FLOATING_EXPANDED_KEY, String(devToolFloatingExpanded));
+    nav.classList.toggle('is-expanded', devToolFloatingExpanded);
+    const toggle = nav.querySelector('[data-dev-tool-menu-toggle]');
+    const toggleLabel = state.language === 'en' ? (devToolFloatingExpanded ? 'Collapse developer tools' : 'Expand developer tools') : (devToolFloatingExpanded ? '收起开发工具' : '展开开发工具');
+    toggle?.setAttribute('aria-expanded', String(devToolFloatingExpanded));
+    toggle?.setAttribute('aria-label', toggleLabel);
+    toggle?.setAttribute('title', toggleLabel);
+    requestAnimationFrame(() => {
+      const rect = nav.getBoundingClientRect();
+      setDevToolFloatingPosition(nav, rect.left, rect.top);
+    });
+    return;
+  }
+  const button = event.target.closest('.dev-mode-option[data-dev-mode]');
+  if (!button) return;
   state.devTools.active = DEV_TOOL_IDS.includes(button.dataset.devMode) ? button.dataset.devMode : DEV_TOOL_IDS[0];
   state.devTools.historyOpen = false;
+  devToolFloatingExpanded = false;
+  localStorage.setItem(DEV_TOOL_FLOATING_EXPANDED_KEY, 'false');
   devModeTransitionPending = true;
   saveDevTools();
   render();
@@ -11130,14 +11182,17 @@ document.addEventListener('pointercancel', finishTimestampCityDrag);
 window.addEventListener('blur', () => finishTimestampCityDrag());
 let devModeTransitionPending = false;
 function developerTool() {
-  const visibleModes = DEV_TOOL_IDS.filter((id) => id !== 'unit-convert');
+  const visibleModes = getVisibleDevToolOrder();
   const mode = visibleModes.includes(state.devTools.active) ? state.devTools.active : visibleModes[0];
   if (state.devTools.active !== mode) { state.devTools.active = mode; saveDevTools(); }
-  const modes = visibleModes.map((id) => '<button type="button" class="dev-mode-option' + (mode === id ? ' active' : '') + '" role="tab" aria-selected="' + String(mode === id) + '" aria-label="' + escapeHtml(devModeLabel(id)) + '" title="' + escapeHtml(devModeLabel(id)) + '" data-dev-mode="' + id + '"><span class="dev-mode-option-icon">' + devModeIcon(id) + '</span><span class="dev-mode-option-label">' + escapeHtml(devModeLabel(id)) + '</span></button>').join('');
+  const sortHint = state.language === 'en' ? 'Hold and drag to reorder' : '长按拖动排序';
+  const modes = visibleModes.map((id) => '<button type="button" class="dev-mode-option' + (mode === id ? ' active' : '') + '" role="tab" aria-selected="' + String(mode === id) + '" aria-label="' + escapeHtml(devModeLabel(id)) + '" title="' + escapeHtml(devModeLabel(id) + ' · ' + sortHint) + '" data-dev-mode="' + id + '"><span class="dev-mode-option-icon">' + devModeIcon(id) + '</span><span class="dev-mode-option-label">' + escapeHtml(devModeLabel(id)) + '</span></button>').join('');
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : mode === 'file-compare' ? window.OneBoxFileCompareUI.render() : convert();
   const modalOverlay = mode === 'json-compare' && state.devTools.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
   const outputOverlay = mode === 'json-format' && state.devTools.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' + developerJsonOutputPaneMarkup(true) : '';
-  const modeSwitch = '<div class="dev-mode-floating-nav" role="tablist" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</div>';
+  const toggleLabel = state.language === 'en' ? (devToolFloatingExpanded ? 'Collapse developer tools' : 'Expand developer tools') : (devToolFloatingExpanded ? '收起开发工具' : '展开开发工具');
+  const floatingToggle = '<button type="button" class="dev-mode-floating-toggle" data-dev-tool-menu-toggle aria-label="' + toggleLabel + '" title="' + toggleLabel + '" aria-expanded="' + String(devToolFloatingExpanded) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></button>';
+  const modeSwitch = '<div class="dev-mode-floating-nav' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="group" aria-label="' + escapeHtml(t('development')) + '">' + floatingToggle + '<div class="dev-mode-floating-options' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="tablist" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</div></div>';
   const toolClass = 'dev-current-tool' + (devModeTransitionPending ? ' dev-mode-enter' : '');
   return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '">' + modalOverlay + modeSwitch + '<div class="dev-tools-body"><div class="' + toolClass + '">' + content + '</div></div>' + outputOverlay + '</section>';
 }

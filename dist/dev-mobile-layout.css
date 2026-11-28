@@ -1,4 +1,11 @@
-/* Mobile developer tools use one scroll column and five individually movable icons. */
+/* Keep the existing desktop mode rail working with the shared grouped markup. */
+@media (min-width: 761px) {
+  .dev-tools-page.dev-is-fullscreen .dev-mode-floating-toggle { display: none !important; }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-floating-nav { display: block; width: max-content; }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-floating-options { display: flex; align-items: center; gap: 2px; }
+}
+
+/* Mobile developer tools use one scroll column and a compact collapsible tool group. */
 @media (max-width: 760px) {
   #workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
     position: fixed !important;
@@ -22,46 +29,70 @@
   }
 
   body.dev-tools-fullscreen .dev-mode-floating-nav {
-    display: contents !important;
-  }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option {
     position: fixed !important;
     z-index: 90 !important;
-    display: grid !important;
+    right: max(14px, env(safe-area-inset-right)) !important;
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    display: flex !important;
     box-sizing: border-box !important;
-    width: 36px !important;
-    min-width: 36px !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    place-items: center !important;
-    padding: 0 !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: 42px !important;
+    min-height: 42px !important;
+    padding: 3px !important;
+    overflow: visible !important;
     border: 1px solid var(--line) !important;
-    border-radius: 50% !important;
+    border-radius: 24px !important;
     background: var(--panel) !important;
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--ink) 12%, transparent) !important;
-    color: var(--muted) !important;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--ink) 12%, transparent) !important;
     cursor: grab;
     touch-action: none !important;
     user-select: none !important;
     -webkit-user-select: none !important;
+  }
+  body.dev-tools-fullscreen .dev-mode-floating-nav.is-expanded {
+    width: max-content !important;
+    max-width: calc(100vw - 16px) !important;
+    padding: 4px !important;
+    border-radius: 23px !important;
+  }
+  body.dev-tools-fullscreen .dev-mode-floating-toggle,
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option {
+    display: grid !important;
+    box-sizing: border-box !important;
+    flex: 0 0 34px !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    place-items: center !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--muted) !important;
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: color .14s ease, border-color .14s ease, box-shadow .14s ease !important;
+    transition: color .14s ease, border-color .14s ease !important;
   }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-format"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(290px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-compare"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(246px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="text-stats"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(202px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="timestamp"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(158px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="file-compare"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(114px + env(safe-area-inset-bottom)) !important; }
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option.is-dragging {
-    cursor: grabbing;
-    transition: none !important;
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 16%, transparent) !important;
+    opacity: .7;
+    transform: scale(1.08) !important;
   }
-
+  body.dev-tools-fullscreen .dev-mode-floating-options { display: none !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav.is-expanded .dev-mode-floating-options {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+  }
+  body.dev-tools-fullscreen .dev-mode-floating-options .dev-mode-option { flex: 0 0 32px !important; width: 32px !important; min-width: 32px !important; height: 32px !important; min-height: 32px !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-toggle svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:hover,
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:active,
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:focus-visible { outline: 1px solid var(--muted) !important; outline-offset: 2px !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option.active { border-color: var(--muted) !important; background: var(--panel) !important; color: var(--ink) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option.active { border-color: var(--muted) !important; background: transparent !important; color: var(--ink) !important; }
 
   body.dev-tools-fullscreen .dev-mode-option-icon,
   body.dev-tools-fullscreen .dev-mode-option.active .dev-mode-option-icon {
@@ -82,9 +113,8 @@
     stroke-width: 1.8;
   }
   body.dev-tools-fullscreen .dev-mode-option-label { display: none !important; }
-  body.dev-tools-fullscreen .dev-mode-option:hover,
-  body.dev-tools-fullscreen .dev-mode-option:active,
-  body.dev-tools-fullscreen .dev-mode-option:focus-visible { background: var(--panel) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav.is-dragging { cursor: grabbing; transition: none !important; box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 16%, transparent) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav.is-reordering .dev-mode-option { cursor: grabbing !important; }
 
   #workspace[data-tool="dev"] .dev-tools-body,
   #workspace[data-tool="dev"] .dev-current-tool {
@@ -260,10 +290,6 @@
 }
 
 @media (max-width: 380px) {
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option { width: 32px !important; min-width: 32px !important; height: 32px !important; min-height: 32px !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-format"] { bottom: calc(274px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-compare"] { bottom: calc(234px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="text-stats"] { bottom: calc(194px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="timestamp"] { bottom: calc(154px + env(safe-area-inset-bottom)) !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="file-compare"] { bottom: calc(114px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-toggle,
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option { flex-basis: 30px !important; width: 30px !important; min-width: 30px !important; height: 30px !important; min-height: 30px !important; }
 }
