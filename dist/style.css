@@ -8571,13 +8571,13 @@ main:has(#toolNav[hidden]):has(#workspace[data-tool="navigation"]) { padding-top
 #toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="previous"] { left: 0; }
 #toolNav .tool-tab-panel .feed-source-scroll-button[data-scroll-direction="right"] {
   right: 0;
-  transform: translateX(4px);
   background: linear-gradient(270deg, var(--panel) 12%, color-mix(in srgb, var(--panel) 78%, transparent) 54%, transparent 100%);
 }
 #toolNav .tool-tab-panel .feed-source-scroll-button[hidden] { display: none; }
 #toolNav .tool-tab-panel .feed-source-scroll-button:hover { color: var(--ink); }
 #toolNav .tool-tab-panel .feed-source-scroll-button:focus-visible { outline: 2px solid color-mix(in srgb, var(--ink) 45%, transparent); outline-offset: -4px; border-radius: 8px; }
 #toolNav .tool-tab-panel .feed-source-scroll-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-scroll-direction="right"] svg { transform: translateX(4px); }
 #toolNav .tool-tabs.page-swipe-nav-dragging .tab.active::after { opacity: 0 !important; }
 
 /* Restore the direct card controls: long-press remains for dragging and
