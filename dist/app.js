@@ -273,10 +273,13 @@ function restoreDevToolFloatingPosition(nav) {
   if (!nav || !window.matchMedia('(max-width: 760px)').matches) return;
   const saved = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, null);
   if (!saved || !Number.isFinite(Number(saved.x)) || !Number.isFinite(Number(saved.y))) return;
-  const rect = nav.getBoundingClientRect();
-  const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
-  const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
-  setDevToolFloatingPosition(nav, 8 + Number(saved.x) * Math.max(0, maxLeft - 8), 8 + Number(saved.y) * Math.max(0, maxTop - 8));
+  const navRect = nav.getBoundingClientRect();
+  const collapsedSize = 44;
+  const maxLeft = Math.max(8, window.innerWidth - collapsedSize - 8);
+  const maxTop = Math.max(8, window.innerHeight - collapsedSize - 8);
+  const left = 8 + Number(saved.x) * Math.max(0, maxLeft - 8);
+  const collapsedTop = 8 + Number(saved.y) * Math.max(0, maxTop - 8);
+  setDevToolFloatingPosition(nav, left, devToolFloatingExpanded ? collapsedTop + collapsedSize - navRect.height : collapsedTop);
 }
 function syncDevToolFloatingNavLocation(nav = document.querySelector('.dev-mode-floating-nav')) {
   if (!nav) return;
@@ -314,8 +317,14 @@ document.addEventListener('pointerdown', (event) => {
   const option = event.target.closest?.('.dev-mode-option[data-dev-mode]');
   const captureTarget = event.target.closest?.('button') || nav;
   if (devToolFloatingExpanded && !option) return;
-  devToolFloatingDrag = { nav, option, captureTarget, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, mode: devToolFloatingExpanded ? 'pending-reorder' : 'pending', moved: false, timer: null };
-  if (devToolFloatingExpanded && option) {
+  devToolFloatingDrag = { nav, option, captureTarget, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, mode: devToolFloatingExpanded ? 'pending-reorder' : 'pending-move', moved: false, timer: null };
+  if (!devToolFloatingExpanded) {
+    devToolFloatingDrag.timer = window.setTimeout(() => {
+      if (devToolFloatingDrag?.pointerId !== event.pointerId || devToolFloatingDrag.moved) return;
+      devToolFloatingDrag.mode = 'move';
+      nav.classList.add('is-drag-armed');
+    }, 420);
+  } else if (option) {
     devToolFloatingDrag.timer = window.setTimeout(() => {
       if (devToolFloatingDrag?.pointerId !== event.pointerId || devToolFloatingDrag.moved) return;
       devToolFloatingDrag.mode = 'reorder';
@@ -330,7 +339,13 @@ document.addEventListener('pointermove', (event) => {
   if (!drag || drag.pointerId !== event.pointerId) return;
   const dx = event.clientX - drag.x;
   const dy = event.clientY - drag.y;
-  if ((drag.mode === 'pending' || drag.mode === 'pending-reorder') && Math.hypot(dx, dy) < 6) return;
+  if ((drag.mode === 'pending-move' || drag.mode === 'pending-reorder') && Math.hypot(dx, dy) < 6) return;
+  if (drag.mode === 'pending-move') {
+    window.clearTimeout(drag.timer);
+    drag.mode = 'ignore';
+    drag.moved = true;
+    return;
+  }
   if (drag.mode === 'pending-reorder') {
     window.clearTimeout(drag.timer);
     drag.mode = 'ignore';
@@ -362,6 +377,7 @@ function finishDevToolFloatingDrag(event) {
   devToolFloatingDrag = null;
   window.clearTimeout(drag.timer);
   drag.nav.classList.remove('is-dragging');
+  drag.nav.classList.remove('is-drag-armed');
   drag.nav.classList.remove('is-reordering');
   drag.option?.classList.remove('is-reordering');
   if (!drag.moved) return;
@@ -406,8 +422,6 @@ document.addEventListener('click', (event) => {
   if (!button) return;
   state.devTools.active = DEV_TOOL_IDS.includes(button.dataset.devMode) ? button.dataset.devMode : DEV_TOOL_IDS[0];
   state.devTools.historyOpen = false;
-  devToolFloatingExpanded = false;
-  localStorage.setItem(DEV_TOOL_FLOATING_EXPANDED_KEY, 'false');
   devModeTransitionPending = true;
   saveDevTools();
   render();
