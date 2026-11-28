@@ -5058,6 +5058,19 @@ html[data-theme="dark"] .feed-source-mark.footprint { border-color: #444; }
   order: 1;
   pointer-events: none;
 }
+#pageSwipeStage.is-active > #workspace[data-tool="dev"] {
+  position: relative;
+  min-height: calc(100dvh - var(--app-header-height) - 42px);
+}
+#pageSwipeStage.is-active > #workspace[data-tool="dev"] > .dev-tools-page.dev-is-fullscreen {
+  position: absolute;
+  inset: 0;
+  top: 0;
+  z-index: auto;
+  width: auto;
+  min-height: 100%;
+  max-width: none;
+}
 #pageSwipeStage.is-active.backward .page-swipe-preview {
   order: -1;
 }

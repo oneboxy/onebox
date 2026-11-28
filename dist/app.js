@@ -14229,6 +14229,7 @@ let tabSwipeGesture = null;
 let tabSwipeSuppressClickUntil = 0;
 let pageSwipeGesture = null;
 let pageSwipeAnimationToken = 0;
+let pageSwipeAnimationGeneration = 0;
 let pageSwipeSuppressClickUntil = 0;
 let pageSwipeTrackState = null;
 let pageSwipeNavState = null;
@@ -14819,6 +14820,8 @@ function ticketWalletPageSwipeBodyMarkup(markup) {
   return panel ? panel.innerHTML : '';
 }
 function clearPageSwipeTrack() {
+  pageSwipeAnimationGeneration += 1;
+  pageSwipeAnimationToken = 0;
   const track = pageSwipeTrackState;
   const trackStage = track?.stage;
   if (trackStage && trackStage !== pageSwipeStage) {
@@ -14890,7 +14893,8 @@ function resetPageSwipeTransform() {
   }
 }
 function settlePageSwipeBack() {
-  const token = ++pageSwipeAnimationToken;
+  const token = ++pageSwipeAnimationGeneration;
+  pageSwipeAnimationToken = token;
   const track = pageSwipeTrackState;
   const swipeStage = track?.stage || pageSwipeStage;
   settlePageSwipeNav(false);
@@ -14904,7 +14908,7 @@ function settlePageSwipeBack() {
     workspace.style.transform = 'translate3d(0, 0, 0)';
   }
   window.setTimeout(() => {
-    if (token !== pageSwipeAnimationToken) return;
+    if (token !== pageSwipeAnimationGeneration) return;
     pageSwipeAnimationToken = 0;
     clearPageSwipeTrack();
   }, 300);
@@ -14915,7 +14919,8 @@ function selectPageSwipeItem(item) {
   return selectHomeFeedSource(item.id);
 }
 function settlePageSwipe(target, direction) {
-  const token = ++pageSwipeAnimationToken;
+  const token = ++pageSwipeAnimationGeneration;
+  pageSwipeAnimationToken = token;
   const track = pageSwipeTrackState;
   if (!track) return settlePageSwipeBack();
   const swipeStage = track.stage || pageSwipeStage;
@@ -14924,7 +14929,7 @@ function settlePageSwipe(target, direction) {
   swipeStage.classList.add('page-swipe-settling');
   swipeStage.style.transform = 'translate3d(' + (direction === 1 ? -track.pageWidth : 0) + 'px, 0, 0)';
   window.setTimeout(() => {
-    if (token !== pageSwipeAnimationToken) return;
+    if (token !== pageSwipeAnimationGeneration) return;
     pageSwipeAnimationToken = 0;
     clearPageSwipeTrack();
     selectPageSwipeItem(target);
