@@ -14890,6 +14890,7 @@ function resetPageSwipeTransform() {
   else {
     workspace.classList.remove('page-swipe-dragging');
     workspace.style.transform = '';
+    clearPageSwipeNav();
   }
 }
 function settlePageSwipeBack() {
@@ -14958,6 +14959,20 @@ function updatePageSwipe(event) {
   endLongPress();
   if (event.cancelable) event.preventDefault();
   const direction = gesture.dx < 0 ? 1 : -1;
+  const nextItem = gesture.items[gesture.index + direction];
+  if (state.section === 'tools' && nextItem && (state.tool === 'dev' || nextItem.id === 'dev')) {
+    if (!gesture.directTarget && (pageSwipeTrackState || pageSwipeStage.classList.contains('is-active'))) clearPageSwipeTrack();
+    gesture.directTarget = nextItem;
+    if (gesture.directDirection !== direction) {
+      gesture.directDirection = direction;
+      gesture.nav = beginPageSwipeNav(nav, direction);
+    }
+    const threshold = Math.max(56, Math.min(112, window.innerWidth * 0.18));
+    setPageSwipeNavProgress(Math.abs(gesture.dx) / Math.min(threshold, gesture.nav?.navDistance || threshold));
+    return;
+  }
+  gesture.directTarget = null;
+  if (gesture.directDirection) { clearPageSwipeNav(); gesture.directDirection = 0; }
   const track = preparePageSwipeTrack(gesture, direction);
   if (!track) {
     const visualDx = gesture.dx * 0.2;
@@ -14983,6 +14998,14 @@ function finishPageSwipe(event) {
   const direction = gesture.dx < 0 ? 1 : -1;
   const distance = Math.abs(gesture.dx);
   const threshold = Math.max(56, Math.min(112, window.innerWidth * 0.18));
+  const nextItem = gesture.items[gesture.index + direction];
+  if (state.section === 'tools' && nextItem && (state.tool === 'dev' || nextItem.id === 'dev')) {
+    const committed = distance >= threshold;
+    settlePageSwipeNav(committed);
+    clearPageSwipeTrack();
+    if (committed) selectPageSwipeItem(nextItem);
+    return;
+  }
   const track = pageSwipeTrackState;
   const target = track?.direction === direction && distance >= threshold ? track.target : null;
   if (target) settlePageSwipe(target, direction);
