@@ -421,8 +421,8 @@ document.addEventListener('click', (event) => {
     toggle?.setAttribute('aria-label', toggleLabel);
     toggle?.setAttribute('title', toggleLabel);
     if (toggle) toggle.innerHTML = devToolFloatingExpanded
-      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>'
-      : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m15 14-3 3-3-3"/></svg>';
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m15 14-3 3-3-3"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>';
     if (devToolFloatingExpanded) render();
     requestAnimationFrame(() => {
       const currentNav = document.querySelector('.dev-mode-floating-nav');
@@ -11228,8 +11228,8 @@ function developerTool() {
   const outputOverlay = mode === 'json-format' && state.devTools.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' + developerJsonOutputPaneMarkup(true) : '';
   const toggleLabel = state.language === 'en' ? (devToolFloatingExpanded ? 'Collapse developer tools' : 'Expand developer tools') : (devToolFloatingExpanded ? '收起开发工具' : '展开开发工具');
   const floatingToggleIcon = devToolFloatingExpanded
-    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>'
-    : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m15 14-3 3-3-3"/></svg>';
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m15 14-3 3-3-3"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/></svg>';
   const floatingToggle = '<button type="button" class="dev-mode-floating-toggle" data-dev-tool-menu-toggle aria-label="' + toggleLabel + '" title="' + toggleLabel + '" aria-expanded="' + String(devToolFloatingExpanded) + '">' + floatingToggleIcon + '</button>';
   const modeSwitch = '<div class="dev-mode-floating-nav' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="group" aria-label="' + escapeHtml(t('development')) + '"><div class="dev-mode-floating-options' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="tablist" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</div>' + floatingToggle + '</div>';
   const toolClass = 'dev-current-tool' + (devModeTransitionPending ? ' dev-mode-enter' : '');
