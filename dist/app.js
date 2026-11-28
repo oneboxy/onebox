@@ -15003,7 +15003,11 @@ function finishPageSwipe(event) {
     const committed = distance >= threshold;
     settlePageSwipeNav(committed);
     clearPageSwipeTrack();
-    if (committed) selectPageSwipeItem(nextItem);
+    if (committed) {
+      workspace.classList.add('page-swipe-direct-enter');
+      selectPageSwipeItem(nextItem);
+      window.setTimeout(() => workspace.classList.remove('page-swipe-direct-enter'), 220);
+    }
     return;
   }
   const track = pageSwipeTrackState;

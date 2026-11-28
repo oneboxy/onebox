@@ -5074,11 +5074,27 @@ html[data-theme="dark"] .feed-source-mark.footprint { border-color: #444; }
 #pageSwipeStage.is-active.backward .page-swipe-preview {
   order: -1;
 }
+#workspace.page-swipe-direct-enter {
+  animation: page-swipe-direct-enter .2s cubic-bezier(.22, .8, .22, 1) both;
+}
+@keyframes page-swipe-direct-enter {
+  from { opacity: .72; }
+  to { opacity: 1; }
+}
+#workspace[data-tool="reader"] .reader-book-card.reorder-hold,
+#workspace[data-tool="reader"] .reader-book-card.reader-delete-ready {
+  z-index: 1;
+  outline: 1px solid var(--line);
+  outline-offset: 1px;
+}
 #pageSwipeStage.page-swipe-dragging {
   will-change: transform;
   transition: none !important;
   user-select: none;
   cursor: grabbing;
+}
+@media (prefers-reduced-motion: reduce) {
+  #workspace.page-swipe-direct-enter { animation: none; }
 }
 #pageSwipeStage.page-swipe-settling {
   will-change: transform;
