@@ -34,7 +34,7 @@
     right: max(14px, env(safe-area-inset-right)) !important;
     bottom: calc(86px + env(safe-area-inset-bottom)) !important;
     display: flex !important;
-    flex-direction: column-reverse !important;
+    flex-direction: column !important;
     box-sizing: border-box !important;
     align-items: center !important;
     gap: 5px !important;
