@@ -434,13 +434,20 @@ document.addEventListener('click', (event) => {
   }
   const button = event.target.closest('.dev-mode-option[data-dev-mode]');
   if (!button) return;
+  const floatingNavRect = nav.getBoundingClientRect();
   state.devTools.active = DEV_TOOL_IDS.includes(button.dataset.devMode) ? button.dataset.devMode : DEV_TOOL_IDS[0];
   state.devTools.historyOpen = false;
   devModeTransitionPending = true;
   saveDevTools();
   render();
   devModeTransitionPending = false;
-  requestAnimationFrame(() => workspace.querySelector('.dev-current-tool.dev-mode-enter')?.classList.remove('dev-mode-enter'));
+  requestAnimationFrame(() => {
+    const currentNav = document.querySelector('.dev-mode-floating-nav');
+    if (currentNav && window.matchMedia('(max-width: 760px)').matches && devToolFloatingExpanded) {
+      setDevToolFloatingPosition(currentNav, floatingNavRect.left, floatingNavRect.top);
+    }
+    workspace.querySelector('.dev-current-tool.dev-mode-enter')?.classList.remove('dev-mode-enter');
+  });
 }, true);
 window.addEventListener('resize', () => {
   syncDevToolFloatingNavLocation();
