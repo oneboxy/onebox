@@ -8564,14 +8564,14 @@ main:has(#toolNav[hidden]):has(#workspace[data-tool="navigation"]) { padding-top
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: linear-gradient(90deg, var(--panel) 12%, color-mix(in srgb, var(--panel) 78%, transparent) 54%, transparent 100%);
+  background: transparent;
   color: var(--muted);
   cursor: pointer;
 }
 #toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="previous"] { left: 0; }
 #toolNav .tool-tab-panel .feed-source-scroll-button[data-scroll-direction="right"] {
   right: 0;
-  background: linear-gradient(270deg, var(--panel) 12%, color-mix(in srgb, var(--panel) 78%, transparent) 54%, transparent 100%);
+  background: transparent;
 }
 #toolNav .tool-tab-panel .feed-source-scroll-button[hidden] { display: none; }
 #toolNav .tool-tab-panel .feed-source-scroll-button:hover { color: var(--ink); }
