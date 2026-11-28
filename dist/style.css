@@ -8649,25 +8649,25 @@ main:has(#toolNav[hidden]):has(#workspace[data-tool="navigation"]) { padding-top
 @media (max-width: 760px) {
   #toolNav .tool-tabs {
     gap: 0;
-    padding-inline: 2px;
+    padding-inline: 0;
   }
   #toolNav .tool-tabs .tab,
   #toolNav .tool-tabs .tab.active {
     flex: 1 1 0;
     min-width: 0;
-    gap: 2px;
-    padding-inline: 1px;
-    font-size: 11px;
+    gap: 0;
+    padding-inline: 0;
+    font-size: 12px;
     white-space: nowrap;
   }
   #toolNav .tool-tabs .tab > span {
-    flex: 0 0 14px;
-    width: 14px;
-    height: 14px;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
   }
   #toolNav .tool-tabs .tab > span svg {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
   }
   #toolNav .tool-tab-panel.has-tool-overflow .tool-tabs {
     padding-right: 34px;
