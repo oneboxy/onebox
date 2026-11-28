@@ -313,8 +313,9 @@ document.addEventListener('pointerdown', (event) => {
   const rect = nav.getBoundingClientRect();
   const option = event.target.closest?.('.dev-mode-option[data-dev-mode]');
   const captureTarget = event.target.closest?.('button') || nav;
-  devToolFloatingDrag = { nav, option, captureTarget, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, mode: 'pending', moved: false, timer: null };
-  if (option) {
+  if (devToolFloatingExpanded && !option) return;
+  devToolFloatingDrag = { nav, option, captureTarget, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, mode: devToolFloatingExpanded ? 'pending-reorder' : 'pending', moved: false, timer: null };
+  if (devToolFloatingExpanded && option) {
     devToolFloatingDrag.timer = window.setTimeout(() => {
       if (devToolFloatingDrag?.pointerId !== event.pointerId || devToolFloatingDrag.moved) return;
       devToolFloatingDrag.mode = 'reorder';
@@ -329,7 +330,13 @@ document.addEventListener('pointermove', (event) => {
   if (!drag || drag.pointerId !== event.pointerId) return;
   const dx = event.clientX - drag.x;
   const dy = event.clientY - drag.y;
-  if (drag.mode === 'pending' && Math.hypot(dx, dy) < 6) return;
+  if ((drag.mode === 'pending' || drag.mode === 'pending-reorder') && Math.hypot(dx, dy) < 6) return;
+  if (drag.mode === 'pending-reorder') {
+    window.clearTimeout(drag.timer);
+    drag.mode = 'ignore';
+    drag.moved = true;
+    return;
+  }
   if (drag.mode === 'pending') {
     window.clearTimeout(drag.timer);
     drag.mode = 'move';
@@ -361,7 +368,7 @@ function finishDevToolFloatingDrag(event) {
   if (drag.mode === 'reorder') {
     const order = [...drag.nav.querySelectorAll('.dev-mode-option[data-dev-mode]')].map((button) => button.dataset.devMode);
     localStorage.setItem(DEV_TOOL_ORDER_KEY, JSON.stringify(order));
-  } else saveDevToolFloatingPosition(drag.nav);
+  } else if (drag.mode === 'move') saveDevToolFloatingPosition(drag.nav);
   suppressDevToolFloatingClick = true;
   window.setTimeout(() => { suppressDevToolFloatingClick = false; }, 500);
 }

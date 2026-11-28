@@ -1,17 +1,17 @@
 // Keep the startup placeholder visible while offering retry after a stall.
-const CACHE = 'onebox-v1251';
+const CACHE = 'onebox-v1252';
 const APP_SHELL = [
   './',
   'index.html',
   'ticket-wallet-layout.js?v=2.18.768',
   'dev-json-editor.js?v=2.18.761',
   'style.css?v=2.18.890',
-  'app.js?v=2.18.1065',
+  'app.js?v=2.18.1066',
   'track-module.js?v=1.0.23',
   'track-module.css?v=1.0.20',
   'page-surface-flat.css?v=1.0.211',
   'weather-surface-clean.css?v=1.0.1',
-  'dev-mobile-layout.css?v=1.0.5',
+  'dev-mobile-layout.css?v=1.0.6',
   'navigation-rail-fix.css?v=1.0.1',
   'developer-canvas-clean.css?v=1.0.1',
   'dev-json-workbench-clean.css?v=1.0.3',
