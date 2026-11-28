@@ -1544,15 +1544,15 @@ main { padding-top: calc(var(--app-header-height) + 48px + 6px); }
 #toolNav {
   width: min(1104px, calc(100% - 24px));
   margin: 0 auto 6px;
-  padding: 5px 8px 4px;
+  padding: 0;
   gap: 2px;
   border: 0;
   border-bottom: 1px solid var(--line);
-  border-radius: 0 0 14px 14px;
-  background: color-mix(in srgb, var(--panel) 92%, transparent);
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 8%, transparent);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  border-radius: 0;
+  background: var(--bg);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 #toolNav .tab,
 #toolNav .tab.active {
@@ -1707,7 +1707,7 @@ html.standalone-pwa main { padding-bottom: calc(94px + env(safe-area-inset-botto
   .app-header .header-actions .icon-btn,
   .app-header .header-actions .header-icon,
   .app-header #themeBtn { width: 38px; min-width: 38px; height: 38px; padding: 0; }
-  #toolNav { top: var(--app-header-height); padding: 2px 8px 3px; }
+  #toolNav { top: var(--app-header-height); padding: 0; }
   #toolNav .tab, #toolNav .tab.active { min-height: 38px; padding: 6px 10px 7px; }
   #workspace[data-tool="home"] .feed-source-panel { top: var(--app-header-height); padding-top: 3px; padding-bottom: 3px; }
   #workspace[data-tool="home"] .feed-home { padding-top: 34px; }
@@ -1720,7 +1720,7 @@ html.standalone-pwa main { padding-bottom: calc(94px + env(safe-area-inset-botto
 @media (max-width: 760px) {
   :root { --app-header-height: calc(48px + env(safe-area-inset-top)); }
   .app-header { min-height: var(--app-header-height); padding-top: calc(env(safe-area-inset-top) + 6px); padding-bottom: 6px; }
-  #toolNav { top: var(--app-header-height); padding-top: 2px; padding-bottom: 2px; }
+  #toolNav { top: var(--app-header-height); padding-top: 0; padding-bottom: 0; }
   #toolNav .tab, #toolNav .tab.active { min-height: 34px; padding-top: 4px; padding-bottom: 5px; }
   #workspace[data-tool="home"] .feed-source-panel { top: var(--app-header-height); padding-top: 2px; padding-bottom: 2px; }
   #workspace[data-tool="home"] .feed-home { padding-top: 29px; }
@@ -1919,7 +1919,7 @@ main:has(#workspace[data-tool="mine"]) { background: var(--panel); }
 #toolNav {
   height: 42px;
   box-sizing: border-box;
-  padding: 0 8px;
+  padding: 0;
 }
 #toolNav .tab,
 #toolNav .tab.active {
@@ -4899,8 +4899,7 @@ html[data-theme="dark"] select:focus,
 html[data-theme="dark"] textarea:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 24%, transparent);
 }
-html[data-theme="dark"] .bottom-nav,
-html[data-theme="dark"] #toolNav {
+html[data-theme="dark"] .bottom-nav {
   box-shadow: 0 18px 55px rgba(0, 0, 0, .72);
 }
 html[data-theme="dark"] .popover,
@@ -5004,7 +5003,7 @@ html[data-theme="dark"] .feed-source-mark.footprint { border-color: #444; }
   position: fixed;
   top: var(--app-header-height);
   left: 50%;
-  z-index: 50;
+  z-index: 55;
   width: min(1104px, calc(100% - 24px));
   margin: 0;
   transform: translateX(-50%);
@@ -8625,7 +8624,7 @@ main:has(#toolNav[hidden]):has(#workspace[data-tool="navigation"]) { padding-top
 #workspace[data-tool="navigation"] .navigation-add-glyph { border-radius: 14px; }
 
 @media (max-width: 600px) {
-  #toolNav .tool-tabs { padding-inline: 3px; }
+  #toolNav .tool-tabs { padding-inline: 4px; }
   #workspace[data-tool="navigation"] .navigation-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     max-width: none;
@@ -16504,7 +16503,7 @@ body:has(.ticket-wallet-page) .ticket-wallet-cafe-label-heading strong {
     transform: none;
   }
   .desktop-page-tabs > #homeSourceNav .feed-source-panel { width: 100%; }
-  .desktop-page-tabs > #toolNav { padding: 0 8px; }
+  .desktop-page-tabs > #toolNav { padding: 0; }
   .app-header .header-actions { flex: 0 0 auto; min-width: 0; }
   main:not(:has(#workspace[data-tool="home"])):not(:has(#workspace[data-tool="messages"])):not(:has(#workspace[data-tool="mine"])) {
     padding-top: calc(var(--app-header-height) + 4px);
