@@ -14166,7 +14166,7 @@ function render() {
   // A page swipe preview is transient. Clear it before any route/content
   // render so iOS Safari/PWA cannot retain the old 200% stage and expose an
   // empty lower half after returning from an external feed page.
-  if (pageSwipeTrackState || pageSwipeStage.classList.contains('is-active')) clearPageSwipeTrack();
+  if (pageSwipeTrackState || pageSwipeStage.classList.contains('is-active') || workspace.classList.contains('page-swipe-direct-transition')) clearPageSwipeTrack();
   syncHomeFeedLoading();
   applyLanguage();
   if (state.section === 'home') loadHomeFeeds();
@@ -14833,7 +14833,8 @@ function clearPageSwipeTrack() {
     pageSwipeStage.className = 'page-swipe-stage';
     pageSwipeStage.style.transform = '';
   }
-  workspace.classList.remove('page-swipe-dragging', 'page-swipe-settling');
+  workspace.classList.remove('page-swipe-dragging', 'page-swipe-settling', 'page-swipe-direct-transition', 'page-swipe-direct-enter');
+  workspace.style.transition = '';
   workspace.style.transform = '';
   document.body.classList.remove('page-swipe-reader-leaving');
   clearPageSwipeNav();
@@ -14888,7 +14889,8 @@ function preparePageSwipeTrack(gesture, direction) {
 function resetPageSwipeTransform() {
   if (pageSwipeTrackState) clearPageSwipeTrack();
   else {
-    workspace.classList.remove('page-swipe-dragging');
+    workspace.classList.remove('page-swipe-dragging', 'page-swipe-settling', 'page-swipe-direct-transition', 'page-swipe-direct-enter');
+    workspace.style.transition = '';
     workspace.style.transform = '';
     clearPageSwipeNav();
   }
@@ -14918,6 +14920,38 @@ function selectPageSwipeItem(item) {
   if (item.kind === 'tool') return selectTool(item.id);
   if (item.kind === 'ticket-filter') return selectTicketWalletFilter(item.id);
   return selectHomeFeedSource(item.id);
+}
+function settleDirectToolPageSwipe(target, direction) {
+  const token = ++pageSwipeAnimationGeneration;
+  pageSwipeAnimationToken = token;
+  const pageWidth = Math.max(1, workspace.getBoundingClientRect().width || window.innerWidth);
+  const exitX = direction === 1 ? -pageWidth : pageWidth;
+  const enterX = -exitX;
+  settlePageSwipeNav(true);
+  workspace.classList.remove('page-swipe-dragging', 'page-swipe-direct-enter');
+  workspace.classList.add('page-swipe-settling', 'page-swipe-direct-transition');
+  workspace.style.transition = '';
+  workspace.style.transform = 'translate3d(' + exitX + 'px, 0, 0)';
+  window.setTimeout(() => {
+    if (token !== pageSwipeAnimationGeneration) return;
+    workspace.classList.remove('page-swipe-settling', 'page-swipe-direct-transition');
+    workspace.style.transition = 'none';
+    workspace.style.transform = 'translate3d(' + enterX + 'px, 0, 0)';
+    // Render the destination while it is offscreen, then slide it into place.
+    selectPageSwipeItem(target);
+    workspace.classList.add('page-swipe-direct-transition', 'page-swipe-direct-enter');
+    workspace.style.transition = '';
+    void workspace.offsetWidth;
+    requestAnimationFrame(() => {
+      if (token !== pageSwipeAnimationGeneration) return;
+      workspace.style.transform = 'translate3d(0, 0, 0)';
+    });
+    window.setTimeout(() => {
+      if (token !== pageSwipeAnimationGeneration) return;
+      pageSwipeAnimationToken = 0;
+      clearPageSwipeTrack();
+    }, 320);
+  }, 300);
 }
 function settlePageSwipe(target, direction) {
   const token = ++pageSwipeAnimationGeneration;
@@ -14969,10 +15003,14 @@ function updatePageSwipe(event) {
     }
     const threshold = Math.max(56, Math.min(112, window.innerWidth * 0.18));
     setPageSwipeNavProgress(Math.abs(gesture.dx) / Math.min(threshold, gesture.nav?.navDistance || threshold));
+    workspace.classList.remove('page-swipe-settling', 'page-swipe-direct-enter');
+    workspace.classList.add('page-swipe-dragging', 'page-swipe-direct-transition');
+    workspace.style.transition = 'none';
+    workspace.style.transform = 'translate3d(' + gesture.dx + 'px, 0, 0)';
     return;
   }
   gesture.directTarget = null;
-  if (gesture.directDirection) { clearPageSwipeNav(); gesture.directDirection = 0; }
+  if (gesture.directDirection) { clearPageSwipeTrack(); gesture.directDirection = 0; }
   const track = preparePageSwipeTrack(gesture, direction);
   if (!track) {
     const visualDx = gesture.dx * 0.2;
@@ -15001,13 +15039,8 @@ function finishPageSwipe(event) {
   const nextItem = gesture.items[gesture.index + direction];
   if (state.section === 'tools' && nextItem && (state.tool === 'dev' || nextItem.id === 'dev')) {
     const committed = distance >= threshold;
-    settlePageSwipeNav(committed);
-    clearPageSwipeTrack();
-    if (committed) {
-      workspace.classList.add('page-swipe-direct-enter');
-      selectPageSwipeItem(nextItem);
-      window.setTimeout(() => workspace.classList.remove('page-swipe-direct-enter'), 220);
-    }
+    if (committed) settleDirectToolPageSwipe(nextItem, direction);
+    else settlePageSwipeBack();
     return;
   }
   const track = pageSwipeTrackState;
