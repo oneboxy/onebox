@@ -8645,6 +8645,39 @@ main:has(#toolNav[hidden]):has(#workspace[data-tool="navigation"]) { padding-top
   #workspace[data-tool="navigation"] .navigation-card-actions button { width: 20px; height: 20px; }
 }
 
+/* Keep up to seven tool tabs visible together on mobile. */
+@media (max-width: 760px) {
+  #toolNav .tool-tabs {
+    gap: 0;
+    padding-inline: 2px;
+  }
+  #toolNav .tool-tabs .tab,
+  #toolNav .tool-tabs .tab.active {
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 2px;
+    padding-inline: 1px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  #toolNav .tool-tabs .tab > span {
+    flex: 0 0 14px;
+    width: 14px;
+    height: 14px;
+  }
+  #toolNav .tool-tabs .tab > span svg {
+    width: 14px;
+    height: 14px;
+  }
+  #toolNav .tool-tab-panel.has-tool-overflow .tool-tabs {
+    padding-right: 34px;
+  }
+  #toolNav .tool-tab-panel.has-tool-overflow .tool-tabs .tab {
+    flex: 0 0 auto;
+    padding-inline: 6px;
+  }
+}
+
 /* 2.18.178: a single tap selects a site and reveals its compact actions;
    opening the URL requires a double tap. Keep the action bar attached to the
    card instead of floating two unrelated circles above it. */

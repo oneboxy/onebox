@@ -1,6 +1,6 @@
 /* OneBox 2.0 — dependency-free, mobile-first PWA application layer. */
 /* Pages deployment marker: stable startup surface during app refresh. */
-const APP_VERSION = '2.18.1022';
+const APP_VERSION = '2.18.1023';
 // The OAuth secret stays in the Cloudflare Worker. The browser only knows the
 // public client id and receives the authorization result in the URL fragment,
 // which is consumed immediately and never sent to a server.
@@ -2021,7 +2021,8 @@ function updateToolTabOverflowControls() {
   if (!panel || !tabs || !control) return;
   const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
   const reservedGutter = panel.classList.contains('has-tool-overflow') ? 26 : 0;
-  const hasOverflow = tabs.scrollWidth > tabs.clientWidth + reservedGutter + 1;
+  const tabCount = tabs.querySelectorAll('.tab').length;
+  const hasOverflow = tabCount > 7;
   const firstTab = tabs.querySelector('.tab');
   const threshold = Math.min(Math.max(1, Math.min((firstTab?.offsetWidth || 0) * .5, tabs.clientWidth * .12)), maxScroll * .5);
   const scrollLeft = Math.max(0, Math.min(maxScroll, tabs.scrollLeft));
