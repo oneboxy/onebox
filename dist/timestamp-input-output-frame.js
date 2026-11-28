@@ -13,7 +13,7 @@
       scope + ' .dev-timestamp-bidirectional{display:grid!important;gap:8px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}' +
       scope + ' .dev-timestamp-bidirectional-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;margin:0!important;font-size:14px!important;line-height:1.3!important}' +
       scope + ' .dev-timestamp-bidirectional-title .dev-timestamp-bidirectional-swap{flex:0 0 26px!important;width:26px!important;min-width:26px!important;height:26px!important;min-height:26px!important;padding:0!important;border:0!important;background:transparent!important;color:var(--muted)!important;font-size:18px!important}' +
-      scope + ' .dev-timestamp-bidirectional-fields{display:grid!important;grid-template-columns:minmax(0,42%) minmax(0,42%)!important;justify-content:space-between!important;align-items:end!important;gap:7px!important}' +
+      scope + ' .dev-timestamp-bidirectional-fields{display:grid!important;grid-template-columns:minmax(0,1fr)!important;justify-content:stretch!important;align-items:stretch!important;gap:8px!important}' +
       scope + ' .dev-timestamp-bidirectional-field{display:flex!important;min-width:0!important;flex-direction:column!important;gap:0!important}' +
       scope + ' .dev-timestamp-bidirectional-label{display:none!important}' +
       scope + ' .dev-timestamp-bidirectional-field>.dev-timestamp-input-row{display:block!important;width:100%!important;min-width:0!important;margin:0!important}' +

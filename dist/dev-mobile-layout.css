@@ -1,0 +1,279 @@
+/* Mobile developer tools use one scroll column and a compact, movable tool rail. */
+@media (max-width: 760px) {
+  #workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
+    position: fixed !important;
+    top: var(--dev-fullscreen-top, calc(var(--app-header-height) + 48px)) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    display: block !important;
+    box-sizing: border-box;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 10px 12px calc(96px + env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    background: var(--bg) !important;
+    transform: none !important;
+  }
+
+  body.dev-tools-fullscreen .dev-mode-floating-nav {
+    position: fixed !important;
+    z-index: 90 !important;
+    right: max(14px, env(safe-area-inset-right)) !important;
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    display: flex !important;
+    width: max-content !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 24px !important;
+    background: var(--panel) !important;
+    box-shadow: 0 5px 16px color-mix(in srgb, var(--ink) 12%, transparent) !important;
+    pointer-events: auto !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    cursor: grab;
+  }
+  body.dev-tools-fullscreen .dev-mode-floating-nav.is-dragging {
+    cursor: grabbing;
+    transition: none !important;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 16%, transparent) !important;
+  }
+
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option,
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:hover,
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:active,
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:focus-visible {
+    display: grid !important;
+    box-sizing: border-box;
+    flex: 0 0 32px !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    place-items: center !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 50% !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--muted) !important;
+    transform: none !important;
+    transition: color .14s ease, border-color .14s ease !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option.active {
+    border-color: var(--line) !important;
+    background: transparent !important;
+    color: var(--ink) !important;
+  }
+
+  body.dev-tools-fullscreen .dev-mode-option-icon,
+  body.dev-tools-fullscreen .dev-mode-option.active .dev-mode-option-icon {
+    display: grid !important;
+    width: 18px !important;
+    height: 18px !important;
+    place-items: center !important;
+    color: currentColor !important;
+  }
+  body.dev-tools-fullscreen .dev-mode-option-icon svg {
+    display: block;
+    width: 17px !important;
+    height: 17px !important;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+  body.dev-tools-fullscreen .dev-mode-option-label { display: none !important; }
+  body.dev-tools-fullscreen .dev-mode-option:hover,
+  body.dev-tools-fullscreen .dev-mode-option:active,
+  body.dev-tools-fullscreen .dev-mode-option:focus-visible { background: transparent !important; }
+
+  #workspace[data-tool="dev"] .dev-tools-body,
+  #workspace[data-tool="dev"] .dev-current-tool {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  #workspace[data-tool="dev"] .dev-tools-body { padding-bottom: 8px !important; }
+
+  #workspace[data-tool="dev"] .dev-workbench:not(.dev-timestamp),
+  #workspace[data-tool="dev"] .dev-editor-grid[data-dev-pane-grid],
+  #workspace[data-tool="dev"] .dev-compare-grid[data-dev-pane-grid] {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    grid-auto-rows: max-content !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: none !important;
+    overflow: visible !important;
+    gap: 12px !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-pane {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+  }
+  #workspace[data-tool="dev"] .dev-pane-head {
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 7px !important;
+  }
+  #workspace[data-tool="dev"] .dev-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #workspace[data-tool="dev"] .dev-pane-actions,
+  #workspace[data-tool="dev"] .dev-timestamp-actions {
+    max-width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-format .dev-format-editor {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: min(34dvh, 340px) !important;
+    min-height: 180px !important;
+    max-height: none !important;
+  }
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-format .dev-json-live-output {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: min(32dvh, 320px) !important;
+    min-height: 170px !important;
+    max-height: none !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  #workspace[data-tool="dev"] .dev-workbench.dev-json-compare .dev-code-editor,
+  #workspace[data-tool="dev"] .dev-workbench.dev-text-stats .dev-text-editor {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: min(30dvh, 300px) !important;
+    min-height: 180px !important;
+    max-height: none !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-workbench.dev-timestamp.dev-timestamp .dev-timestamp-content.dev-timestamp-content,
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-rows: max-content !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: none !important;
+    gap: 12px !important;
+    overflow: visible !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame > .dev-timestamp-card,
+  #workspace[data-tool="dev"] .dev-timestamp-input-output-frame > .dev-timestamp-output-card {
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: none !important;
+    overflow: visible !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-input-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 8px !important;
+  }
+  #workspace[data-tool="dev"] .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-fields.dev-timestamp-bidirectional-fields {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  #workspace[data-tool="dev"] .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field,
+  #workspace[data-tool="dev"] .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field > .dev-timestamp-input-row,
+  #workspace[data-tool="dev"] .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field .dev-timestamp-input-shell,
+  #workspace[data-tool="dev"] .dev-workbench.dev-timestamp .dev-timestamp-bidirectional-field .dev-timestamp-datetime-trigger {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #workspace[data-tool="dev"] .dev-workbench.dev-timestamp.dev-timestamp .dev-timestamp-content .dev-timestamp-bidirectional .dev-timestamp-result-block.dev-timestamp-result-block {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #workspace[data-tool="dev"] .dev-timestamp-world-result,
+  #workspace[data-tool="dev"] .dev-timestamp-country-list,
+  #workspace[data-tool="dev"] .dev-timestamp-country-matrix {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  #workspace[data-tool="dev"] .dev-file-compare-pair {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 8px !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-dropzone {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 92px !important;
+  }
+  #workspace[data-tool="dev"] .dev-file-compare-vs {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    margin: 0 auto !important;
+    transform: rotate(90deg) !important;
+  }
+
+  #workspace[data-tool="dev"] .converter-panel,
+  #workspace[data-tool="dev"] .converter-card,
+  #workspace[data-tool="dev"] .converter-panel .conversion-rows,
+  #workspace[data-tool="dev"] .converter-panel .conversion-row {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body.dev-tools-fullscreen .dev-mode-floating-nav { right: 10px !important; gap: 2px !important; padding: 3px !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option { flex-basis: 29px !important; width: 29px !important; min-width: 29px !important; height: 29px !important; min-height: 29px !important; }
+}

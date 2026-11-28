@@ -247,6 +247,95 @@ function saveHomeSourceFloatingPosition() {
     }));
   } catch {}
 }
+const DEV_TOOL_FLOATING_POSITION_KEY = 'onebox-dev-tools-floating-position';
+let devToolFloatingDrag = null;
+let suppressDevToolFloatingClick = false;
+function setDevToolFloatingPosition(nav, left, top) {
+  const rect = nav.getBoundingClientRect();
+  const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+  const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+  nav.style.left = Math.min(maxLeft, Math.max(8, left)) + 'px';
+  nav.style.top = Math.min(maxTop, Math.max(8, top)) + 'px';
+  nav.style.right = 'auto';
+  nav.style.bottom = 'auto';
+}
+function restoreDevToolFloatingPosition(nav) {
+  if (!nav || !window.matchMedia('(max-width: 760px)').matches) return;
+  const saved = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, null);
+  if (!saved || !Number.isFinite(Number(saved.x)) || !Number.isFinite(Number(saved.y))) return;
+  const rect = nav.getBoundingClientRect();
+  const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+  const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+  setDevToolFloatingPosition(nav, 8 + Number(saved.x) * Math.max(0, maxLeft - 8), 8 + Number(saved.y) * Math.max(0, maxTop - 8));
+}
+function syncDevToolFloatingNavLocation(nav = document.querySelector('.dev-mode-floating-nav')) {
+  if (!nav) return;
+  if (window.matchMedia('(max-width: 760px)').matches) {
+    if (nav.parentElement !== document.body) document.body.appendChild(nav);
+    restoreDevToolFloatingPosition(nav);
+    return;
+  }
+  const page = workspace.querySelector('.dev-tools-page');
+  if (page && nav.parentElement !== page) {
+    page.insertBefore(nav, page.querySelector('.dev-tools-body'));
+    nav.style.removeProperty('left');
+    nav.style.removeProperty('top');
+    nav.style.removeProperty('right');
+    nav.style.removeProperty('bottom');
+  }
+}
+function saveDevToolFloatingPosition(nav) {
+  const rect = nav.getBoundingClientRect();
+  const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+  const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+  const left = Math.min(maxLeft, Math.max(8, rect.left));
+  const top = Math.min(maxTop, Math.max(8, rect.top));
+  try {
+    localStorage.setItem(DEV_TOOL_FLOATING_POSITION_KEY, JSON.stringify({
+      x: maxLeft === 8 ? 0 : (left - 8) / (maxLeft - 8),
+      y: maxTop === 8 ? 0 : (top - 8) / (maxTop - 8),
+    }));
+  } catch {}
+}
+document.addEventListener('pointerdown', (event) => {
+  const nav = event.target.closest?.('.dev-mode-floating-nav');
+  if (!nav || !window.matchMedia('(max-width: 760px)').matches || event.button !== 0) return;
+  const rect = nav.getBoundingClientRect();
+  devToolFloatingDrag = { nav, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
+  try { nav.setPointerCapture(event.pointerId); } catch {}
+});
+document.addEventListener('pointermove', (event) => {
+  const drag = devToolFloatingDrag;
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  const dx = event.clientX - drag.x;
+  const dy = event.clientY - drag.y;
+  if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+  drag.moved = true;
+  drag.nav.classList.add('is-dragging');
+  setDevToolFloatingPosition(drag.nav, drag.left + dx, drag.top + dy);
+  event.preventDefault();
+});
+function finishDevToolFloatingDrag(event) {
+  const drag = devToolFloatingDrag;
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  devToolFloatingDrag = null;
+  drag.nav.classList.remove('is-dragging');
+  if (!drag.moved) return;
+  saveDevToolFloatingPosition(drag.nav);
+  suppressDevToolFloatingClick = true;
+  window.setTimeout(() => { suppressDevToolFloatingClick = false; }, 500);
+}
+document.addEventListener('pointerup', finishDevToolFloatingDrag);
+document.addEventListener('pointercancel', finishDevToolFloatingDrag);
+document.addEventListener('click', (event) => {
+  if (!suppressDevToolFloatingClick || !event.target.closest?.('.dev-mode-floating-nav')) return;
+  event.preventDefault();
+  event.stopPropagation();
+  suppressDevToolFloatingClick = false;
+}, true);
+window.addEventListener('resize', () => {
+  syncDevToolFloatingNavLocation();
+}, { passive: true });
 homeSourceAddFloatingButton.addEventListener('pointerdown', (event) => {
   if (event.button !== 0) return;
   const rect = homeSourceAddFloatingButton.getBoundingClientRect();
@@ -14175,6 +14264,7 @@ function render() {
   nav.hidden = state.section !== 'tools' || state.tool === 'track';
   const renderers = { calculator, dev: developerTool, calendar, weather, convert, translate: translateConvertView, reader, navigation: renderNavigation, track: () => window.OneBoxTrack.render() };
   workspace.dataset.tool = state.section === 'tools' ? state.tool : state.section;
+  document.querySelectorAll('body > .dev-mode-floating-nav').forEach((floatingNav) => floatingNav.remove());
   workspace.innerHTML = allModulesUnavailable ? '<div class="empty module-unavailable">' + (state.language === 'en' ? 'All OneBox modules are currently unavailable.' : 'OneBox 模块当前均不可用。') + '</div>' : state.section === 'home' ? renderHome() : state.section === 'navigation' ? renderNavigation() : state.section === 'messages' ? renderMessages() : state.section === 'mine' ? (state.settingsPageOpen ? renderSettingsPage() : state.ticketWalletOpen ? renderTicketWallet() : state.minePage === 'pet' ? renderPetDialog(true) : state.minePage === 'account' ? renderGithubDialog(true) : state.minePage === 'agreement' ? renderAgreementDialog(true) : state.minePage === 'track' ? window.OneBoxTrack.render() : renderMine()) : (renderers[state.tool] || calculator)();
   $('#settingsBtn').hidden = !cloudModuleEnabled('settings');
   injectCloudContent();
@@ -14183,6 +14273,8 @@ function render() {
   if (state.section === 'mine' && state.ticketWalletOpen && state.ticketWalletView === 'journeys') requestAnimationFrame(() => { void hydrateTicketWalletMap(); });
   document.body.classList.toggle('dev-tools-fullscreen', developerFullscreen);
   document.body.classList.toggle('dev-history-open', developerFullscreen && state.devTools.historyOpen === true);
+  const devFloatingNav = developerFullscreen ? workspace.querySelector('.dev-mode-floating-nav') : null;
+  if (devFloatingNav) requestAnimationFrame(() => syncDevToolFloatingNavLocation(devFloatingNav));
   renderHomeSourceNav();
   document.documentElement.classList.toggle('reader-focus', state.section === 'tools' && state.tool === 'reader' && state.readerMode === 'reading' && state.readerImmersive);
   syncReaderSafariSurface();
