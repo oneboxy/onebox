@@ -22126,124 +22126,78 @@ body:has(#workspace > .app-boot-splash.is-home-placeholder) #bottomNav:empty { d
   #workspace.page-swipe-direct-enter { transition: none !important; }
 }
 
-/* A compact floating switcher keeps Developer modes close at hand without
-   taking a permanent row away from the workbench. */
+/* Keep every developer tool visible in a quiet, theme-aware floating dock. */
 .dev-tools-page.dev-is-fullscreen .dev-mode-floating-nav {
   position: fixed;
   z-index: 90;
   right: max(18px, env(safe-area-inset-right));
   bottom: max(18px, env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  pointer-events: none;
-}
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab,
-.dev-tools-page.dev-is-fullscreen .dev-mode-option { pointer-events: auto; }
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab {
-  display: flex;
-  width: 54px;
-  height: 54px;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--panel) 94%, var(--primary));
-  color: var(--primary);
-  box-shadow: 0 8px 26px color-mix(in srgb, var(--ink) 18%, transparent);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
-}
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab:hover { transform: translateY(-2px); }
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab:active { transform: scale(.96); }
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab[aria-expanded="true"] { border-color: color-mix(in srgb, var(--primary) 36%, var(--line)); }
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab-icon { display: grid; width: 24px; height: 24px; place-items: center; }
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab-icon svg,
-.dev-tools-page.dev-is-fullscreen .dev-mode-option-icon svg {
-  display: block;
-  width: 21px;
-  height: 21px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-}
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab-caret {
-  width: 12px;
-  height: 12px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-  transition: transform .16s ease;
-}
-.dev-tools-page.dev-is-fullscreen .dev-mode-fab[aria-expanded="true"] .dev-mode-fab-caret { transform: rotate(180deg); }
-.dev-tools-page.dev-is-fullscreen .dev-mode-menu {
   display: grid;
-  width: min(220px, calc(100vw - 36px));
-  max-height: min(360px, calc(100dvh - 150px));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: min(380px, calc(100vw - 32px));
+  align-items: stretch;
   gap: 2px;
   padding: 6px;
-  overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--panel) 96%, transparent);
-  box-shadow: 0 14px 38px color-mix(in srgb, var(--ink) 18%, transparent);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  border-radius: 17px;
+  background: var(--panel);
+  box-shadow: 0 8px 26px color-mix(in srgb, var(--ink) 14%, transparent);
   pointer-events: auto;
-  scrollbar-width: thin;
-}
-.dev-tools-page.dev-is-fullscreen .dev-mode-menu[hidden] { display: none; }
-.dev-tools-page.dev-is-fullscreen .dev-mode-menu:not([hidden]) { animation: dev-mode-menu-enter .16s cubic-bezier(.2, .75, .25, 1) both; }
-@keyframes dev-mode-menu-enter {
-  from { opacity: 0; transform: translateY(5px) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .dev-tools-page.dev-is-fullscreen .dev-mode-option {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 18px;
-  min-height: 42px;
+  display: flex;
+  min-width: 0;
+  min-height: 56px;
+  flex-direction: column;
   align-items: center;
-  gap: 9px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 10px;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 2px;
+  border: 1px solid transparent;
+  border-radius: 11px;
   background: transparent;
-  color: var(--ink);
-  text-align: left;
+  color: var(--muted);
+  text-align: center;
   font: inherit;
-  font-size: 12px;
-  font-weight: 600;
   cursor: pointer;
-  transition: background .14s ease, color .14s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .14s ease, color .14s ease;
 }
 .dev-tools-page.dev-is-fullscreen .dev-mode-option:hover,
 .dev-tools-page.dev-is-fullscreen .dev-mode-option:focus-visible,
 .dev-tools-page.dev-is-fullscreen .dev-mode-option.active {
-  background: color-mix(in srgb, var(--primary) 8%, var(--panel));
-  color: var(--primary);
+  border-color: var(--line);
+  background: transparent;
+  color: var(--ink);
   outline: 0;
 }
-.dev-tools-page.dev-is-fullscreen .dev-mode-option-icon { display: grid; width: 28px; height: 28px; place-items: center; color: var(--muted); }
-.dev-tools-page.dev-is-fullscreen .dev-mode-option.active .dev-mode-option-icon { color: var(--primary); }
-.dev-tools-page.dev-is-fullscreen .dev-mode-option-icon svg { width: 19px; height: 19px; }
-.dev-tools-page.dev-is-fullscreen .dev-mode-option-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dev-tools-page.dev-is-fullscreen .dev-mode-option-check {
-  width: 15px;
-  height: 15px;
+.dev-tools-page.dev-is-fullscreen .dev-mode-option-icon,
+.dev-tools-page.dev-is-fullscreen .dev-mode-option.active .dev-mode-option-icon { color: currentColor; }
+.dev-tools-page.dev-is-fullscreen .dev-mode-option-icon { width: 22px; height: 22px; }
+.dev-tools-page.dev-is-fullscreen .dev-mode-option-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 2;
+  stroke-width: 1.8;
 }
+.dev-tools-page.dev-is-fullscreen .dev-mode-option-label {
+  display: -webkit-box;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.dev-tools-page.dev-is-fullscreen .dev-tools-body { padding-bottom: 82px; }
 .dev-tools-page.dev-is-fullscreen .dev-current-tool.dev-mode-enter { animation: dev-mode-enter .18s cubic-bezier(.2, .75, .25, 1) both; }
 @keyframes dev-mode-enter {
   from { opacity: .72; transform: translateY(5px); }
@@ -22253,18 +22207,24 @@ body:has(#workspace > .app-boot-splash.is-home-placeholder) #bottomNav:empty { d
   .dev-tools-page.dev-is-fullscreen .dev-mode-floating-nav {
     right: max(12px, env(safe-area-inset-right));
     bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
+    width: min(380px, calc(100vw - 24px));
+    gap: 1px;
+    padding: 5px;
+    border-radius: 15px;
   }
-  .dev-tools-page.dev-is-fullscreen .dev-mode-fab { width: 50px; height: 50px; }
-  .dev-tools-page.dev-is-fullscreen .dev-tools-body { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-option { min-height: 54px; gap: 3px; padding-inline: 1px; }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-option-label { font-size: 8px; }
+  .dev-tools-page.dev-is-fullscreen .dev-tools-body { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
   .dev-tools-page.dev-is-fullscreen .dev-workbench { gap: 12px; }
   .dev-tools-page.dev-is-fullscreen .dev-pane { padding: 10px; border-radius: 12px; }
   .dev-tools-page.dev-is-fullscreen .dev-pane-head { margin-bottom: 8px; }
-  .dev-tools-page.dev-is-fullscreen .dev-mode-menu { width: min(208px, calc(100vw - 28px)); }
+}
+@media (max-width: 350px) {
+  .dev-tools-page.dev-is-fullscreen .dev-mode-floating-nav { width: calc(100vw - 16px); right: 8px; }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-option-icon svg { width: 18px; height: 18px; }
+  .dev-tools-page.dev-is-fullscreen .dev-mode-option-label { font-size: 7px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dev-tools-page.dev-is-fullscreen .dev-mode-fab,
-  .dev-tools-page.dev-is-fullscreen .dev-mode-fab-caret,
   .dev-tools-page.dev-is-fullscreen .dev-mode-option { transition: none; }
-  .dev-tools-page.dev-is-fullscreen .dev-mode-menu:not([hidden]) { animation: none; }
   .dev-tools-page.dev-is-fullscreen .dev-current-tool.dev-mode-enter { animation: none; }
 }

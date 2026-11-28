@@ -11023,12 +11023,11 @@ function developerTool() {
   const visibleModes = DEV_TOOL_IDS.filter((id) => id !== 'unit-convert');
   const mode = visibleModes.includes(state.devTools.active) ? state.devTools.active : visibleModes[0];
   if (state.devTools.active !== mode) { state.devTools.active = mode; saveDevTools(); }
-  const modeLabel = devModeLabel(mode);
-  const modes = visibleModes.map((id) => '<button type="button" class="dev-mode-option' + (mode === id ? ' active' : '') + '" role="menuitemradio" aria-checked="' + String(mode === id) + '" data-dev-mode="' + id + '"><span class="dev-mode-option-icon">' + devModeIcon(id) + '</span><span class="dev-mode-option-label">' + escapeHtml(devModeLabel(id)) + '</span>' + (mode === id ? '<svg class="dev-mode-option-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</button>').join('');
+  const modes = visibleModes.map((id) => '<button type="button" class="dev-mode-option' + (mode === id ? ' active' : '') + '" role="tab" aria-selected="' + String(mode === id) + '" aria-label="' + escapeHtml(devModeLabel(id)) + '" title="' + escapeHtml(devModeLabel(id)) + '" data-dev-mode="' + id + '"><span class="dev-mode-option-icon">' + devModeIcon(id) + '</span><span class="dev-mode-option-label">' + escapeHtml(devModeLabel(id)) + '</span></button>').join('');
   const content = mode === 'json-format' ? renderDeveloperJsonFormat() : mode === 'json-compare' ? renderDeveloperCompare() : mode === 'text-stats' ? renderDeveloperStats() : mode === 'timestamp' ? renderDeveloperTimestamp() : mode === 'file-compare' ? window.OneBoxFileCompareUI.render() : convert();
   const modalOverlay = mode === 'json-compare' && state.devTools.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
   const outputOverlay = mode === 'json-format' && state.devTools.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' + developerJsonOutputPaneMarkup(true) : '';
-  const modeSwitch = '<div class="dev-mode-floating-nav" role="group" aria-label="' + escapeHtml(t('development')) + '"><div id="devModeMenu" class="dev-mode-menu" role="menu" aria-label="' + escapeHtml(t('development')) + '" hidden>' + modes + '</div><button type="button" class="dev-mode-fab" data-dev-mode-menu-toggle aria-haspopup="menu" aria-controls="devModeMenu" aria-expanded="false" aria-label="' + escapeHtml((state.language === 'en' ? 'Switch tool · ' : '切换开发工具 · ') + modeLabel) + '" title="' + escapeHtml(modeLabel) + '"><span class="dev-mode-fab-icon">' + devModeIcon(mode) + '</span><svg class="dev-mode-fab-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 14 5-5 5 5"/></svg></button></div>';
+  const modeSwitch = '<div class="dev-mode-floating-nav" role="tablist" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</div>';
   const toolClass = 'dev-current-tool' + (devModeTransitionPending ? ' dev-mode-enter' : '');
   return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '">' + modalOverlay + modeSwitch + '<div class="dev-tools-body"><div class="' + toolClass + '">' + content + '</div></div>' + outputOverlay + '</section>';
 }
@@ -16004,36 +16003,17 @@ workspace.addEventListener('contextmenu', (event) => {
   scheduleReaderNativeSelectionMenuSync();
 });
 workspace.addEventListener('keydown', (event) => {
-  const modeItem = event.target.closest('.dev-mode-option[role="menuitemradio"]');
-  if (modeItem) {
-    const items = [...modeItem.closest('[role="menu"]').querySelectorAll('.dev-mode-option')];
-    const index = items.indexOf(modeItem);
-    const nextIndex = event.key === 'ArrowDown' ? (index + 1) % items.length : event.key === 'ArrowUp' ? (index + items.length - 1) % items.length : event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : -1;
-    if (event.key === 'Escape') {
+  const devModeTab = event.target.closest('.dev-mode-option[role="tab"]');
+  if (devModeTab) {
+    const tabs = [...devModeTab.closest('[role="tablist"]').querySelectorAll('.dev-mode-option[role="tab"]')];
+    const index = tabs.indexOf(devModeTab);
+    const nextIndex = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+    if (nextIndex >= 0) {
       event.preventDefault();
-      const picker = modeItem.closest('.dev-mode-floating-nav');
-      picker.querySelector('[data-dev-mode-menu-toggle]')?.setAttribute('aria-expanded', 'false');
-      picker.querySelector('[role="menu"]').hidden = true;
-      picker.querySelector('[data-dev-mode-menu-toggle]')?.focus();
-      return;
+      const mode = tabs[nextIndex].dataset.devMode;
+      tabs[nextIndex].click();
+      requestAnimationFrame(() => workspace.querySelector('.dev-mode-option[data-dev-mode="' + mode + '"]')?.focus({ preventScroll: true }));
     }
-    if (event.key === 'Tab') {
-      const picker = modeItem.closest('.dev-mode-floating-nav');
-      picker.querySelector('[role="menu"]').hidden = true;
-      picker.querySelector('[data-dev-mode-menu-toggle]')?.setAttribute('aria-expanded', 'false');
-      return;
-    }
-    if (nextIndex >= 0) { event.preventDefault(); items[nextIndex]?.focus(); }
-    return;
-  }
-  const modeToggle = event.target.closest('[data-dev-mode-menu-toggle]');
-  if (modeToggle && (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ')) {
-    event.preventDefault();
-    const picker = modeToggle.closest('.dev-mode-floating-nav');
-    const menu = picker.querySelector('[role="menu"]');
-    menu.hidden = false;
-    modeToggle.setAttribute('aria-expanded', 'true');
-    menu.querySelector('[aria-checked="true"]')?.focus();
     return;
   }
   const current = event.target.closest('.dev-converter-mode [role="tab"]');
@@ -16047,13 +16027,6 @@ workspace.addEventListener('keydown', (event) => {
   const key = tabs[nextIndex].dataset.conversionCategory;
   tabs[nextIndex].click();
   requestAnimationFrame(() => workspace.querySelector('[data-conversion-category="' + key + '"]')?.focus({ preventScroll: true }));
-});
-document.addEventListener('pointerdown', (event) => {
-  const picker = document.querySelector('.dev-mode-floating-nav');
-  if (!picker || picker.contains(event.target)) return;
-  const toggle = picker.querySelector('[data-dev-mode-menu-toggle]');
-  const menu = picker.querySelector('[role="menu"]');
-  if (menu && !menu.hidden) { menu.hidden = true; toggle?.setAttribute('aria-expanded', 'false'); }
 });
 workspace.addEventListener('click', async (event) => {
   const calendarDeleteButton = event.target.closest('[data-calendar-event-row] [data-delete-event]');
@@ -16428,17 +16401,6 @@ workspace.addEventListener('click', async (event) => {
     const kind = DEV_TOOL_IDS.includes(clearDevRecords.dataset.devRecordKind) ? clearDevRecords.dataset.devRecordKind : state.devTools.active;
     state.devTools.records[kind] = [];
     saveDevTools(); return render();
-  }
-  const devModeMenuToggle = event.target.closest('[data-dev-mode-menu-toggle]');
-  if (devModeMenuToggle) {
-    const picker = devModeMenuToggle.closest('.dev-mode-floating-nav');
-    const menu = picker?.querySelector('[role="menu"]');
-    if (menu) {
-      menu.hidden = !menu.hidden;
-      devModeMenuToggle.setAttribute('aria-expanded', String(!menu.hidden));
-      if (!menu.hidden) requestAnimationFrame(() => menu.querySelector('[aria-checked="true"]')?.focus());
-    }
-    return;
   }
   const devMode = event.target.closest('[data-dev-mode]');
   if (devMode) { state.devTools.active = DEV_TOOL_IDS.includes(devMode.dataset.devMode) ? devMode.dataset.devMode : DEV_TOOL_IDS[0]; state.devTools.historyOpen = false; devModeTransitionPending = true; saveDevTools(); render(); devModeTransitionPending = false; requestAnimationFrame(() => workspace.querySelector('.dev-current-tool.dev-mode-enter')?.classList.remove('dev-mode-enter')); return; }
