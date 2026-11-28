@@ -339,7 +339,7 @@ document.addEventListener('pointermove', (event) => {
     const target = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('.dev-mode-option[data-dev-mode]');
     if (target && target !== drag.option && target.parentElement === drag.option.parentElement) {
       const rect = target.getBoundingClientRect();
-      const after = event.clientX > rect.left + rect.width / 2;
+      const after = event.clientY > rect.top + rect.height / 2;
       drag.option.parentElement.insertBefore(drag.option, after ? target.nextSibling : target);
     }
     event.preventDefault();
@@ -380,6 +380,7 @@ document.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
   if (event.target.closest('[data-dev-tool-menu-toggle]')) {
+    const previousRect = nav.getBoundingClientRect();
     devToolFloatingExpanded = !devToolFloatingExpanded;
     localStorage.setItem(DEV_TOOL_FLOATING_EXPANDED_KEY, String(devToolFloatingExpanded));
     nav.classList.toggle('is-expanded', devToolFloatingExpanded);
@@ -389,8 +390,8 @@ document.addEventListener('click', (event) => {
     toggle?.setAttribute('aria-label', toggleLabel);
     toggle?.setAttribute('title', toggleLabel);
     requestAnimationFrame(() => {
-      const rect = nav.getBoundingClientRect();
-      setDevToolFloatingPosition(nav, rect.left, rect.top);
+      const nextRect = nav.getBoundingClientRect();
+      setDevToolFloatingPosition(nav, previousRect.left, previousRect.bottom - nextRect.height);
     });
     return;
   }
@@ -11192,7 +11193,7 @@ function developerTool() {
   const outputOverlay = mode === 'json-format' && state.devTools.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' + developerJsonOutputPaneMarkup(true) : '';
   const toggleLabel = state.language === 'en' ? (devToolFloatingExpanded ? 'Collapse developer tools' : 'Expand developer tools') : (devToolFloatingExpanded ? '收起开发工具' : '展开开发工具');
   const floatingToggle = '<button type="button" class="dev-mode-floating-toggle" data-dev-tool-menu-toggle aria-label="' + toggleLabel + '" title="' + toggleLabel + '" aria-expanded="' + String(devToolFloatingExpanded) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></button>';
-  const modeSwitch = '<div class="dev-mode-floating-nav' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="group" aria-label="' + escapeHtml(t('development')) + '">' + floatingToggle + '<div class="dev-mode-floating-options' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="tablist" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</div></div>';
+  const modeSwitch = '<div class="dev-mode-floating-nav' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="group" aria-label="' + escapeHtml(t('development')) + '"><div class="dev-mode-floating-options' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="tablist" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</div>' + floatingToggle + '</div>';
   const toolClass = 'dev-current-tool' + (devModeTransitionPending ? ' dev-mode-enter' : '');
   return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '">' + modalOverlay + modeSwitch + '<div class="dev-tools-body"><div class="' + toolClass + '">' + content + '</div></div>' + outputOverlay + '</section>';
 }

@@ -34,6 +34,7 @@
     right: max(14px, env(safe-area-inset-right)) !important;
     bottom: calc(86px + env(safe-area-inset-bottom)) !important;
     display: flex !important;
+    flex-direction: column-reverse !important;
     box-sizing: border-box !important;
     align-items: center !important;
     gap: 4px !important;
@@ -51,9 +52,9 @@
     -webkit-user-select: none !important;
   }
   body.dev-tools-fullscreen .dev-mode-floating-nav.is-expanded {
-    width: max-content !important;
+    width: 42px !important;
     max-width: calc(100vw - 16px) !important;
-    padding: 4px !important;
+    padding: 3px !important;
     border-radius: 23px !important;
   }
   body.dev-tools-fullscreen .dev-mode-floating-toggle,
@@ -83,6 +84,7 @@
   body.dev-tools-fullscreen .dev-mode-floating-options { display: none !important; }
   body.dev-tools-fullscreen .dev-mode-floating-nav.is-expanded .dev-mode-floating-options {
     display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
     gap: 2px !important;
     min-width: 0 !important;
