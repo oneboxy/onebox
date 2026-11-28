@@ -8569,7 +8569,7 @@ main:has(#toolNav[hidden]):has(#workspace[data-tool="navigation"]) { padding-top
   cursor: pointer;
 }
 #toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="previous"] { left: 0; }
-#toolNav .tool-tab-panel .feed-source-scroll-button[data-tool-scroll="next"] {
+#toolNav .tool-tab-panel .feed-source-scroll-button[data-scroll-direction="right"] {
   right: 0;
   transform: translateX(4px);
   background: linear-gradient(270deg, var(--panel) 12%, color-mix(in srgb, var(--panel) 78%, transparent) 54%, transparent 100%);
