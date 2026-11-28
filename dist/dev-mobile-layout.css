@@ -37,9 +37,13 @@
     flex-direction: column !important;
     box-sizing: border-box !important;
     align-items: center !important;
+    justify-content: flex-start !important;
     gap: 2px !important;
+    flex: 0 0 auto !important;
     width: max-content !important;
+    height: auto !important;
     min-height: 0 !important;
+    max-height: none !important;
     padding: 0 !important;
     overflow: visible !important;
     border: 0 !important;
@@ -47,6 +51,7 @@
     background: transparent !important;
     box-shadow: none !important;
     touch-action: none !important;
+    resize: none !important;
     user-select: none !important;
     -webkit-user-select: none !important;
   }
@@ -63,11 +68,14 @@
   body.dev-tools-fullscreen .dev-mode-floating-nav.is-expanded {
     width: max-content !important;
     max-width: none !important;
-    height: auto !important;
+    height: fit-content !important;
     min-height: 0 !important;
-    padding: 3px !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+    align-content: flex-start !important;
+    padding: 4px !important;
     border: 1px solid var(--line) !important;
-    border-radius: 23px !important;
+    border-radius: 16px !important;
     background: var(--panel) !important;
     box-shadow: 0 8px 22px color-mix(in srgb, var(--ink) 14%, transparent) !important;
   }
@@ -107,10 +115,25 @@
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 4px !important;
+    justify-content: flex-start !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    gap: 1px !important;
     min-width: 0 !important;
   }
-  body.dev-tools-fullscreen .dev-mode-floating-options .dev-mode-option { flex: 0 0 36px !important; width: 36px !important; min-width: 36px !important; height: 36px !important; min-height: 36px !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-options .dev-mode-option {
+    flex: 0 0 34px !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+  }
   body.dev-tools-fullscreen .dev-mode-floating-toggle svg { display: block; width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:hover,
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:active { color: var(--ink) !important; }
