@@ -406,15 +406,29 @@ document.addEventListener('click', (event) => {
     const previousRect = nav.getBoundingClientRect();
     devToolFloatingExpanded = !devToolFloatingExpanded;
     localStorage.setItem(DEV_TOOL_FLOATING_EXPANDED_KEY, String(devToolFloatingExpanded));
+    if (devToolFloatingExpanded) {
+      const firstMode = getVisibleDevToolOrder()[0];
+      if (firstMode && state.devTools.active !== firstMode) {
+        state.devTools.active = firstMode;
+        state.devTools.historyOpen = false;
+        saveDevTools();
+      }
+    }
     nav.classList.toggle('is-expanded', devToolFloatingExpanded);
     const toggle = nav.querySelector('[data-dev-tool-menu-toggle]');
     const toggleLabel = state.language === 'en' ? (devToolFloatingExpanded ? 'Collapse developer tools' : 'Expand developer tools') : (devToolFloatingExpanded ? '收起开发工具' : '展开开发工具');
     toggle?.setAttribute('aria-expanded', String(devToolFloatingExpanded));
     toggle?.setAttribute('aria-label', toggleLabel);
     toggle?.setAttribute('title', toggleLabel);
+    if (toggle) toggle.innerHTML = devToolFloatingExpanded
+      ? '<svg class="reader-fullscreen-icon reader-fullscreen-exit" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M20 15h-5v5M9 20v-5H4"/></svg>'
+      : '<svg class="reader-fullscreen-icon reader-fullscreen-enter" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>';
+    if (devToolFloatingExpanded) render();
     requestAnimationFrame(() => {
-      const nextRect = nav.getBoundingClientRect();
-      setDevToolFloatingPosition(nav, previousRect.left, previousRect.bottom - nextRect.height);
+      const currentNav = document.querySelector('.dev-mode-floating-nav');
+      if (!currentNav) return;
+      const nextRect = currentNav.getBoundingClientRect();
+      setDevToolFloatingPosition(currentNav, previousRect.left, previousRect.bottom - nextRect.height);
     });
     return;
   }
@@ -11213,7 +11227,10 @@ function developerTool() {
   const modalOverlay = mode === 'json-compare' && state.devTools.compareFullscreen ? '<button type="button" class="dev-json-compare-backdrop" data-dev-action="json-compare-fullscreen" aria-label="' + (state.language === 'en' ? 'Close comparison overlay' : '关闭对比浮窗') + '"></button>' : '';
   const outputOverlay = mode === 'json-format' && state.devTools.formatOutputFullscreen ? '<button type="button" class="dev-json-output-backdrop" data-dev-action="json-output-fullscreen" aria-label="' + (state.language === 'en' ? 'Close output overlay' : '关闭输出浮窗') + '"></button>' + developerJsonOutputPaneMarkup(true) : '';
   const toggleLabel = state.language === 'en' ? (devToolFloatingExpanded ? 'Collapse developer tools' : 'Expand developer tools') : (devToolFloatingExpanded ? '收起开发工具' : '展开开发工具');
-  const floatingToggle = '<button type="button" class="dev-mode-floating-toggle" data-dev-tool-menu-toggle aria-label="' + toggleLabel + '" title="' + toggleLabel + '" aria-expanded="' + String(devToolFloatingExpanded) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></button>';
+  const floatingToggleIcon = devToolFloatingExpanded
+    ? '<svg class="reader-fullscreen-icon reader-fullscreen-exit" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M20 15h-5v5M9 20v-5H4"/></svg>'
+    : '<svg class="reader-fullscreen-icon reader-fullscreen-enter" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>';
+  const floatingToggle = '<button type="button" class="dev-mode-floating-toggle" data-dev-tool-menu-toggle aria-label="' + toggleLabel + '" title="' + toggleLabel + '" aria-expanded="' + String(devToolFloatingExpanded) + '">' + floatingToggleIcon + '</button>';
   const modeSwitch = '<div class="dev-mode-floating-nav' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="group" aria-label="' + escapeHtml(t('development')) + '"><div class="dev-mode-floating-options' + (devToolFloatingExpanded ? ' is-expanded' : '') + '" role="tablist" aria-label="' + escapeHtml(t('development')) + '">' + modes + '</div>' + floatingToggle + '</div>';
   const toolClass = 'dev-current-tool' + (devModeTransitionPending ? ' dev-mode-enter' : '');
   return '<section class="dev-tools-page dev-is-fullscreen' + (mode === 'json-format' && state.devTools.formatOutputFullscreen ? ' dev-output-modal-open' : mode === 'json-compare' && state.devTools.compareFullscreen ? ' dev-compare-modal-open' : '') + '">' + modalOverlay + modeSwitch + '<div class="dev-tools-body"><div class="' + toolClass + '">' + content + '</div></div>' + outputOverlay + '</section>';
