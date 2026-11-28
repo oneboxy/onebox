@@ -1,4 +1,4 @@
-/* Mobile developer tools use one scroll column and a compact, movable tool rail. */
+/* Mobile developer tools use one scroll column and five individually movable icons. */
 @media (max-width: 760px) {
   #workspace[data-tool="dev"] .dev-tools-page.dev-is-fullscreen {
     position: fixed !important;
@@ -22,60 +22,46 @@
   }
 
   body.dev-tools-fullscreen .dev-mode-floating-nav {
+    display: contents !important;
+  }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option {
     position: fixed !important;
     z-index: 90 !important;
-    right: max(14px, env(safe-area-inset-right)) !important;
-    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
-    display: flex !important;
-    width: max-content !important;
-    align-items: center !important;
-    gap: 4px !important;
-    padding: 4px !important;
+    display: grid !important;
+    box-sizing: border-box !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    place-items: center !important;
+    padding: 0 !important;
     border: 1px solid var(--line) !important;
-    border-radius: 24px !important;
+    border-radius: 50% !important;
     background: var(--panel) !important;
-    box-shadow: 0 5px 16px color-mix(in srgb, var(--ink) 12%, transparent) !important;
-    pointer-events: auto !important;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--ink) 12%, transparent) !important;
+    color: var(--muted) !important;
+    cursor: grab;
     touch-action: none !important;
     user-select: none !important;
     -webkit-user-select: none !important;
-    cursor: grab;
+    -webkit-tap-highlight-color: transparent;
+    transition: color .14s ease, border-color .14s ease, box-shadow .14s ease !important;
   }
-  body.dev-tools-fullscreen .dev-mode-floating-nav.is-dragging {
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-format"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(290px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-compare"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(246px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="text-stats"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(202px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="timestamp"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(158px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="file-compare"] { right: max(14px, env(safe-area-inset-right)) !important; bottom: calc(114px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option.is-dragging {
     cursor: grabbing;
     transition: none !important;
     box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 16%, transparent) !important;
   }
 
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option,
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:hover,
   body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:active,
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:focus-visible {
-    display: grid !important;
-    box-sizing: border-box;
-    flex: 0 0 32px !important;
-    width: 32px !important;
-    min-width: 32px !important;
-    height: 32px !important;
-    min-height: 32px !important;
-    place-items: center !important;
-    padding: 0 !important;
-    border: 1px solid transparent !important;
-    border-radius: 50% !important;
-    outline: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: var(--muted) !important;
-    transform: none !important;
-    transition: color .14s ease, border-color .14s ease !important;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option.active {
-    border-color: var(--line) !important;
-    background: transparent !important;
-    color: var(--ink) !important;
-  }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option:focus-visible { outline: 1px solid var(--muted) !important; outline-offset: 2px !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option.active { border-color: var(--muted) !important; background: var(--panel) !important; color: var(--ink) !important; }
 
   body.dev-tools-fullscreen .dev-mode-option-icon,
   body.dev-tools-fullscreen .dev-mode-option.active .dev-mode-option-icon {
@@ -98,7 +84,7 @@
   body.dev-tools-fullscreen .dev-mode-option-label { display: none !important; }
   body.dev-tools-fullscreen .dev-mode-option:hover,
   body.dev-tools-fullscreen .dev-mode-option:active,
-  body.dev-tools-fullscreen .dev-mode-option:focus-visible { background: transparent !important; }
+  body.dev-tools-fullscreen .dev-mode-option:focus-visible { background: var(--panel) !important; }
 
   #workspace[data-tool="dev"] .dev-tools-body,
   #workspace[data-tool="dev"] .dev-current-tool {
@@ -274,6 +260,10 @@
 }
 
 @media (max-width: 380px) {
-  body.dev-tools-fullscreen .dev-mode-floating-nav { right: 10px !important; gap: 2px !important; padding: 3px !important; }
-  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option { flex-basis: 29px !important; width: 29px !important; min-width: 29px !important; height: 29px !important; min-height: 29px !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option { width: 32px !important; min-width: 32px !important; height: 32px !important; min-height: 32px !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-format"] { bottom: calc(274px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="json-compare"] { bottom: calc(234px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="text-stats"] { bottom: calc(194px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="timestamp"] { bottom: calc(154px + env(safe-area-inset-bottom)) !important; }
+  body.dev-tools-fullscreen .dev-mode-floating-nav .dev-mode-option[data-dev-mode="file-compare"] { bottom: calc(114px + env(safe-area-inset-bottom)) !important; }
 }

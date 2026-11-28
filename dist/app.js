@@ -261,12 +261,15 @@ function setDevToolFloatingPosition(nav, left, top) {
 }
 function restoreDevToolFloatingPosition(nav) {
   if (!nav || !window.matchMedia('(max-width: 760px)').matches) return;
-  const saved = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, null);
-  if (!saved || !Number.isFinite(Number(saved.x)) || !Number.isFinite(Number(saved.y))) return;
-  const rect = nav.getBoundingClientRect();
-  const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
-  const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
-  setDevToolFloatingPosition(nav, 8 + Number(saved.x) * Math.max(0, maxLeft - 8), 8 + Number(saved.y) * Math.max(0, maxTop - 8));
+  const saved = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, {});
+  nav.querySelectorAll('.dev-mode-option[data-dev-mode]').forEach((button) => {
+    const position = saved[button.dataset.devMode];
+    if (!position || !Number.isFinite(Number(position.x)) || !Number.isFinite(Number(position.y))) return;
+    const rect = button.getBoundingClientRect();
+    const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+    const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+    setDevToolFloatingPosition(button, 8 + Number(position.x) * Math.max(0, maxLeft - 8), 8 + Number(position.y) * Math.max(0, maxTop - 8));
+  });
 }
 function syncDevToolFloatingNavLocation(nav = document.querySelector('.dev-mode-floating-nav')) {
   if (!nav) return;
@@ -278,31 +281,35 @@ function syncDevToolFloatingNavLocation(nav = document.querySelector('.dev-mode-
   const page = workspace.querySelector('.dev-tools-page');
   if (page && nav.parentElement !== page) {
     page.insertBefore(nav, page.querySelector('.dev-tools-body'));
-    nav.style.removeProperty('left');
-    nav.style.removeProperty('top');
-    nav.style.removeProperty('right');
-    nav.style.removeProperty('bottom');
+    nav.querySelectorAll('.dev-mode-option').forEach((button) => {
+      button.style.removeProperty('left');
+      button.style.removeProperty('top');
+      button.style.removeProperty('right');
+      button.style.removeProperty('bottom');
+    });
   }
 }
-function saveDevToolFloatingPosition(nav) {
-  const rect = nav.getBoundingClientRect();
+function saveDevToolFloatingPosition(button) {
+  const rect = button.getBoundingClientRect();
   const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
   const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
   const left = Math.min(maxLeft, Math.max(8, rect.left));
   const top = Math.min(maxTop, Math.max(8, rect.top));
   try {
-    localStorage.setItem(DEV_TOOL_FLOATING_POSITION_KEY, JSON.stringify({
+    const positions = parseStored(DEV_TOOL_FLOATING_POSITION_KEY, {});
+    positions[button.dataset.devMode] = {
       x: maxLeft === 8 ? 0 : (left - 8) / (maxLeft - 8),
       y: maxTop === 8 ? 0 : (top - 8) / (maxTop - 8),
-    }));
+    };
+    localStorage.setItem(DEV_TOOL_FLOATING_POSITION_KEY, JSON.stringify(positions));
   } catch {}
 }
 document.addEventListener('pointerdown', (event) => {
-  const nav = event.target.closest?.('.dev-mode-floating-nav');
-  if (!nav || !window.matchMedia('(max-width: 760px)').matches || event.button !== 0) return;
-  const rect = nav.getBoundingClientRect();
-  devToolFloatingDrag = { nav, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
-  try { nav.setPointerCapture(event.pointerId); } catch {}
+  const button = event.target.closest?.('.dev-mode-floating-nav .dev-mode-option[data-dev-mode]');
+  if (!button || !window.matchMedia('(max-width: 760px)').matches || event.button !== 0) return;
+  const rect = button.getBoundingClientRect();
+  devToolFloatingDrag = { button, pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
+  try { button.setPointerCapture(event.pointerId); } catch {}
 });
 document.addEventListener('pointermove', (event) => {
   const drag = devToolFloatingDrag;
@@ -311,27 +318,41 @@ document.addEventListener('pointermove', (event) => {
   const dy = event.clientY - drag.y;
   if (!drag.moved && Math.hypot(dx, dy) < 5) return;
   drag.moved = true;
-  drag.nav.classList.add('is-dragging');
-  setDevToolFloatingPosition(drag.nav, drag.left + dx, drag.top + dy);
+  drag.button.classList.add('is-dragging');
+  setDevToolFloatingPosition(drag.button, drag.left + dx, drag.top + dy);
   event.preventDefault();
 });
 function finishDevToolFloatingDrag(event) {
   const drag = devToolFloatingDrag;
   if (!drag || drag.pointerId !== event.pointerId) return;
   devToolFloatingDrag = null;
-  drag.nav.classList.remove('is-dragging');
+  drag.button.classList.remove('is-dragging');
   if (!drag.moved) return;
-  saveDevToolFloatingPosition(drag.nav);
+  saveDevToolFloatingPosition(drag.button);
   suppressDevToolFloatingClick = true;
   window.setTimeout(() => { suppressDevToolFloatingClick = false; }, 500);
 }
 document.addEventListener('pointerup', finishDevToolFloatingDrag);
 document.addEventListener('pointercancel', finishDevToolFloatingDrag);
 document.addEventListener('click', (event) => {
-  if (!suppressDevToolFloatingClick || !event.target.closest?.('.dev-mode-floating-nav')) return;
+  const button = event.target.closest?.('.dev-mode-floating-nav .dev-mode-option[data-dev-mode]');
+  if (!button) return;
+  if (suppressDevToolFloatingClick) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    suppressDevToolFloatingClick = false;
+    return;
+  }
+  if (!document.body.classList.contains('dev-tools-fullscreen')) return;
   event.preventDefault();
-  event.stopPropagation();
-  suppressDevToolFloatingClick = false;
+  event.stopImmediatePropagation();
+  state.devTools.active = DEV_TOOL_IDS.includes(button.dataset.devMode) ? button.dataset.devMode : DEV_TOOL_IDS[0];
+  state.devTools.historyOpen = false;
+  devModeTransitionPending = true;
+  saveDevTools();
+  render();
+  devModeTransitionPending = false;
+  requestAnimationFrame(() => workspace.querySelector('.dev-current-tool.dev-mode-enter')?.classList.remove('dev-mode-enter'));
 }, true);
 window.addEventListener('resize', () => {
   syncDevToolFloatingNavLocation();
